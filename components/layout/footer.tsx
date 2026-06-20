@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/routing";
 import { Globe, Mail, MapPin, UserRound } from "lucide-react";
@@ -41,6 +42,38 @@ const socialLinks = [
 
 export function Footer() {
   const t = useTranslations("footer");
+  const [email, setEmail] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState({ text: "", type: "" });
+
+  const handleSubscribe = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!email) return;
+
+    setLoading(true);
+    setMessage({ text: "", type: "" });
+
+    try {
+      const response = await fetch("/api/subscribe", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        setMessage({ text: "Subscribed successfully!", type: "success" });
+        setEmail("");
+      } else {
+        setMessage({ text: data.error || "Failed to subscribe.", type: "error" });
+      }
+    } catch (error) {
+      setMessage({ text: "An error occurred. Please try again.", type: "error" });
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <footer className="bg-primary border-t border-white/10">
@@ -174,16 +207,27 @@ export function Footer() {
                 Get insights on software, cloud, and digital transformation.
               </p>
             </div>
-            <form className="flex flex-col sm:flex-row gap-3 w-full md:w-auto" onSubmit={(e) => e.preventDefault()}>
-              <input
-                type="email"
-                placeholder={t("newsletterPlaceholder")}
-                className="flex-1 w-full sm:w-auto md:w-64 rounded-lg border border-black/10 dark:border-white/10 bg-black/5 dark:bg-white/5 px-4 py-2.5 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-accent text-foreground"
-              />
-              <Button type="submit" className="w-full sm:w-auto py-2.5 h-auto">
-                {t("newsletterButton")}
-              </Button>
-            </form>
+            <div className="flex flex-col w-full md:w-auto">
+              <form className="flex flex-col sm:flex-row gap-3 w-full" onSubmit={handleSubscribe}>
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder={t("newsletterPlaceholder")}
+                  required
+                  disabled={loading}
+                  className="flex-1 w-full sm:w-auto md:w-64 rounded-lg border border-black/10 dark:border-white/10 bg-black/5 dark:bg-white/5 px-4 py-2.5 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-accent text-foreground disabled:opacity-50"
+                />
+                <Button type="submit" disabled={loading} className="w-full sm:w-auto py-2.5 h-auto">
+                  {loading ? "Subscribing..." : t("newsletterButton")}
+                </Button>
+              </form>
+              {message.text && (
+                <p className={`text-xs mt-2 ${message.type === 'success' ? 'text-green-500' : 'text-red-500'}`}>
+                  {message.text}
+                </p>
+              )}
+            </div>
           </div>
         </div>
 
