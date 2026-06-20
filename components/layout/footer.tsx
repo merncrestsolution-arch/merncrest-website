@@ -15,10 +15,10 @@ const serviceLinks = [
 ];
 
 const solutionLinks = [
-  { href: "/solutions/erp-solution", label: "ERP System" },
-  { href: "/solutions/crm-solution", label: "CRM System" },
-  { href: "/solutions/hospital-management", label: "Hospital Management" },
-  { href: "/solutions/pos-system", label: "POS System" },
+  { href: "/solutions/erp", label: "ERP System" },
+  { href: "/solutions/crm", label: "CRM System" },
+  { href: "/solutions/healthcare", label: "Hospital Management" },
+  { href: "/solutions/pos", label: "POS System" },
 ];
 
 const companyLinks = [
