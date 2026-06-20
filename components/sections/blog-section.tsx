@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/routing";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Calendar, User } from "lucide-react";
+import Image from "next/image";
 
 const blogPosts = [
   {
@@ -71,11 +72,12 @@ export function BlogSection() {
               className="group rounded-2xl overflow-hidden glass-card border border-white/5 hover:border-white/10 transition-colors flex flex-col h-full"
             >
               <div className="relative h-48 overflow-hidden">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img 
+                <Image 
                   src={post.image} 
                   alt={post.title}
-                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                  fill
+                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                  className="object-cover transition-transform duration-700 group-hover:scale-105"
                 />
                 <div className="absolute top-4 left-4">
                   <span className="px-3 py-1 text-xs font-semibold bg-accent text-white rounded-full">
