@@ -56,7 +56,9 @@ export default async function LocaleLayout({
           disableTransitionOnChange
         >
           <NextIntlClientProvider messages={messages}>
-            {children}
+            <div className="relative flex min-h-screen flex-col overflow-x-hidden w-full">
+              {children}
+            </div>
           </NextIntlClientProvider>
         </ThemeProvider>
       </body>

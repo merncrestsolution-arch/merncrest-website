@@ -10,7 +10,7 @@ function AnimatedHeadline({ text }: { text: string }) {
   const words = text.split(" ");
 
   return (
-    <h1 className="font-display text-[2.75rem] leading-[1.1] sm:text-5xl lg:text-6xl xl:text-7xl font-bold text-balance tracking-tight">
+    <h1 className="font-display text-4xl leading-[1.1] sm:text-5xl lg:text-6xl xl:text-7xl font-bold text-balance tracking-tight text-center lg:text-left">
       {words.map((word, i) => (
         <motion.span
           key={`${word}-${i}`}
@@ -110,14 +110,14 @@ export function HeroSection() {
 
       <div className="container-wide section-padding relative z-10">
         <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
-          <div className="space-y-8">
+          <div className="space-y-8 flex flex-col items-center lg:items-start text-center lg:text-left">
             <AnimatedHeadline text={t("headline")} />
 
             <motion.p
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.6, duration: 0.5 }}
-              className="text-lg text-muted max-w-xl leading-relaxed"
+              className="text-base sm:text-lg text-muted max-w-xl leading-relaxed mx-auto lg:mx-0"
             >
               {t("subheadline")}
             </motion.p>
@@ -126,7 +126,7 @@ export function HeroSection() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.8, duration: 0.5 }}
-              className="flex flex-col sm:flex-row flex-wrap gap-3 w-full sm:w-auto"
+              className="flex flex-col sm:flex-row flex-wrap gap-3 w-full sm:w-auto justify-center lg:justify-start"
             >
               <Button asChild size="lg" className="w-full sm:w-auto">
                 <Link href="/contact">{t("ctaConsultation")}</Link>
@@ -134,7 +134,7 @@ export function HeroSection() {
               <Button asChild variant="outline" size="lg" className="w-full sm:w-auto">
                 <Link href="/portfolio">
                   {t("ctaPortfolio")}
-                  <ArrowRight className="h-4 w-4" />
+                  <ArrowRight className="ml-2 h-4 w-4" />
                 </Link>
               </Button>
               <Button asChild variant="ghost" size="lg" className="w-full sm:w-auto">
@@ -146,7 +146,7 @@ export function HeroSection() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 1, duration: 0.5 }}
-              className="flex flex-wrap gap-x-6 gap-y-2 pt-4 border-t border-white/10"
+              className="flex flex-wrap gap-x-6 gap-y-2 pt-4 border-t border-white/10 justify-center lg:justify-start w-full"
             >
               {trustStats.map((stat) => (
                 <span
