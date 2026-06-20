@@ -174,13 +174,13 @@ export function Footer() {
                 Get insights on software, cloud, and digital transformation.
               </p>
             </div>
-            <form className="flex gap-2 w-full md:w-auto" onSubmit={(e) => e.preventDefault()}>
+            <form className="flex flex-col sm:flex-row gap-3 w-full md:w-auto" onSubmit={(e) => e.preventDefault()}>
               <input
                 type="email"
                 placeholder={t("newsletterPlaceholder")}
-                className="flex-1 md:w-64 rounded-lg border border-black/10 dark:border-white/10 bg-black/5 dark:bg-white/5 px-4 py-2.5 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-accent text-foreground"
+                className="flex-1 w-full sm:w-auto md:w-64 rounded-lg border border-black/10 dark:border-white/10 bg-black/5 dark:bg-white/5 px-4 py-2.5 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-accent text-foreground"
               />
-              <Button type="submit" size="sm">
+              <Button type="submit" className="w-full sm:w-auto py-2.5 h-auto">
                 {t("newsletterButton")}
               </Button>
             </form>

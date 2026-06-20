@@ -92,9 +92,16 @@ export function ApplyButton({ jobTitle }: ApplyButtonProps) {
         setLoading(false);
         return;
       }
-      const allowedTypes = ['application/pdf', 'image/jpeg', 'image/png', 'image/jpg'];
-      if (!allowedTypes.includes(file.type)) {
-        setError("Only PDF and Image files (JPG/PNG) are allowed.");
+      const allowedTypes = [
+        'application/pdf', 
+        'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+        'application/msword',
+        'image/jpeg', 
+        'image/png', 
+        'image/jpg'
+      ];
+      if (!allowedTypes.includes(file.type) && !file.name.endsWith('.pdf') && !file.name.endsWith('.docx') && !file.name.endsWith('.doc')) {
+        setError("Only PDF, DOCX, and Image files are allowed.");
         setLoading(false);
         return;
       }
@@ -246,12 +253,12 @@ export function ApplyButton({ jobTitle }: ApplyButtonProps) {
                           </div>
 
                           <div className="space-y-2">
-                            <label htmlFor="attachment" className="text-sm font-medium text-muted-foreground">Resume / CV (PDF or Image, max 5MB)</label>
+                            <label htmlFor="attachment" className="text-sm font-medium text-muted-foreground">Resume / CV (PDF, DOCX, or Image, max 5MB)</label>
                             <input
                               id="attachment"
                               name="attachment"
                               type="file"
-                              accept=".pdf,image/png,image/jpeg,image/jpg"
+                              accept=".pdf,.docx,.doc,image/png,image/jpeg,image/jpg"
                               className="w-full h-12 px-4 py-2.5 rounded-xl bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 focus:border-accent focus:ring-1 focus:ring-accent transition-colors outline-none text-foreground dark:text-white file:mr-4 file:py-1 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-accent/10 file:text-accent hover:file:bg-accent/20 cursor-pointer"
                             />
                           </div>

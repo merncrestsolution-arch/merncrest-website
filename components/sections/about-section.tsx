@@ -47,13 +47,13 @@ export function AboutSection() {
             className="space-y-8"
           >
             <div>
-              <p className="text-accent font-mono text-sm uppercase tracking-wider mb-3">
+              <p className="text-accent font-mono text-sm uppercase tracking-wider mb-3 text-center lg:text-left">
                 {t("badge")}
               </p>
-              <h2 className="text-3xl sm:text-4xl font-bold text-balance mb-6">
+              <h2 className="text-3xl sm:text-4xl font-bold text-balance mb-6 text-center lg:text-left break-words">
                 {t("title")}
               </h2>
-              <p className="text-muted leading-relaxed">
+              <p className="text-muted leading-relaxed text-center lg:text-left">
                 {t("description")}
               </p>
             </div>

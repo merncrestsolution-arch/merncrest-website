@@ -34,10 +34,17 @@ export async function POST(request: Request) {
         );
       }
 
-      const allowedTypes = ['application/pdf', 'image/jpeg', 'image/png', 'image/jpg'];
-      if (!allowedTypes.includes(attachment.type)) {
+      const allowedTypes = [
+        'application/pdf', 
+        'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+        'application/msword',
+        'image/jpeg', 
+        'image/png', 
+        'image/jpg'
+      ];
+      if (!allowedTypes.includes(attachment.type) && !attachment.name.endsWith('.pdf') && !attachment.name.endsWith('.docx') && !attachment.name.endsWith('.doc')) {
         return NextResponse.json(
-          { error: 'Invalid file type. Only PDF and Image files are allowed.' },
+          { error: 'Invalid file type. Only PDF, DOCX, and Image files are allowed.' },
           { status: 400 }
         );
       }
