@@ -54,10 +54,16 @@ export function Footer() {
     setMessage({ text: "", type: "" });
 
     try {
-      const response = await fetch("/api/subscribe", {
+      const response = await fetch("https://formsubmit.co/ajax/merncrestsolution@gmail.com", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email }),
+        headers: { 
+          "Content-Type": "application/json",
+          "Accept": "application/json"
+        },
+        body: JSON.stringify({ 
+          email: email,
+          _subject: "New Newsletter Subscriber!"
+        }),
       });
 
       const data = await response.json();
