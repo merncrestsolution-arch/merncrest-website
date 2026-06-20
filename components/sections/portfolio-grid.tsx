@@ -4,69 +4,8 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowRight, TrendingUp } from "lucide-react";
 import Image from "next/image";
-
-const portfolioProjects = [
-  {
-    id: "fintech-app",
-    title: "FinTech Mobile Banking App",
-    category: "Mobile App",
-    image: "/fintech-app.png",
-    description: "A secure, high-performance banking app serving over 500,000 active users with real-time transactions.",
-    tech: ["React Native", "Node.js", "AWS", "PostgreSQL"],
-    metric: "500k+ Active Users",
-    featured: true,
-  },
-  {
-    id: "ecommerce-platform",
-    title: "Enterprise E-Commerce Platform",
-    category: "Web Platform",
-    image: "https://images.unsplash.com/photo-1661956602116-aa6865609028?ixlib=rb-4.0.3&auto=format&fit=crop&w=1600&q=80",
-    description: "A headless e-commerce solution handling 10k+ orders daily with sub-second page loads.",
-    tech: ["Next.js", "GraphQL", "Elasticsearch", "Redis"],
-    metric: "Sub-second Loads",
-    featured: false,
-  },
-  {
-    id: "ai-crm",
-    title: "AI-Powered CRM Dashboard",
-    category: "SaaS",
-    image: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?ixlib=rb-4.0.3&auto=format&fit=crop&w=1600&q=80",
-    description: "A customer relationship manager using AI to predict sales trends and automate outreach.",
-    tech: ["React", "Python", "TensorFlow", "MongoDB"],
-    metric: "+150% Sales",
-    featured: false,
-  },
-  {
-    id: "supply-chain",
-    title: "Global Supply Chain Tracker",
-    category: "Enterprise",
-    image: "https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?ixlib=rb-4.0.3&auto=format&fit=crop&w=1600&q=80",
-    description: "Real-time logistics tracking system with IoT integration across 40+ countries.",
-    tech: ["Vue.js", "Go", "Docker", "Kubernetes"],
-    metric: "Global Scale",
-    featured: true,
-  },
-  {
-    id: "telehealth",
-    title: "Telehealth Video Platform",
-    category: "SaaS",
-    image: "https://images.unsplash.com/photo-1576091160550-2173dba999ef?ixlib=rb-4.0.3&auto=format&fit=crop&w=1600&q=80",
-    description: "HIPAA-compliant video consultation platform connecting patients with doctors instantly.",
-    tech: ["WebRTC", "Socket.io", "NestJS", "AWS"],
-    metric: "Zero Latency",
-    featured: false,
-  },
-  {
-    id: "blockchain-realestate",
-    title: "Blockchain Real Estate Exchange",
-    category: "Web3",
-    image: "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?ixlib=rb-4.0.3&auto=format&fit=crop&w=1600&q=80",
-    description: "Tokenizing physical real estate assets for fractional ownership and seamless trading.",
-    tech: ["Solidity", "Next.js", "Web3.js", "IPFS"],
-    metric: "$50M+ Volume",
-    featured: false,
-  }
-];
+import { Link } from "@/i18n/routing";
+import { portfolioProjects } from "@/lib/portfolio";
 
 const categories = ["All", "Web Platform", "Mobile App", "SaaS", "Enterprise", "Web3"];
 
@@ -134,9 +73,9 @@ export function PortfolioGrid() {
 
                 {/* Hover Reveal Button */}
                 <div className="absolute inset-0 z-20 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                  <button className="flex items-center gap-2 bg-accent text-white px-6 py-3 rounded-full font-bold translate-y-4 group-hover:translate-y-0 transition-all duration-300 shadow-xl">
+                  <Link href={`/portfolio/${project.id}` as any} className="flex items-center gap-2 bg-accent text-white px-6 py-3 rounded-full font-bold translate-y-4 group-hover:translate-y-0 transition-all duration-300 shadow-xl">
                     View Case Study <ArrowRight className="h-4 w-4" />
-                  </button>
+                  </Link>
                 </div>
               </div>
               

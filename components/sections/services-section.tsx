@@ -4,37 +4,13 @@ import { motion } from "framer-motion";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/routing";
 import { Button } from "@/components/ui/button";
-import { 
-  ArrowRight, 
-  Code2, 
-  Smartphone, 
-  Globe, 
-  Cloud, 
-  ShieldCheck, 
-  Bot, 
-  LineChart, 
-  Lightbulb, 
-  Server
-} from "lucide-react";
-
-const serviceIcons = {
-  softwareDevelopment: Code2,
-  webDevelopment: Globe,
-  mobileAppDevelopment: Smartphone,
-  cloudServices: Cloud,
-  cyberSecurity: ShieldCheck,
-  aiSolutions: Bot,
-  digitalMarketing: LineChart,
-  itConsulting: Lightbulb,
-  hostingDomain: Server,
-};
+import { ArrowRight } from "lucide-react";
+import { serviceMenuItems } from "@/lib/navigation";
 
 export function ServicesSection({ hideViewAll = false }: { hideViewAll?: boolean }) {
   const t = useTranslations("servicesMenu");
   const tSection = useTranslations("servicesSnippet");
   const tCommon = useTranslations("common");
-
-  const services = Object.keys(serviceIcons) as Array<keyof typeof serviceIcons>;
 
   return (
     <section className="relative py-16 md:py-24 bg-secondary/50">
@@ -52,8 +28,9 @@ export function ServicesSection({ hideViewAll = false }: { hideViewAll?: boolean
         </div>
 
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {services.map((service, index) => {
-            const Icon = serviceIcons[service];
+          {serviceMenuItems.map((item, index) => {
+            const Icon = item.icon;
+            const service = item.key;
             return (
               <motion.div
                 key={service}
@@ -63,7 +40,7 @@ export function ServicesSection({ hideViewAll = false }: { hideViewAll?: boolean
                 transition={{ duration: 0.5, delay: index * 0.05 }}
               >
                 <Link 
-                  href={`/services/${service.toLowerCase()}`}
+                  href={item.href as any}
                   className="group block h-full p-6 rounded-2xl glass-card hover:border-accent/30 transition-all hover:-translate-y-1"
                 >
                   <div className="h-12 w-12 rounded-xl bg-accent/10 flex items-center justify-center mb-6 group-hover:bg-accent/20 transition-colors">
