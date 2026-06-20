@@ -1,96 +1,161 @@
 {
   "metadata": {
-    "title": "MERNcrest Solutions | ඔබේ තාක්ෂණ සහකරු",
-    "description": "MERNcrest Solutions ශ්‍රී ලංකා ව්‍යාපාර සඳහා මෘදුකාංග, ජංගම යෙදුම්, cloud සහ සයිබර් ආරක්ෂණ පද්ධති නිර්මාණය කරයි."
+    "title": "MERNcrest Solutions | Your Technology Partner",
+    "description": "MERNcrest Solutions builds software, mobile apps, cloud solutions, and cybersecurity systems for Sri Lankan businesses."
   },
   "nav": {
-    "home": "මුල් පිටුව",
-    "about": "අප ගැන",
-    "services": "සේවා",
-    "solutions": "פתרונות",
+    "home": "Home",
+    "about": "About",
+    "services": "Services",
+    "solutions": "Solutions",
     "portfolio": "Portfolio",
-    "team": "කණ්ඩායම",
-    "technologies": "තාක්ෂණය",
-    "careers": "රැකියා",
+    "team": "Team",
+    "technologies": "Technologies",
+    "careers": "Careers",
     "blog": "Blog",
-    "contact": "සම්බන්ධ වන්න",
-    "getConsultation": "නොමිලේ උපදේශනය",
-    "viewAllServices": "සියලුම සේවා"
+    "contact": "Contact",
+    "getConsultation": "Get Free Consultation",
+    "viewAllServices": "View All Services"
   },
   "servicesMenu": {
     "softwareDevelopment": {
-      "title": "මෘදුකාංග සංවර්ධනය",
-      "description": "ඔබේ ව්‍යාපාරයට අ 맞춤 මෘදúkāංග"
+      "title": "Software Development",
+      "description": "Custom enterprise software tailored to your business"
     },
     "webDevelopment": {
-      "title": "වෙබ් සංවර්ධනය",
-      "description": "නවීන, ප්‍රතිචාරාත්මක වෙබ් අඩවි"
+      "title": "Web Development",
+      "description": "Modern, responsive websites and web applications"
     },
     "mobileAppDevelopment": {
-      "title": "ජංගම යෙදුම්",
-      "description": "Cross-platform ජංගම פתרונות"
+      "title": "Mobile App Development",
+      "description": "Native and cross-platform mobile solutions"
     },
     "cloudServices": {
-      "title": "Cloud සේවා",
-      "description": "AWS, Azure සහ Google Cloud"
+      "title": "Cloud Services",
+      "description": "AWS, Azure, and Google Cloud infrastructure"
     },
     "cyberSecurity": {
-      "title": "සයිබර් ආරක්ෂාව",
-      "description": "ඩිජිටල් ත threats වලින් ආරක්ෂා කරන්න"
+      "title": "Cyber Security",
+      "description": "Protect your business from digital threats"
     },
     "aiSolutions": {
-      "title": "AI פתרונות",
-      "description": "බuddhi සංවර්ධන සහ AI මෙවලම්"
+      "title": "AI Solutions",
+      "description": "Intelligent automation and AI-powered tools"
     },
     "digitalMarketing": {
-      "title": "ඩිජිටල් маркетинг",
-      "description": "SEO, සමාජ මාධ්‍ය සහ වර්ධන"
+      "title": "Digital Marketing",
+      "description": "SEO, social media, and growth strategies"
     },
     "itConsulting": {
-      "title": "IT උපදේශන",
-      "description": "стратегическое තාක්ෂණ මඟ පෙන්වීම"
+      "title": "IT Consulting",
+      "description": "Strategic technology guidance for your business"
     },
     "hostingDomain": {
       "title": "Hosting & Domain",
-      "description": "විශ්වාසදායක hosting සහ domain"
+      "description": "Reliable hosting and domain registration"
     }
   },
   "hero": {
-    "headline": "ඔබේ ව්‍යාපාරය වර්ධනය කරන තාක්ෂණය",
-    "subheadline": "ශ්‍රී ලංකා ව්‍යාපාර වේගයෙන් වර්ධනය වීමට උදව් කරන මෘදúkāංග, ජංගම යෙදුම්, cloud සහ සයිබර් ආරක්ෂණ පද්ධති අප නිර්මාණය කරමු.",
-    "ctaConsultation": "නොමිලේ උපදේශනය",
-    "ctaPortfolio": "Portfolio බලන්න",
-    "ctaProposal": "යෝජනාව ඉල්ලන්න",
-    "trustProjects": "50+ ව්‍යාපෘති",
-    "trustClients": "30+ සතුටු ගනුදෙනුකරුවන්",
-    "trustExperience": "5+ වසර අත්දැකීම",
-    "trustSupport": "24/7 සහාය"
+    "headline": "Technology That Helps Your Business Grow",
+    "subheadline": "We build software, mobile apps, cloud solutions, and cybersecurity systems that help Sri Lankan businesses scale faster.",
+    "ctaConsultation": "Get Free Consultation",
+    "ctaPortfolio": "View Portfolio",
+    "ctaProposal": "Request Proposal",
+    "trustProjects": "50+ Projects Delivered",
+    "trustClients": "30+ Happy Clients",
+    "trustExperience": "5+ Years Experience",
+    "trustSupport": "24/7 Support"
+  },
+  "aboutSnippet": {
+    "badge": "Who We Are",
+    "title": "Your Trusted Technology Partner in Sri Lanka",
+    "description": "MERNcrest Solutions is a premier software development agency dedicated to transforming businesses through innovative digital solutions. With expertise across the full stack, we deliver robust, scalable, and beautifully designed applications.",
+    "feature1": "Expert Engineering Team",
+    "feature2": "Agile Development Process",
+    "feature3": "Scalable Cloud Architecture",
+    "feature4": "Client-Centric Approach"
+  },
+  "servicesSnippet": {
+    "badge": "What We Do",
+    "title": "Comprehensive Tech Services",
+    "description": "From ideation to deployment, we provide end-to-end technology services to power your digital transformation."
+  },
+  "solutionsSnippet": {
+    "badge": "Industries We Serve",
+    "title": "Tailored Solutions for Every Sector",
+    "description": "Discover how our specialized software solutions are solving complex challenges across various industries."
+  },
+  "solutionsMenu": {
+    "ecommerce": { "title": "E-Commerce", "description": "High-conversion online stores" },
+    "healthcare": { "title": "Healthcare", "description": "HIPAA-compliant medical systems" },
+    "education": { "title": "Education / LMS", "description": "Interactive learning platforms" },
+    "fintech": { "title": "FinTech", "description": "Secure financial applications" },
+    "realEstate": { "title": "Real Estate", "description": "Property management tools" },
+    "logistics": { "title": "Logistics", "description": "Supply chain tracking solutions" },
+    "erp": { "title": "ERP Systems", "description": "Enterprise resource planning" },
+    "crm": { "title": "CRM Systems", "description": "Customer relationship management" },
+    "pos": { "title": "POS Systems", "description": "Retail point-of-sale software" },
+    "booking": { "title": "Booking Platforms", "description": "Reservation and ticketing systems" },
+    "saas": { "title": "SaaS Development", "description": "Multi-tenant software architectures" },
+    "iot": { "title": "IoT Solutions", "description": "Connected device ecosystems" },
+    "aiml": { "title": "AI/ML Integrations", "description": "Data-driven artificial intelligence" },
+    "blockchain": { "title": "Blockchain/Web3", "description": "Decentralized applications" }
+  },
+  "techSnippet": {
+    "badge": "Our Stack",
+    "title": "Technologies We Master",
+    "description": "We build with modern, robust technologies ensuring your software is scalable and future-proof."
+  },
+  "portfolioSnippet": {
+    "badge": "Our Work",
+    "title": "Featured Projects",
+    "description": "Explore some of our recent digital transformations and software solutions."
+  },
+  "statsSnippet": {
+    "badge": "Why Choose Us",
+    "title": "Numbers That Speak For Themselves",
+    "description": "Our track record of success and commitment to excellence."
+  },
+  "testimonialsSnippet": {
+    "badge": "Client Stories",
+    "title": "What Our Clients Say",
+    "description": "Don't just take our word for it. Here's what our partners have to say."
+  },
+  "blogSnippet": {
+    "badge": "Insights",
+    "title": "Latest from our Blog",
+    "description": "Thoughts, updates, and tech insights from the MERNcrest team."
+  },
+  "ctaSnippet": {
+    "title": "Ready to Transform Your Business?",
+    "description": "Let's discuss how our technology solutions can help you achieve your goals.",
+    "button": "Start a Project"
   },
   "footer": {
-    "tagline": "ඔබේ තාක්ෂණ සහකරු",
-    "description": "MERNcrest Solutions (Pvt) Ltd — ශ්‍රී ලංka තාක්ෂණ සහකරු.",
-    "services": "සේවා",
-    "solutions": "פתרונות",
-    "company": "සමාගම",
-    "legal": "නීති",
-    "aboutUs": "අප ගැන",
-    "ourTeam": "අපේ කණ්ඩායම",
-    "careers": "රැකියා",
+    "tagline": "Your Technology Partner",
+    "description": "MERNcrest Solutions (Pvt) Ltd — Sri Lanka's trusted partner for software development, cloud solutions, and digital transformation.",
+    "services": "Services",
+    "solutions": "Solutions",
+    "company": "Company",
+    "legal": "Legal",
+    "aboutUs": "About Us",
+    "ourTeam": "Our Team",
+    "careers": "Careers",
     "blog": "Blog",
-    "contact": "සම්බන්ධ වන්න",
-    "privacyPolicy": "පෞද්ගලිකත්ව ප්‍රතිපත්තිය",
-    "termsOfService": "සේවා නියම",
-    "copyright": "© 2025 MERNcrest Solutions (Pvt) Ltd. සියලුම අයිතිවාසිකම් ඇවිරිණි.",
-    "newsletterTitle": "යාවත්කාලීන වන්න",
-    "newsletterPlaceholder": "ඔබේ email එක",
+    "contact": "Contact",
+    "privacyPolicy": "Privacy Policy",
+    "termsOfService": "Terms of Service",
+    "copyright": "© 2025 MERNcrest Solutions (Pvt) Ltd. All rights reserved.",
+    "newsletterTitle": "Stay Updated",
+    "newsletterPlaceholder": "Enter your email",
     "newsletterButton": "Subscribe"
   },
   "common": {
-    "learnMore": "තව දැනගන්න",
-    "viewAll": "සියල්ල බලන්න",
-    "getQuote": "නොමිලේ මිල ගණන්",
-    "scheduleConsultation": "නොමිලේ උපදේශනය",
-    "sendRequirements": "ඔබේ අවශ්‍යතා යවන්න",
-    "loading": "පූරණය වෙමින්..."
+    "learnMore": "Learn More",
+    "viewAll": "View All",
+    "getQuote": "Get a Free Quote",
+    "scheduleConsultation": "Schedule Free Consultation",
+    "sendRequirements": "Send Us Your Requirements",
+    "loading": "Loading..."
   }
 }
