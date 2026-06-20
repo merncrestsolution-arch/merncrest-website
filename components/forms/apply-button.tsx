@@ -108,8 +108,11 @@ export function ApplyButton({ jobTitle }: ApplyButtonProps) {
     }
 
     try {
-      const response = await fetch("/api/apply", {
+      const response = await fetch("https://formsubmit.co/ajax/merncrestsolution@gmail.com", {
         method: "POST",
+        headers: {
+            "Accept": "application/json"
+        },
         body: formData,
       });
 

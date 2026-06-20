@@ -21,10 +21,11 @@ export function ContactForm() {
     };
 
     try {
-      const response = await fetch("/api/contact", {
+      const response = await fetch("https://formsubmit.co/ajax/merncrestsolution@gmail.com", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          "Accept": "application/json",
         },
         body: JSON.stringify(data),
       });
