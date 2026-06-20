@@ -15,7 +15,7 @@ export function TechnologiesSection() {
   const tSection = useTranslations("techSnippet");
 
   return (
-    <section className="relative py-24 bg-secondary/30 border-y border-black/5 dark:border-white/5 overflow-hidden">
+    <section className="relative py-16 md:py-24 bg-secondary/30 border-y border-black/5 dark:border-white/5 overflow-hidden">
       <div className="container-wide relative z-10">
         <div className="text-center max-w-2xl mx-auto mb-16">
           <p className="text-accent font-mono text-sm uppercase tracking-wider mb-3">

@@ -37,7 +37,7 @@ export function ServicesSection({ hideViewAll = false }: { hideViewAll?: boolean
   const services = Object.keys(serviceIcons) as Array<keyof typeof serviceIcons>;
 
   return (
-    <section className="relative py-24 bg-secondary/50">
+    <section className="relative py-16 md:py-24 bg-secondary/50">
       <div className="container-wide relative z-10">
         <div className="text-center max-w-2xl mx-auto mb-16">
           <p className="text-accent font-mono text-sm uppercase tracking-wider mb-3">

@@ -55,7 +55,7 @@ export function SolutionsSection() {
   ] as Array<keyof typeof solutionIcons>;
 
   return (
-    <section className="relative py-24 overflow-hidden">
+    <section className="relative py-16 md:py-24 overflow-hidden">
       {/* Background elements */}
       <div className="absolute top-1/2 left-0 w-96 h-96 bg-accent/5 rounded-full blur-[100px] pointer-events-none" />
       <div className="absolute bottom-0 right-0 w-96 h-96 bg-accent-alt/5 rounded-full blur-[100px] pointer-events-none" />

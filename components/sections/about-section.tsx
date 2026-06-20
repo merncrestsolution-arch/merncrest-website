@@ -18,7 +18,7 @@ export function AboutSection() {
   ];
 
   return (
-    <section className="relative py-24 overflow-hidden">
+    <section className="relative py-16 md:py-24 overflow-hidden">
       <div className="container-wide relative z-10">
         <div className="grid lg:grid-cols-2 gap-16 items-center">
           <motion.div

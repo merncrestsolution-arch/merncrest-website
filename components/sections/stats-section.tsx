@@ -41,7 +41,7 @@ export function StatsSection() {
   ];
 
   return (
-    <section className="relative py-24 bg-accent/5 overflow-hidden">
+    <section className="relative py-16 md:py-24 bg-accent/5 overflow-hidden">
       <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1550751827-4bd374c3f58b?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80')] bg-cover bg-center mix-blend-overlay opacity-5" />
       
       <div className="container-wide relative z-10">

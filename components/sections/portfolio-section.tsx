@@ -33,7 +33,7 @@ export function PortfolioSection() {
   const tCommon = useTranslations("common");
 
   return (
-    <section className="relative py-24 overflow-hidden">
+    <section className="relative py-16 md:py-24 overflow-hidden">
       <div className="container-wide relative z-10">
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-16">
           <div className="max-w-2xl">

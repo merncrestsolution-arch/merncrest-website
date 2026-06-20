@@ -9,7 +9,7 @@ export function CTASection() {
   const tSection = useTranslations("ctaSnippet");
 
   return (
-    <section className="relative py-24 overflow-hidden">
+    <section className="relative py-16 md:py-24 overflow-hidden">
       <div className="container-wide relative z-10">
         <motion.div
           initial={{ opacity: 0, y: 40 }}
