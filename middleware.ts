@@ -37,3 +37,12 @@ export function middleware(request: NextRequest) {
     return new NextResponse(`Middleware Error: ${error.message}\n${error.stack}`, { status: 500 });
   }
 }
+
+export const config = {
+  matcher: [
+    // Match all pathnames except for
+    // - … if they start with `/api`, `/_next` or `/_vercel`
+    // - … the ones containing a dot (e.g. `favicon.ico`)
+    '/((?!api|_next|_vercel|.*\\\\..*).*)',
+  ]
+};
