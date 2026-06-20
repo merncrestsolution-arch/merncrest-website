@@ -5,6 +5,7 @@ import { createPortal } from "react-dom";
 import { Button } from "@/components/ui/button";
 import { CheckCircle2, Loader2, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import Image from "next/image";
 
 interface ApplyButtonProps {
   jobTitle: string;
@@ -162,12 +163,23 @@ export function ApplyButton({ jobTitle }: ApplyButtonProps) {
             >
               <button 
                 onClick={() => setOpen(false)}
-                className="absolute right-4 top-4 z-20 p-2 rounded-full hover:bg-black/10 dark:hover:bg-white/10 transition-colors"
+                className="absolute right-4 top-4 z-20 p-2 rounded-full bg-black/20 hover:bg-black/40 text-white backdrop-blur-md transition-colors"
               >
-                <X className="h-5 w-5 text-muted-foreground hover:text-foreground dark:hover:text-white" />
+                <X className="h-5 w-5" />
               </button>
 
-              <div className="p-6 sm:p-8 relative overflow-hidden min-h-[400px]">
+              <div className="relative h-40 sm:h-48 w-full shrink-0">
+                <Image
+                  src="/careers-poster.png"
+                  alt="Careers at MERNcrest"
+                  fill
+                  className="object-cover"
+                  priority
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-background/95 dark:from-card/95 to-transparent" />
+              </div>
+
+              <div className="p-6 sm:p-8 pt-2 relative overflow-hidden min-h-[400px]">
                 <AnimatePresence mode="wait" custom={direction}>
                   
                   {/* STEP 1: Terms & Conditions */}
