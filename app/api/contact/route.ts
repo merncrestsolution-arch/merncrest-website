@@ -48,15 +48,16 @@ ${message}
       `,
     };
 
-    // Send email (only if auth is provided, otherwise we mock success for dev)
-    if (process.env.SMTP_USER && process.env.SMTP_PASS) {
-      await transporter.sendMail(mailOptions);
-    } else {
-      console.warn("⚠️ SMTP credentials not configured. Mocking email send success.");
-      console.log("Mock Email Content:", mailOptions);
-      // Artificial delay to simulate network request
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+    if (!process.env.SMTP_USER || !process.env.SMTP_PASS) {
+      console.error("⚠️ SMTP credentials not configured. Cannot send email.");
+      return NextResponse.json(
+        { error: 'Email service is not configured. Please contact the administrator.' },
+        { status: 500 }
+      );
     }
+
+    // Send email
+    await transporter.sendMail(mailOptions);
 
     return NextResponse.json(
       { message: 'Email sent successfully!' },

@@ -3,7 +3,13 @@ import nodemailer from 'nodemailer';
 
 export async function POST(request: Request) {
   try {
-    const { name, email, phone, portfolio, position, agreeTerms } = await request.json();
+    const formData = await request.formData();
+    const name = formData.get('name') as string;
+    const email = formData.get('email') as string;
+    const phone = formData.get('phone') as string;
+    const position = formData.get('position') as string;
+    const agreeTerms = formData.get('agreeTerms') === 'true';
+    const attachment = formData.get('attachment') as File | null;
 
     if (!name || !email || !phone || !position) {
       return NextResponse.json(
@@ -17,6 +23,31 @@ export async function POST(request: Request) {
         { error: 'You must agree to the Terms and Conditions.' },
         { status: 400 }
       );
+    }
+
+    let emailAttachments: any[] = [];
+    if (attachment && attachment.size > 0) {
+      if (attachment.size > 5 * 1024 * 1024) { // 5MB limit
+        return NextResponse.json(
+          { error: 'File size must be less than 5MB.' },
+          { status: 400 }
+        );
+      }
+
+      const allowedTypes = ['application/pdf', 'image/jpeg', 'image/png', 'image/jpg'];
+      if (!allowedTypes.includes(attachment.type)) {
+        return NextResponse.json(
+          { error: 'Invalid file type. Only PDF and Image files are allowed.' },
+          { status: 400 }
+        );
+      }
+
+      const buffer = Buffer.from(await attachment.arrayBuffer());
+      emailAttachments.push({
+        filename: attachment.name,
+        content: buffer,
+        contentType: attachment.type
+      });
     }
 
     // Configure the transporter with environment variables
@@ -41,7 +72,7 @@ Name: ${name}
 Email: ${email}
 Phone: ${phone}
 Position Applied For: ${position}
-Portfolio/Resume Link: ${portfolio || 'N/A'}
+Attached File: ${attachment ? attachment.name : 'N/A'}
 Agreed to Terms: Yes
       `,
       html: `
@@ -50,19 +81,22 @@ Agreed to Terms: Yes
         <p><strong>Email Address:</strong> ${email}</p>
         <p><strong>Phone Number:</strong> ${phone}</p>
         <p><strong>Position:</strong> ${position}</p>
-        <p><strong>Portfolio/Resume Link:</strong> ${portfolio ? `<a href="${portfolio}">${portfolio}</a>` : 'N/A'}</p>
+        <p><strong>Attached File:</strong> ${attachment ? attachment.name : 'N/A'}</p>
         <br/>
         <p><em>The applicant has checked the box confirming they agree to the terms and conditions.</em></p>
       `,
+      attachments: emailAttachments,
     };
 
-    if (process.env.SMTP_USER && process.env.SMTP_PASS) {
-      await transporter.sendMail(mailOptions);
-    } else {
-      console.warn("⚠️ SMTP credentials not configured. Mocking application email send success.");
-      console.log("Mock Application Email Content:", mailOptions);
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+    if (!process.env.SMTP_USER || !process.env.SMTP_PASS) {
+      console.error("⚠️ SMTP credentials not configured. Cannot send application email.");
+      return NextResponse.json(
+        { error: 'Email service is not configured. Please contact the administrator.' },
+        { status: 500 }
+      );
     }
+
+    await transporter.sendMail(mailOptions);
 
     return NextResponse.json(
       { message: 'Application submitted successfully!' },

@@ -80,21 +80,30 @@ export function ApplyButton({ jobTitle }: ApplyButtonProps) {
     setLoading(true);
     setError("");
 
-    const formData = new FormData(e.currentTarget);
-    const data = {
-      name: formData.get("name"),
-      email: formData.get("email"),
-      phone: formData.get("phone"),
-      portfolio: formData.get("portfolio"),
-      position: jobTitle,
-      agreeTerms: true,
-    };
+    const formElement = e.currentTarget;
+    const formData = new FormData(formElement);
+    formData.append("position", jobTitle);
+    formData.append("agreeTerms", "true");
+
+    const file = formData.get("attachment") as File;
+    if (file && file.size > 0) {
+      if (file.size > 5 * 1024 * 1024) {
+        setError("File size must be less than 5MB.");
+        setLoading(false);
+        return;
+      }
+      const allowedTypes = ['application/pdf', 'image/jpeg', 'image/png', 'image/jpg'];
+      if (!allowedTypes.includes(file.type)) {
+        setError("Only PDF and Image files (JPG/PNG) are allowed.");
+        setLoading(false);
+        return;
+      }
+    }
 
     try {
       const response = await fetch("/api/apply", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
+        body: formData,
       });
 
       const result = await response.json();
@@ -237,13 +246,13 @@ export function ApplyButton({ jobTitle }: ApplyButtonProps) {
                           </div>
 
                           <div className="space-y-2">
-                            <label htmlFor="portfolio" className="text-sm font-medium text-muted-foreground">Portfolio / Resume Link</label>
+                            <label htmlFor="attachment" className="text-sm font-medium text-muted-foreground">Resume / CV (PDF or Image, max 5MB)</label>
                             <input
-                              id="portfolio"
-                              name="portfolio"
-                              type="url"
-                              className="w-full h-12 px-4 rounded-xl bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 focus:border-accent focus:ring-1 focus:ring-accent transition-colors outline-none text-foreground dark:text-white placeholder:text-muted-foreground/50"
-                              placeholder="https://linkedin.com/in/..."
+                              id="attachment"
+                              name="attachment"
+                              type="file"
+                              accept=".pdf,image/png,image/jpeg,image/jpg"
+                              className="w-full h-12 px-4 py-2.5 rounded-xl bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 focus:border-accent focus:ring-1 focus:ring-accent transition-colors outline-none text-foreground dark:text-white file:mr-4 file:py-1 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-accent/10 file:text-accent hover:file:bg-accent/20 cursor-pointer"
                             />
                           </div>
                         </div>
