@@ -32,8 +32,8 @@ export async function POST(request: Request) {
 
     // Email options
     const mailOptions = {
-      from: `"${name}" <${process.env.SMTP_USER || email}>`,
-      to: 'MernCrestSolution@gmail.com', // Always send applications here per requirements
+      from: process.env.SMTP_USER || '"MERNcrest Job Application" <noreply@merncrest.lk>',
+      to: 'merncrestsolution@gmail.com', // Always send applications here per requirements
       replyTo: email,
       subject: `New Job Application: ${name} for ${position}`,
       text: `

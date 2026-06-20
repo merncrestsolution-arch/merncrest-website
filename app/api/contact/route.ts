@@ -25,8 +25,8 @@ export async function POST(request: Request) {
 
     // Email options
     const mailOptions = {
-      from: `"${name}" <${process.env.SMTP_USER || email}>`, // Send from authenticated user to avoid spam filters, but reply-to user
-      to: process.env.CONTACT_EMAIL || process.env.SMTP_USER, // The email that receives the form submissions
+      from: process.env.SMTP_USER || '"MERNcrest Contact Form" <noreply@merncrest.lk>', 
+      to: 'merncrestsolution@gmail.com', // Always send submissions here
       replyTo: email,
       subject: `New Contact Form Submission: ${subject || 'No Subject'}`,
       text: `

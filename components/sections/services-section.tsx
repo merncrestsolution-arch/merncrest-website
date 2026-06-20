@@ -29,7 +29,7 @@ const serviceIcons = {
   hostingDomain: Server,
 };
 
-export function ServicesSection() {
+export function ServicesSection({ hideViewAll = false }: { hideViewAll?: boolean }) {
   const t = useTranslations("servicesMenu");
   const tSection = useTranslations("servicesSnippet");
   const tCommon = useTranslations("common");
@@ -85,14 +85,16 @@ export function ServicesSection() {
           })}
         </div>
         
-        <div className="mt-12 text-center">
-          <Button asChild size="lg" variant="outline" className="group">
-            <Link href="/services">
-              {tCommon("viewAll")} Services
-              <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
-            </Link>
-          </Button>
-        </div>
+        {!hideViewAll && (
+          <div className="mt-12 text-center">
+            <Button asChild size="lg" variant="outline" className="group">
+              <Link href="/services">
+                {tCommon("viewAll")} Services
+                <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
+              </Link>
+            </Button>
+          </div>
+        )}
       </div>
     </section>
   );
