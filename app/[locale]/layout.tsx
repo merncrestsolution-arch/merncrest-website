@@ -47,7 +47,7 @@ export default async function LocaleLayout({
   return (
     <html lang={locale} suppressHydrationWarning>
       <body
-        className={`${inter.variable} ${sora.variable} ${jetbrains.variable} font-sans antialiased`}
+        className={`${inter.variable} ${sora.variable} ${jetbrains.variable} font-sans antialiased overflow-x-hidden`}
       >
         <ThemeProvider
           attribute="class"

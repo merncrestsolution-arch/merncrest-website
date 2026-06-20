@@ -15,7 +15,8 @@
     "blog": "Blog",
     "contact": "Contact",
     "getConsultation": "Get Free Consultation",
-    "viewAllServices": "View All Services"
+    "viewAllServices": "View All Services",
+    "language": "Language"
   },
   "servicesMenu": {
     "softwareDevelopment": {
