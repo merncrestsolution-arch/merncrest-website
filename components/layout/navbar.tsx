@@ -173,33 +173,33 @@ export function Navbar() {
                 <span className="sr-only">Open menu</span>
               </Button>
             </SheetTrigger>
-            <SheetContent side="right" className="overflow-y-auto">
-              <SheetHeader>
-                <SheetTitle>
-                  <span className="gradient-text font-display text-xl font-bold">
+            <SheetContent side="right" className="overflow-y-auto bg-background/90 backdrop-blur-2xl border-l border-white/10 w-[85vw] sm:w-[400px]">
+              <SheetHeader className="pb-4 border-b border-white/10">
+                <SheetTitle className="text-left">
+                  <span className="gradient-text font-display text-2xl font-bold tracking-tight">
                     MERNcrest
                   </span>
                 </SheetTitle>
               </SheetHeader>
-              <div className="mt-8 flex flex-col gap-1">
+              <div className="mt-6 flex flex-col gap-2">
                 <Link
                   href="/"
                   onClick={() => setMobileOpen(false)}
-                  className="rounded-lg px-4 py-3 text-base hover:bg-white/5"
+                  className="flex items-center rounded-xl px-4 py-3.5 text-base font-medium text-muted hover:text-foreground hover:bg-white/5 transition-colors"
                 >
                   {t("home")}
                 </Link>
                 <Link
                   href="/about"
                   onClick={() => setMobileOpen(false)}
-                  className="rounded-lg px-4 py-3 text-base hover:bg-white/5"
+                  className="flex items-center rounded-xl px-4 py-3.5 text-base font-medium text-muted hover:text-foreground hover:bg-white/5 transition-colors"
                 >
                   {t("about")}
                 </Link>
 
                 <button
                   onClick={() => setMobileServicesOpen(!mobileServicesOpen)}
-                  className="flex items-center justify-between rounded-lg px-4 py-3 text-base hover:bg-white/5"
+                  className="flex items-center justify-between rounded-xl px-4 py-3.5 text-base font-medium text-muted hover:text-foreground hover:bg-white/5 transition-colors w-full"
                 >
                   {t("services")}
                   <ChevronDown
@@ -210,13 +210,13 @@ export function Navbar() {
                   />
                 </button>
                 {mobileServicesOpen && (
-                  <div className="ml-4 flex flex-col gap-1 border-l border-white/10 pl-4">
+                  <div className="ml-4 flex flex-col gap-1 border-l-2 border-accent/20 pl-4 py-2 mt-1 mb-2">
                     {serviceMenuItems.map((item) => (
                       <Link
                         key={item.key}
                         href={item.href}
                         onClick={() => setMobileOpen(false)}
-                        className="rounded-lg px-4 py-2 text-sm text-muted hover:text-foreground"
+                        className="rounded-lg px-4 py-3 text-sm text-muted hover:text-foreground hover:bg-white/5 transition-colors"
                       >
                         {tServices(`${item.key}.title`)}
                       </Link>
@@ -224,7 +224,7 @@ export function Navbar() {
                     <Link
                       href="/services"
                       onClick={() => setMobileOpen(false)}
-                      className="rounded-lg px-4 py-2 text-sm text-accent"
+                      className="rounded-lg px-4 py-3 text-sm font-medium text-accent hover:text-accent-alt transition-colors inline-flex items-center gap-2"
                     >
                       {t("viewAllServices")} →
                     </Link>
@@ -236,16 +236,17 @@ export function Navbar() {
                     key={link.key}
                     href={link.href}
                     onClick={() => setMobileOpen(false)}
-                    className="rounded-lg px-4 py-3 text-base hover:bg-white/5"
+                    className="flex items-center rounded-xl px-4 py-3.5 text-base font-medium text-muted hover:text-foreground hover:bg-white/5 transition-colors"
                   >
                     {t(link.key)}
                   </Link>
                 ))}
 
-                <div className="mt-4 px-4">
+                <div className="mt-6 px-4 pt-6 border-t border-white/10 flex items-center justify-between">
+                  <span className="text-sm text-muted">{t("language") || "Language"}</span>
                   <LanguageSwitcher />
                 </div>
-                <div className="mt-4 px-4">
+                <div className="mt-6 px-4 pb-8">
                   <Button asChild className="w-full">
                     <Link href="/contact" onClick={() => setMobileOpen(false)}>
                       {t("getConsultation")}

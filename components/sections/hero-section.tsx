@@ -10,7 +10,7 @@ function AnimatedHeadline({ text }: { text: string }) {
   const words = text.split(" ");
 
   return (
-    <h1 className="font-display text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-bold leading-tight text-balance">
+    <h1 className="font-display text-[2.75rem] leading-[1.1] sm:text-5xl lg:text-6xl xl:text-7xl font-bold text-balance tracking-tight">
       {words.map((word, i) => (
         <motion.span
           key={`${word}-${i}`}
@@ -61,7 +61,7 @@ function HeroVisual() {
             alt="MERNcrest Solutions" 
             width={1000} 
             height={400} 
-            className="h-48 sm:h-64 lg:h-[350px] w-auto object-contain scale-[1.3] lg:scale-[1.6] transform origin-center dark:hidden"
+            className="h-40 sm:h-56 lg:h-[350px] w-auto object-contain scale-[1.1] sm:scale-[1.2] lg:scale-[1.6] transform origin-center dark:hidden"
             priority
           />
           {/* Dark Mode Logo */}
@@ -70,7 +70,7 @@ function HeroVisual() {
             alt="MERNcrest Solutions" 
             width={1000} 
             height={400} 
-            className="h-48 sm:h-64 lg:h-[350px] w-auto object-contain scale-[1.3] lg:scale-[1.6] transform origin-center hidden dark:block"
+            className="h-40 sm:h-56 lg:h-[350px] w-auto object-contain scale-[1.1] sm:scale-[1.2] lg:scale-[1.6] transform origin-center hidden dark:block"
             priority
           />
         </motion.div>
@@ -126,18 +126,18 @@ export function HeroSection() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.8, duration: 0.5 }}
-              className="flex flex-wrap gap-3"
+              className="flex flex-col sm:flex-row flex-wrap gap-3 w-full sm:w-auto"
             >
-              <Button asChild size="lg">
+              <Button asChild size="lg" className="w-full sm:w-auto">
                 <Link href="/contact">{t("ctaConsultation")}</Link>
               </Button>
-              <Button asChild variant="outline" size="lg">
+              <Button asChild variant="outline" size="lg" className="w-full sm:w-auto">
                 <Link href="/portfolio">
                   {t("ctaPortfolio")}
                   <ArrowRight className="h-4 w-4" />
                 </Link>
               </Button>
-              <Button asChild variant="ghost" size="lg">
+              <Button asChild variant="ghost" size="lg" className="w-full sm:w-auto">
                 <Link href="/contact">{t("ctaProposal")}</Link>
               </Button>
             </motion.div>

@@ -10,7 +10,7 @@ const portfolioProjects = [
     id: "fintech-app",
     title: "FinTech Mobile Banking App",
     category: "Mobile App",
-    image: "https://images.unsplash.com/photo-1563986768494-4dee2763ff0f?ixlib=rb-4.0.3&auto=format&fit=crop&w=1600&q=80",
+    image: "/fintech-app.png",
     description: "A secure, high-performance banking app serving over 500,000 active users with real-time transactions.",
     tech: ["React Native", "Node.js", "AWS", "PostgreSQL"],
     metric: "500k+ Active Users",
