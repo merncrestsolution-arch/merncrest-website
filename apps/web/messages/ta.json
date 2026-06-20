@@ -1,0 +1,96 @@
+{
+  "metadata": {
+    "title": "MERNcrest Solutions | உங்கள் தொழில்நுட்ப பartner",
+    "description": "MERNcrest Solutions இலங்கை வணிகங்களுக்கு மென்பொருள், மொபைல் பயன்பாடுகள், கிளவுட் மற்றும் சைபர் பாதுகாப்பு அமைப்புகளை உருவாக்குகிறது."
+  },
+  "nav": {
+    "home": "முகப்பு",
+    "about": "எங்களைப் பற்றி",
+    "services": "சேவைகள்",
+    "solutions": "தீர்வுகள்",
+    "portfolio": "பортфолио",
+    "team": "குழு",
+    "technologies": "தொழில்நுட்பங்கள்",
+    "careers": "வ careers",
+    "blog": "வலைப்பதிவு",
+    "contact": "தொடர்பு",
+    "getConsultation": "இலவச ஆலோசனை",
+    "viewAllServices": "அனைத்து சேவைகளும்"
+  },
+  "servicesMenu": {
+    "softwareDevelopment": {
+      "title": "மென்பொருள் மேம்பாடு",
+      "description": "உங்கள் வணிகத்திற்கு தனிப்பயன் மென்பொருள்"
+    },
+    "webDevelopment": {
+      "title": "வலை மேம்பாடு",
+      "description": "நவீன, பதிலளிக்கும் வலைத்தளங்கள்"
+    },
+    "mobileAppDevelopment": {
+      "title": "மொபைல் பயன்பாடு",
+      "description": "குறுக்கு-தளம் மொபைல் தீர்வுகள்"
+    },
+    "cloudServices": {
+      "title": "கிளவுட் சேவைகள்",
+      "description": "AWS, Azure மற்றும் Google Cloud"
+    },
+    "cyberSecurity": {
+      "title": "சைபர் பாதுகாப்பு",
+      "description": "டிஜிட்டல் அச்சுறுத்தல்களிலிருந்து பாதுகாக்கவும்"
+    },
+    "aiSolutions": {
+      "title": "AI தீர்வுகள்",
+      "description": "நுண்ணறிவு தானியங்கி மற்றும் AI கருவிகள்"
+    },
+    "digitalMarketing": {
+      "title": "டிஜிட்டல் маркетинг",
+      "description": "SEO, சமூக ஊடகம் மற்றும் வளர்ச்சி"
+    },
+    "itConsulting": {
+      "title": "IT ஆலோசனை",
+      "description": "ம стратегическое தொழில்நுட்ப வழிகாட்டுதல்"
+    },
+    "hostingDomain": {
+      "title": "ஹோஸ்டிங் & டொமைன்",
+      "description": "நம்பகமான ஹோஸ்டிங் மற்றும் டொமைன்"
+    }
+  },
+  "hero": {
+    "headline": "உங்கள் வணிகத்தை வளர்க்கும் தொழில்நுட்பம்",
+    "subheadline": "இலங்கை வணிகங்கள் வேகமாக வளர உதவும் மென்பொருள், மொபைல் பயன்பாடுகள், கிளவுட் மற்றும் சைபர் பாதுகாப்பு அமைப்புகளை நாங்கள் உருவாக்குகிறோம்.",
+    "ctaConsultation": "இலவச ஆலோசனை",
+    "ctaPortfolio": "பортфолио பார்க்க",
+    "ctaProposal": "முன்மொழிவு கோருங்கள்",
+    "trustProjects": "50+ திட்டங்கள்",
+    "trustClients": "30+ வாடிக்கையாளர்கள்",
+    "trustExperience": "5+ ஆண்டுகள் அனுபவம்",
+    "trustSupport": "24/7 ஆதரவு"
+  },
+  "footer": {
+    "tagline": "உங்கள் தொழில்நுட்ப பartner",
+    "description": "MERNcrest Solutions (Pvt) Ltd — இலங்கையின் நம்பகமான மென்பொருள் மற்றும் டிஜிட்டல் மாற்ற партнер.",
+    "services": "சேவைகள்",
+    "solutions": "தீர்வுகள்",
+    "company": "நிறுவனம்",
+    "legal": "சட்டம்",
+    "aboutUs": "எங்களைப் பற்றி",
+    "ourTeam": "எங்கள் குழு",
+    "careers": "வ careers",
+    "blog": "வலைப்பதிவு",
+    "contact": "தொடர்பு",
+    "privacyPolicy": "தனியுரிமைக் கொள்கை",
+    "termsOfService": "சேவை விதிமுறைகள்",
+    "copyright": "© 2025 MERNcrest Solutions (Pvt) Ltd. அனைத்து உரிமைகளும் பாதுகாக்கப்பட்டவை.",
+    "newsletterTitle": "புதுப்பிப்புகளைப் பெறுங்கள்",
+    "newsletterPlaceholder": "உங்கள் மின்னஞ்சலை உள்ளிடவும்",
+    "newsletterButton": "சந்தா"
+  },
+  "common": {
+    "learnMore": "மேலும் அறிய",
+    "viewAll": "அனைத்தையும் பார்",
+    "getQuote": "இலவச மதிப்பீடு",
+    "scheduleConsultation": "இலவச ஆலோசனை",
+    "sendRequirements": "உங்கள் தேவைகளை அனுப்புங்கள்",
+    "loading": "ஏற்றுகிறது..."
+  }
+}

@@ -1,0 +1,96 @@
+{
+  "metadata": {
+    "title": "MERNcrest Solutions | ඔබේ තාක්ෂණ සහකරු",
+    "description": "MERNcrest Solutions ශ්‍රී ලංකා ව්‍යාපාර සඳහා මෘදුකාංග, ජංගම යෙදුම්, cloud සහ සයිබර් ආරක්ෂණ පද්ධති නිර්මාණය කරයි."
+  },
+  "nav": {
+    "home": "මුල් පිටුව",
+    "about": "අප ගැන",
+    "services": "සේවා",
+    "solutions": "פתרונות",
+    "portfolio": "Portfolio",
+    "team": "කණ්ඩායම",
+    "technologies": "තාක්ෂණය",
+    "careers": "රැකියා",
+    "blog": "Blog",
+    "contact": "සම්බන්ධ වන්න",
+    "getConsultation": "නොමිලේ උපදේශනය",
+    "viewAllServices": "සියලුම සේවා"
+  },
+  "servicesMenu": {
+    "softwareDevelopment": {
+      "title": "මෘදුකාංග සංවර්ධනය",
+      "description": "ඔබේ ව්‍යාපාරයට අ 맞춤 මෘදúkāංග"
+    },
+    "webDevelopment": {
+      "title": "වෙබ් සංවර්ධනය",
+      "description": "නවීන, ප්‍රතිචාරාත්මක වෙබ් අඩවි"
+    },
+    "mobileAppDevelopment": {
+      "title": "ජංගම යෙදුම්",
+      "description": "Cross-platform ජංගම פתרונות"
+    },
+    "cloudServices": {
+      "title": "Cloud සේවා",
+      "description": "AWS, Azure සහ Google Cloud"
+    },
+    "cyberSecurity": {
+      "title": "සයිබර් ආරක්ෂාව",
+      "description": "ඩිජිටල් ත threats වලින් ආරක්ෂා කරන්න"
+    },
+    "aiSolutions": {
+      "title": "AI פתרונות",
+      "description": "බuddhi සංවර්ධන සහ AI මෙවලම්"
+    },
+    "digitalMarketing": {
+      "title": "ඩිජිටල් маркетинг",
+      "description": "SEO, සමාජ මාධ්‍ය සහ වර්ධන"
+    },
+    "itConsulting": {
+      "title": "IT උපදේශන",
+      "description": "стратегическое තාක්ෂණ මඟ පෙන්වීම"
+    },
+    "hostingDomain": {
+      "title": "Hosting & Domain",
+      "description": "විශ්වාසදායක hosting සහ domain"
+    }
+  },
+  "hero": {
+    "headline": "ඔබේ ව්‍යාපාරය වර්ධනය කරන තාක්ෂණය",
+    "subheadline": "ශ්‍රී ලංකා ව්‍යාපාර වේගයෙන් වර්ධනය වීමට උදව් කරන මෘදúkāංග, ජංගම යෙදුම්, cloud සහ සයිබර් ආරක්ෂණ පද්ධති අප නිර්මාණය කරමු.",
+    "ctaConsultation": "නොමිලේ උපදේශනය",
+    "ctaPortfolio": "Portfolio බලන්න",
+    "ctaProposal": "යෝජනාව ඉල්ලන්න",
+    "trustProjects": "50+ ව්‍යාපෘති",
+    "trustClients": "30+ සතුටු ගනුදෙනුකරුවන්",
+    "trustExperience": "5+ වසර අත්දැකීම",
+    "trustSupport": "24/7 සහාය"
+  },
+  "footer": {
+    "tagline": "ඔබේ තාක්ෂණ සහකරු",
+    "description": "MERNcrest Solutions (Pvt) Ltd — ශ්‍රී ලංka තාක්ෂණ සහකරු.",
+    "services": "සේවා",
+    "solutions": "פתרונות",
+    "company": "සමාගම",
+    "legal": "නීති",
+    "aboutUs": "අප ගැන",
+    "ourTeam": "අපේ කණ්ඩායම",
+    "careers": "රැකියා",
+    "blog": "Blog",
+    "contact": "සම්බන්ධ වන්න",
+    "privacyPolicy": "පෞද්ගලිකත්ව ප්‍රතිපත්තිය",
+    "termsOfService": "සේවා නියම",
+    "copyright": "© 2025 MERNcrest Solutions (Pvt) Ltd. සියලුම අයිතිවාසිකම් ඇවිරිණි.",
+    "newsletterTitle": "යාවත්කාලීන වන්න",
+    "newsletterPlaceholder": "ඔබේ email එක",
+    "newsletterButton": "Subscribe"
+  },
+  "common": {
+    "learnMore": "තව දැනගන්න",
+    "viewAll": "සියල්ල බලන්න",
+    "getQuote": "නොමිලේ මිල ගණන්",
+    "scheduleConsultation": "නොමිලේ උපදේශනය",
+    "sendRequirements": "ඔබේ අවශ්‍යතා යවන්න",
+    "loading": "පූරණය වෙමින්..."
+  }
+}
