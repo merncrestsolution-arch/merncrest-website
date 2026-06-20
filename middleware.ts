@@ -6,9 +6,21 @@ const defaultLocale = 'en';
 
 export function middleware(request: NextRequest) {
   try {
+    const pathname = request.nextUrl.pathname;
+
+    // Filter out API, internal paths, and static files directly in code
+    // to bypass Vercel Edge Runtime regex matcher crashes
+    if (
+      pathname.startsWith('/_next') ||
+      pathname.startsWith('/api') ||
+      pathname.startsWith('/_vercel') ||
+      pathname.includes('.')
+    ) {
+      return NextResponse.next();
+    }
+    
     const locales = ['en', 'ta', 'si'];
     const defaultLocale = 'en';
-    const pathname = request.nextUrl.pathname;
     
     const pathnameHasLocale = locales.some(
       (locale) => pathname.startsWith(`/${locale}/`) || pathname === `/${locale}`
@@ -25,7 +37,3 @@ export function middleware(request: NextRequest) {
     return new NextResponse(`Middleware Error: ${error.message}\n${error.stack}`, { status: 500 });
   }
 }
-
-export const config = {
-  matcher: ['/((?!api|_next|_vercel|.*\\..*).*)']
-};
