@@ -41,7 +41,7 @@ export function InvoicesList() {
     load();
   }, [load]);
 
-  async function pay(invoiceId: string) {
+  async function payDemo(invoiceId: string) {
     setBusyId(invoiceId);
     setError("");
     setMessage("");
@@ -53,11 +53,48 @@ export function InvoicesList() {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Payment failed");
-      setMessage(data.message || "Paid");
+      setMessage(data.message || "Paid — services activated");
       await load();
     } catch (e) {
       setError(e instanceof Error ? e.message : "Payment failed");
     } finally {
+      setBusyId(null);
+    }
+  }
+
+  async function payPayHere(invoiceId: string) {
+    setBusyId(invoiceId);
+    setError("");
+    setMessage("");
+    try {
+      const res = await fetch("/api/payments/payhere/checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ invoiceId }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Checkout failed");
+
+      if (data.mode === "demo") {
+        setMessage(data.message);
+        await payDemo(invoiceId);
+        return;
+      }
+
+      const form = document.createElement("form");
+      form.method = "POST";
+      form.action = data.checkoutUrl;
+      Object.entries(data.fields as Record<string, string>).forEach(([k, v]) => {
+        const input = document.createElement("input");
+        input.type = "hidden";
+        input.name = k;
+        input.value = v;
+        form.appendChild(input);
+      });
+      document.body.appendChild(form);
+      form.submit();
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Checkout failed");
       setBusyId(null);
     }
   }
@@ -83,30 +120,30 @@ export function InvoicesList() {
               Order {inv.order.orderNumber} · {inv.status}
             </p>
             {inv.dueAt && inv.status !== "PAID" && (
-              <p className="text-xs text-muted mt-1">
-                Due {new Date(inv.dueAt).toLocaleDateString()}
-              </p>
+              <p className="text-xs text-muted mt-1">Due {new Date(inv.dueAt).toLocaleDateString()}</p>
             )}
             {inv.paidAt && (
-              <p className="text-xs text-teal-400/80 mt-1">
-                Paid {new Date(inv.paidAt).toLocaleString()}
-              </p>
+              <p className="text-xs text-teal-400/80 mt-1">Paid {new Date(inv.paidAt).toLocaleString()}</p>
             )}
           </div>
-          <div className="flex items-center gap-3">
-            <p className="font-semibold">{formatMoney(inv.totalCents, inv.currency)}</p>
+          <div className="flex flex-wrap items-center gap-2">
+            <p className="font-semibold mr-2">{formatMoney(inv.totalCents, inv.currency)}</p>
             {inv.status !== "PAID" && inv.status !== "VOID" && (
-              <Button
-                size="sm"
-                disabled={busyId === inv.id}
-                onClick={() => pay(inv.id)}
-              >
-                {busyId === inv.id ? "Paying…" : "Pay now"}
-              </Button>
+              <>
+                <Button size="sm" disabled={busyId === inv.id} onClick={() => payPayHere(inv.id)}>
+                  {busyId === inv.id ? "…" : "PayHere"}
+                </Button>
+                <Button size="sm" variant="outline" disabled={busyId === inv.id} onClick={() => payDemo(inv.id)}>
+                  Demo pay
+                </Button>
+              </>
             )}
           </div>
         </div>
       ))}
+      <p className="text-xs text-muted">
+        Demo pay activates domains/hosting immediately. PayHere uses sandbox/live credentials when configured.
+      </p>
     </div>
   );
 }

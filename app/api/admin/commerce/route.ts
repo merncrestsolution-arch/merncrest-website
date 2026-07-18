@@ -7,7 +7,7 @@ export async function GET() {
   if (auth.error) return auth.error;
 
   try {
-    const [orders, invoices, revenuePaid, customerCount] = await Promise.all([
+    const [orders, invoices, revenuePaid, customerCount, domainCount, hostingCount] = await Promise.all([
       prisma.order.findMany({
         include: {
           user: { select: { email: true, fullName: true } },
@@ -30,6 +30,8 @@ export async function GET() {
         _sum: { amountCents: true },
       }),
       prisma.user.count({ where: { role: "CUSTOMER" } }),
+      prisma.domain.count(),
+      prisma.hostingAccount.count(),
     ]);
 
     return NextResponse.json({
@@ -40,6 +42,8 @@ export async function GET() {
         orderCount: orders.length,
         openInvoices: invoices.filter((i) => i.status !== "PAID" && i.status !== "VOID").length,
         customerCount,
+        domainCount,
+        hostingCount,
       },
     });
   } catch (error) {

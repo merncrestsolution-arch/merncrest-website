@@ -117,7 +117,7 @@ Seeded accounts (password `ChangeMe123!`):
 | **1** | Public platform rebuild + portal/admin/auth shells + cinematic UI | Done |
 | **2** | Core API + Auth (PostgreSQL, email verify, RBAC) | Done |
 | **3** | Commerce (catalog, orders, invoices, payments) | Done |
-| **4** | Domains & Hosting adapters | Planned |
+| **4** | Domains & Hosting adapters | Done (Part 03 — mock registry + auto-provision) |
 | **5** | Support (tickets, live chat, KB CMS) | Planned |
 | **6** | CRM + Sales pipeline | Planned |
 | **7** | WhatsApp AI (EN/TA/SI) | Planned |

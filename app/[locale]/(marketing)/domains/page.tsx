@@ -2,6 +2,7 @@ import { Link } from "@/i18n/routing";
 import { Reveal } from "@/components/motion/reveal";
 import { Button } from "@/components/ui/button";
 import { CatalogGrid } from "@/components/commerce/catalog-grid";
+import { DomainSearch } from "@/components/domains/domain-search";
 
 export default function DomainsPage() {
   return (
@@ -18,6 +19,11 @@ export default function DomainsPage() {
             <Button asChild variant="outline"><Link href="/knowledge-base">Domain guides</Link></Button>
           </div>
         </Reveal>
+
+        <div className="mb-12 max-w-2xl">
+          <DomainSearch />
+        </div>
+
         <ul className="flex flex-wrap gap-2 mb-10 text-sm text-muted">
           {["Registration", "Transfer", "Renewal", "DNS", "WHOIS"].map((x) => (
             <li key={x} className="border border-white/10 px-3 py-1 rounded-full font-mono text-xs">{x}</li>

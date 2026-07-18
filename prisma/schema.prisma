@@ -21,12 +21,15 @@ model User {
   createdAt        DateTime  @default(now())
   updatedAt        DateTime  @updatedAt
 
-  sessions  Session[]
-  profile   CustomerProfile?
-  cart      Cart?
-  orders    Order[]
-  invoices  Invoice[]
-  payments  Payment[]
+  sessions         Session[]
+  profile          CustomerProfile?
+  cart             Cart?
+  orders           Order[]
+  invoices         Invoice[]
+  payments         Payment[]
+  domains          Domain[]
+  hostingAccounts  HostingAccount[]
+  subscriptions    Subscription[]
 
   @@index([role])
 }
@@ -110,6 +113,8 @@ model CartItem {
   productId String
   product   Product @relation(fields: [productId], references: [id])
   quantity  Int     @default(1)
+  /// JSON: domainName, tld, planCode, etc.
+  metaJson  String?
 
   @@unique([cartId, productId])
 }
@@ -129,9 +134,12 @@ model Order {
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
-  items    OrderItem[]
-  invoice  Invoice?
-  payments Payment[]
+  items           OrderItem[]
+  invoice         Invoice?
+  payments        Payment[]
+  domains         Domain[]
+  hostingAccounts HostingAccount[]
+  subscriptions   Subscription[]
 
   @@index([userId])
   @@index([status])
@@ -150,6 +158,7 @@ model OrderItem {
   unitPriceCents Int
   totalCents    Int
   billingPeriod String  @default("ONCE")
+  metaJson      String?
 }
 
 model Invoice {
@@ -196,4 +205,99 @@ model Payment {
   @@index([userId])
   @@index([orderId])
   @@index([status])
+}
+
+model Domain {
+  id           String    @id @default(cuid())
+  userId       String
+  user         User      @relation(fields: [userId], references: [id])
+  orderId      String?
+  order        Order?    @relation(fields: [orderId], references: [id], onDelete: SetNull)
+  name         String
+  tld          String
+  /// PENDING | ACTIVE | EXPIRED | TRANSFERRING | LOCKED
+  status       String    @default("PENDING")
+  autoRenew    Boolean   @default(true)
+  locked       Boolean   @default(false)
+  registeredAt DateTime?
+  expiresAt    DateTime?
+  nameservers  String    @default("ns1.merncrest.lk,ns2.merncrest.lk")
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  dnsRecords DnsRecord[]
+
+  @@unique([name, tld])
+  @@index([userId])
+  @@index([status])
+  @@index([expiresAt])
+}
+
+model DnsRecord {
+  id        String   @id @default(cuid())
+  domainId  String
+  domain    Domain   @relation(fields: [domainId], references: [id], onDelete: Cascade)
+  /// A | AAAA | CNAME | MX | TXT | NS
+  type      String
+  host      String
+  value     String
+  ttl       Int      @default(3600)
+  priority  Int?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([domainId])
+}
+
+model HostingAccount {
+  id            String    @id @default(cuid())
+  userId        String
+  user          User      @relation(fields: [userId], references: [id])
+  orderId       String?
+  order         Order?    @relation(fields: [orderId], references: [id], onDelete: SetNull)
+  label         String
+  planCode      String
+  /// PENDING | PROVISIONING | ACTIVE | SUSPENDED | CANCELLED
+  status        String    @default("PENDING")
+  primaryDomain String?
+  diskMb        Int       @default(10240)
+  diskUsedMb    Int       @default(0)
+  bandwidthGb   Int       @default(100)
+  bandwidthUsedGb Int     @default(0)
+  cpuPercent    Int       @default(5)
+  ramMb         Int       @default(512)
+  ramUsedMb     Int       @default(128)
+  sslStatus     String    @default("PENDING")
+  backupStatus  String    @default("OK")
+  panelUrl      String?
+  activatedAt   DateTime?
+  renewsAt      DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  @@index([userId])
+  @@index([status])
+}
+
+model Subscription {
+  id            String    @id @default(cuid())
+  userId        String
+  user          User      @relation(fields: [userId], references: [id])
+  orderId       String?
+  order         Order?    @relation(fields: [orderId], references: [id], onDelete: SetNull)
+  productSlug   String
+  productName   String
+  /// ACTIVE | PAST_DUE | CANCELLED | PAUSED
+  status        String    @default("ACTIVE")
+  /// MONTHLY | YEARLY
+  billingPeriod String
+  amountCents   Int
+  currency      String    @default("LKR")
+  nextBillingAt DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  @@index([userId])
+  @@index([status])
+  @@index([nextBillingAt])
 }

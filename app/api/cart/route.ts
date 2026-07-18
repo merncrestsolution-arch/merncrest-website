@@ -34,6 +34,7 @@ export async function GET() {
 const addSchema = z.object({
   productId: z.string().min(1),
   quantity: z.number().int().min(1).max(99).optional(),
+  meta: z.record(z.string(), z.string()).optional(),
 });
 
 export async function POST(request: Request) {
@@ -56,14 +57,36 @@ export async function POST(request: Request) {
 
     const cart = await getOrCreateCart(auth.user.id);
     const qty = parsed.data.quantity ?? 1;
+    const metaJson = parsed.data.meta ? JSON.stringify(parsed.data.meta) : null;
 
-    await prisma.cartItem.upsert({
+    const existing = await prisma.cartItem.findUnique({
       where: {
         cartId_productId: { cartId: cart.id, productId: product.id },
       },
-      update: { quantity: { increment: qty } },
-      create: { cartId: cart.id, productId: product.id, quantity: qty },
     });
+
+    if (existing && !metaJson) {
+      await prisma.cartItem.update({
+        where: { id: existing.id },
+        data: { quantity: { increment: qty } },
+      });
+    } else if (existing && metaJson) {
+      // Domain/hosting with meta: add as separate line by bumping quantity on same product
+      // Store latest meta on the line
+      await prisma.cartItem.update({
+        where: { id: existing.id },
+        data: { quantity: { increment: qty }, metaJson },
+      });
+    } else {
+      await prisma.cartItem.create({
+        data: {
+          cartId: cart.id,
+          productId: product.id,
+          quantity: qty,
+          metaJson,
+        },
+      });
+    }
 
     const updated = await getOrCreateCart(auth.user.id);
     const subtotalCents = updated.items.reduce(

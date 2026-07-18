@@ -28,6 +28,8 @@ type CommercePayload = {
     orderCount: number;
     openInvoices: number;
     customerCount: number;
+    domainCount?: number;
+    hostingCount?: number;
   };
 };
 
@@ -56,6 +58,8 @@ export function AdminCommercePanel({ view }: { view: "orders" | "billing" | "das
           { label: "Recent orders", value: String(data.stats.orderCount) },
           { label: "Open invoices", value: String(data.stats.openInvoices) },
           { label: "Customers", value: String(data.stats.customerCount) },
+          { label: "Domains", value: String(data.stats.domainCount ?? 0) },
+          { label: "Hosting", value: String(data.stats.hostingCount ?? 0) },
         ].map((s) => (
           <div key={s.label} className="rounded-xl border border-white/10 bg-white/[0.02] p-5">
             <p className="text-xs font-mono uppercase tracking-wider text-muted">{s.label}</p>

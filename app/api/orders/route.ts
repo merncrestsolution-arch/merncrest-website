@@ -62,6 +62,7 @@ export async function POST() {
               unitPriceCents: i.product.priceCents,
               totalCents: i.product.priceCents * i.quantity,
               billingPeriod: i.product.billingPeriod,
+              metaJson: i.metaJson,
             })),
           },
         },
