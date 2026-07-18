@@ -8,7 +8,7 @@ services:
       POSTGRES_PASSWORD: merncrest
       POSTGRES_DB: merncrest
     ports:
-      - "5432:5432"
+      - "5434:5432"
     volumes:
       - merncrest_pg_data:/var/lib/postgresql/data
 

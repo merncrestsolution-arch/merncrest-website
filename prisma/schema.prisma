@@ -21,8 +21,12 @@ model User {
   createdAt        DateTime  @default(now())
   updatedAt        DateTime  @updatedAt
 
-  sessions Session[]
-  profile  CustomerProfile?
+  sessions  Session[]
+  profile   CustomerProfile?
+  cart      Cart?
+  orders    Order[]
+  invoices  Invoice[]
+  payments  Payment[]
 
   @@index([role])
 }
@@ -65,4 +69,131 @@ model LoginHistory {
 
   @@index([userId])
   @@index([createdAt])
+}
+
+model Product {
+  id            String   @id @default(cuid())
+  slug          String   @unique
+  name          String
+  description   String
+  category      String
+  priceCents    Int
+  currency      String   @default("LKR")
+  /// ONCE | MONTHLY | YEARLY
+  billingPeriod String   @default("ONCE")
+  active        Boolean  @default(true)
+  featured      Boolean  @default(false)
+  sortOrder     Int      @default(0)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  cartItems  CartItem[]
+  orderItems OrderItem[]
+
+  @@index([category])
+  @@index([active])
+}
+
+model Cart {
+  id        String     @id @default(cuid())
+  userId    String     @unique
+  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  items     CartItem[]
+  updatedAt DateTime   @updatedAt
+  createdAt DateTime   @default(now())
+}
+
+model CartItem {
+  id        String  @id @default(cuid())
+  cartId    String
+  cart      Cart    @relation(fields: [cartId], references: [id], onDelete: Cascade)
+  productId String
+  product   Product @relation(fields: [productId], references: [id])
+  quantity  Int     @default(1)
+
+  @@unique([cartId, productId])
+}
+
+model Order {
+  id          String      @id @default(cuid())
+  orderNumber String      @unique
+  userId      String
+  user        User        @relation(fields: [userId], references: [id])
+  /// PENDING | PAID | PROCESSING | COMPLETED | CANCELLED
+  status      String      @default("PENDING")
+  subtotalCents Int
+  taxCents      Int       @default(0)
+  totalCents    Int
+  currency      String    @default("LKR")
+  notes         String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  items    OrderItem[]
+  invoice  Invoice?
+  payments Payment[]
+
+  @@index([userId])
+  @@index([status])
+  @@index([createdAt])
+}
+
+model OrderItem {
+  id            String  @id @default(cuid())
+  orderId       String
+  order         Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId     String?
+  product       Product? @relation(fields: [productId], references: [id], onDelete: SetNull)
+  productName   String
+  productSlug   String
+  quantity      Int
+  unitPriceCents Int
+  totalCents    Int
+  billingPeriod String  @default("ONCE")
+}
+
+model Invoice {
+  id            String    @id @default(cuid())
+  invoiceNumber String    @unique
+  orderId       String    @unique
+  order         Order     @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  userId        String
+  user          User      @relation(fields: [userId], references: [id])
+  /// DRAFT | SENT | PAID | OVERDUE | VOID
+  status        String    @default("SENT")
+  subtotalCents Int
+  taxCents      Int       @default(0)
+  totalCents    Int
+  currency      String    @default("LKR")
+  dueAt         DateTime?
+  paidAt        DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  payments Payment[]
+
+  @@index([userId])
+  @@index([status])
+}
+
+model Payment {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
+  orderId     String
+  order       Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  invoiceId   String?
+  invoice     Invoice? @relation(fields: [invoiceId], references: [id], onDelete: SetNull)
+  amountCents Int
+  currency    String   @default("LKR")
+  /// MANUAL | DEMO | PAYHERE | STRIPE
+  method      String   @default("DEMO")
+  /// PENDING | SUCCEEDED | FAILED
+  status      String   @default("PENDING")
+  providerRef String?
+  createdAt   DateTime @default(now())
+
+  @@index([userId])
+  @@index([orderId])
+  @@index([status])
 }

@@ -3,6 +3,7 @@ import { Link } from "@/i18n/routing";
 import { getProductCategory, productCategories } from "@/lib/data/products";
 import { Button } from "@/components/ui/button";
 import { Reveal } from "@/components/motion/reveal";
+import { CatalogGrid } from "@/components/commerce/catalog-grid";
 
 export function generateStaticParams() {
   return productCategories.map((c) => ({ category: c.slug }));
@@ -40,12 +41,11 @@ export default async function ProductCategoryPage({
           </ul>
         </Reveal>
 
+        <CatalogGrid category={category} />
+
         <Reveal delay={0.15} className="mt-10 flex flex-wrap gap-3">
-          <Button asChild>
-            <Link href="/register">Get Started</Link>
-          </Button>
           <Button asChild variant="outline">
-            <Link href="/contact">Request Quote</Link>
+            <Link href="/contact">Request custom quote</Link>
           </Button>
         </Reveal>
       </div>

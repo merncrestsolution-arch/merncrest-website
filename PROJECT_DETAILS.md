@@ -51,18 +51,30 @@ Everything operates from **one centralized system**.
 | GET | `/api/auth/me` | Current user + profile |
 | GET | `/api/auth/verify-email?token=` | Email verification |
 
+### Commerce API (Phase 3)
+
+| Method | Path | Role |
+|--------|------|------|
+| GET | `/api/catalog` | Public product SKUs |
+| GET/POST/PATCH | `/api/cart` | Customer cart |
+| GET/POST | `/api/orders` | List orders / checkout |
+| GET | `/api/invoices` | Customer invoices |
+| POST | `/api/payments/demo` | Demo pay invoice |
+| GET | `/api/admin/commerce` | Staff orders + billing stats |
+
 Roles: `CUSTOMER`, `STAFF`, `ADMIN`, `OWNER`. Portal requires login; Admin requires staff roles.
 
 ### Local database
 
-Default local DB is **SQLite** (`prisma/dev.db`) so Phase 2 works without Docker.
+Default local DB is **PostgreSQL via Docker** on port **5434**.
 
 ```bash
+npm run db:up          # docker compose postgres
 npm run db:setup       # prisma generate + db push + seed
 npm run dev
 ```
 
-Optional Docker Postgres: set `provider = "postgresql"` in `prisma/schema.prisma`, use the Postgres `DATABASE_URL` from `.env.example`, then `npm run db:up && npm run db:setup`.
+For Vercel, set `DATABASE_URL` to a hosted Postgres (Neon/Supabase) with `sslmode=require`, then run `db:setup` against that URL once.
 
 Seeded accounts (password `ChangeMe123!`):
 - `owner@merncrest.lk` — OWNER → `/admin`
@@ -104,7 +116,7 @@ Seeded accounts (password `ChangeMe123!`):
 |-------|-------------|--------|
 | **1** | Public platform rebuild + portal/admin/auth shells + cinematic UI | Done |
 | **2** | Core API + Auth (PostgreSQL, email verify, RBAC) | Done |
-| **3** | Commerce (catalog, orders, invoices, payments) | Planned |
+| **3** | Commerce (catalog, orders, invoices, payments) | Done |
 | **4** | Domains & Hosting adapters | Planned |
 | **5** | Support (tickets, live chat, KB CMS) | Planned |
 | **6** | CRM + Sales pipeline | Planned |
@@ -221,6 +233,6 @@ Open http://localhost:3000 → redirects to `/en`.
 
 **Phase 1 done:** Public IA, cinematic UI, static marketplace/KB/pricing data, portal/admin shells.
 
-**Phase 2 done:** Prisma DB, register/login/logout/me/verify-email APIs, session cookies, RBAC guards, seeded users.
+**Phase 3 done:** Catalog SKUs, cart, checkout → order + invoice, demo payments, admin commerce views.
 
-**Out of scope until Phase 3+:** Real payments, domain registrars, WhatsApp AI, IVR, ERP logic, Redis.
+**Out of scope until Phase 4+:** Domain registrars, real PayHere/Stripe, WhatsApp AI, IVR, ERP logic, Redis.

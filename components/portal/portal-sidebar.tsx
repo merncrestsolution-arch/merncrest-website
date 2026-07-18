@@ -5,6 +5,7 @@ import { Link, usePathname, useRouter } from "@/i18n/routing";
 import {
   LayoutDashboard,
   ShoppingBag,
+  ShoppingCart,
   Globe,
   Server,
   FileText,
@@ -17,6 +18,7 @@ import { cn } from "@/lib/utils";
 
 const links = [
   { key: "overview", href: "/portal", icon: LayoutDashboard },
+  { key: "cart", href: "/portal/cart", icon: ShoppingCart },
   { key: "orders", href: "/portal/orders", icon: ShoppingBag },
   { key: "domains", href: "/portal/domains", icon: Globe },
   { key: "hosting", href: "/portal/hosting", icon: Server },

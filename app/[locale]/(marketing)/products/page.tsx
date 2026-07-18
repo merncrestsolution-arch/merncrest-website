@@ -2,6 +2,7 @@ import { Link } from "@/i18n/routing";
 import { productCategories } from "@/lib/data/products";
 import { Reveal } from "@/components/motion/reveal";
 import { ArrowRight } from "lucide-react";
+import { CatalogGrid } from "@/components/commerce/catalog-grid";
 
 export default function ProductsPage() {
   return (
@@ -15,7 +16,7 @@ export default function ProductsPage() {
           </p>
         </Reveal>
 
-        <div className="grid md:grid-cols-2 gap-10">
+        <div className="grid md:grid-cols-2 gap-10 mb-16">
           {productCategories.map((cat, i) => (
             <Reveal key={cat.slug} delay={i * 0.04}>
               <Link href={`/products/${cat.slug}`} className="group block space-y-4 border-b border-white/10 pb-10">
@@ -24,17 +25,16 @@ export default function ProductsPage() {
                   <ArrowRight className="h-5 w-5 opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all" />
                 </h2>
                 <p className="text-muted leading-relaxed">{cat.description}</p>
-                <ul className="flex flex-wrap gap-2">
-                  {cat.items.map((item) => (
-                    <li key={item} className="text-xs font-mono text-muted/80 border border-white/10 px-2 py-1 rounded">
-                      {item}
-                    </li>
-                  ))}
-                </ul>
               </Link>
             </Reveal>
           ))}
         </div>
+
+        <Reveal>
+          <h2 className="font-display text-2xl font-bold mb-2">Buy online</h2>
+          <p className="text-muted mb-6">Live catalog SKUs — add to cart after login.</p>
+        </Reveal>
+        <CatalogGrid />
       </div>
     </div>
   );
