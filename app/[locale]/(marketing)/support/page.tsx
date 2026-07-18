@@ -1,13 +1,14 @@
 import { Link } from "@/i18n/routing";
 import { Reveal } from "@/components/motion/reveal";
 import { Button } from "@/components/ui/button";
+import { CallbackForm } from "@/components/support/callback-form";
 import { MessageSquare, Ticket, BookOpen, Phone } from "lucide-react";
 
 const channels = [
-  { icon: Ticket, title: "Create a ticket", body: "Trackable support with file uploads and SLA routing.", href: "/portal/tickets", cta: "Open portal" },
-  { icon: MessageSquare, title: "Live chat", body: "AI assistant plus human agents on the website.", href: "/contact", cta: "Start chat" },
+  { icon: Ticket, title: "Create a ticket", body: "Trackable support with SLA routing across portal and chat.", href: "/portal/tickets", cta: "Open portal" },
+  { icon: MessageSquare, title: "Live chat", body: "AI assistant on every page — say “agent” to escalate to a ticket.", href: "/support", cta: "Use chat widget" },
   { icon: BookOpen, title: "Knowledge base", body: "Tutorials, FAQs, and troubleshooting guides.", href: "/knowledge-base", cta: "Browse articles" },
-  { icon: Phone, title: "WhatsApp & phone", body: "Quick contact and IVR-ready customer care.", href: "/contact", cta: "Contact care" },
+  { icon: Phone, title: "WhatsApp & phone", body: "WhatsApp AI stub + IVR callback queue into CRM.", href: "/contact", cta: "Contact care" },
 ];
 
 export default function SupportCenterPage() {
@@ -18,10 +19,10 @@ export default function SupportCenterPage() {
           <p className="font-mono text-xs uppercase tracking-[0.2em] text-accent mb-3">Support Center</p>
           <h1 className="font-display text-4xl sm:text-5xl font-bold">How can we help?</h1>
           <p className="mt-4 text-lg text-muted">
-            Tickets, live chat, WhatsApp, knowledge base, and emergency escalation — one support system.
+            Tickets, live chat, WhatsApp, knowledge base, and IVR callbacks — one support ecosystem.
           </p>
         </Reveal>
-        <div className="grid sm:grid-cols-2 gap-10 mb-12">
+        <div className="grid sm:grid-cols-2 gap-10 mb-14">
           {channels.map((c, i) => {
             const Icon = c.icon;
             return (
@@ -38,7 +39,10 @@ export default function SupportCenterPage() {
             );
           })}
         </div>
-        <div className="flex flex-wrap gap-3">
+        <Reveal>
+          <CallbackForm />
+        </Reveal>
+        <div className="flex flex-wrap gap-3 mt-10">
           <Button asChild><Link href="/login">Customer login</Link></Button>
           <Button asChild variant="outline"><Link href="/contact">Emergency support</Link></Button>
         </div>

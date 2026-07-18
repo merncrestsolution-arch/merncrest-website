@@ -281,7 +281,103 @@ async function main() {
     });
   }
 
-  console.log("Seeded users +", catalog.length, "products +", coupons.length, "coupons");
+  const demo = await prisma.user.findUnique({ where: { email: "demo@merncrest.lk" } });
+  const owner = await prisma.user.findUnique({ where: { email: "owner@merncrest.lk" } });
+
+  if (demo && owner) {
+    const existingTicket = await prisma.ticket.findFirst({
+      where: { userId: demo.id, subject: "Demo: Hosting activation question" },
+    });
+    if (!existingTicket) {
+      await prisma.ticket.create({
+        data: {
+          ticketNumber: "TKT-SEED-001",
+          userId: demo.id,
+          subject: "Demo: Hosting activation question",
+          department: "HOSTING",
+          priority: "MEDIUM",
+          channel: "PORTAL",
+          status: "OPEN",
+          messages: {
+            create: [
+              {
+                authorId: demo.id,
+                authorName: demo.fullName,
+                authorRole: "CUSTOMER",
+                body: "How long after Demo pay until my hosting shows as ACTIVE?",
+              },
+              {
+                authorId: owner.id,
+                authorName: owner.fullName,
+                authorRole: "STAFF",
+                body: "Usually immediate after payment confirmation. Check Portal → Hosting.",
+              },
+            ],
+          },
+        },
+      });
+    }
+
+    await prisma.notification.deleteMany({
+      where: { userId: demo.id, title: { in: ["Welcome to MernCrest Portal", "Support tip"] } },
+    });
+    await prisma.notification.createMany({
+      data: [
+        {
+          userId: demo.id,
+          title: "Welcome to MernCrest Portal",
+          body: "Manage domains, hosting, billing, and support from one place.",
+          category: "SYSTEM",
+          href: "/portal",
+        },
+        {
+          userId: demo.id,
+          title: "Support tip",
+          body: "Use live chat or open a ticket — both sync to our CRM.",
+          category: "SUPPORT",
+          href: "/portal/tickets",
+        },
+      ],
+    });
+
+    const leadCount = await prisma.crmLead.count();
+    if (leadCount === 0) {
+      await prisma.crmLead.create({
+        data: {
+          fullName: "Nimal Perera",
+          email: "nimal@example.lk",
+          phone: "+94771234567",
+          company: "Perera Traders",
+          interest: "Business Hosting + .lk domain",
+          source: "WEBSITE",
+          stage: "QUALIFIED",
+          valueCents: 1500000,
+          ownerId: owner.id,
+          activities: {
+            create: [
+              { userId: owner.id, type: "NOTE", body: "Interested in annual billing." },
+              { userId: owner.id, type: "WHATSAPP", body: "Sent package comparison." },
+            ],
+          },
+        },
+      });
+      await prisma.crmLead.create({
+        data: {
+          fullName: "Ayesha Fernando",
+          email: "ayesha@startup.lk",
+          phone: "+94779876543",
+          company: "Startup LK",
+          interest: "AWS Managed Hosting",
+          source: "LIVE_CHAT",
+          stage: "NEW",
+          valueCents: 15000000,
+          ownerId: owner.id,
+        },
+      });
+    }
+  }
+
+  console.log("Seeded users +", catalog.length, "products +", coupons.length, "coupons + support/CRM samples");
   console.log("  OWNER: owner@merncrest.lk / ChangeMe123!");
   console.log("  CUSTOMER: demo@merncrest.lk / ChangeMe123!");
   console.log("  Coupons: WELCOME10 (10%), SAVE20 (Rs. 2,000 off)");

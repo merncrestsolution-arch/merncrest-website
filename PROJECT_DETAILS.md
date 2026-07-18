@@ -62,6 +62,14 @@ Everything operates from **one centralized system**.
 | POST | `/api/payments/demo` | Demo pay invoice |
 | GET | `/api/admin/commerce` | Staff orders + billing stats |
 
+| GET/POST/PATCH | `/api/tickets` | Portal + staff tickets |
+| GET/POST | `/api/chat` | Live AI chat sessions |
+| GET/POST/PUT | `/api/whatsapp` | WhatsApp webhook stub + inbox |
+| GET/POST/PATCH | `/api/callbacks` | IVR callback queue |
+| GET/PATCH | `/api/notifications` | In-portal notifications |
+| GET/POST/PATCH | `/api/crm` | Staff CRM leads & pipeline |
+| GET | `/api/admin/support` | Support ops dashboard |
+
 Roles: `CUSTOMER`, `STAFF`, `ADMIN`, `OWNER`. Portal requires login; Admin requires staff roles.
 
 ### Local database
@@ -118,12 +126,12 @@ Seeded accounts (password `ChangeMe123!`):
 | **2** | Core API + Auth (PostgreSQL, email verify, RBAC) | Done |
 | **3** | Commerce (catalog, orders, invoices, payments) | Done |
 | **4** | Domains & Hosting adapters | Done (Part 03 — mock registry + auto-provision) |
-| **5** | Support (tickets, live chat, KB CMS) | Planned |
-| **6** | CRM + Sales pipeline | Planned |
-| **7** | WhatsApp AI (EN/TA/SI) | Planned |
+| **5** | Support (tickets, live chat, KB CMS) | Done (Part 04) |
+| **6** | CRM + Sales pipeline | Done (Part 04) |
+| **7** | WhatsApp AI (EN/TA/SI) | Done (stub + AI replies; live Meta API later) |
 | **8** | Internal ERP modules | Planned |
 | **9** | Projects + server monitoring + status page | Planned |
-| **10** | Landline IVR + callbacks | Planned |
+| **10** | Landline IVR + callbacks | Done (callback queue; telephony later) |
 | **11** | AWS production hardening | Planned |
 
 ---
@@ -237,4 +245,6 @@ Open http://localhost:3000 → redirects to `/en`.
 
 **Phase 3 / Part 03 done:** Catalog SKUs (domains, hosting tiers, SSL, email), cart with registrant + coupons, checkout → order + invoice, demo + PayHere checkout stubs, domain search (SL + intl TLDs), DNS/lock/auto-renew, hosting dashboard metrics, auto-provisioning after payment, invoice HTML/PDF print, refund requests, activation emails (SMTP when configured).
 
-**Out of scope until Phase 4+:** Live registrar/cPanel APIs, live PayHere merchant keys, WhatsApp AI, IVR, full CRM/ticketing (Part 04), ERP logic, Redis.
+**Part 04 done:** Tickets + replies, live AI chat (KB-aware, handoff → ticket), WhatsApp webhook stub with AI replies, IVR callback requests → CRM leads, in-portal notifications, Admin CRM pipeline + Support inbox (tickets/callbacks/WhatsApp).
+
+**Out of scope until later:** Live registrar/cPanel APIs, live PayHere merchant keys, Meta WhatsApp Cloud API tokens, real telephony/IVR PBX, full KB CMS editor, ERP logic, Redis.
