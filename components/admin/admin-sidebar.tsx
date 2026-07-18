@@ -12,6 +12,7 @@ import {
   BarChart3,
   Settings,
   LogOut,
+  Building2,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -22,6 +23,7 @@ const links = [
   { key: "billing", href: "/admin/billing", icon: CreditCard },
   { key: "crm", href: "/admin/crm", icon: Contact },
   { key: "support", href: "/admin/support", icon: LifeBuoy },
+  { key: "erp", href: "/admin/erp", icon: Building2 },
   { key: "reports", href: "/admin/reports", icon: BarChart3 },
   { key: "settings", href: "/admin/settings", icon: Settings },
 ] as const;

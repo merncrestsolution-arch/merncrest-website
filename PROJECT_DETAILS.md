@@ -133,8 +133,8 @@ Seeded accounts (password `ChangeMe123!`):
 | **5** | Support (tickets, live chat, KB CMS) | Done (Part 04) |
 | **6** | CRM + Sales pipeline | Done (Part 04) |
 | **7** | WhatsApp AI (EN/TA/SI) | Done (stub + AI replies; live Meta API later) |
-| **8** | Internal ERP modules | Planned |
-| **9** | Projects + server monitoring + status page | Planned |
+| **8** | Internal ERP modules | Done (Part 05) |
+| **9** | Projects + server monitoring + status page | Partial (ERP projects done; monitoring later) |
 | **10** | Landline IVR + callbacks | Done (callback queue; telephony later) |
 | **11** | AWS production hardening | Planned |
 
@@ -191,6 +191,7 @@ Portal: overview widgets, My Services, cart, orders, domains, hosting, billing, 
 | `/admin/billing` | Billing |
 | `/admin/crm` | CRM |
 | `/admin/support` | Support |
+| `/admin/erp` | ERP hub (HRM, Finance, Projects, EAM, SCM, FSM, Permissions) |
 | `/admin/reports` | Reports |
 | `/admin/settings` | Settings |
 
@@ -251,4 +252,6 @@ Open http://localhost:3000 → redirects to `/en`.
 
 **Part 04 done:** Tickets + replies + CSAT, live AI chat (KB-aware, handoff → ticket), WhatsApp business menu (domain search, orders, invoices, tickets, human handover, EN/TA/SI detection), IVR simulator (language/department → call log + callback + CRM), email→ticket stub, quotations (accept → order), Customer ID 360 profiles, Admin CRM pipeline (NEW→WON), Support inbox (tickets/callbacks/WhatsApp/IVR).
 
-**Out of scope until later:** Live registrar/cPanel APIs, live PayHere merchant keys, Meta WhatsApp Cloud API tokens, real telephony/IVR PBX audio, full KB CMS editor, ERP modules (Part 05), Redis.
+**Part 05 done:** Internal ERP — departments/employees/leave (HRM), finance ledger, projects/tasks, assets (EAM), inventory (SCM), field work orders (FSM), staff permission grants, ERP analytics on Reports. Roles: OWNER/ADMIN full access; STAFF defaults + optional `StaffPermission` grants.
+
+**Out of scope until later:** Deep manufacturing/IoT telemetry, full multi-company consolidation, live registrar/cPanel, Meta WhatsApp tokens, real IVR PBX audio, Redis.

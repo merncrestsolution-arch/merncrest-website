@@ -429,8 +429,178 @@ async function main() {
     }
   }
 
-  console.log("Seeded users +", catalog.length, "products +", coupons.length, "coupons + support/CRM samples");
+  // —— Part 05 ERP seed ——
+  await prisma.user.upsert({
+    where: { email: "staff@merncrest.lk" },
+    update: {},
+    create: {
+      email: "staff@merncrest.lk",
+      fullName: "Support Staff",
+      company: "MernCrest Solutions",
+      passwordHash,
+      role: "STAFF",
+      emailVerifiedAt: new Date(),
+    },
+  });
+  const staffUser = await prisma.user.findUnique({ where: { email: "staff@merncrest.lk" } });
+
+  const depts = [
+    { code: "SALES", name: "Sales", description: "Sales & account management" },
+    { code: "TECH", name: "Technical", description: "Hosting & infrastructure" },
+    { code: "FIN", name: "Finance", description: "Billing & finance" },
+    { code: "HR", name: "Human Resources", description: "People operations" },
+  ];
+  for (const d of depts) {
+    await prisma.department.upsert({
+      where: { code: d.code },
+      update: { name: d.name, description: d.description },
+      create: d,
+    });
+  }
+
+  if (staffUser && owner) {
+    const tech = await prisma.department.findUnique({ where: { code: "TECH" } });
+    const empCount = await prisma.employee.count();
+    if (empCount === 0 && tech) {
+      await prisma.employee.create({
+        data: {
+          employeeCode: "EMP-SEED-001",
+          userId: staffUser.id,
+          departmentId: tech.id,
+          fullName: staffUser.fullName,
+          email: staffUser.email,
+          jobTitle: "Support Engineer",
+          employmentType: "FULL_TIME",
+          salaryCents: 12000000,
+          status: "ACTIVE",
+        },
+      });
+      await prisma.employee.create({
+        data: {
+          employeeCode: "EMP-SEED-002",
+          departmentId: tech.id,
+          fullName: "Kasun Silva",
+          email: "kasun@merncrest.lk",
+          jobTitle: "Systems Admin",
+          salaryCents: 15000000,
+          status: "ACTIVE",
+        },
+      });
+    }
+
+    await prisma.staffPermission.upsert({
+      where: {
+        userId_permission: { userId: staffUser.id, permission: "erp.finance.view" },
+      },
+      update: {},
+      create: { userId: staffUser.id, permission: "erp.finance.view" },
+    });
+
+    if ((await prisma.erpProject.count()) === 0) {
+      await prisma.erpProject.create({
+        data: {
+          projectCode: "PRJ-SEED-001",
+          name: "Customer Portal Phase 2",
+          description: "Internal delivery of portal enhancements",
+          departmentId: tech?.id,
+          status: "ACTIVE",
+          budgetCents: 250000000,
+          members: { create: { userId: owner.id, role: "LEAD" } },
+          tasks: {
+            create: [
+              { title: "ERP HR module", status: "DONE", assigneeId: owner.id },
+              { title: "Finance ledger UI", status: "IN_PROGRESS", assigneeId: staffUser.id },
+              { title: "FSM work orders", status: "TODO" },
+            ],
+          },
+        },
+      });
+    }
+
+    if ((await prisma.financeEntry.count()) === 0) {
+      await prisma.financeEntry.createMany({
+        data: [
+          {
+            entryNumber: "FIN-SEED-001",
+            type: "INCOME",
+            category: "Hosting",
+            description: "Monthly hosting collections",
+            amountCents: 85000000,
+            createdById: owner.id,
+          },
+          {
+            entryNumber: "FIN-SEED-002",
+            type: "EXPENSE",
+            category: "Infrastructure",
+            description: "AWS / datacenter costs",
+            amountCents: 22000000,
+            createdById: owner.id,
+          },
+          {
+            entryNumber: "FIN-SEED-003",
+            type: "EXPENSE",
+            category: "Payroll",
+            description: "Staff salaries (sample)",
+            amountCents: 45000000,
+            createdById: owner.id,
+          },
+        ],
+      });
+    }
+
+    if ((await prisma.asset.count()) === 0) {
+      await prisma.asset.createMany({
+        data: [
+          {
+            assetCode: "AST-SEED-001",
+            name: "Dell R740 Server",
+            category: "IT Hardware",
+            status: "ASSIGNED",
+            location: "Colombo DC",
+            purchaseCents: 85000000,
+            assignedTo: "Systems",
+          },
+          {
+            assetCode: "AST-SEED-002",
+            name: "MacBook Pro 14",
+            category: "IT Hardware",
+            status: "ASSIGNED",
+            location: "HQ",
+            purchaseCents: 45000000,
+            assignedTo: staffUser.fullName,
+          },
+        ],
+      });
+    }
+
+    if ((await prisma.inventoryItem.count()) === 0) {
+      await prisma.inventoryItem.createMany({
+        data: [
+          { sku: "CBL-CAT6", name: "Cat6 Cable (box)", category: "Networking", quantity: 12, reorderLevel: 5, unitCostCents: 150000 },
+          { sku: "SSD-1TB", name: "1TB NVMe SSD", category: "Storage", quantity: 3, reorderLevel: 4, unitCostCents: 3500000 },
+          { sku: "LIC-CPANEL", name: "cPanel license credit", category: "Software", quantity: 20, reorderLevel: 5, unitCostCents: 250000 },
+        ],
+      });
+    }
+
+    if ((await prisma.workOrder.count()) === 0) {
+      await prisma.workOrder.create({
+        data: {
+          workNumber: "WO-SEED-001",
+          title: "On-site router replacement — Demo Co",
+          description: "Replace CPE and verify failover",
+          status: "OPEN",
+          priority: "HIGH",
+          assetCode: "AST-SEED-001",
+          assigneeId: staffUser.id,
+        },
+      });
+    }
+  }
+
+  console.log("Seeded users +", catalog.length, "products +", coupons.length, "coupons + CRM/ERP samples");
   console.log("  OWNER: owner@merncrest.lk / ChangeMe123!");
+  console.log("  STAFF: staff@merncrest.lk / ChangeMe123!");
   console.log("  CUSTOMER: demo@merncrest.lk / ChangeMe123!");
   console.log("  Coupons: WELCOME10 (10%), SAVE20 (Rs. 2,000 off)");
 }
