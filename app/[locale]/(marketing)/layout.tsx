@@ -1,6 +1,7 @@
 import { Navbar } from "@/components/layout/navbar";
 import { Footer } from "@/components/layout/footer";
 import { WhatsAppButton } from "@/components/layout/whatsapp-button";
+import { AiChatWidget } from "@/components/layout/ai-chat-widget";
 import { PageTransition } from "@/components/layout/page-transition";
 
 export default function MarketingLayout({
@@ -16,6 +17,7 @@ export default function MarketingLayout({
       </main>
       <Footer />
       <WhatsAppButton />
+      <AiChatWidget />
     </>
   );
 }

@@ -1,12 +1,13 @@
 import type { Metadata } from "next";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { HeroSection } from "@/components/sections/hero-section";
+import { HighlightsSection } from "@/components/sections/highlights-section";
+import { FeaturedServicesSection } from "@/components/sections/featured-services-section";
+import { WhyChooseSection } from "@/components/sections/why-choose-section";
 import { PlatformSection } from "@/components/sections/platform-section";
-import { ProductsSection } from "@/components/sections/products-section";
-import { AboutSection } from "@/components/sections/about-section";
 import { SolutionsSection } from "@/components/sections/solutions-section";
 import { PortfolioSection } from "@/components/sections/portfolio-section";
-import { StatsSection } from "@/components/sections/stats-section";
+import { TestimonialsSection } from "@/components/sections/testimonials-section";
 import { BlogSection } from "@/components/sections/blog-section";
 import { CTASection } from "@/components/sections/cta-section";
 
@@ -47,12 +48,13 @@ export default async function HomePage({
   return (
     <>
       <HeroSection />
+      <HighlightsSection />
+      <FeaturedServicesSection />
+      <WhyChooseSection />
       <PlatformSection />
-      <ProductsSection />
-      <AboutSection />
       <SolutionsSection />
       <PortfolioSection />
-      <StatsSection />
+      <TestimonialsSection />
       <BlogSection />
       <CTASection />
     </>

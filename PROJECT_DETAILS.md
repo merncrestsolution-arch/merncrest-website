@@ -128,33 +128,33 @@ Seeded accounts (password `ChangeMe123!`):
 
 ---
 
-## 5. Public Website IA (`/{locale}/...`)
+## 5. Public Website IA (`/{locale}/...`) — Part 02 aligned
 
 | Route | Role |
 |-------|------|
-| `/` | Cinematic enterprise homepage |
+| `/` | Home — hero, highlights, featured services, why-us, platform, solutions, portfolio, testimonials, blog, CTA |
 | `/about` | Company story |
 | `/services` | Service catalog |
-| `/services/[slug]` | Service detail |
+| `/domains` | Domain landing + catalog |
+| `/hosting` | Hosting landing + catalog |
+| `/cloud` | Cloud solutions landing |
+| `/solutions` | Enterprise solutions |
 | `/products` | Marketplace hub |
-| `/products/[category]` | Category detail |
-| `/pricing` | Pricing tiers |
-| `/industries` | Industry solutions |
-| `/solutions` | Enterprise solutions catalog |
-| `/solutions/[slug]` | Solution detail |
+| `/industries` | Industries |
+| `/pricing` | Pricing |
 | `/portfolio` | Case studies |
-| `/portfolio/[id]` | Case study detail |
-| `/blog` | Blog index |
-| `/blog/[slug]` | Post detail |
-| `/knowledge-base` | Tutorials, FAQs, docs |
-| `/knowledge-base/[slug]` | Article |
+| `/blog` | Blog |
+| `/knowledge-base` | KB |
+| `/downloads` | Brochures & resources |
+| `/partners` | Technology partners |
+| `/support` | Support Center |
 | `/careers` | Jobs |
 | `/contact` | Contact |
-| `/login` | Customer login shell |
-| `/register` | Customer registration shell |
-| `/team` | Team |
-| `/technologies` | Tech stack |
-| Legal | `/privacy`, `/terms`, `/refund`, `/hosting-policy`, `/domain-policy`, `/cookie-policy`, `/aup`, `/sla`, `/service-agreement` |
+| `/login` `/register` `/forgot-password` | Auth |
+| Legal | privacy, terms, refund, policies, SLA… |
+
+Portal: overview widgets, My Services, cart, orders, domains, hosting, billing, support, notifications, settings.
+
 
 ### Customer Portal (`/(portal)/`)
 

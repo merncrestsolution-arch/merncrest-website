@@ -7,12 +7,14 @@ import type { SessionUser } from "@/lib/auth-types";
 
 const mobileLinks = [
   { href: "/portal", key: "overview" },
+  { href: "/portal/services", key: "services" },
   { href: "/portal/cart", key: "cart" },
   { href: "/portal/orders", key: "orders" },
   { href: "/portal/domains", key: "domains" },
   { href: "/portal/hosting", key: "hosting" },
   { href: "/portal/invoices", key: "invoices" },
   { href: "/portal/tickets", key: "tickets" },
+  { href: "/portal/notifications", key: "notifications" },
   { href: "/portal/settings", key: "settings" },
 ] as const;
 

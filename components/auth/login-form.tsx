@@ -59,37 +59,23 @@ export function LoginForm() {
         }}
       >
         <div>
-          <label className="text-sm font-medium mb-1.5 block" htmlFor="email">
-            {t("email")}
-          </label>
-          <input
-            id="email"
-            name="email"
-            type="email"
-            required
-            autoComplete="email"
-            className="w-full h-11 rounded-lg border border-white/10 bg-white/5 px-3 text-sm outline-none focus:ring-2 focus:ring-accent/50"
-            placeholder="you@company.com"
-          />
+          <label className="text-sm font-medium mb-1.5 block" htmlFor="email">{t("email")}</label>
+          <input id="email" name="email" type="email" required autoComplete="email"
+            className="w-full h-11 rounded-lg border border-white/10 bg-white/5 px-3 text-sm outline-none focus:ring-2 focus:ring-accent/50" />
         </div>
         <div>
-          <label className="text-sm font-medium mb-1.5 block" htmlFor="password">
-            {t("password")}
-          </label>
-          <input
-            id="password"
-            name="password"
-            type="password"
-            required
-            autoComplete="current-password"
-            className="w-full h-11 rounded-lg border border-white/10 bg-white/5 px-3 text-sm outline-none focus:ring-2 focus:ring-accent/50"
-          />
+          <label className="text-sm font-medium mb-1.5 block" htmlFor="password">{t("password")}</label>
+          <input id="password" name="password" type="password" required autoComplete="current-password"
+            className="w-full h-11 rounded-lg border border-white/10 bg-white/5 px-3 text-sm outline-none focus:ring-2 focus:ring-accent/50" />
         </div>
-        {error && (
-          <p className="text-sm text-red-400" role="alert">
-            {error}
-          </p>
-        )}
+        <div className="flex items-center justify-between text-sm">
+          <label className="flex items-center gap-2 text-muted">
+            <input type="checkbox" name="remember" className="rounded border-white/20" />
+            {t("rememberMe")}
+          </label>
+          <Link href="/forgot-password" className="text-accent hover:underline">{t("forgotPassword")}</Link>
+        </div>
+        {error && <p className="text-sm text-red-400" role="alert">{error}</p>}
         <Button type="submit" className="w-full" size="lg" disabled={loading}>
           {loading ? "Signing in..." : t("loginCta")}
         </Button>
@@ -97,9 +83,7 @@ export function LoginForm() {
 
       <p className="text-sm text-muted">
         {t("noAccount")}{" "}
-        <Link href="/register" className="text-accent hover:underline">
-          {t("registerCta")}
-        </Link>
+        <Link href="/register" className="text-accent hover:underline">{t("registerCta")}</Link>
       </p>
     </motion.div>
   );

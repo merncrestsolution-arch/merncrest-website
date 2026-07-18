@@ -24,6 +24,12 @@ export async function POST(request: Request) {
 
     const { fullName, email, company, password } = parsed.data;
     const normalizedEmail = email.toLowerCase().trim();
+    const bodyExtra = body as {
+      mobile?: string;
+      country?: string;
+      address?: string;
+      nic?: string;
+    };
 
     const existing = await prisma.user.findUnique({
       where: { email: normalizedEmail },
@@ -47,7 +53,14 @@ export async function POST(request: Request) {
         passwordHash,
         emailVerifyToken,
         role: "CUSTOMER",
-        profile: { create: {} },
+        profile: {
+          create: {
+            phone: bodyExtra.mobile?.trim() || null,
+            country: bodyExtra.country?.trim() || "Sri Lanka",
+            address: bodyExtra.address?.trim() || null,
+            notes: bodyExtra.nic?.trim() ? `NIC/BR: ${bodyExtra.nic.trim()}` : null,
+          },
+        },
       },
     });
 
