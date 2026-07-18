@@ -233,6 +233,8 @@ Open http://localhost:3000 → redirects to `/en`.
 
 **Phase 1 done:** Public IA, cinematic UI, static marketplace/KB/pricing data, portal/admin shells.
 
-**Phase 3 done:** Catalog SKUs, cart, checkout → order + invoice, demo payments, admin commerce views.
+**Phase 2 done:** Auth (register/login/session), RBAC portal/admin guards, Prisma + PostgreSQL.
 
-**Out of scope until Phase 4+:** Domain registrars, real PayHere/Stripe, WhatsApp AI, IVR, ERP logic, Redis.
+**Phase 3 / Part 03 done:** Catalog SKUs (domains, hosting tiers, SSL, email), cart with registrant + coupons, checkout → order + invoice, demo + PayHere checkout stubs, domain search (SL + intl TLDs), DNS/lock/auto-renew, hosting dashboard metrics, auto-provisioning after payment, invoice HTML/PDF print, refund requests, activation emails (SMTP when configured).
+
+**Out of scope until Phase 4+:** Live registrar/cPanel APIs, live PayHere merchant keys, WhatsApp AI, IVR, full CRM/ticketing (Part 04), ERP logic, Redis.

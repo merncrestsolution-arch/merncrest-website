@@ -52,7 +52,7 @@ export function AdminCommercePanel({ view }: { view: "orders" | "billing" | "das
 
   if (view === "dashboard") {
     return (
-      <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {[
           { label: "Revenue", value: formatMoney(data.stats.revenueCents) },
           { label: "Recent orders", value: String(data.stats.orderCount) },

@@ -59,25 +59,8 @@ export async function POST(request: Request) {
     const qty = parsed.data.quantity ?? 1;
     const metaJson = parsed.data.meta ? JSON.stringify(parsed.data.meta) : null;
 
-    const existing = await prisma.cartItem.findUnique({
-      where: {
-        cartId_productId: { cartId: cart.id, productId: product.id },
-      },
-    });
-
-    if (existing && !metaJson) {
-      await prisma.cartItem.update({
-        where: { id: existing.id },
-        data: { quantity: { increment: qty } },
-      });
-    } else if (existing && metaJson) {
-      // Domain/hosting with meta: add as separate line by bumping quantity on same product
-      // Store latest meta on the line
-      await prisma.cartItem.update({
-        where: { id: existing.id },
-        data: { quantity: { increment: qty }, metaJson },
-      });
-    } else {
+    if (metaJson) {
+      // Domains / configured services: one cart line per meta snapshot
       await prisma.cartItem.create({
         data: {
           cartId: cart.id,
@@ -86,6 +69,22 @@ export async function POST(request: Request) {
           metaJson,
         },
       });
+    } else {
+      const existing = cart.items.find((i) => i.productId === product.id && !i.metaJson);
+      if (existing) {
+        await prisma.cartItem.update({
+          where: { id: existing.id },
+          data: { quantity: { increment: qty } },
+        });
+      } else {
+        await prisma.cartItem.create({
+          data: {
+            cartId: cart.id,
+            productId: product.id,
+            quantity: qty,
+          },
+        });
+      }
     }
 
     const updated = await getOrCreateCart(auth.user.id);

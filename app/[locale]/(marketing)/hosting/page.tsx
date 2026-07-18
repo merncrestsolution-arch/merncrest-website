@@ -19,7 +19,7 @@ export default function HostingPage() {
           </div>
         </Reveal>
         <ul className="flex flex-wrap gap-2 mb-10 text-sm text-muted">
-          {["Shared", "Business", "cPanel", "VPS", "Dedicated", "AWS"].map((x) => (
+          {["Shared", "Business", "WordPress", "cPanel", "Cloud", "VPS", "Dedicated", "AWS"].map((x) => (
             <li key={x} className="border border-white/10 px-3 py-1 rounded-full font-mono text-xs">{x}</li>
           ))}
         </ul>

@@ -138,6 +138,11 @@ export function InvoicesList() {
                 </Button>
               </>
             )}
+            <Button asChild size="sm" variant="ghost">
+              <a href={`/api/invoices/${inv.id}/pdf`} target="_blank" rel="noopener noreferrer">
+                PDF
+              </a>
+            </Button>
           </div>
         </div>
       ))}

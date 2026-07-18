@@ -30,6 +30,7 @@ model User {
   domains          Domain[]
   hostingAccounts  HostingAccount[]
   subscriptions    Subscription[]
+  refundRequests   RefundRequest[]
 
   @@index([role])
 }
@@ -116,7 +117,7 @@ model CartItem {
   /// JSON: domainName, tld, planCode, etc.
   metaJson  String?
 
-  @@unique([cartId, productId])
+  @@index([cartId])
 }
 
 model Order {
@@ -128,8 +129,12 @@ model Order {
   status      String      @default("PENDING")
   subtotalCents Int
   taxCents      Int       @default(0)
+  discountCents Int      @default(0)
   totalCents    Int
   currency      String    @default("LKR")
+  couponCode    String?
+  /// JSON registrant / billing contact snapshot
+  registrantJson String?
   notes         String?
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
@@ -140,6 +145,7 @@ model Order {
   domains         Domain[]
   hostingAccounts HostingAccount[]
   subscriptions   Subscription[]
+  refundRequests  RefundRequest[]
 
   @@index([userId])
   @@index([status])
@@ -300,4 +306,36 @@ model Subscription {
   @@index([userId])
   @@index([status])
   @@index([nextBillingAt])
+}
+
+model Coupon {
+  id              String    @id @default(cuid())
+  code            String    @unique
+  /// PERCENT | FIXED
+  type            String
+  value           Int
+  maxUses         Int?
+  usedCount       Int       @default(0)
+  minOrderCents   Int       @default(0)
+  active          Boolean   @default(true)
+  expiresAt       DateTime?
+  createdAt       DateTime  @default(now())
+}
+
+model RefundRequest {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
+  orderId     String
+  order       Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  amountCents Int
+  reason      String
+  /// PENDING | APPROVED | REJECTED | PAID
+  status      String   @default("PENDING")
+  adminNote   String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([userId])
+  @@index([status])
 }

@@ -15,6 +15,7 @@ import {
   LogOut,
   Layers,
   Bell,
+  RotateCcw,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -26,6 +27,7 @@ const links = [
   { key: "domains", href: "/portal/domains", icon: Globe },
   { key: "hosting", href: "/portal/hosting", icon: Server },
   { key: "invoices", href: "/portal/invoices", icon: FileText },
+  { key: "refunds", href: "/portal/refunds", icon: RotateCcw },
   { key: "tickets", href: "/portal/tickets", icon: LifeBuoy },
   { key: "notifications", href: "/portal/notifications", icon: Bell },
   { key: "downloads", href: "/portal/downloads", icon: Download },

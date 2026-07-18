@@ -1,6 +1,7 @@
 import { createHash } from "crypto";
 import type { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/db";
+import { sendProvisioningEmail } from "@/lib/mail";
 
 type Tx = Prisma.TransactionClient;
 
@@ -134,6 +135,23 @@ export async function activateOrderServices(orderId: string, tx?: Tx) {
     where: { id: order.id },
     data: { status: "COMPLETED" },
   });
+
+  const summary: string[] = [];
+  const domains = await db.domain.findMany({ where: { orderId: order.id } });
+  const hosting = await db.hostingAccount.findMany({ where: { orderId: order.id } });
+  domains.forEach((d) => summary.push(`Domain active: ${d.name}.${d.tld}`));
+  hosting.forEach((h) => summary.push(`Hosting active: ${h.label} (${h.status})`));
+  if (summary.length === 0) summary.push("Order completed — check your portal for services.");
+
+  const user = await db.user.findUnique({ where: { id: order.userId } });
+  if (user?.email) {
+    // Fire-and-forget outside strict tx concerns when called with prisma root
+    void sendProvisioningEmail({
+      to: user.email,
+      orderNumber: order.orderNumber,
+      summary,
+    });
+  }
 }
 
 export async function markInvoicePaid(opts: {
