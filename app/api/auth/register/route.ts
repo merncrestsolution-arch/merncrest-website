@@ -44,6 +44,7 @@ export async function POST(request: Request) {
 
     const emailVerifyToken = generateToken();
     const passwordHash = await hashPassword(password);
+    const customerCode = `MC-${Date.now().toString(36).toUpperCase().slice(-6)}`;
 
     const user = await prisma.user.create({
       data: {
@@ -55,10 +56,14 @@ export async function POST(request: Request) {
         role: "CUSTOMER",
         profile: {
           create: {
+            customerCode,
             phone: bodyExtra.mobile?.trim() || null,
+            whatsapp: bodyExtra.mobile?.trim() || null,
             country: bodyExtra.country?.trim() || "Sri Lanka",
             address: bodyExtra.address?.trim() || null,
-            notes: bodyExtra.nic?.trim() ? `NIC/BR: ${bodyExtra.nic.trim()}` : null,
+            nicPassport: bodyExtra.nic?.trim() || null,
+            preferredLanguage: "en",
+            timezone: "Asia/Colombo",
           },
         },
       },

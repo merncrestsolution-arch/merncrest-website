@@ -1,8 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { requireStaff } from "@/lib/commerce";
-import { aiReply } from "@/lib/support/ai-replies";
-import { nextNumber } from "@/lib/commerce";
+import { handleWhatsAppMessage } from "@/lib/support/whatsapp-ai";
 import { z } from "zod";
 
 /** Inbound WhatsApp webhook stub (Meta Cloud API shape simplified) */
@@ -35,46 +34,24 @@ export async function POST(request: Request) {
       },
     });
 
-    const reply = aiReply(String(text), body.locale || "en");
+    const handled = await handleWhatsAppMessage(String(phone), String(text), body.locale);
     const outbound = await prisma.whatsAppMessage.create({
       data: {
         direction: "OUT",
         phone: String(phone),
-        body: reply,
+        body: handled.reply,
         status: "AI_REPLIED",
+        localeHint: handled.locale,
       },
     });
-
-    // Auto-create ticket for handoff keywords
-    let ticketNumber: string | null = null;
-    if (/agent|human|support|help|ticket/i.test(String(text))) {
-      const ticket = await prisma.ticket.create({
-        data: {
-          ticketNumber: nextNumber("TKT"),
-          guestName: `WhatsApp ${phone}`,
-          guestEmail: null,
-          subject: `WhatsApp: ${String(text).slice(0, 80)}`,
-          department: "GENERAL",
-          channel: "WHATSAPP",
-          priority: "MEDIUM",
-          status: "OPEN",
-          messages: {
-            create: {
-              authorName: `WA ${phone}`,
-              authorRole: "CUSTOMER",
-              body: String(text),
-            },
-          },
-        },
-      });
-      ticketNumber = ticket.ticketNumber;
-    }
 
     return NextResponse.json({
       ok: true,
       inboundId: inbound.id,
       reply: outbound.body,
-      ticketNumber,
+      ticketNumber: handled.ticketNumber ?? null,
+      leadId: handled.leadId ?? null,
+      locale: handled.locale,
       note: "Stub: connect Meta WhatsApp Cloud API credentials to send real outbound messages.",
     });
   } catch (error) {

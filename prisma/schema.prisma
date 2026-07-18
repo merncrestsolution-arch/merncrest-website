@@ -38,21 +38,33 @@ model User {
   crmLeadsOwned    CrmLead[]       @relation("LeadOwner")
   crmActivities   CrmActivity[]
   callbackRequests CallbackRequest[]
+  quotations       Quotation[]
+  callRecords      CallRecord[]
 
   @@index([role])
 }
 
 model CustomerProfile {
-  id        String   @id @default(cuid())
-  userId    String   @unique
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  phone     String?
-  address   String?
-  city      String?
-  country   String?  @default("Sri Lanka")
-  notes     String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id                 String   @id @default(cuid())
+  userId             String   @unique
+  user               User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  /// Public unique customer ID e.g. MC-A1B2C3
+  customerCode       String?  @unique
+  phone              String?
+  whatsapp           String?
+  address            String?
+  city               String?
+  province           String?
+  postalCode         String?
+  country            String?  @default("Sri Lanka")
+  businessReg        String?
+  nicPassport        String?
+  timezone           String?  @default("Asia/Colombo")
+  preferredLanguage  String?  @default("en")
+  creditBalanceCents Int      @default(0)
+  notes              String?
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
 }
 
 model Session {
@@ -357,7 +369,7 @@ model Ticket {
   guestEmail   String?
   guestName    String?
   subject      String
-  /// BILLING | TECHNICAL | SALES | DOMAIN | HOSTING | GENERAL
+  /// BILLING | TECHNICAL | SALES | DOMAIN | HOSTING | GENERAL | ENTERPRISE
   department   String   @default("GENERAL")
   /// LOW | MEDIUM | HIGH | URGENT
   priority     String   @default("MEDIUM")
@@ -366,6 +378,8 @@ model Ticket {
   /// PORTAL | LIVE_CHAT | WHATSAPP | EMAIL | PHONE | IVR
   channel      String   @default("PORTAL")
   assigneeName String?
+  csatRating   Int?
+  csatFeedback String?
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
   closedAt     DateTime?
@@ -398,7 +412,7 @@ model TicketMessage {
 /// Sales / support CRM lead
 model CrmLead {
   id          String    @id @default(cuid())
-  /// NEW | CONTACTED | QUALIFIED | PROPOSAL | WON | LOST
+  /// NEW | ASSIGNED | CONTACTED | MEETING | QUOTATION | NEGOTIATION | WON | LOST
   stage       String    @default("NEW")
   source      String    @default("WEBSITE")
   fullName    String
@@ -408,16 +422,22 @@ model CrmLead {
   interest    String?
   notes       String?
   valueCents  Int       @default(0)
+  budgetCents Int       @default(0)
+  /// LOW | MEDIUM | HIGH | URGENT
+  priority    String    @default("MEDIUM")
+  followUpAt  DateTime?
   ownerId     String?
   owner       User?     @relation("LeadOwner", fields: [ownerId], references: [id], onDelete: SetNull)
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
 
-  activities CrmActivity[]
+  activities  CrmActivity[]
+  quotations  Quotation[]
 
   @@index([stage])
   @@index([email])
   @@index([ownerId])
+  @@index([followUpAt])
 }
 
 model CrmActivity {
@@ -441,6 +461,8 @@ model ChatSession {
   user        User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
   visitorId   String
   locale      String   @default("en")
+  /// Sales | Technical | Hosting | Billing | Domain | Enterprise
+  department  String?
   /// OPEN | HANDOFF | CLOSED
   status      String   @default("OPEN")
   createdAt   DateTime @default(now())
@@ -518,5 +540,72 @@ model Notification {
 
   @@index([userId])
   @@index([readAt])
+  @@index([createdAt])
+}
+
+model Quotation {
+  id            String   @id @default(cuid())
+  quoteNumber   String   @unique
+  leadId        String?
+  lead          CrmLead? @relation(fields: [leadId], references: [id], onDelete: SetNull)
+  userId        String?
+  user          User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  /// DRAFT | SENT | ACCEPTED | REJECTED | CHANGES_REQUESTED | EXPIRED
+  status        String   @default("DRAFT")
+  customerName  String
+  customerEmail String
+  company       String?
+  subtotalCents Int
+  taxCents      Int      @default(0)
+  discountCents Int      @default(0)
+  totalCents    Int
+  currency      String   @default("LKR")
+  validUntil    DateTime?
+  terms         String?
+  notes         String?
+  orderId       String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  items QuotationItem[]
+
+  @@index([leadId])
+  @@index([userId])
+  @@index([status])
+}
+
+model QuotationItem {
+  id             String    @id @default(cuid())
+  quotationId    String
+  quotation      Quotation @relation(fields: [quotationId], references: [id], onDelete: Cascade)
+  description    String
+  quantity       Int       @default(1)
+  unitPriceCents Int
+  totalCents     Int
+}
+
+/// IVR / landline call log
+model CallRecord {
+  id           String   @id @default(cuid())
+  callNumber   String   @unique
+  userId       String?
+  user         User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  phone        String
+  /// si | ta | en
+  language     String   @default("en")
+  /// SALES | TECHNICAL | HOSTING | DOMAIN | BILLING | ENTERPRISE | CARE
+  department   String   @default("CARE")
+  agentName    String?
+  /// RINGING | ANSWERED | MISSED | VOICEMAIL | CALLBACK
+  status       String   @default("MISSED")
+  durationSec  Int      @default(0)
+  recordingUrl String?
+  notes        String?
+  disposition  String?
+  createdAt    DateTime @default(now())
+
+  @@index([userId])
+  @@index([status])
+  @@index([department])
   @@index([createdAt])
 }

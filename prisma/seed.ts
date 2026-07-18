@@ -245,9 +245,61 @@ async function main() {
       passwordHash,
       role: "CUSTOMER",
       emailVerifiedAt: new Date(),
-      profile: { create: { city: "Colombo", country: "Sri Lanka" } },
+      profile: {
+        create: {
+          city: "Colombo",
+          country: "Sri Lanka",
+          customerCode: "MC-DEMO01",
+          phone: "94770000001",
+          whatsapp: "94770000001",
+          preferredLanguage: "en",
+          timezone: "Asia/Colombo",
+        },
+      },
     },
   });
+
+  // Ensure demo profile has WhatsApp + customer code (for existing DBs)
+  const demoUser = await prisma.user.findUnique({
+    where: { email: "demo@merncrest.lk" },
+    include: { profile: true },
+  });
+  if (demoUser?.profile) {
+    await prisma.customerProfile.update({
+      where: { userId: demoUser.id },
+      data: {
+        customerCode: demoUser.profile.customerCode || "MC-DEMO01",
+        phone: demoUser.profile.phone || "94770000001",
+        whatsapp: demoUser.profile.whatsapp || "94770000001",
+        preferredLanguage: demoUser.profile.preferredLanguage || "en",
+      },
+    });
+  } else if (demoUser && !demoUser.profile) {
+    await prisma.customerProfile.create({
+      data: {
+        userId: demoUser.id,
+        customerCode: "MC-DEMO01",
+        phone: "94770000001",
+        whatsapp: "94770000001",
+        city: "Colombo",
+        country: "Sri Lanka",
+      },
+    });
+  }
+
+  const ownerProfile = await prisma.user.findUnique({ where: { email: "owner@merncrest.lk" } });
+  if (ownerProfile) {
+    await prisma.customerProfile.upsert({
+      where: { userId: ownerProfile.id },
+      update: {},
+      create: {
+        userId: ownerProfile.id,
+        customerCode: "MC-OWNER1",
+        city: "Colombo",
+        country: "Sri Lanka",
+      },
+    });
+  }
 
   for (const p of catalog) {
     await prisma.product.upsert({
@@ -350,7 +402,7 @@ async function main() {
           company: "Perera Traders",
           interest: "Business Hosting + .lk domain",
           source: "WEBSITE",
-          stage: "QUALIFIED",
+          stage: "MEETING",
           valueCents: 1500000,
           ownerId: owner.id,
           activities: {

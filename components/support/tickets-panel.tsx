@@ -21,6 +21,7 @@ type Ticket = {
   status: string;
   channel: string;
   createdAt: string;
+  csatRating?: number | null;
   messages: Message[];
 };
 
@@ -197,6 +198,69 @@ export function TicketsPanel({ staffMode = false }: { staffMode?: boolean }) {
               />
               <Button type="submit" disabled={busy || !reply.trim()}>Send</Button>
             </form>
+            {!staffMode && ["RESOLVED", "CLOSED"].includes(active.status) && (
+              <div className="border-t border-white/10 p-4 space-y-2">
+                <p className="text-sm text-muted">Rate this support experience</p>
+                <div className="flex gap-2">
+                  {[1, 2, 3, 4, 5].map((n) => (
+                    <Button
+                      key={n}
+                      type="button"
+                      size="sm"
+                      variant={active.csatRating === n ? "default" : "outline"}
+                      disabled={busy || Boolean(active.csatRating)}
+                      onClick={async () => {
+                        setBusy(true);
+                        try {
+                          const res = await fetch("/api/tickets", {
+                            method: "PUT",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify({ ticketId: active.id, csatRating: n }),
+                          });
+                          const data = await res.json();
+                          if (res.ok) {
+                            setTickets((prev) =>
+                              prev.map((t) => (t.id === data.ticket.id ? { ...t, ...data.ticket } : t))
+                            );
+                          }
+                        } finally {
+                          setBusy(false);
+                        }
+                      }}
+                    >
+                      ★{n}
+                    </Button>
+                  ))}
+                </div>
+                {active.csatRating && (
+                  <p className="text-xs text-teal-400">Thanks — you rated ★{active.csatRating}</p>
+                )}
+              </div>
+            )}
+            {staffMode && active.status !== "CLOSED" && (
+              <div className="border-t border-white/10 p-3 flex gap-2">
+                <Button
+                  size="sm"
+                  variant="outline"
+                  disabled={busy}
+                  onClick={async () => {
+                    setBusy(true);
+                    try {
+                      await fetch("/api/tickets", {
+                        method: "PUT",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ ticketId: active.id, status: "RESOLVED" }),
+                      });
+                      await load();
+                    } finally {
+                      setBusy(false);
+                    }
+                  }}
+                >
+                  Mark resolved
+                </Button>
+              </div>
+            )}
           </>
         )}
       </div>

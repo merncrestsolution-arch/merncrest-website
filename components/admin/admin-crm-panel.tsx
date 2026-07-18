@@ -18,7 +18,7 @@ type Lead = {
   activities: { id: string; type: string; body: string; createdAt: string }[];
 };
 
-const STAGES = ["NEW", "CONTACTED", "QUALIFIED", "PROPOSAL", "WON", "LOST"] as const;
+const STAGES = ["NEW", "ASSIGNED", "CONTACTED", "MEETING", "QUOTATION", "NEGOTIATION", "WON", "LOST"] as const;
 
 export function AdminCrmPanel() {
   const [leads, setLeads] = useState<Lead[]>([]);
@@ -212,6 +212,45 @@ export function AdminCrmPanel() {
               />
               <Button type="submit" disabled={busy}>Log</Button>
             </form>
+            <Button
+              size="sm"
+              variant="outline"
+              disabled={busy}
+              onClick={async () => {
+                setBusy(true);
+                setError("");
+                try {
+                  const res = await fetch("/api/quotations", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                      leadId: active.id,
+                      customerName: active.fullName,
+                      customerEmail: active.email,
+                      company: active.company || undefined,
+                      send: true,
+                      items: [
+                        {
+                          description: active.interest || "MernCrest services package",
+                          quantity: 1,
+                          unitPriceCents: active.valueCents || 5000000,
+                        },
+                      ],
+                    }),
+                  });
+                  const data = await res.json();
+                  if (!res.ok) throw new Error(data.error || "Quote failed");
+                  setNote(`Quote ${data.quotation.quoteNumber} sent`);
+                  await load();
+                } catch (err) {
+                  setError(err instanceof Error ? err.message : "Quote failed");
+                } finally {
+                  setBusy(false);
+                }
+              }}
+            >
+              Create & send quotation
+            </Button>
             <ul className="space-y-2 max-h-[280px] overflow-y-auto">
               {active.activities.map((a) => (
                 <li key={a.id} className="text-sm border-b border-white/5 pb-2">

@@ -2,13 +2,14 @@ import { Link } from "@/i18n/routing";
 import { Reveal } from "@/components/motion/reveal";
 import { Button } from "@/components/ui/button";
 import { CallbackForm } from "@/components/support/callback-form";
+import { IvrSimulator } from "@/components/support/ivr-simulator";
 import { MessageSquare, Ticket, BookOpen, Phone } from "lucide-react";
 
 const channels = [
   { icon: Ticket, title: "Create a ticket", body: "Trackable support with SLA routing across portal and chat.", href: "/portal/tickets", cta: "Open portal" },
   { icon: MessageSquare, title: "Live chat", body: "AI assistant on every page — say “agent” to escalate to a ticket.", href: "/support", cta: "Use chat widget" },
   { icon: BookOpen, title: "Knowledge base", body: "Tutorials, FAQs, and troubleshooting guides.", href: "/knowledge-base", cta: "Browse articles" },
-  { icon: Phone, title: "WhatsApp & phone", body: "WhatsApp AI stub + IVR callback queue into CRM.", href: "/contact", cta: "Contact care" },
+  { icon: Phone, title: "WhatsApp & phone", body: "WhatsApp business menu + IVR language/department routing.", href: "/contact", cta: "Contact care" },
 ];
 
 export default function SupportCenterPage() {
@@ -19,7 +20,7 @@ export default function SupportCenterPage() {
           <p className="font-mono text-xs uppercase tracking-[0.2em] text-accent mb-3">Support Center</p>
           <h1 className="font-display text-4xl sm:text-5xl font-bold">How can we help?</h1>
           <p className="mt-4 text-lg text-muted">
-            Tickets, live chat, WhatsApp, knowledge base, and IVR callbacks — one support ecosystem.
+            Omnichannel care: tickets, live chat, WhatsApp, email, knowledge base, and IVR — all linked to CRM.
           </p>
         </Reveal>
         <div className="grid sm:grid-cols-2 gap-10 mb-14">
@@ -39,10 +40,15 @@ export default function SupportCenterPage() {
             );
           })}
         </div>
-        <Reveal>
-          <CallbackForm />
-        </Reveal>
-        <div className="flex flex-wrap gap-3 mt-10">
+        <div className="grid lg:grid-cols-2 gap-8 mb-10">
+          <Reveal>
+            <CallbackForm />
+          </Reveal>
+          <Reveal delay={0.05}>
+            <IvrSimulator />
+          </Reveal>
+        </div>
+        <div className="flex flex-wrap gap-3">
           <Button asChild><Link href="/login">Customer login</Link></Button>
           <Button asChild variant="outline"><Link href="/contact">Emergency support</Link></Button>
         </div>

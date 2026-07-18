@@ -88,11 +88,20 @@ export async function POST(request: Request) {
     let ticketNumber: string | null = null;
 
     if (handoff) {
-      reply =
-        "Connecting you with a human agent. I've opened a support ticket from this chat — our team will follow up shortly.";
+      const dept =
+        /bill|invoice|pay/i.test(parsed.data.message)
+          ? "Billing"
+          : /host|server|vps/i.test(parsed.data.message)
+            ? "Hosting"
+            : /domain|dns/i.test(parsed.data.message)
+              ? "Domain"
+              : /sale|quote|website|erp/i.test(parsed.data.message)
+                ? "Sales"
+                : "Technical Support";
+      reply = `Connecting you with ${dept}. I've opened a support ticket from this chat — our team will follow up shortly.`;
       await prisma.chatSession.update({
         where: { id: session.id },
-        data: { status: "HANDOFF", userId: user?.id ?? session.userId },
+        data: { status: "HANDOFF", userId: user?.id ?? session.userId, department: dept },
       });
 
       const ticket = await prisma.ticket.create({
@@ -101,8 +110,17 @@ export async function POST(request: Request) {
           userId: user?.id,
           guestEmail: user?.email,
           guestName: user?.fullName || "Live chat visitor",
-          subject: `Live chat handoff: ${parsed.data.message.slice(0, 80)}`,
-          department: "GENERAL",
+          subject: `Live chat → ${dept}: ${parsed.data.message.slice(0, 60)}`,
+          department:
+            dept === "Billing"
+              ? "BILLING"
+              : dept === "Hosting"
+                ? "HOSTING"
+                : dept === "Domain"
+                  ? "DOMAIN"
+                  : dept === "Sales"
+                    ? "SALES"
+                    : "TECHNICAL",
           priority: "HIGH",
           channel: "LIVE_CHAT",
           status: "OPEN",
@@ -122,7 +140,7 @@ export async function POST(request: Request) {
         await notifyUser({
           userId: user.id,
           title: `Chat escalated · ${ticket.ticketNumber}`,
-          body: "An agent will reply on your ticket shortly.",
+          body: `Routed to ${dept}. An agent will reply on your ticket shortly.`,
           category: "SUPPORT",
           href: "/portal/tickets",
         });

@@ -68,7 +68,11 @@ Everything operates from **one centralized system**.
 | GET/POST/PATCH | `/api/callbacks` | IVR callback queue |
 | GET/PATCH | `/api/notifications` | In-portal notifications |
 | GET/POST/PATCH | `/api/crm` | Staff CRM leads & pipeline |
-| GET | `/api/admin/support` | Support ops dashboard |
+| GET/POST/PATCH | `/api/quotations` | Quotes; accept → order |
+| GET/POST/PATCH | `/api/ivr` | IVR call simulator + logs |
+| POST | `/api/email/inbound` | Email → support ticket |
+| GET | `/api/admin/customers` | Customer directory |
+| GET | `/api/admin/customers/[id]` | Customer 360 profile |
 
 Roles: `CUSTOMER`, `STAFF`, `ADMIN`, `OWNER`. Portal requires login; Admin requires staff roles.
 
@@ -245,6 +249,6 @@ Open http://localhost:3000 → redirects to `/en`.
 
 **Phase 3 / Part 03 done:** Catalog SKUs (domains, hosting tiers, SSL, email), cart with registrant + coupons, checkout → order + invoice, demo + PayHere checkout stubs, domain search (SL + intl TLDs), DNS/lock/auto-renew, hosting dashboard metrics, auto-provisioning after payment, invoice HTML/PDF print, refund requests, activation emails (SMTP when configured).
 
-**Part 04 done:** Tickets + replies, live AI chat (KB-aware, handoff → ticket), WhatsApp webhook stub with AI replies, IVR callback requests → CRM leads, in-portal notifications, Admin CRM pipeline + Support inbox (tickets/callbacks/WhatsApp).
+**Part 04 done:** Tickets + replies + CSAT, live AI chat (KB-aware, handoff → ticket), WhatsApp business menu (domain search, orders, invoices, tickets, human handover, EN/TA/SI detection), IVR simulator (language/department → call log + callback + CRM), email→ticket stub, quotations (accept → order), Customer ID 360 profiles, Admin CRM pipeline (NEW→WON), Support inbox (tickets/callbacks/WhatsApp/IVR).
 
-**Out of scope until later:** Live registrar/cPanel APIs, live PayHere merchant keys, Meta WhatsApp Cloud API tokens, real telephony/IVR PBX, full KB CMS editor, ERP logic, Redis.
+**Out of scope until later:** Live registrar/cPanel APIs, live PayHere merchant keys, Meta WhatsApp Cloud API tokens, real telephony/IVR PBX audio, full KB CMS editor, ERP modules (Part 05), Redis.

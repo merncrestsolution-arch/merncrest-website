@@ -7,7 +7,7 @@ export async function GET() {
   if (auth.error) return auth.error;
 
   try {
-    const [openTickets, pendingCallbacks, chatHandoffs, recentWhatsApp, pipeline] =
+    const [openTickets, pendingCallbacks, chatHandoffs, recentWhatsApp, missedCalls, pipeline] =
       await Promise.all([
         prisma.ticket.count({ where: { status: { in: ["OPEN", "IN_PROGRESS", "WAITING"] } } }),
         prisma.callbackRequest.count({ where: { status: "PENDING" } }),
@@ -15,6 +15,7 @@ export async function GET() {
         prisma.whatsAppMessage.count({
           where: { createdAt: { gte: new Date(Date.now() - 24 * 60 * 60 * 1000) } },
         }),
+        prisma.callRecord.count({ where: { status: { in: ["MISSED", "VOICEMAIL"] } } }),
         prisma.crmLead.groupBy({ by: ["stage"], _count: { _all: true } }),
       ]);
 
@@ -38,6 +39,7 @@ export async function GET() {
         pendingCallbacks,
         chatHandoffs,
         recentWhatsApp,
+        missedCalls,
         pipeline: Object.fromEntries(pipeline.map((p) => [p.stage, p._count._all])),
       },
       tickets,

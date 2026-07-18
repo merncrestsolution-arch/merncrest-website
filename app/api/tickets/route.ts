@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
-import { nextNumber, requireStaff, requireUser } from "@/lib/commerce";
+import { nextNumber, requireUser } from "@/lib/commerce";
 import { notifyUser } from "@/lib/support/notify";
 import { z } from "zod";
 
@@ -156,21 +156,53 @@ export async function PATCH(request: Request) {
   }
 }
 
-/** Staff-only status update without message */
+/** Staff status update or customer CSAT */
 export async function PUT(request: Request) {
-  const auth = await requireStaff();
+  const auth = await requireUser();
   if (auth.error) return auth.error;
 
   try {
     const body = await request.json();
     const schema = z.object({
       ticketId: z.string(),
-      status: z.enum(["OPEN", "IN_PROGRESS", "WAITING", "RESOLVED", "CLOSED"]),
+      status: z.enum(["OPEN", "IN_PROGRESS", "WAITING", "RESOLVED", "CLOSED"]).optional(),
       assigneeName: z.string().optional(),
+      csatRating: z.number().int().min(1).max(5).optional(),
+      csatFeedback: z.string().max(1000).optional(),
     });
     const parsed = schema.safeParse(body);
     if (!parsed.success) {
       return NextResponse.json({ error: "Invalid input" }, { status: 400 });
+    }
+
+    const isStaff = ["STAFF", "ADMIN", "OWNER"].includes(auth.user.role);
+    const existing = await prisma.ticket.findFirst({
+      where: {
+        id: parsed.data.ticketId,
+        ...(isStaff ? {} : { userId: auth.user.id }),
+      },
+    });
+    if (!existing) {
+      return NextResponse.json({ error: "Not found" }, { status: 404 });
+    }
+
+    // CSAT only when resolved/closed
+    if (parsed.data.csatRating != null && !isStaff) {
+      if (!["RESOLVED", "CLOSED"].includes(existing.status)) {
+        return NextResponse.json({ error: "Rate after ticket is resolved" }, { status: 400 });
+      }
+      const ticket = await prisma.ticket.update({
+        where: { id: existing.id },
+        data: {
+          csatRating: parsed.data.csatRating,
+          csatFeedback: parsed.data.csatFeedback,
+        },
+      });
+      return NextResponse.json({ ticket, message: "Thank you for your feedback" });
+    }
+
+    if (!isStaff) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
     const ticket = await prisma.ticket.update({
@@ -184,6 +216,20 @@ export async function PUT(request: Request) {
             : null,
       },
     });
+
+    if (
+      ticket.userId &&
+      (parsed.data.status === "RESOLVED" || parsed.data.status === "CLOSED")
+    ) {
+      await notifyUser({
+        userId: ticket.userId,
+        title: `${ticket.ticketNumber} resolved`,
+        body: "Please rate your support experience (1–5 stars) in Portal → Tickets.",
+        category: "SUPPORT",
+        href: "/portal/tickets",
+      });
+    }
+
     return NextResponse.json({ ticket });
   } catch (error) {
     console.error("[tickets:put]", error);

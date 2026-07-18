@@ -46,9 +46,11 @@ const leadSchema = z.object({
   company: z.string().optional(),
   interest: z.string().optional(),
   source: z.string().optional(),
-  stage: z.enum(["NEW", "CONTACTED", "QUALIFIED", "PROPOSAL", "WON", "LOST"]).optional(),
+  stage: z.enum(["NEW", "ASSIGNED", "CONTACTED", "MEETING", "QUOTATION", "NEGOTIATION", "WON", "LOST"]).optional(),
   notes: z.string().optional(),
   valueCents: z.number().int().min(0).optional(),
+  budgetCents: z.number().int().min(0).optional(),
+  priority: z.enum(["LOW", "MEDIUM", "HIGH", "URGENT"]).optional(),
 });
 
 export async function POST(request: Request) {
@@ -88,9 +90,12 @@ export async function POST(request: Request) {
 
 const patchSchema = z.object({
   leadId: z.string(),
-  stage: z.enum(["NEW", "CONTACTED", "QUALIFIED", "PROPOSAL", "WON", "LOST"]).optional(),
+  stage: z.enum(["NEW", "ASSIGNED", "CONTACTED", "MEETING", "QUOTATION", "NEGOTIATION", "WON", "LOST"]).optional(),
   notes: z.string().optional(),
   valueCents: z.number().int().min(0).optional(),
+  budgetCents: z.number().int().min(0).optional(),
+  priority: z.enum(["LOW", "MEDIUM", "HIGH", "URGENT"]).optional(),
+  followUpAt: z.string().datetime().optional(),
   activity: z
     .object({
       type: z.enum(["NOTE", "CALL", "EMAIL", "WHATSAPP", "MEETING", "STATUS"]),
@@ -139,6 +144,9 @@ export async function PATCH(request: Request) {
           stage: parsed.data.stage,
           notes: parsed.data.notes,
           valueCents: parsed.data.valueCents,
+          budgetCents: parsed.data.budgetCents,
+          priority: parsed.data.priority,
+          followUpAt: parsed.data.followUpAt ? new Date(parsed.data.followUpAt) : undefined,
         },
         include: {
           activities: { orderBy: { createdAt: "desc" }, take: 10 },
