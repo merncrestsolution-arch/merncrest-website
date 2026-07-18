@@ -11,16 +11,16 @@ const config: Config = {
     extend: {
       colors: {
         primary: {
-          DEFAULT: "#0A0A0F",
-          foreground: "#F8FAFC",
+          DEFAULT: "#0B1622",
+          foreground: "#F0FDFA",
         },
         surface: {
-          DEFAULT: "#111118",
-          foreground: "#F8FAFC",
+          DEFAULT: "#0F1C2A",
+          foreground: "#F0FDFA",
         },
         accent: {
-          DEFAULT: "#6366F1",
-          alt: "#8B5CF6",
+          DEFAULT: "#14B8A6",
+          alt: "#0E7490",
           foreground: "#FFFFFF",
         },
         success: {
@@ -28,7 +28,7 @@ const config: Config = {
           foreground: "#FFFFFF",
         },
         muted: {
-          DEFAULT: "#94A3B8",
+          DEFAULT: "#7A93A8",
           foreground: "#64748B",
         },
         border: "rgba(255,255,255,0.08)",
@@ -55,8 +55,8 @@ const config: Config = {
         ring: "hsl(var(--ring))",
       },
       fontFamily: {
-        display: ["var(--font-sora)", "system-ui", "sans-serif"],
-        sans: ["var(--font-inter)", "system-ui", "sans-serif"],
+        display: ["var(--font-syne)", "system-ui", "sans-serif"],
+        sans: ["var(--font-manrope)", "system-ui", "sans-serif"],
         mono: ["var(--font-jetbrains)", "monospace"],
       },
       fontSize: {
@@ -74,17 +74,19 @@ const config: Config = {
       },
       backgroundImage: {
         "gradient-radial": "radial-gradient(var(--tw-gradient-stops))",
-        "gradient-accent": "linear-gradient(135deg, #6366F1 0%, #8B5CF6 100%)",
-        "gradient-text": "linear-gradient(90deg, #818CF8 0%, #A78BFA 100%)",
+        "gradient-accent": "linear-gradient(135deg, #14B8A6 0%, #0E7490 100%)",
+        "gradient-text": "linear-gradient(90deg, #2DD4BF 0%, #22D3EE 50%, #14B8A6 100%)",
       },
       boxShadow: {
-        glow: "0 0 30px rgba(99, 102, 241, 0.3)",
-        "glow-lg": "0 0 50px rgba(99, 102, 241, 0.4)",
+        glow: "0 0 30px rgba(20, 184, 166, 0.28)",
+        "glow-lg": "0 0 50px rgba(20, 184, 166, 0.38)",
       },
       animation: {
         marquee: "marquee 40s linear infinite",
         "marquee-reverse": "marquee-reverse 40s linear infinite",
         "pulse-soft": "pulse-soft 2s ease-in-out infinite",
+        drift: "drift 18s ease-in-out infinite",
+        "wave-slow": "wave-slow 12s ease-in-out infinite",
       },
       keyframes: {
         marquee: {
@@ -98,6 +100,14 @@ const config: Config = {
         "pulse-soft": {
           "0%, 100%": { transform: "scale(1)", opacity: "1" },
           "50%": { transform: "scale(1.05)", opacity: "0.9" },
+        },
+        drift: {
+          "0%, 100%": { transform: "translate(0, 0) scale(1)" },
+          "50%": { transform: "translate(2%, -3%) scale(1.05)" },
+        },
+        "wave-slow": {
+          "0%, 100%": { transform: "translateY(0)" },
+          "50%": { transform: "translateY(-12px)" },
         },
       },
       borderRadius: {

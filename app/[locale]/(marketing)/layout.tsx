@@ -1,7 +1,7 @@
 import { Navbar } from "@/components/layout/navbar";
 import { Footer } from "@/components/layout/footer";
 import { WhatsAppButton } from "@/components/layout/whatsapp-button";
-
+import { PageTransition } from "@/components/layout/page-transition";
 
 export default function MarketingLayout({
   children,
@@ -12,7 +12,7 @@ export default function MarketingLayout({
     <>
       <Navbar />
       <main className="min-h-screen">
-        {children}
+        <PageTransition>{children}</PageTransition>
       </main>
       <Footer />
       <WhatsAppButton />

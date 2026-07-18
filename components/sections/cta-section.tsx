@@ -31,8 +31,8 @@ export function CTASection() {
               {tSection("description")}
             </p>
             <div className="flex flex-col sm:flex-row justify-center gap-4 pt-4">
-              <Button asChild size="lg" className="h-14 px-8 text-base shadow-[0_0_20px_rgba(99,102,241,0.3)] hover:shadow-[0_0_30px_rgba(99,102,241,0.5)] transition-all">
-                <Link href="/contact">{tSection("button")}</Link>
+              <Button asChild size="lg" className="h-14 px-8 text-base shadow-glow hover:shadow-glow-lg transition-all">
+                <Link href="/register">{tSection("button")}</Link>
               </Button>
             </div>
           </div>

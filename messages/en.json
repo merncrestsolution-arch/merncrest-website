@@ -1,22 +1,38 @@
 {
   "metadata": {
-    "title": "MERNcrest Solutions | Your Technology Partner",
-    "description": "MERNcrest Solutions builds software, mobile apps, cloud solutions, and cybersecurity systems for Sri Lankan businesses."
+    "title": "MernCrest Solutions | AI-Powered Enterprise Digital Platform",
+    "description": "MernCrest Solutions Pvt Ltd - domains, hosting, enterprise software, CRM, ERP, billing, and AI customer support from one platform in Sri Lanka."
   },
   "nav": {
     "home": "Home",
     "about": "About",
     "services": "Services",
+    "products": "Products",
     "solutions": "Solutions",
+    "industries": "Industries",
+    "pricing": "Pricing",
     "portfolio": "Portfolio",
     "team": "Team",
     "technologies": "Technologies",
     "careers": "Careers",
     "blog": "Blog",
+    "knowledgeBase": "Knowledge Base",
     "contact": "Contact",
+    "login": "Login",
+    "getStarted": "Get Started",
     "getConsultation": "Get Free Consultation",
     "viewAllServices": "View All Services",
+    "viewAllProducts": "View All Products",
     "language": "Language"
+  },
+  "productsMenu": {
+    "domains": { "title": "Domains", "description": "Search, register, transfer & DNS" },
+    "hosting": { "title": "Hosting", "description": "Shared, VPS, cloud & managed" },
+    "software": { "title": "Software", "description": "ERP, CRM, POS & custom apps" },
+    "digital": { "title": "Digital Services", "description": "Design, SEO & marketing" },
+    "cloud": { "title": "Cloud", "description": "AWS, migration & security" },
+    "security": { "title": "Security", "description": "SSL, firewall & monitoring" },
+    "email": { "title": "Business Email", "description": "Workspace & Microsoft 365" }
   },
   "servicesMenu": {
     "softwareDevelopment": {
@@ -57,8 +73,10 @@
     }
   },
   "hero": {
-    "headline": "Technology That Helps Your Business Grow",
-    "subheadline": "We build software, mobile apps, cloud solutions, and cybersecurity systems that help Sri Lankan businesses scale faster.",
+    "headline": "One platform for every digital business need",
+    "subheadline": "Domains, hosting, enterprise software, CRM, billing, and AI support — unified for Sri Lankan businesses.",
+    "ctaPrimary": "Explore Products",
+    "ctaSecondary": "Talk to Sales",
     "ctaConsultation": "Get Free Consultation",
     "ctaPortfolio": "View Portfolio",
     "ctaProposal": "Request Proposal",
@@ -67,10 +85,15 @@
     "trustExperience": "5+ Years Experience",
     "trustSupport": "24/7 Support"
   },
+  "platformSnippet": {
+    "badge": "The Platform",
+    "title": "Website, portal, WhatsApp, and care — one system",
+    "description": "Every customer interaction syncs into CRM, billing, and support so your team never loses context."
+  },
   "aboutSnippet": {
     "badge": "Who We Are",
     "title": "Your Trusted Technology Partner in Sri Lanka",
-    "description": "MERNcrest Solutions is a premier software development agency dedicated to transforming businesses through innovative digital solutions. With expertise across the full stack, we deliver robust, scalable, and beautifully designed applications.",
+    "description": "MernCrest Solutions is building an AI-powered enterprise digital platform — from marketplace commerce to ERP — so businesses grow on one stack.",
     "feature1": "Expert Engineering Team",
     "feature2": "Agile Development Process",
     "feature3": "Scalable Cloud Architecture",
@@ -82,9 +105,9 @@
     "description": "From ideation to deployment, we provide end-to-end technology services to power your digital transformation."
   },
   "solutionsSnippet": {
-    "badge": "Industries We Serve",
-    "title": "Tailored Solutions for Every Sector",
-    "description": "Discover how our specialized software solutions are solving complex challenges across various industries."
+    "badge": "Enterprise Solutions",
+    "title": "ERP, CRM, and operations software that scales",
+    "description": "Deploy modular enterprise systems — from finance and HR to IoT and predictive maintenance."
   },
   "solutionsMenu": {
     "ecommerce": { "title": "E-Commerce", "description": "High-conversion online stores" },
@@ -125,20 +148,21 @@
   "blogSnippet": {
     "badge": "Insights",
     "title": "Latest from our Blog",
-    "description": "Thoughts, updates, and tech insights from the MERNcrest team."
+    "description": "Thoughts, updates, and tech insights from the MernCrest team."
   },
   "ctaSnippet": {
-    "title": "Ready to Transform Your Business?",
-    "description": "Let's discuss how our technology solutions can help you achieve your goals.",
-    "button": "Start a Project"
+    "title": "Ready to run your business on one platform?",
+    "description": "Create a customer account or talk to sales about enterprise deployment.",
+    "button": "Create Account"
   },
   "footer": {
-    "tagline": "Your Technology Partner",
-    "description": "MERNcrest Solutions (Pvt) Ltd — Sri Lanka's trusted partner for software development, cloud solutions, and digital transformation.",
+    "tagline": "AI-Powered Enterprise Digital Platform",
+    "description": "MernCrest Solutions (Pvt) Ltd — domains, hosting, enterprise software, CRM, ERP, and AI support from one system.",
     "services": "Services",
     "solutions": "Solutions",
     "company": "Company",
     "legal": "Legal",
+    "products": "Products",
     "aboutUs": "About Us",
     "ourTeam": "Our Team",
     "careers": "Careers",
@@ -146,7 +170,9 @@
     "contact": "Contact",
     "privacyPolicy": "Privacy Policy",
     "termsOfService": "Terms of Service",
-    "copyright": "© 2025 MERNcrest Solutions (Pvt) Ltd. All rights reserved.",
+    "refundPolicy": "Refund Policy",
+    "sla": "SLA",
+    "copyright": "© 2026 MernCrest Solutions (Pvt) Ltd. All rights reserved.",
     "newsletterTitle": "Stay Updated",
     "newsletterPlaceholder": "Enter your email",
     "newsletterButton": "Subscribe"
@@ -157,6 +183,50 @@
     "getQuote": "Get a Free Quote",
     "scheduleConsultation": "Schedule Free Consultation",
     "sendRequirements": "Send Us Your Requirements",
-    "loading": "Loading..."
+    "loading": "Loading...",
+    "comingOnline": "Coming online",
+    "comingOnlineBody": "This module is part of the MernCrest platform roadmap and will connect to live data in a later phase.",
+    "backHome": "Back to home"
+  },
+  "auth": {
+    "loginTitle": "Customer Login",
+    "loginSubtitle": "Access your portal — domains, hosting, invoices, and tickets.",
+    "registerTitle": "Create your account",
+    "registerSubtitle": "One account for every MernCrest service.",
+    "email": "Email",
+    "password": "Password",
+    "fullName": "Full name",
+    "company": "Company (optional)",
+    "confirmPassword": "Confirm password",
+    "loginCta": "Sign in",
+    "registerCta": "Create account",
+    "noAccount": "New to MernCrest?",
+    "hasAccount": "Already have an account?"
+  },
+  "portal": {
+    "title": "Customer Portal",
+    "overview": "Overview",
+    "orders": "Orders",
+    "domains": "Domains",
+    "hosting": "Hosting",
+    "invoices": "Invoices",
+    "tickets": "Tickets",
+    "downloads": "Downloads",
+    "settings": "Settings",
+    "welcome": "Welcome back",
+    "welcomeBody": "Manage all your MernCrest services from one place."
+  },
+  "admin": {
+    "title": "Admin",
+    "dashboard": "Dashboard",
+    "customers": "Customers",
+    "orders": "Orders",
+    "billing": "Billing",
+    "crm": "CRM",
+    "support": "Support",
+    "reports": "Reports",
+    "settings": "Settings",
+    "welcome": "Owner Dashboard",
+    "welcomeBody": "Revenue, customers, tickets, and operations — shell ready for live analytics."
   }
 }

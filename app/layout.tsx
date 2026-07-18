@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "MERNcrest Solutions",
-  description: "Your Technology Partner",
+  title: "MernCrest Solutions",
+  description: "AI-Powered Enterprise Digital Platform",
 };
 
 export default function RootLayout({

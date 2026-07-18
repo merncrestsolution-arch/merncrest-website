@@ -1,4 +1,4 @@
-import { Inter, JetBrains_Mono, Sora } from "next/font/google";
+import { Syne, Manrope, JetBrains_Mono } from "next/font/google";
 import { notFound } from "next/navigation";
 import { NextIntlClientProvider } from "next-intl";
 import { getMessages, setRequestLocale } from "next-intl/server";
@@ -6,15 +6,15 @@ import { ThemeProvider } from "@/components/layout/theme-provider";
 import { routing } from "@/i18n/routing";
 import "../globals.css";
 
-const inter = Inter({
+const syne = Syne({
   subsets: ["latin"],
-  variable: "--font-inter",
+  variable: "--font-syne",
   display: "swap",
 });
 
-const sora = Sora({
+const manrope = Manrope({
   subsets: ["latin"],
-  variable: "--font-sora",
+  variable: "--font-manrope",
   display: "swap",
 });
 
@@ -47,7 +47,7 @@ export default async function LocaleLayout({
   return (
     <html lang={locale} suppressHydrationWarning>
       <body
-        className={`${inter.variable} ${sora.variable} ${jetbrains.variable} font-sans antialiased`}
+        className={`${syne.variable} ${manrope.variable} ${jetbrains.variable} font-sans antialiased`}
       >
         <ThemeProvider
           attribute="class"

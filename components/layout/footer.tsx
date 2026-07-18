@@ -8,17 +8,17 @@ import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
 
 const serviceLinks = [
-  { href: "/services/software-development", label: "Software Development" },
-  { href: "/services/web-development", label: "Web Development" },
-  { href: "/services/cloud-services", label: "Cloud Services" },
-  { href: "/services/cyber-security", label: "Cyber Security" },
+  { href: "/products/domains", label: "Domains" },
+  { href: "/products/hosting", label: "Hosting" },
+  { href: "/products/software", label: "Software" },
+  { href: "/products/cloud", label: "Cloud Services" },
 ];
 
 const solutionLinks = [
+  { href: "/solutions", label: "Enterprise Solutions" },
   { href: "/solutions/erp", label: "ERP System" },
   { href: "/solutions/crm", label: "CRM System" },
-  { href: "/solutions/healthcare", label: "Hospital Management" },
-  { href: "/solutions/pos", label: "POS System" },
+  { href: "/pricing", label: "Pricing" },
 ];
 
 const companyLinks = [
@@ -32,6 +32,8 @@ const companyLinks = [
 const legalLinks = [
   { key: "privacyPolicy", href: "/privacy" },
   { key: "termsOfService", href: "/terms" },
+  { key: "refundPolicy", href: "/refund" },
+  { key: "sla", href: "/sla" },
 ] as const;
 
 const socialLinks = [
@@ -89,7 +91,7 @@ export function Footer() {
           <div className="lg:col-span-2 space-y-4">
             <Link href="/" className="inline-block">
               <span className="font-display text-2xl font-bold gradient-text">
-                MERNcrest
+                MernCrest
               </span>
             </Link>
             <p className="text-sm text-muted max-w-sm">{t("tagline")}</p>

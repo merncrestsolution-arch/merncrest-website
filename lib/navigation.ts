@@ -9,6 +9,13 @@ import {
   Shield,
   Smartphone,
   Briefcase,
+  Globe2,
+  HardDrive,
+  Boxes,
+  Palette,
+  CloudCog,
+  ShieldCheck,
+  Mail,
 } from "lucide-react";
 
 export interface ServiceMenuItem {
@@ -18,61 +25,41 @@ export interface ServiceMenuItem {
 }
 
 export const serviceMenuItems: ServiceMenuItem[] = [
-  {
-    key: "softwareDevelopment",
-    href: "/services/software-development",
-    icon: Code2,
-  },
-  {
-    key: "webDevelopment",
-    href: "/services/web-development",
-    icon: Globe,
-  },
-  {
-    key: "mobileAppDevelopment",
-    href: "/services/mobile-app-development",
-    icon: Smartphone,
-  },
-  {
-    key: "cloudServices",
-    href: "/services/cloud-services",
-    icon: Cloud,
-  },
-  {
-    key: "cyberSecurity",
-    href: "/services/cyber-security",
-    icon: Shield,
-  },
-  {
-    key: "aiSolutions",
-    href: "/services/ai-solutions",
-    icon: Brain,
-  },
-  {
-    key: "digitalMarketing",
-    href: "/services/digital-marketing",
-    icon: Megaphone,
-  },
-  {
-    key: "itConsulting",
-    href: "/services/it-consulting",
-    icon: Briefcase,
-  },
-  {
-    key: "hostingDomain",
-    href: "/services/hosting-domain",
-    icon: Server,
-  },
+  { key: "softwareDevelopment", href: "/services/software-development", icon: Code2 },
+  { key: "webDevelopment", href: "/services/web-development", icon: Globe },
+  { key: "mobileAppDevelopment", href: "/services/mobile-app-development", icon: Smartphone },
+  { key: "cloudServices", href: "/services/cloud-services", icon: Cloud },
+  { key: "cyberSecurity", href: "/services/cyber-security", icon: Shield },
+  { key: "aiSolutions", href: "/services/ai-solutions", icon: Brain },
+  { key: "digitalMarketing", href: "/services/digital-marketing", icon: Megaphone },
+  { key: "itConsulting", href: "/services/it-consulting", icon: Briefcase },
+  { key: "hostingDomain", href: "/services/hosting-domain", icon: Server },
 ];
 
+export const productMenuItems = [
+  { key: "domains", href: "/products/domains", icon: Globe2 },
+  { key: "hosting", href: "/products/hosting", icon: HardDrive },
+  { key: "software", href: "/products/software", icon: Boxes },
+  { key: "digital", href: "/products/digital-services", icon: Palette },
+  { key: "cloud", href: "/products/cloud", icon: CloudCog },
+  { key: "security", href: "/products/security", icon: ShieldCheck },
+  { key: "email", href: "/products/email", icon: Mail },
+] as const;
+
 export const navLinks = [
-  { key: "home", href: "/" },
-  { key: "about", href: "/about" },
+  { key: "products", href: "/products" },
   { key: "solutions", href: "/solutions" },
+  { key: "industries", href: "/industries" },
+  { key: "pricing", href: "/pricing" },
   { key: "portfolio", href: "/portfolio" },
-  { key: "team", href: "/team" },
-  { key: "technologies", href: "/technologies" },
+  { key: "knowledgeBase", href: "/knowledge-base" },
   { key: "careers", href: "/careers" },
-  { key: "blog", href: "/blog" },
   { key: "contact", href: "/contact" },
+] as const;
+
+export const resourceLinks = [
+  { key: "blog", href: "/blog" },
+  { key: "knowledgeBase", href: "/knowledge-base" },
+  { key: "about", href: "/about" },
+  { key: "team", href: "/team" },
 ] as const;

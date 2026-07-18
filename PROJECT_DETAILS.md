@@ -1,0 +1,226 @@
+# MernCrest Solutions Pvt Ltd — Complete Platform Bible
+
+**Brand:** MernCrest Solutions (Pvt) Ltd  
+**Website:** https://merncrest.lk  
+**Local:** http://localhost:3000  
+**Package:** `web` @ `0.1.0`
+
+---
+
+## 1. Vision
+
+MernCrest is an **AI-powered Enterprise Technology Company** providing end-to-end digital business solutions through a single integrated web platform:
+
+- Company Website
+- Customer Portal
+- AI Customer Support
+- WhatsApp Automation
+- Customer Care (IVR)
+- CRM & Sales CRM
+- ERP & Internal Operations
+- Billing & Marketplace (Domains, Hosting, Software, Cloud, Security, Email)
+- Enterprise Business Solutions
+- Analytics & Reporting
+
+Everything operates from **one centralized system**.
+
+---
+
+## 2. Tech Stack (Current + Target)
+
+| Layer | Current (Phase 1–2) | Target |
+|--------|---------------------|--------|
+| Framework | Next.js 14 App Router | Same + monorepo `apps/web` |
+| UI | React 18, TypeScript, Tailwind, shadcn/ui | Ocean-crest design system |
+| Motion | Framer Motion | Cinematic hero + scroll motion |
+| i18n | next-intl (`en`, `ta`, `si`) | Full copy localization over time |
+| Theming | next-themes (dark default) | Navy/teal tokens |
+| API | Next.js Route Handlers (`/api/auth/*`) | Expand + optional Nest/Express later |
+| Database | SQLite local / PostgreSQL via Docker | + Redis (Phase 3+) |
+| Auth | Session cookies, bcrypt, RBAC roles | + 2FA (later) |
+| Mail | Nodemailer / Brevo SMTP (optional) | Production SMTP |
+| Infra | Docker Compose Postgres local / future AWS | Ubuntu, Nginx, Docker, PM2, Cloudflare, SSL |
+
+### Auth API (Phase 2)
+
+| Method | Path | Role |
+|--------|------|------|
+| POST | `/api/auth/register` | Create customer + profile + session |
+| POST | `/api/auth/login` | Session login + login history |
+| POST | `/api/auth/logout` | Destroy session |
+| GET | `/api/auth/me` | Current user + profile |
+| GET | `/api/auth/verify-email?token=` | Email verification |
+
+Roles: `CUSTOMER`, `STAFF`, `ADMIN`, `OWNER`. Portal requires login; Admin requires staff roles.
+
+### Local database
+
+Default local DB is **SQLite** (`prisma/dev.db`) so Phase 2 works without Docker.
+
+```bash
+npm run db:setup       # prisma generate + db push + seed
+npm run dev
+```
+
+Optional Docker Postgres: set `provider = "postgresql"` in `prisma/schema.prisma`, use the Postgres `DATABASE_URL` from `.env.example`, then `npm run db:up && npm run db:setup`.
+
+Seeded accounts (password `ChangeMe123!`):
+- `owner@merncrest.lk` — OWNER → `/admin`
+- `demo@merncrest.lk` — CUSTOMER → `/portal`
+
+
+---
+
+## 3. Architecture
+
+```text
+                    Customers
+                         │
+      ┌──────────────────┼──────────────────┐
+      │                  │                  │
+ Website            WhatsApp          Customer Care
+      │                  │                  │
+      └──────────────┬───┴──────────────────┘
+                     │
+              Live Chat & Email
+                     │
+              MERNCREST API PLATFORM
+                     │
+ ┌──────────────────────────────────────────────────┐
+ │ CRM │ ERP │ Billing │ Orders │ Domains │ Hosting │
+ │ Projects │ Finance │ HR │ Analytics │ Support   │
+ └──────────────────────────────────────────────────┘
+                     │
+             PostgreSQL + Redis
+                     │
+               AWS Cloud Infrastructure
+```
+
+---
+
+## 4. Phase Roadmap
+
+| Phase | Deliverable | Status |
+|-------|-------------|--------|
+| **1** | Public platform rebuild + portal/admin/auth shells + cinematic UI | Done |
+| **2** | Core API + Auth (PostgreSQL, email verify, RBAC) | Done |
+| **3** | Commerce (catalog, orders, invoices, payments) | Planned |
+| **4** | Domains & Hosting adapters | Planned |
+| **5** | Support (tickets, live chat, KB CMS) | Planned |
+| **6** | CRM + Sales pipeline | Planned |
+| **7** | WhatsApp AI (EN/TA/SI) | Planned |
+| **8** | Internal ERP modules | Planned |
+| **9** | Projects + server monitoring + status page | Planned |
+| **10** | Landline IVR + callbacks | Planned |
+| **11** | AWS production hardening | Planned |
+
+---
+
+## 5. Public Website IA (`/{locale}/...`)
+
+| Route | Role |
+|-------|------|
+| `/` | Cinematic enterprise homepage |
+| `/about` | Company story |
+| `/services` | Service catalog |
+| `/services/[slug]` | Service detail |
+| `/products` | Marketplace hub |
+| `/products/[category]` | Category detail |
+| `/pricing` | Pricing tiers |
+| `/industries` | Industry solutions |
+| `/solutions` | Enterprise solutions catalog |
+| `/solutions/[slug]` | Solution detail |
+| `/portfolio` | Case studies |
+| `/portfolio/[id]` | Case study detail |
+| `/blog` | Blog index |
+| `/blog/[slug]` | Post detail |
+| `/knowledge-base` | Tutorials, FAQs, docs |
+| `/knowledge-base/[slug]` | Article |
+| `/careers` | Jobs |
+| `/contact` | Contact |
+| `/login` | Customer login shell |
+| `/register` | Customer registration shell |
+| `/team` | Team |
+| `/technologies` | Tech stack |
+| Legal | `/privacy`, `/terms`, `/refund`, `/hosting-policy`, `/domain-policy`, `/cookie-policy`, `/aup`, `/sla`, `/service-agreement` |
+
+### Customer Portal (`/(portal)/`)
+
+| Route | Role |
+|-------|------|
+| `/portal` | Overview dashboard |
+| `/portal/orders` | Orders |
+| `/portal/domains` | Domains |
+| `/portal/hosting` | Hosting / VPS / Cloud |
+| `/portal/invoices` | Invoices & payments |
+| `/portal/tickets` | Support tickets |
+| `/portal/downloads` | Downloads / licenses |
+| `/portal/settings` | Account settings |
+
+### Admin (`/(admin)/`)
+
+| Route | Role |
+|-------|------|
+| `/admin` | Owner dashboard |
+| `/admin/customers` | Customers |
+| `/admin/orders` | Orders |
+| `/admin/billing` | Billing |
+| `/admin/crm` | CRM |
+| `/admin/support` | Support |
+| `/admin/reports` | Reports |
+| `/admin/settings` | Settings |
+
+---
+
+## 6. Design System (Phase 1)
+
+- **Direction:** Ocean-crest — deep navy surfaces, electric teal accents
+- **Fonts:** Syne (display) + Manrope (body) + JetBrains Mono
+- **Hero:** Full-bleed muted video atmosphere; brand + one headline + one line + CTA group
+- **Motion:** Page transitions, scroll reveals, ambient gradient drift
+- Avoid purple-indigo default AI look
+
+---
+
+## 7. Marketplace Categories
+
+- Domains (.lk, .com, .net, .org, TLDs)
+- Hosting (Shared, cPanel, Business, VPS, Cloud, AWS, Managed)
+- Software (Websites, E-Commerce, ERP, CRM, POS, HR, Custom)
+- Digital Services (UI/UX, Branding, SEO, Marketing)
+- Cloud Services (AWS, Migration, Management, Security)
+- Security (SSL, Protection, Backup, Firewall, Monitoring)
+- Business Email (Professional, Google Workspace, Microsoft 365)
+
+---
+
+## 8. Enterprise Solutions
+
+ERP, EAM, ESM, FSM, Project Management, Supply Chain, Finance, HR, Manufacturing, AI & Cloud, IIoT, Predictive Maintenance, Analytics, CSM — plus Document, Inventory, Warehouse, Fleet, Visitor, LMS, Workflow, Procurement, Multi-Company/Branch, BI.
+
+---
+
+## 9. Security Targets
+
+SSL, 2FA, email verification, login history, device management, audit logs, RBAC, CAPTCHA, rate limiting, daily backups.
+
+---
+
+## 10. Local Development
+
+```bash
+npm install
+npm run dev
+```
+
+Open http://localhost:3000 → redirects to `/en`.
+
+---
+
+## 11. Explicit Phase Boundaries
+
+**Phase 1 done:** Public IA, cinematic UI, static marketplace/KB/pricing data, portal/admin shells.
+
+**Phase 2 done:** Prisma DB, register/login/logout/me/verify-email APIs, session cookies, RBAC guards, seeded users.
+
+**Out of scope until Phase 3+:** Real payments, domain registrars, WhatsApp AI, IVR, ERP logic, Redis.
