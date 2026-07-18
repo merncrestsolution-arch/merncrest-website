@@ -2,18 +2,9 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { Link } from "@/i18n/routing";
-import { Button } from "@/components/ui/button";
+import { ERP_SECTIONS } from "@/lib/erp/modules";
 import { formatMoney } from "@/lib/commerce-format";
-import {
-  Users,
-  Wallet,
-  FolderKanban,
-  Package,
-  Boxes,
-  Wrench,
-  Shield,
-  LayoutDashboard,
-} from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 type Stats = {
   employees: number;
@@ -28,28 +19,21 @@ type Stats = {
   lowStockCount: number;
 };
 
-const modules = [
-  { href: "/admin/erp/hr", label: "HRM", desc: "Employees & leave", icon: Users, perm: "erp.hr.view" },
-  { href: "/admin/erp/finance", label: "Finance", desc: "Income & expenses", icon: Wallet, perm: "erp.finance.view" },
-  { href: "/admin/erp/projects", label: "Projects", desc: "Tasks & delivery", icon: FolderKanban, perm: "erp.projects.view" },
-  { href: "/admin/erp/assets", label: "EAM", desc: "Asset registry", icon: Package, perm: "erp.assets.view" },
-  { href: "/admin/erp/inventory", label: "SCM", desc: "Inventory / stock", icon: Boxes, perm: "erp.inventory.view" },
-  { href: "/admin/erp/fsm", label: "FSM", desc: "Field work orders", icon: Wrench, perm: "erp.fsm.view" },
-  { href: "/admin/erp/permissions", label: "Roles", desc: "Staff permissions", icon: Shield, perm: "erp.permissions.manage" },
-];
-
 export function ErpDashboard() {
   const [stats, setStats] = useState<Stats | null>(null);
   const [permissions, setPermissions] = useState<string[]>([]);
+  const [depts, setDepts] = useState<{ code: string; name: string; parentId?: string | null }[]>([]);
   const [error, setError] = useState("");
 
   const load = useCallback(async () => {
     try {
-      const res = await fetch("/api/erp");
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Failed");
-      setStats(data.stats);
-      setPermissions(data.permissions ?? []);
+      const [erpRes, hrRes] = await Promise.all([fetch("/api/erp"), fetch("/api/erp/hr")]);
+      const erp = await erpRes.json();
+      const hr = await hrRes.json();
+      if (!erpRes.ok) throw new Error(erp.error || "Failed");
+      setStats(erp.stats);
+      setPermissions(erp.permissions ?? []);
+      if (hrRes.ok) setDepts(hr.departments ?? []);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Failed");
     }
@@ -59,43 +43,55 @@ export function ErpDashboard() {
     load();
   }, [load]);
 
-  const can = (p: string) => permissions.includes(p) || permissions.includes("erp.permissions.manage");
+  const can = (p: string) =>
+    permissions.includes(p) ||
+    permissions.includes("erp.permissions.manage") ||
+    (p.endsWith(".view") && permissions.includes(p.replace(".view", ".manage")));
 
   return (
     <div className="space-y-8">
       {error && <p className="text-sm text-red-400">{error}</p>}
-      <div className="flex items-center gap-2 text-muted text-sm">
-        <LayoutDashboard className="h-4 w-4" />
-        Internal ERP · modules gated by role + StaffPermission
+
+      <div>
+        <p className="text-sm text-muted mb-3">
+          Part 05 Enterprise Platform — 20 module groups. Architecture · departments · hierarchy.
+        </p>
+        {stats && (
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
+            {[
+              { label: "Employees", value: String(stats.employees) },
+              { label: "Active projects", value: String(stats.projects) },
+              { label: "Net P&L", value: formatMoney(stats.netCents) },
+              { label: "Work orders", value: String(stats.workOrders) },
+            ].map((s) => (
+              <div key={s.label} className="rounded-xl border border-white/10 p-4">
+                <p className="text-xs font-mono uppercase text-muted">{s.label}</p>
+                <p className="font-display text-xl font-bold mt-1">{s.value}</p>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
-      {stats && (
-        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-3">
-          {[
-            { label: "Active employees", value: String(stats.employees) },
-            { label: "Pending leave", value: String(stats.leavePending) },
-            { label: "Active projects", value: String(stats.projects) },
-            { label: "Open work orders", value: String(stats.workOrders) },
-            { label: "Assets", value: String(stats.assets) },
-            { label: "SKUs / low stock", value: `${stats.inventory} / ${stats.lowStockCount}` },
-            { label: "Income", value: formatMoney(stats.incomeCents) },
-            { label: "Net (P&L)", value: formatMoney(stats.netCents) },
-          ].map((s) => (
-            <div key={s.label} className="rounded-xl border border-white/10 p-4">
-              <p className="text-xs font-mono uppercase text-muted">{s.label}</p>
-              <p className="font-display text-xl font-bold mt-1">{s.value}</p>
-            </div>
-          ))}
+      {depts.length > 0 && (
+        <div className="rounded-xl border border-white/10 p-4">
+          <h3 className="font-display font-semibold text-sm mb-2">Organization · departments</h3>
+          <ul className="flex flex-wrap gap-2 text-xs">
+            {depts.map((d) => (
+              <li key={d.code} className="border border-white/10 px-2 py-1 rounded font-mono">
+                {d.code} · {d.name}
+              </li>
+            ))}
+          </ul>
         </div>
       )}
 
-      <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        {modules.map((m) => {
-          const Icon = m.icon;
-          const allowed = can(m.perm);
+      <div className="grid sm:grid-cols-2 xl:grid-cols-3 gap-4">
+        {ERP_SECTIONS.map((m) => {
+          const allowed = can(m.permission);
           return (
             <Link
-              key={m.href}
+              key={m.id}
               href={allowed ? m.href : "/admin/erp"}
               className={`rounded-xl border p-5 transition-colors ${
                 allowed
@@ -103,17 +99,26 @@ export function ErpDashboard() {
                   : "border-white/5 opacity-40 pointer-events-none"
               }`}
             >
-              <Icon className="h-5 w-5 text-accent mb-3" />
-              <p className="font-display font-semibold">{m.label}</p>
-              <p className="text-sm text-muted mt-1">{m.desc}</p>
+              <p className="font-mono text-[10px] uppercase tracking-wider text-accent">{m.section}</p>
+              <p className="font-display font-semibold mt-1">{m.title}</p>
+              <p className="text-sm text-muted mt-2 leading-relaxed">{m.summary}</p>
+              <ul className="mt-3 flex flex-wrap gap-1">
+                {m.features.slice(0, 4).map((f) => (
+                  <li key={f} className="text-[10px] border border-white/10 px-1.5 py-0.5 rounded text-muted">
+                    {f}
+                  </li>
+                ))}
+              </ul>
             </Link>
           );
         })}
       </div>
 
-      <Button asChild variant="outline" size="sm">
-        <Link href="/admin/reports">Analytics / reports</Link>
-      </Button>
+      <div className="flex flex-wrap gap-2">
+        <Button asChild size="sm"><Link href="/staff">Staff portal</Link></Button>
+        <Button asChild size="sm" variant="outline"><Link href="/admin/erp/dashboards">Executive dashboards</Link></Button>
+        <Button asChild size="sm" variant="outline"><Link href="/admin/reports">BI / Reports</Link></Button>
+      </div>
     </div>
   );
 }

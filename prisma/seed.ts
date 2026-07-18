@@ -470,6 +470,7 @@ async function main() {
           fullName: staffUser.fullName,
           email: staffUser.email,
           jobTitle: "Support Engineer",
+          orgRole: "ENGINEER",
           employmentType: "FULL_TIME",
           salaryCents: 12000000,
           status: "ACTIVE",
@@ -482,11 +483,18 @@ async function main() {
           fullName: "Kasun Silva",
           email: "kasun@merncrest.lk",
           jobTitle: "Systems Admin",
+          orgRole: "ENGINEER",
           salaryCents: 15000000,
           status: "ACTIVE",
         },
       });
     }
+
+    // Update existing staff employee orgRole if present
+    await prisma.employee.updateMany({
+      where: { userId: staffUser.id },
+      data: { orgRole: "ENGINEER" },
+    });
 
     await prisma.staffPermission.upsert({
       where: {
@@ -495,6 +503,13 @@ async function main() {
       update: {},
       create: { userId: staffUser.id, permission: "erp.finance.view" },
     });
+    for (const p of ["erp.iot.view", "erp.esm.view", "erp.dms.view", "erp.ai.view"] as const) {
+      await prisma.staffPermission.upsert({
+        where: { userId_permission: { userId: staffUser.id, permission: p } },
+        update: {},
+        create: { userId: staffUser.id, permission: p },
+      });
+    }
 
     if ((await prisma.erpProject.count()) === 0) {
       await prisma.erpProject.create({
@@ -593,6 +608,98 @@ async function main() {
           priority: "HIGH",
           assetCode: "AST-SEED-001",
           assigneeId: staffUser.id,
+          latitude: 6.9271,
+          longitude: 79.8612,
+        },
+      });
+    }
+
+    if ((await prisma.vendor.count()) === 0) {
+      const vendor = await prisma.vendor.create({
+        data: {
+          vendorCode: "VEN-SEED-001",
+          name: "Lanka IT Supplies",
+          email: "sales@lankait.lk",
+          category: "Hardware",
+          ownerId: owner.id,
+        },
+      });
+      await prisma.purchaseOrder.create({
+        data: {
+          poNumber: "PO-SEED-001",
+          vendorId: vendor.id,
+          description: "SSD stock replenishment",
+          amountCents: 35000000,
+          status: "SUBMITTED",
+        },
+      });
+    }
+
+    if ((await prisma.warehouse.count()) === 0) {
+      await prisma.warehouse.create({
+        data: { code: "WH-CMB", name: "Colombo Main Warehouse", location: "Colombo" },
+      });
+    }
+
+    if ((await prisma.serviceCatalogItem.count()) === 0) {
+      await prisma.serviceCatalogItem.createMany({
+        data: [
+          { code: "SVC-HOST", name: "Hosting incident", category: "Technical", slaHours: 4 },
+          { code: "SVC-ACCESS", name: "Access request", category: "Request", slaHours: 24 },
+          { code: "SVC-CHANGE", name: "Standard change", category: "Change", slaHours: 72 },
+        ],
+      });
+    }
+
+    if ((await prisma.iotDevice.count()) === 0) {
+      const device = await prisma.iotDevice.create({
+        data: {
+          deviceCode: "IOT-SEED-001",
+          name: "Rack A Temperature",
+          location: "Colombo DC",
+          status: "ONLINE",
+          healthScore: 92,
+          lastSeenAt: new Date(),
+        },
+      });
+      await prisma.iotReading.create({
+        data: { deviceId: device.id, metric: "temperature", value: 28.5, unit: "C" },
+      });
+    }
+
+    if ((await prisma.document.count()) === 0) {
+      await prisma.document.create({
+        data: {
+          docNumber: "DOC-SEED-001",
+          title: "Employee Handbook 2026",
+          category: "HR Policy",
+          status: "APPROVED",
+          version: 1,
+          uploaderId: owner.id,
+        },
+      });
+    }
+
+    if ((await prisma.bom.count()) === 0) {
+      const bom = await prisma.bom.create({
+        data: {
+          bomCode: "BOM-SEED-001",
+          productName: "Managed Edge Appliance",
+          lines: {
+            create: [
+              { componentSku: "SSD-1TB", quantity: 1 },
+              { componentSku: "CBL-CAT6", quantity: 4 },
+            ],
+          },
+        },
+      });
+      await prisma.productionOrder.create({
+        data: {
+          orderNumber: "MO-SEED-001",
+          bomId: bom.id,
+          productName: "Managed Edge Appliance",
+          quantity: 5,
+          status: "PLANNED",
         },
       });
     }
@@ -600,7 +707,7 @@ async function main() {
 
   console.log("Seeded users +", catalog.length, "products +", coupons.length, "coupons + CRM/ERP samples");
   console.log("  OWNER: owner@merncrest.lk / ChangeMe123!");
-  console.log("  STAFF: staff@merncrest.lk / ChangeMe123!");
+  console.log("  STAFF: staff@merncrest.lk / ChangeMe123!  → /staff + /admin/erp");
   console.log("  CUSTOMER: demo@merncrest.lk / ChangeMe123!");
   console.log("  Coupons: WELCOME10 (10%), SAVE20 (Rs. 2,000 off)");
 }

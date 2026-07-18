@@ -191,8 +191,9 @@ Portal: overview widgets, My Services, cart, orders, domains, hosting, billing, 
 | `/admin/billing` | Billing |
 | `/admin/crm` | CRM |
 | `/admin/support` | Support |
-| `/admin/erp` | ERP hub (HRM, Finance, Projects, EAM, SCM, FSM, Permissions) |
-| `/admin/reports` | Reports |
+| `/admin/erp` | Full ERP hub (5.1–5.20 module map) |
+| `/staff` | Internal staff portal (ESS, tasks, chat) |
+| `/admin/reports` | BI / Reports |
 | `/admin/settings` | Settings |
 
 ---
@@ -252,6 +253,8 @@ Open http://localhost:3000 → redirects to `/en`.
 
 **Part 04 done:** Tickets + replies + CSAT, live AI chat (KB-aware, handoff → ticket), WhatsApp business menu (domain search, orders, invoices, tickets, human handover, EN/TA/SI detection), IVR simulator (language/department → call log + callback + CRM), email→ticket stub, quotations (accept → order), Customer ID 360 profiles, Admin CRM pipeline (NEW→WON), Support inbox (tickets/callbacks/WhatsApp/IVR).
 
-**Part 05 done:** Internal ERP — departments/employees/leave (HRM), finance ledger, projects/tasks, assets (EAM), inventory (SCM), field work orders (FSM), staff permission grants, ERP analytics on Reports. Roles: OWNER/ADMIN full access; STAFF defaults + optional `StaffPermission` grants.
+**Part 05 done (full blueprint map):** 20 ERP sections (5.1–5.20) as navigable modules — Overview, HRM (+ attendance/recruitment/payroll APIs), Finance, Procurement, Inventory, SCM, Manufacturing (BOM/MO), EAM, ESM, FSM, Projects, CSM (via Support), IoT, Predictive Maintenance, AI assistant, BI, DMS, Staff Portal, Roles/Permissions (org-role presets), Executive Dashboards. Granular `erp.*.view|manage` ACL + Employee.orgRole presets (CEO→Auditor).
 
-**Out of scope until later:** Deep manufacturing/IoT telemetry, full multi-company consolidation, live registrar/cPanel, Meta WhatsApp tokens, real IVR PBX audio, Redis.
+**Next blueprint parts:** Part 06 Admin panel depth · Part 07 AWS/DevOps/Security · Part 08 UI/UX/SOP.
+
+**Still stubs / deepen later:** Full GL/AR/AP ledgers, barcode hardware, GPS route optimization, OCR, live LLM providers, multi-company consolidation, Redis.

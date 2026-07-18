@@ -48,6 +48,10 @@ model User {
   financeEntries   FinanceEntry[]
   permissions      StaffPermission[]
   workOrders       WorkOrder[]     @relation("WorkOrderAssignee")
+  attendance       AttendanceRecord[]
+  documents        Document[]      @relation("DocUploader")
+  internalMessages InternalMessage[] @relation("MsgSender")
+  vendorsManaged   Vendor[]        @relation("VendorOwner")
 
   @@index([role])
 }
@@ -625,10 +629,16 @@ model Department {
   code        String       @unique
   name        String
   description String?
+  parentId    String?
+  parent      Department?  @relation("DeptTree", fields: [parentId], references: [id], onDelete: SetNull)
+  children    Department[] @relation("DeptTree")
   createdAt   DateTime     @default(now())
   updatedAt   DateTime     @updatedAt
   employees   Employee[]
   projects    ErpProject[]
+  costCenter  String?
+
+  @@index([parentId])
 }
 
 model Employee {
@@ -644,16 +654,23 @@ model Employee {
   /// FULL_TIME | PART_TIME | CONTRACT | INTERN
   employmentType String      @default("FULL_TIME")
   jobTitle       String
+  /// CEO | DIRECTOR | HR | FINANCE | SALES | MARKETING | SUPPORT | DEVELOPER | ENGINEER | AUDITOR | STAFF
+  orgRole        String      @default("STAFF")
   /// ACTIVE | ON_LEAVE | TERMINATED
   status         String      @default("ACTIVE")
   hireDate       DateTime    @default(now())
   salaryCents    Int         @default(0)
+  managerId      String?
   createdAt      DateTime    @default(now())
   updatedAt      DateTime    @updatedAt
+
+  attendance AttendanceRecord[]
+  payrollLines PayrollLine[]
 
   @@index([departmentId])
   @@index([status])
   @@index([email])
+  @@index([orgRole])
 }
 
 model LeaveRequest {
@@ -692,8 +709,9 @@ model ErpProject {
   createdAt    DateTime    @default(now())
   updatedAt    DateTime    @updatedAt
 
-  members ProjectMember[]
-  tasks   ProjectTask[]
+  members    ProjectMember[]
+  tasks      ProjectTask[]
+  milestones ProjectMilestone[]
 
   @@index([status])
   @@index([departmentId])
@@ -758,12 +776,17 @@ model Asset {
   /// AVAILABLE | ASSIGNED | MAINTENANCE | RETIRED
   status        String    @default("AVAILABLE")
   location      String?
-  purchaseCents Int       @default(0)
-  purchaseDate  DateTime?
-  assignedTo    String?
-  notes         String?
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  purchaseCents   Int       @default(0)
+  purchaseDate    DateTime?
+  assignedTo      String?
+  /// Useful life years for depreciation
+  usefulLifeYears Int       @default(5)
+  salvageCents    Int       @default(0)
+  notes           String?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  maintenance AssetMaintenance[]
 
   @@index([status])
   @@index([category])
@@ -777,11 +800,19 @@ model InventoryItem {
   quantity      Int      @default(0)
   reorderLevel  Int      @default(5)
   unitCostCents Int      @default(0)
+  warehouseId   String?
+  warehouse     Warehouse? @relation(fields: [warehouseId], references: [id], onDelete: SetNull)
+  batchCode     String?
+  expiresAt     DateTime?
+  barcode       String?
   location      String?
   updatedAt     DateTime @updatedAt
   createdAt     DateTime @default(now())
 
+  movements StockMovement[]
+
   @@index([category])
+  @@index([warehouseId])
 }
 
 model WorkOrder {
@@ -793,12 +824,17 @@ model WorkOrder {
   status      String    @default("OPEN")
   /// LOW | MEDIUM | HIGH | URGENT
   priority    String    @default("MEDIUM")
-  assetCode   String?
-  assigneeId  String?
-  assignee    User?     @relation("WorkOrderAssignee", fields: [assigneeId], references: [id], onDelete: SetNull)
-  dueDate     DateTime?
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+  assetCode     String?
+  assigneeId    String?
+  assignee      User?     @relation("WorkOrderAssignee", fields: [assigneeId], references: [id], onDelete: SetNull)
+  dueDate       DateTime?
+  scheduledAt   DateTime?
+  latitude      Float?
+  longitude     Float?
+  customerSign  String?
+  serviceReport String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
 
   @@index([status])
   @@index([assigneeId])
@@ -813,4 +849,293 @@ model StaffPermission {
 
   @@unique([userId, permission])
   @@index([userId])
+}
+
+/// —— Part 05 expanded modules ——
+
+model AttendanceRecord {
+  id         String    @id @default(cuid())
+  employeeId String
+  employee   Employee  @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  userId     String?
+  user       User?     @relation(fields: [userId], references: [id], onDelete: SetNull)
+  workDate   DateTime
+  checkIn    DateTime?
+  checkOut   DateTime?
+  /// PRESENT | ABSENT | LATE | HALF_DAY | REMOTE
+  status     String    @default("PRESENT")
+  notes      String?
+  createdAt  DateTime  @default(now())
+
+  @@index([employeeId])
+  @@index([workDate])
+  @@index([userId])
+}
+
+model PayrollRun {
+  id          String       @id @default(cuid())
+  runNumber   String       @unique
+  periodLabel String
+  /// DRAFT | APPROVED | PAID
+  status      String       @default("DRAFT")
+  totalCents  Int          @default(0)
+  createdAt   DateTime     @default(now())
+  lines       PayrollLine[]
+}
+
+model PayrollLine {
+  id           String     @id @default(cuid())
+  payrollRunId String
+  payrollRun   PayrollRun @relation(fields: [payrollRunId], references: [id], onDelete: Cascade)
+  employeeId   String
+  employee     Employee   @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  grossCents   Int
+  deductionsCents Int     @default(0)
+  netCents     Int
+  notes        String?
+
+  @@index([payrollRunId])
+  @@index([employeeId])
+}
+
+model JobOpening {
+  id          String   @id @default(cuid())
+  title       String
+  department  String?
+  description String?
+  /// OPEN | CLOSED | FILLED
+  status      String   @default("OPEN")
+  createdAt   DateTime @default(now())
+  applications JobApplication[]
+}
+
+model JobApplication {
+  id           String     @id @default(cuid())
+  jobOpeningId String
+  jobOpening   JobOpening @relation(fields: [jobOpeningId], references: [id], onDelete: Cascade)
+  fullName     String
+  email        String
+  phone        String?
+  resumeUrl    String?
+  /// NEW | SCREENING | INTERVIEW | OFFER | HIRED | REJECTED
+  status       String     @default("NEW")
+  notes        String?
+  createdAt    DateTime   @default(now())
+
+  @@index([jobOpeningId])
+  @@index([status])
+}
+
+model Vendor {
+  id          String   @id @default(cuid())
+  vendorCode  String   @unique
+  name        String
+  email       String?
+  phone       String?
+  address     String?
+  category    String?
+  ownerId     String?
+  owner       User?    @relation("VendorOwner", fields: [ownerId], references: [id], onDelete: SetNull)
+  /// ACTIVE | INACTIVE | BLOCKED
+  status      String   @default("ACTIVE")
+  createdAt   DateTime @default(now())
+  purchaseOrders PurchaseOrder[]
+
+  @@index([status])
+}
+
+model PurchaseOrder {
+  id          String   @id @default(cuid())
+  poNumber    String   @unique
+  vendorId    String?
+  vendor      Vendor?  @relation(fields: [vendorId], references: [id], onDelete: SetNull)
+  description String
+  amountCents Int
+  /// DRAFT | SUBMITTED | APPROVED | ORDERED | RECEIVED | CANCELLED
+  status      String   @default("DRAFT")
+  orderedAt   DateTime?
+  createdAt   DateTime @default(now())
+
+  @@index([vendorId])
+  @@index([status])
+}
+
+model Warehouse {
+  id        String          @id @default(cuid())
+  code      String          @unique
+  name      String
+  location  String?
+  createdAt DateTime        @default(now())
+  items     InventoryItem[]
+}
+
+model StockMovement {
+  id        String        @id @default(cuid())
+  itemId    String
+  item      InventoryItem @relation(fields: [itemId], references: [id], onDelete: Cascade)
+  /// IN | OUT | ADJUST | TRANSFER
+  type      String
+  quantity  Int
+  note      String?
+  createdAt DateTime      @default(now())
+
+  @@index([itemId])
+  @@index([createdAt])
+}
+
+model Bom {
+  id          String    @id @default(cuid())
+  bomCode     String    @unique
+  productName String
+  description String?
+  createdAt   DateTime  @default(now())
+  lines       BomLine[]
+  productionOrders ProductionOrder[]
+}
+
+model BomLine {
+  id          String @id @default(cuid())
+  bomId       String
+  bom         Bom    @relation(fields: [bomId], references: [id], onDelete: Cascade)
+  componentSku String
+  quantity    Float  @default(1)
+}
+
+model ProductionOrder {
+  id          String   @id @default(cuid())
+  orderNumber String   @unique
+  bomId       String?
+  bom         Bom?     @relation(fields: [bomId], references: [id], onDelete: SetNull)
+  productName String
+  quantity    Int      @default(1)
+  /// PLANNED | IN_PROGRESS | QC | DONE | CANCELLED
+  status      String   @default("PLANNED")
+  createdAt   DateTime @default(now())
+
+  @@index([status])
+}
+
+model AssetMaintenance {
+  id          String   @id @default(cuid())
+  assetId     String
+  asset       Asset    @relation(fields: [assetId], references: [id], onDelete: Cascade)
+  title       String
+  /// SCHEDULED | IN_PROGRESS | DONE
+  status      String   @default("SCHEDULED")
+  scheduledAt DateTime?
+  costCents   Int      @default(0)
+  notes       String?
+  createdAt   DateTime @default(now())
+
+  @@index([assetId])
+  @@index([status])
+}
+
+model ServiceCatalogItem {
+  id          String   @id @default(cuid())
+  code        String   @unique
+  name        String
+  category    String
+  description String?
+  slaHours    Int      @default(24)
+  active      Boolean  @default(true)
+}
+
+model EsIncident {
+  id          String   @id @default(cuid())
+  incidentNumber String @unique
+  title       String
+  description String?
+  /// INCIDENT | PROBLEM | CHANGE | REQUEST
+  type        String   @default("INCIDENT")
+  /// OPEN | IN_PROGRESS | RESOLVED | CLOSED
+  status      String   @default("OPEN")
+  priority    String   @default("MEDIUM")
+  slaDueAt    DateTime?
+  createdAt   DateTime @default(now())
+
+  @@index([status])
+  @@index([type])
+}
+
+model ProjectMilestone {
+  id          String     @id @default(cuid())
+  projectId   String
+  project     ErpProject @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  title       String
+  dueDate     DateTime?
+  /// PENDING | DONE
+  status      String     @default("PENDING")
+  createdAt   DateTime   @default(now())
+
+  @@index([projectId])
+}
+
+model IotDevice {
+  id          String   @id @default(cuid())
+  deviceCode  String   @unique
+  name        String
+  location    String?
+  /// ONLINE | OFFLINE | ALERT
+  status      String   @default("ONLINE")
+  lastSeenAt  DateTime?
+  healthScore Int      @default(100)
+  createdAt   DateTime @default(now())
+  readings    IotReading[]
+
+  @@index([status])
+}
+
+model IotReading {
+  id        String    @id @default(cuid())
+  deviceId  String
+  device    IotDevice @relation(fields: [deviceId], references: [id], onDelete: Cascade)
+  metric    String
+  value     Float
+  unit      String?
+  createdAt DateTime  @default(now())
+
+  @@index([deviceId])
+  @@index([createdAt])
+}
+
+model Document {
+  id          String   @id @default(cuid())
+  docNumber   String   @unique
+  title       String
+  category    String
+  /// DRAFT | PENDING | APPROVED | ARCHIVED
+  status      String   @default("DRAFT")
+  version     Int      @default(1)
+  fileUrl     String?
+  uploaderId  String?
+  uploader    User?    @relation("DocUploader", fields: [uploaderId], references: [id], onDelete: SetNull)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([category])
+  @@index([status])
+}
+
+model InternalMessage {
+  id        String   @id @default(cuid())
+  senderId  String
+  sender    User     @relation("MsgSender", fields: [senderId], references: [id], onDelete: Cascade)
+  channel   String   @default("general")
+  body      String
+  createdAt DateTime @default(now())
+
+  @@index([channel])
+  @@index([createdAt])
+}
+
+model AiInsight {
+  id        String   @id @default(cuid())
+  title     String
+  category  String
+  summary   String
+  payload   String?
+  createdAt DateTime @default(now())
+
+  @@index([category])
 }

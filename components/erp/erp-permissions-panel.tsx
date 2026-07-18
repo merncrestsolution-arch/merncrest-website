@@ -2,6 +2,8 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
+import { ORG_ROLE_PRESETS } from "@/lib/erp/permissions";
+import { ORG_ROLES } from "@/lib/erp/modules";
 
 type Staff = {
   id: string;
@@ -54,8 +56,24 @@ export function ErpPermissionsPanel() {
     <div className="space-y-6">
       {error && <p className="text-sm text-red-400">{error}</p>}
       <p className="text-sm text-muted">
-        OWNER/ADMIN have all ERP permissions. Extra grants apply mainly to STAFF roles.
+        OWNER/ADMIN have all ERP permissions. Org roles (CEO→Auditor) apply via Employee.orgRole; extras grant/revoke below.
       </p>
+      <div className="rounded-xl border border-white/10 p-4">
+        <h3 className="font-semibold text-sm mb-2">Org role presets (5.19)</h3>
+        <ul className="grid sm:grid-cols-2 gap-2 text-xs">
+          {ORG_ROLES.map((role) => {
+            const preset = ORG_ROLE_PRESETS[role];
+            return (
+              <li key={role} className="border border-white/10 rounded p-2">
+                <p className="font-mono text-accent">{role}</p>
+                <p className="text-muted mt-1">
+                  {preset === "*" ? "ALL permissions" : `${(preset || []).length} permissions`}
+                </p>
+              </li>
+            );
+          })}
+        </ul>
+      </div>
       <div className="grid lg:grid-cols-[240px_1fr] gap-4">
         <ul className="space-y-2">
           {staff.map((s) => (
