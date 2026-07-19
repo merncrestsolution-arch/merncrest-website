@@ -119,11 +119,11 @@ export function DomainSearch() {
         <input
           value={q}
           onChange={(e) => setQ(e.target.value)}
-          placeholder="example.lk"
-          className="flex-1 h-12 rounded-lg border border-white/10 bg-white/5 px-4 text-sm outline-none focus:ring-2 focus:ring-accent/50"
+          placeholder="Search your perfect domain — e.g. mybrand.lk"
+          className="flex-1 h-12 rounded-full border border-violet-500/25 bg-black/20 px-5 text-sm text-white outline-none placeholder:text-white/35 focus:border-violet-400/50 focus:ring-2 focus:ring-violet-500/30"
         />
-        <Button type="submit" size="lg" disabled={loading}>
-          {loading ? "Searching…" : "Search"}
+        <Button type="submit" size="lg" disabled={loading} className="rounded-full px-8 shadow-glow">
+          {loading ? "Searching…" : "Search Domains"}
         </Button>
       </form>
       {error && <p className="text-sm text-red-400">{error}</p>}

@@ -96,6 +96,10 @@
     @apply backdrop-blur-md bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 rounded-xl shadow-sm dark:shadow-none;
   }
 
+  .glass-panel {
+    @apply backdrop-blur-xl bg-white/[0.03] border border-white/10 rounded-2xl shadow-glow;
+  }
+
   .gradient-text {
     @apply bg-gradient-to-r from-violet-400 via-fuchsia-400 to-indigo-400 bg-clip-text text-transparent;
   }

@@ -6,6 +6,7 @@ import { Link } from "@/i18n/routing";
 import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
 import { HeroAtmosphere } from "./hero-atmosphere";
+import { SearchTrigger } from "@/components/layout/command-search";
 
 const TRUST_KEYS = [
   "trustProjects",
@@ -52,9 +53,18 @@ export function HeroSection() {
           </motion.p>
 
           <motion.div
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.28 }}
+            className="pt-1"
+          >
+            <SearchTrigger className="w-full sm:w-auto max-w-md justify-start rounded-2xl border-white/15 bg-white/[0.06] px-4 py-3 text-base shadow-glow hover:border-violet-400/50" />
+          </motion.div>
+
+          <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3 }}
+            transition={{ delay: 0.35 }}
             className="flex flex-col sm:flex-row flex-wrap gap-3 pt-1"
           >
             <Button asChild size="lg" className="rounded-full px-8">

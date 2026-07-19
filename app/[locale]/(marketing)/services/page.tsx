@@ -23,7 +23,7 @@ export default async function ServicesPage({
   setRequestLocale(locale);
 
   return (
-    <div className="pt-24 min-h-screen">
+    <div className="min-h-screen">
       <ServicesSection hideViewAll={true} />
     </div>
   );

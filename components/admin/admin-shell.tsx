@@ -3,6 +3,7 @@
 import { Link } from "@/i18n/routing";
 import { useTranslations } from "next-intl";
 import { AdminSidebar } from "@/components/admin/admin-sidebar";
+import { CommandSearchProvider, SearchTrigger } from "@/components/layout/command-search";
 import type { SessionUser } from "@/lib/auth-types";
 
 const mobileLinks = [
@@ -12,6 +13,7 @@ const mobileLinks = [
   { href: "/admin/billing", key: "billing" },
   { href: "/admin/crm", key: "crm" },
   { href: "/admin/support", key: "support" },
+  { href: "/admin/erp", key: "erp" },
   { href: "/admin/reports", key: "reports" },
 ] as const;
 
@@ -24,7 +26,7 @@ function AdminMobileNav() {
           <Link
             key={l.href}
             href={l.href}
-            className="text-xs px-3 py-1.5 rounded-full border border-white/10 text-muted hover:text-foreground hover:border-accent/40"
+            className="text-xs px-3 py-1.5 rounded-full border border-white/10 text-muted hover:text-foreground hover:border-violet-400/40"
           >
             {t(l.key)}
           </Link>
@@ -42,20 +44,32 @@ export function AdminShell({
   user: SessionUser;
 }) {
   return (
-    <div className="flex min-h-screen bg-background">
-      <div className="hidden md:block sticky top-0 h-screen">
-        <AdminSidebar userName={user.fullName} />
+    <CommandSearchProvider>
+      <div className="flex min-h-screen bg-[#050508]">
+        <div className="hidden md:block sticky top-0 h-screen">
+          <AdminSidebar userName={user.fullName} />
+        </div>
+        <div className="flex-1 flex flex-col min-w-0">
+          <header className="sticky top-0 z-40 border-b border-white/10 bg-[#050508]/90 backdrop-blur-xl px-4 py-3 flex items-center justify-between gap-3">
+            <div className="md:hidden">
+              <Link href="/" className="font-display font-bold gradient-text">
+                MernCrest Admin
+              </Link>
+            </div>
+            <div className="hidden md:block font-display text-sm font-semibold text-white/90">
+              Admin Console
+            </div>
+            <div className="flex items-center gap-3 ml-auto">
+              <SearchTrigger />
+              <span className="text-xs text-muted truncate max-w-[8rem] sm:max-w-[12rem]">
+                {user.fullName}
+              </span>
+            </div>
+          </header>
+          <AdminMobileNav />
+          <main className="flex-1 p-6 lg:p-10">{children}</main>
+        </div>
       </div>
-      <div className="flex-1 flex flex-col min-w-0">
-        <header className="md:hidden border-b border-white/10 px-4 py-3 flex items-center justify-between">
-          <Link href="/" className="font-display font-bold gradient-text">
-            MernCrest Admin
-          </Link>
-          <span className="text-xs text-muted truncate max-w-[40%]">{user.fullName}</span>
-        </header>
-        <AdminMobileNav />
-        <main className="flex-1 p-6 lg:p-10">{children}</main>
-      </div>
-    </div>
+    </CommandSearchProvider>
   );
 }

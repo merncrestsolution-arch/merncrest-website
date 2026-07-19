@@ -3,6 +3,7 @@ import { Footer } from "@/components/layout/footer";
 import { WhatsAppButton } from "@/components/layout/whatsapp-button";
 import { AiChatWidget } from "@/components/layout/ai-chat-widget";
 import { PageTransition } from "@/components/layout/page-transition";
+import { CommandSearchProvider } from "@/components/layout/command-search";
 
 export default function MarketingLayout({
   children,
@@ -10,7 +11,7 @@ export default function MarketingLayout({
   children: React.ReactNode;
 }) {
   return (
-    <>
+    <CommandSearchProvider>
       <Navbar />
       <main className="min-h-screen">
         <PageTransition>{children}</PageTransition>
@@ -18,6 +19,6 @@ export default function MarketingLayout({
       <Footer />
       <WhatsAppButton />
       <AiChatWidget />
-    </>
+    </CommandSearchProvider>
   );
 }

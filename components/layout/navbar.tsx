@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/routing";
-import { Menu, ChevronDown, Search } from "lucide-react";
+import { Menu, ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {
@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/sheet";
 import { ThemeToggle } from "./theme-toggle";
 import { LanguageSwitcher } from "./language-switcher";
+import { SearchTrigger } from "./command-search";
 import { navLinks, productMenuItems, resourceLinks } from "@/lib/navigation";
 import Image from "next/image";
 
@@ -144,15 +145,14 @@ export function Navbar() {
           </div>
 
           <div className="flex items-center gap-2 sm:gap-3">
-            <Button asChild variant="ghost" size="icon" className="hidden md:inline-flex" aria-label="Search">
-              <Link href="/knowledge-base"><Search className="h-4 w-4" /></Link>
-            </Button>
+            <SearchTrigger className="sm:hidden !px-2.5" />
+            <SearchTrigger className="hidden sm:inline-flex" />
             <div className="hidden sm:block"><LanguageSwitcher /></div>
             <ThemeToggle />
             <Button asChild variant="ghost" size="sm" className="hidden md:inline-flex">
               <Link href="/login">{t("login")}</Link>
             </Button>
-            <Button asChild className="hidden md:inline-flex rounded-full" size="sm">
+            <Button asChild className="hidden md:inline-flex rounded-full shadow-glow" size="sm">
               <Link href="/contact">{t("getConsultation")}</Link>
             </Button>
 

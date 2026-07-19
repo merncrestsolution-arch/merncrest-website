@@ -3,6 +3,7 @@
 import { Link, usePathname, useRouter } from "@/i18n/routing";
 import { LayoutDashboard, CheckSquare, MessageSquare, Building2, LogOut } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { CommandSearchProvider, SearchTrigger } from "@/components/layout/command-search";
 
 const links = [
   { href: "/staff", label: "Dashboard", icon: LayoutDashboard },
@@ -28,37 +29,51 @@ export function StaffShell({
   }
 
   return (
-    <div className="min-h-screen flex bg-[#050508] text-foreground">
-      <aside className="w-56 shrink-0 border-r border-white/10 flex flex-col">
-        <div className="p-5 border-b border-white/10">
-          <Link href="/" className="font-display font-bold gradient-text">MernCrest</Link>
-          <p className="text-xs text-muted mt-1">Staff Portal</p>
-          {userName && <p className="text-xs mt-2 truncate">{userName}</p>}
+    <CommandSearchProvider>
+      <div className="min-h-screen flex bg-[#050508] text-foreground">
+        <aside className="w-56 shrink-0 border-r border-white/10 flex flex-col">
+          <div className="p-5 border-b border-white/10">
+            <Link href="/" className="font-display font-bold gradient-text">
+              MernCrest
+            </Link>
+            <p className="text-xs text-muted mt-1">Staff Portal</p>
+            {userName && <p className="text-xs mt-2 truncate">{userName}</p>}
+          </div>
+          <nav className="flex-1 p-3 space-y-0.5">
+            {links.map((l) => {
+              const Icon = l.icon;
+              const active =
+                l.href === "/staff" ? pathname === "/staff" : pathname.startsWith(l.href);
+              return (
+                <Link
+                  key={l.href}
+                  href={l.href}
+                  className={cn(
+                    "flex items-center gap-2 rounded-lg px-3 py-2 text-sm",
+                    active ? "bg-violet-500/15 text-violet-300" : "text-muted hover:bg-white/5"
+                  )}
+                >
+                  <Icon className="h-4 w-4" />
+                  {l.label}
+                </Link>
+              );
+            })}
+          </nav>
+          <button
+            type="button"
+            onClick={logout}
+            className="m-3 flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-muted hover:bg-white/5"
+          >
+            <LogOut className="h-4 w-4" /> Log out
+          </button>
+        </aside>
+        <div className="flex-1 flex flex-col min-w-0">
+          <header className="sticky top-0 z-30 border-b border-white/10 bg-[#050508]/90 backdrop-blur-xl px-4 py-3 flex justify-end">
+            <SearchTrigger />
+          </header>
+          <main className="flex-1 p-6 overflow-auto">{children}</main>
         </div>
-        <nav className="flex-1 p-3 space-y-0.5">
-          {links.map((l) => {
-            const Icon = l.icon;
-            const active = l.href === "/staff" ? pathname === "/staff" : pathname.startsWith(l.href);
-            return (
-              <Link
-                key={l.href}
-                href={l.href}
-                className={cn(
-                  "flex items-center gap-2 rounded-lg px-3 py-2 text-sm",
-                  active ? "bg-accent/15 text-accent" : "text-muted hover:bg-white/5"
-                )}
-              >
-                <Icon className="h-4 w-4" />
-                {l.label}
-              </Link>
-            );
-          })}
-        </nav>
-        <button type="button" onClick={logout} className="m-3 flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-muted hover:bg-white/5">
-          <LogOut className="h-4 w-4" /> Log out
-        </button>
-      </aside>
-      <main className="flex-1 p-6 overflow-auto">{children}</main>
-    </div>
+      </div>
+    </CommandSearchProvider>
   );
 }
