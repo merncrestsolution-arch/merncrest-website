@@ -1,6 +1,12 @@
 "use client";
 
-import { Reveal } from "@/components/motion/reveal";
+import {
+  StitchSection,
+  StitchHeader,
+  StitchCard,
+  StitchReveal,
+  StitchGrid,
+} from "@/components/ui/stitch";
 
 const highlights = [
   { value: "5+", label: "Years of experience" },
@@ -15,26 +21,22 @@ const highlights = [
 
 export function HighlightsSection() {
   return (
-    <section className="section-padding border-y border-white/5 relative overflow-hidden">
-      <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-violet-600/5 via-transparent to-indigo-500/5" />
-      <div className="container-wide relative z-10">
-        <Reveal className="mb-10 max-w-xl">
-          <p className="font-mono text-xs uppercase tracking-[0.2em] text-violet-300 mb-3">
-            Company highlights
-          </p>
-          <h2 className="font-display text-3xl font-bold text-white">Numbers that power trust</h2>
-        </Reveal>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-5">
-          {highlights.map((h, i) => (
-            <Reveal key={h.label} delay={i * 0.03}>
-              <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-5">
-                <p className="font-display text-3xl sm:text-4xl font-bold gradient-text">{h.value}</p>
-                <p className="text-sm text-muted mt-1">{h.label}</p>
-              </div>
-            </Reveal>
-          ))}
-        </div>
-      </div>
-    </section>
+    <StitchSection className="!py-14 border-y border-white/[0.05]">
+      <StitchHeader
+        eyebrow="Company highlights"
+        title="Numbers that power trust"
+        className="mb-10"
+      />
+      <StitchGrid cols={4}>
+        {highlights.map((h, i) => (
+          <StitchReveal key={h.label} delay={i * 0.03}>
+            <StitchCard className="!py-5">
+              <p className="font-display text-3xl sm:text-4xl font-bold gradient-text">{h.value}</p>
+              <p className="text-sm text-muted mt-1">{h.label}</p>
+            </StitchCard>
+          </StitchReveal>
+        ))}
+      </StitchGrid>
+    </StitchSection>
   );
 }

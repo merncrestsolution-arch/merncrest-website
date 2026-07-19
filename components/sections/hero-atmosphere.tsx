@@ -6,7 +6,7 @@ import { motion } from "framer-motion";
 export function HeroAtmosphere() {
   return (
     <div className="absolute inset-0 overflow-hidden" aria-hidden>
-      <div className="absolute inset-0 bg-[#050508]" />
+      <div className="absolute inset-0 bg-[#0e0e12]" />
 
       <motion.div
         className="absolute -left-1/4 top-0 h-[80%] w-[70%] rounded-full bg-violet-600/25 blur-[120px]"

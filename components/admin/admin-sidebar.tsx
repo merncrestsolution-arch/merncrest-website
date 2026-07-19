@@ -40,8 +40,8 @@ export function AdminSidebar({ userName }: { userName?: string }) {
   }
 
   return (
-    <aside className="w-64 shrink-0 border-r border-white/10 bg-[#050508] flex flex-col min-h-screen">
-      <div className="p-6 border-b border-white/10">
+    <aside className="w-64 shrink-0 border-r border-white/[0.05] bg-[#0e0e12] flex flex-col min-h-screen">
+      <div className="p-6 border-b border-white/[0.05]">
         <Link href="/" className="font-display text-lg font-bold gradient-text">
           MernCrest
         </Link>
@@ -60,9 +60,9 @@ export function AdminSidebar({ userName }: { userName?: string }) {
               key={link.key}
               href={link.href}
               className={cn(
-                "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition-colors",
+                "flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm transition-colors",
                 active
-                  ? "bg-accent/15 text-accent"
+                  ? "bg-violet-500/15 text-violet-300"
                   : "text-muted hover:text-foreground hover:bg-white/5"
               )}
             >

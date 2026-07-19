@@ -84,7 +84,7 @@ export function Footer() {
   };
 
   return (
-    <footer className="relative overflow-hidden border-t border-white/10 bg-[#050508]">
+    <footer className="relative overflow-hidden border-t border-white/[0.05] bg-[#0e0e12]">
       <div className="pointer-events-none absolute inset-0 brand-mesh opacity-30" aria-hidden />
       <div className="container-wide section-padding pb-8 relative z-10">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-10">

@@ -1,31 +1,27 @@
-import { Reveal } from "@/components/motion/reveal";
+import { Link } from "@/i18n/routing";
 import { partners } from "@/lib/data/resources";
 import { Button } from "@/components/ui/button";
-import { Link } from "@/i18n/routing";
+import { PageHero } from "@/components/ui/page-hero";
 
 export default function PartnersPage() {
   return (
-    <div className="pt-28 section-padding">
-      <div className="container-wide">
-        <Reveal className="max-w-2xl mb-14">
-          <p className="font-mono text-xs uppercase tracking-[0.2em] text-accent mb-3">Partners</p>
-          <h1 className="font-display text-4xl sm:text-5xl font-bold">Technology partners</h1>
-          <p className="mt-4 text-lg text-muted">
-            We build on trusted platforms so your stack stays secure, scalable, and supportable.
-          </p>
-        </Reveal>
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-10 mb-12">
-          {partners.map((p, i) => (
-            <Reveal key={p.name} delay={i * 0.04}>
-              <div className="space-y-2">
-                <h2 className="font-display text-xl font-semibold">{p.name}</h2>
-                <p className="text-xs font-mono text-accent">{p.role}</p>
-                <p className="text-sm text-muted">{p.blurb}</p>
-              </div>
-            </Reveal>
+    <div className="stitch-page">
+      <PageHero
+        eyebrow="Partners"
+        title="Technology partners"
+        description="We build on trusted platforms so your stack stays secure, scalable, and supportable."
+      />
+      <div className="stitch-page-body">
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5 mb-12">
+          {partners.map((p) => (
+            <div key={p.name} className="stitch-card stitch-card-hover">
+              <h2 className="font-display text-xl font-semibold text-white">{p.name}</h2>
+              <p className="mt-1 text-xs font-mono text-violet-300">{p.role}</p>
+              <p className="mt-2 text-sm text-muted">{p.blurb}</p>
+            </div>
           ))}
         </div>
-        <Button asChild>
+        <Button asChild className="rounded-full">
           <Link href="/contact">Become a partner</Link>
         </Button>
       </div>

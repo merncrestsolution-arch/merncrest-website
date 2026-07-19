@@ -32,6 +32,12 @@ yarn-error.log*
 # vercel
 .vercel
 
+# cursor MCP secrets (API keys)
+.cursor/mcp.json
+.cursor/stitch-*.json
+.cursor/stitch-*.env
+.cursor/stitch-project.env
+
 # prisma
 /prisma/dev.db
 /prisma/dev.db-journal
