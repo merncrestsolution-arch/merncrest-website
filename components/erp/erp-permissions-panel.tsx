@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { ORG_ROLE_PRESETS } from "@/lib/erp/permissions";
+import { ORG_ROLE_PRESETS } from "@/lib/erp/permission-matrix";
 import { ORG_ROLES } from "@/lib/erp/modules";
 
 type Staff = {
