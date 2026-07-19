@@ -25,7 +25,7 @@ export async function sendVerificationEmail(to: string, verifyUrl: string) {
     text: `Welcome to MernCrest.\n\nVerify your email:\n${verifyUrl}`,
     html: `
     <div style="font-family:sans-serif;max-width:480px;margin:0 auto">
-      <h1 style="color:#0B1622">MernCrest</h1>
+      <h1 style="color:#7C3AED">MernCrest</h1>
       <p>Welcome — confirm your email to activate your customer portal.</p>
       <p><a href="${verifyUrl}" style="display:inline-block;background:#14B8A6;color:#fff;padding:12px 20px;border-radius:8px;text-decoration:none">Verify email</a></p>
     </div>`,
@@ -46,7 +46,7 @@ export async function sendOrderConfirmationEmail(opts: {
     text: `Thank you for your order ${opts.orderNumber}.\nInvoice ${opts.invoiceNumber}\nTotal ${opts.totalLabel}\n\n${list}\n\nServices will appear in your portal after payment.`,
     html: `
     <div style="font-family:sans-serif;max-width:520px;margin:0 auto">
-      <h1 style="color:#0B1622">Order confirmed</h1>
+      <h1 style="color:#7C3AED">Order confirmed</h1>
       <p>Order <strong>${opts.orderNumber}</strong> · Invoice <strong>${opts.invoiceNumber}</strong></p>
       <p>Total: <strong>${opts.totalLabel}</strong></p>
       <ul>${opts.items.map((i) => `<li>${i}</li>`).join("")}</ul>
@@ -66,7 +66,7 @@ export async function sendProvisioningEmail(opts: {
     text: `Your MernCrest services are active.\n\n${opts.summary.join("\n")}\n\nOpen your customer portal to manage domains and hosting.`,
     html: `
     <div style="font-family:sans-serif;max-width:520px;margin:0 auto">
-      <h1 style="color:#0B1622">Services activated</h1>
+      <h1 style="color:#7C3AED">Services activated</h1>
       <p>Order <strong>${opts.orderNumber}</strong> has been provisioned.</p>
       <ul>${opts.summary.map((s) => `<li>${s}</li>`).join("")}</ul>
       <p><a href="${process.env.NEXT_PUBLIC_SITE_URL || "https://merncrest.lk"}/en/portal">Open dashboard</a></p>

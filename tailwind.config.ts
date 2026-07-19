@@ -11,27 +11,28 @@ const config: Config = {
     extend: {
       colors: {
         primary: {
-          DEFAULT: "#0B1622",
-          foreground: "#F0FDFA",
+          DEFAULT: "#7C3AED",
+          foreground: "#FFFFFF",
         },
         surface: {
-          DEFAULT: "#0F1C2A",
-          foreground: "#F0FDFA",
+          DEFAULT: "#111827",
+          foreground: "#FFFFFF",
         },
         accent: {
-          DEFAULT: "#14B8A6",
-          alt: "#0E7490",
+          DEFAULT: "#8B5CF6",
+          alt: "#6366F1",
+          blue: "#3B82F6",
           foreground: "#FFFFFF",
         },
         success: {
-          DEFAULT: "#10B981",
+          DEFAULT: "#22C55E",
           foreground: "#FFFFFF",
         },
         muted: {
-          DEFAULT: "#7A93A8",
+          DEFAULT: "#94A3B8",
           foreground: "#64748B",
         },
-        border: "rgba(255,255,255,0.08)",
+        border: "rgba(255,255,255,0.1)",
         glass: "rgba(255,255,255,0.04)",
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
@@ -55,8 +56,8 @@ const config: Config = {
         ring: "hsl(var(--ring))",
       },
       fontFamily: {
-        display: ["var(--font-syne)", "system-ui", "sans-serif"],
-        sans: ["var(--font-manrope)", "system-ui", "sans-serif"],
+        display: ["var(--font-jakarta)", "system-ui", "sans-serif"],
+        sans: ["var(--font-inter)", "system-ui", "sans-serif"],
         mono: ["var(--font-jetbrains)", "monospace"],
       },
       fontSize: {
@@ -74,12 +75,12 @@ const config: Config = {
       },
       backgroundImage: {
         "gradient-radial": "radial-gradient(var(--tw-gradient-stops))",
-        "gradient-accent": "linear-gradient(135deg, #14B8A6 0%, #0E7490 100%)",
-        "gradient-text": "linear-gradient(90deg, #2DD4BF 0%, #22D3EE 50%, #14B8A6 100%)",
+        "gradient-accent": "linear-gradient(135deg, #7C3AED 0%, #A855F7 55%, #6366F1 100%)",
+        "gradient-text": "linear-gradient(90deg, #A78BFA 0%, #C084FC 50%, #818CF8 100%)",
       },
       boxShadow: {
-        glow: "0 0 30px rgba(20, 184, 166, 0.28)",
-        "glow-lg": "0 0 50px rgba(20, 184, 166, 0.38)",
+        glow: "0 0 30px rgba(139, 92, 246, 0.35)",
+        "glow-lg": "0 0 50px rgba(139, 92, 246, 0.45)",
       },
       animation: {
         marquee: "marquee 40s linear infinite",

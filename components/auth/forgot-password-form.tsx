@@ -18,7 +18,7 @@ export function ForgotPasswordForm() {
         <p className="mt-2 text-muted">{t("resetSubtitle")}</p>
       </div>
       {sent ? (
-        <p className="text-sm text-teal-400">
+        <p className="text-sm text-success">
           If an account exists for that email, a reset link will be sent. Check your inbox or contact support.
         </p>
       ) : (

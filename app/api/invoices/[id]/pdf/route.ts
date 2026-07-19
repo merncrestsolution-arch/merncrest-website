@@ -35,7 +35,7 @@ export async function GET(
   const html = `<!DOCTYPE html>
 <html><head><meta charset="utf-8"/><title>${invoice.invoiceNumber}</title>
 <style>
-  body{font-family:system-ui,sans-serif;max-width:720px;margin:40px auto;color:#0B1622}
+  body{font-family:system-ui,sans-serif;max-width:720px;margin:40px auto;color:#111827}
   h1{color:#0E7490} table{width:100%;border-collapse:collapse;margin-top:24px}
   th,td{text-align:left;padding:8px;border-bottom:1px solid #e5e7eb;font-size:14px}
   .muted{color:#64748B;font-size:13px} .right{text-align:right}

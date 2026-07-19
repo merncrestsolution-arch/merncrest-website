@@ -217,7 +217,7 @@ export function CartView() {
       <div className="space-y-1 text-sm">
         <div className="flex justify-between text-muted"><span>Subtotal</span><span>{formatMoney(subtotalCents)}</span></div>
         {discountCents > 0 && (
-          <div className="flex justify-between text-teal-400"><span>Discount ({appliedCoupon})</span><span>-{formatMoney(discountCents)}</span></div>
+          <div className="flex justify-between text-success"><span>Discount ({appliedCoupon})</span><span>-{formatMoney(discountCents)}</span></div>
         )}
         <div className="flex justify-between font-display text-xl font-bold pt-2"><span>Total</span><span>{formatMoney(total)}</span></div>
       </div>

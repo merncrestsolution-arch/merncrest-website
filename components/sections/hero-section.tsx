@@ -7,6 +7,13 @@ import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
 import { HeroAtmosphere } from "./hero-atmosphere";
 
+const TRUST_KEYS = [
+  "trustProjects",
+  "trustClients",
+  "trustExperience",
+  "trustSupport",
+] as const;
+
 export function HeroSection() {
   const t = useTranslations("hero");
 
@@ -21,23 +28,25 @@ export function HeroSection() {
             animate={{ opacity: 1, y: 0 }}
             className="font-display text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-white"
           >
-            MernCrest
+            MernCrest{" "}
+            <span className="text-accent-blue">Solutions</span>
           </motion.p>
 
           <motion.h1
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
-            className="font-display text-2xl sm:text-3xl md:text-4xl lg:text-[2.75rem] font-semibold leading-[1.15] text-balance text-white/95"
+            className="font-display text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold leading-[1.12] text-balance text-white"
           >
-            {t("headline")}
+            {t("headlinePrefix")}{" "}
+            <span className="text-accent">{t("headlineHighlight")}</span>
           </motion.h1>
 
           <motion.p
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
-            className="text-base sm:text-lg text-white/70 max-w-xl leading-relaxed"
+            className="text-base sm:text-lg text-muted max-w-xl leading-relaxed"
           >
             {t("subheadline")}
           </motion.p>
@@ -45,22 +54,51 @@ export function HeroSection() {
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.35 }}
+            transition={{ delay: 0.3 }}
             className="flex flex-col sm:flex-row flex-wrap gap-3 pt-1"
           >
-            <Button asChild size="lg">
-              <Link href="/services">{t("ctaExplore")}</Link>
+            <Button asChild size="lg" className="rounded-full px-8">
+              <Link href="/contact">{t("ctaConsultation")}</Link>
             </Button>
-            <Button asChild variant="outline" size="lg" className="border-white/25 text-white hover:bg-white/10">
-              <Link href="/contact">
-                {t("ctaConsultation")}
-                <ArrowRight className="ml-2 h-4 w-4" />
+            <Button
+              asChild
+              variant="outline"
+              size="lg"
+              className="rounded-full border-white/30 text-white hover:bg-white/10"
+            >
+              <Link href="/portfolio">
+                {t("ctaPortfolio")}
+                <ArrowRight className="ml-1 h-4 w-4" />
               </Link>
             </Button>
-            <Button asChild variant="ghost" size="lg" className="text-white/80 hover:text-white hover:bg-white/10">
-              <Link href="/contact">{t("ctaSales")}</Link>
-            </Button>
           </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.4 }}
+          >
+            <Link
+              href="/contact"
+              className="text-sm text-white underline underline-offset-4 hover:text-accent transition-colors"
+            >
+              {t("ctaProposal")}
+            </Link>
+          </motion.div>
+
+          <motion.ul
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.45 }}
+            className="flex flex-wrap gap-x-5 gap-y-2 pt-2"
+          >
+            {TRUST_KEYS.map((key) => (
+              <li key={key} className="flex items-center gap-2 text-sm text-muted">
+                <span className="h-1.5 w-1.5 rounded-full bg-success shrink-0" />
+                {t(key)}
+              </li>
+            ))}
+          </motion.ul>
         </div>
       </div>
     </section>

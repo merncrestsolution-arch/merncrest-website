@@ -107,7 +107,7 @@ export function InvoicesList() {
 
   return (
     <div className="space-y-4">
-      {message && <p className="text-sm text-teal-400">{message}</p>}
+      {message && <p className="text-sm text-success">{message}</p>}
       {error && <p className="text-sm text-red-400">{error}</p>}
       {invoices.map((inv) => (
         <div
@@ -123,7 +123,7 @@ export function InvoicesList() {
               <p className="text-xs text-muted mt-1">Due {new Date(inv.dueAt).toLocaleDateString()}</p>
             )}
             {inv.paidAt && (
-              <p className="text-xs text-teal-400/80 mt-1">Paid {new Date(inv.paidAt).toLocaleString()}</p>
+              <p className="text-xs text-success/80 mt-1">Paid {new Date(inv.paidAt).toLocaleString()}</p>
             )}
           </div>
           <div className="flex flex-wrap items-center gap-2">

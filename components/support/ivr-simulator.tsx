@@ -102,7 +102,7 @@ export function IvrSimulator() {
         />
       )}
       {error && <p className="text-sm text-red-400">{error}</p>}
-      {result && <p className="text-sm text-teal-400">{result}</p>}
+      {result && <p className="text-sm text-success">{result}</p>}
       <Button type="submit" disabled={busy}>{busy ? "Routing…" : "Place call"}</Button>
     </form>
   );

@@ -31,10 +31,10 @@ Everything operates from **one centralized system**.
 | Layer | Current (Phase 1–2) | Target |
 |--------|---------------------|--------|
 | Framework | Next.js 14 App Router | Same + monorepo `apps/web` |
-| UI | React 18, TypeScript, Tailwind, shadcn/ui | Ocean-crest design system |
+| UI | React 18, TypeScript, Tailwind, shadcn/ui | MernCrest brand design system |
 | Motion | Framer Motion | Cinematic hero + scroll motion |
 | i18n | next-intl (`en`, `ta`, `si`) | Full copy localization over time |
-| Theming | next-themes (dark default) | Navy/teal tokens |
+| Theming | next-themes (dark default) | Near-black / purple–indigo tokens |
 | API | Next.js Route Handlers (`/api/auth/*`) | Expand + optional Nest/Express later |
 | Database | SQLite local / PostgreSQL via Docker | + Redis (Phase 3+) |
 | Auth | Session cookies, bcrypt, RBAC roles | + 2FA (later) |
@@ -200,11 +200,11 @@ Portal: overview widgets, My Services, cart, orders, domains, hosting, billing, 
 
 ## 6. Design System (Phase 1)
 
-- **Direction:** Ocean-crest — deep navy surfaces, electric teal accents
-- **Fonts:** Syne (display) + Manrope (body) + JetBrains Mono
-- **Hero:** Full-bleed muted video atmosphere; brand + one headline + one line + CTA group
-- **Motion:** Page transitions, scroll reveals, ambient gradient drift
-- Avoid purple-indigo default AI look
+- **Direction:** Brand dark — near-black surfaces (`#050508`), violet/indigo accents matching merncrest.lk
+- **Colors:** Primary `#7C3AED` / accent `#8B5CF6`, indigo `#6366F1`, blue `#3B82F6`, success `#22C55E`, muted `#94A3B8`
+- **Fonts:** Plus Jakarta Sans (display) + Inter (body) + JetBrains Mono
+- **Hero:** Full-bleed purple glow atmosphere; brand + purple-highlighted headline + CTA group + trust bullets
+- **Motion:** Page transitions, scroll reveals, ambient violet gradient drift
 
 ---
 

@@ -57,7 +57,7 @@ export function CallbackForm() {
       <textarea value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="Notes" rows={2}
         className="w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm" />
       {error && <p className="text-sm text-red-400">{error}</p>}
-      {message && <p className="text-sm text-teal-400">{message}</p>}
+      {message && <p className="text-sm text-success">{message}</p>}
       <Button type="submit" disabled={busy}>{busy ? "Submitting…" : "Request callback"}</Button>
     </form>
   );

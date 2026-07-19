@@ -68,7 +68,7 @@ export function ErpFinancePanel() {
       <div className="grid sm:grid-cols-3 gap-3">
         <div className="rounded-xl border border-white/10 p-4">
           <p className="text-xs text-muted">Income</p>
-          <p className="font-display text-xl font-bold text-teal-400">{formatMoney(summary.incomeCents)}</p>
+          <p className="font-display text-xl font-bold text-success">{formatMoney(summary.incomeCents)}</p>
         </div>
         <div className="rounded-xl border border-white/10 p-4">
           <p className="text-xs text-muted">Expense</p>
@@ -104,7 +104,7 @@ export function ErpFinancePanel() {
               <p>{e.description}</p>
               <p className="text-xs text-muted">{e.type} · {e.category} · {new Date(e.entryDate).toLocaleDateString()}</p>
             </div>
-            <p className={e.type === "INCOME" ? "text-teal-400" : ""}>{formatMoney(e.amountCents)}</p>
+            <p className={e.type === "INCOME" ? "text-success" : ""}>{formatMoney(e.amountCents)}</p>
           </li>
         ))}
       </ul>

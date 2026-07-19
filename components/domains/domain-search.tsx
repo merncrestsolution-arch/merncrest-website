@@ -127,7 +127,7 @@ export function DomainSearch() {
         </Button>
       </form>
       {error && <p className="text-sm text-red-400">{error}</p>}
-      {message && <p className="text-sm text-teal-400">{message}</p>}
+      {message && <p className="text-sm text-success">{message}</p>}
       <ul className="space-y-3">
         {results.map((r) => (
           <ResultRow key={r.domain} r={r} />

@@ -28,7 +28,7 @@ export function StaffShell({
   }
 
   return (
-    <div className="min-h-screen flex bg-[#061018] text-foreground">
+    <div className="min-h-screen flex bg-[#050508] text-foreground">
       <aside className="w-56 shrink-0 border-r border-white/10 flex flex-col">
         <div className="p-5 border-b border-white/10">
           <Link href="/" className="font-display font-bold gradient-text">MernCrest</Link>

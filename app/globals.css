@@ -4,54 +4,56 @@
 
 @layer base {
   :root {
-    --background: 210 40% 98%;
-    --foreground: 210 40% 8%;
+    /* Light mode — rare; brand is dark-first */
+    --background: 240 10% 98%;
+    --foreground: 240 20% 8%;
     --card: 0 0% 100%;
-    --card-foreground: 210 40% 8%;
+    --card-foreground: 240 20% 8%;
     --popover: 0 0% 100%;
-    --popover-foreground: 210 40% 8%;
-    --primary: 210 50% 8%;
-    --primary-foreground: 180 40% 98%;
-    --secondary: 200 25% 94%;
-    --secondary-foreground: 210 40% 12%;
-    --muted: 200 15% 42%;
-    --muted-foreground: 200 12% 40%;
-    --accent: 174 72% 40%;
+    --popover-foreground: 240 20% 8%;
+    --primary: 258 90% 56%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 240 10% 94%;
+    --secondary-foreground: 240 20% 12%;
+    --muted: 220 10% 42%;
+    --muted-foreground: 220 10% 40%;
+    --accent: 258 90% 56%;
     --accent-foreground: 0 0% 100%;
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 98%;
-    --border: 200 20% 88%;
-    --input: 200 20% 88%;
-    --ring: 174 72% 40%;
+    --border: 240 10% 88%;
+    --input: 240 10% 88%;
+    --ring: 258 90% 56%;
     --radius: 0.75rem;
-    --crest: 174 72% 40%;
-    --crest-deep: 192 80% 28%;
-    --navy: 210 50% 8%;
+    --brand: 258 90% 56%;
+    --brand-blue: 213 94% 58%;
+    --success: 142 71% 45%;
   }
 
   .dark {
-    --background: 210 45% 5%;
-    --foreground: 180 20% 96%;
-    --card: 210 40% 8%;
-    --card-foreground: 180 20% 96%;
-    --popover: 210 40% 8%;
-    --popover-foreground: 180 20% 96%;
-    --primary: 180 20% 96%;
-    --primary-foreground: 210 50% 8%;
-    --secondary: 210 30% 12%;
-    --secondary-foreground: 180 20% 96%;
-    --muted: 200 12% 48%;
-    --muted-foreground: 200 15% 62%;
-    --accent: 174 72% 46%;
-    --accent-foreground: 210 50% 6%;
-    --destructive: 0 62% 30%;
+    /* Brand dark — near-black with purple/indigo accents */
+    --background: 240 12% 4%;
+    --foreground: 0 0% 100%;
+    --card: 230 18% 9%;
+    --card-foreground: 0 0% 100%;
+    --popover: 230 18% 9%;
+    --popover-foreground: 0 0% 100%;
+    --primary: 258 90% 62%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 230 16% 12%;
+    --secondary-foreground: 0 0% 100%;
+    --muted: 220 10% 58%;
+    --muted-foreground: 215 16% 68%;
+    --accent: 258 90% 62%;
+    --accent-foreground: 0 0% 100%;
+    --destructive: 0 62% 40%;
     --destructive-foreground: 0 0% 98%;
-    --border: 180 20% 100% / 0.08;
-    --input: 180 20% 100% / 0.08;
-    --ring: 174 72% 46%;
-    --crest: 174 72% 46%;
-    --crest-deep: 192 85% 35%;
-    --navy: 210 45% 5%;
+    --border: 0 0% 100% / 0.1;
+    --input: 0 0% 100% / 0.1;
+    --ring: 258 90% 62%;
+    --brand: 258 90% 62%;
+    --brand-blue: 213 94% 60%;
+    --success: 142 71% 45%;
   }
 }
 
@@ -95,11 +97,11 @@
   }
 
   .gradient-text {
-    @apply bg-gradient-to-r from-teal-400 via-cyan-300 to-teal-500 bg-clip-text text-transparent;
+    @apply bg-gradient-to-r from-violet-400 via-fuchsia-400 to-indigo-400 bg-clip-text text-transparent;
   }
 
   .btn-gradient {
-    @apply bg-gradient-accent text-white font-medium rounded-lg px-6 py-2.5
+    @apply bg-gradient-accent text-white font-medium rounded-xl px-6 py-2.5
            hover:opacity-90 transition-all duration-200 shadow-glow hover:shadow-glow-lg;
   }
 
@@ -111,11 +113,13 @@
     @apply max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8;
   }
 
-  .ocean-mesh {
+  /* Brand atmospheric glow (purple/indigo) */
+  .ocean-mesh,
+  .brand-mesh {
     background:
-      radial-gradient(ellipse 80% 60% at 20% 40%, hsl(174 72% 40% / 0.18), transparent),
-      radial-gradient(ellipse 70% 50% at 80% 20%, hsl(192 85% 35% / 0.22), transparent),
-      radial-gradient(ellipse 60% 40% at 50% 90%, hsl(210 60% 20% / 0.4), transparent);
+      radial-gradient(ellipse 80% 60% at 30% 35%, hsl(258 90% 50% / 0.22), transparent),
+      radial-gradient(ellipse 70% 50% at 75% 20%, hsl(213 94% 50% / 0.12), transparent),
+      radial-gradient(ellipse 60% 40% at 50% 90%, hsl(270 60% 20% / 0.35), transparent);
   }
 
   .coming-online {

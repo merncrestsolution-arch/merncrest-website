@@ -233,7 +233,7 @@ export function TicketsPanel({ staffMode = false }: { staffMode?: boolean }) {
                   ))}
                 </div>
                 {active.csatRating && (
-                  <p className="text-xs text-teal-400">Thanks — you rated ★{active.csatRating}</p>
+                  <p className="text-xs text-success">Thanks — you rated ★{active.csatRating}</p>
                 )}
               </div>
             )}

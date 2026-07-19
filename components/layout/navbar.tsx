@@ -35,7 +35,7 @@ export function Navbar() {
 
   return (
     <>
-      <div className="fixed top-0 left-0 right-0 z-[60] bg-[#0a1f1a] text-teal-100 text-center text-xs sm:text-sm py-1.5 px-4 border-b border-teal-500/20">
+      <div className="fixed top-0 left-0 right-0 z-[60] bg-[#0f0a1a] text-violet-100 text-center text-xs sm:text-sm py-1.5 px-4 border-b border-violet-500/25">
         Emergency support:{" "}
         <a href="tel:+94713838638" className="underline underline-offset-2 hover:text-white">
           +94 713 838 638
@@ -50,7 +50,7 @@ export function Navbar() {
         className={cn(
           "fixed top-8 left-0 right-0 z-50 transition-all duration-300",
           scrolled
-            ? "bg-[#061018]/85 backdrop-blur-xl border-b border-white/10 shadow-lg"
+            ? "bg-[#050508]/90 backdrop-blur-xl border-b border-white/10 shadow-lg"
             : "bg-transparent"
         )}
       >
@@ -152,8 +152,8 @@ export function Navbar() {
             <Button asChild variant="ghost" size="sm" className="hidden md:inline-flex">
               <Link href="/login">{t("login")}</Link>
             </Button>
-            <Button asChild className="hidden md:inline-flex" size="sm">
-              <Link href="/register">{t("getStarted")}</Link>
+            <Button asChild className="hidden md:inline-flex rounded-full" size="sm">
+              <Link href="/contact">{t("getConsultation")}</Link>
             </Button>
 
             <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
@@ -183,8 +183,8 @@ export function Navbar() {
                     <Button asChild variant="outline" className="w-full">
                       <Link href="/login" onClick={() => setMobileOpen(false)}>{t("login")}</Link>
                     </Button>
-                    <Button asChild className="w-full">
-                      <Link href="/register" onClick={() => setMobileOpen(false)}>{t("getStarted")}</Link>
+                    <Button asChild className="w-full rounded-full">
+                      <Link href="/contact" onClick={() => setMobileOpen(false)}>{t("getConsultation")}</Link>
                     </Button>
                   </div>
                 </div>

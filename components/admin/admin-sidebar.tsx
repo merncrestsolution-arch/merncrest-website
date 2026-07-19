@@ -40,7 +40,7 @@ export function AdminSidebar({ userName }: { userName?: string }) {
   }
 
   return (
-    <aside className="w-64 shrink-0 border-r border-white/10 bg-[#061018] flex flex-col min-h-screen">
+    <aside className="w-64 shrink-0 border-r border-white/10 bg-[#050508] flex flex-col min-h-screen">
       <div className="p-6 border-b border-white/10">
         <Link href="/" className="font-display text-lg font-bold gradient-text">
           MernCrest

@@ -61,7 +61,7 @@ export function AiChatWidget() {
   return (
     <div className="fixed bottom-24 right-4 sm:right-6 z-40 flex flex-col items-end gap-3">
       {open && (
-        <div className="w-[min(100vw-2rem,360px)] h-[420px] flex flex-col rounded-2xl border border-white/10 bg-[#0B1622]/95 backdrop-blur-xl shadow-glow-lg overflow-hidden">
+        <div className="w-[min(100vw-2rem,360px)] h-[420px] flex flex-col rounded-2xl border border-white/10 bg-[#0c0a14]/95 backdrop-blur-xl shadow-glow-lg overflow-hidden">
           <div className="flex items-center justify-between px-4 py-3 border-b border-white/10">
             <div>
               <p className="font-display font-semibold text-sm">MernCrest AI</p>

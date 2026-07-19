@@ -77,7 +77,9 @@
     }
   },
   "hero": {
-    "headline": "AI-Powered Enterprise Technology Solutions",
+    "headline": "Technology That Helps Your Business Grow",
+    "headlinePrefix": "Technology That Helps",
+    "headlineHighlight": "Your Business Grow",
     "subheadline": "Domains, Hosting, Cloud, Enterprise Software, ERP, AI, Digital Transformation & Managed IT Services.",
     "ctaExplore": "Explore Services",
     "ctaPrimary": "Explore Products",
@@ -85,7 +87,7 @@
     "ctaConsultation": "Get Free Consultation",
     "ctaSales": "Contact Sales",
     "ctaPortfolio": "View Portfolio",
-    "ctaProposal": "Request Quotation",
+    "ctaProposal": "Request Proposal",
     "trustProjects": "50+ Projects Delivered",
     "trustClients": "30+ Happy Clients",
     "trustExperience": "5+ Years Experience",

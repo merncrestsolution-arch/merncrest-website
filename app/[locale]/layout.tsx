@@ -1,4 +1,4 @@
-import { Syne, Manrope, JetBrains_Mono } from "next/font/google";
+import { Plus_Jakarta_Sans, Inter, JetBrains_Mono } from "next/font/google";
 import { notFound } from "next/navigation";
 import { NextIntlClientProvider } from "next-intl";
 import { getMessages, setRequestLocale } from "next-intl/server";
@@ -6,15 +6,16 @@ import { ThemeProvider } from "@/components/layout/theme-provider";
 import { routing } from "@/i18n/routing";
 import "../globals.css";
 
-const syne = Syne({
+const jakarta = Plus_Jakarta_Sans({
   subsets: ["latin"],
-  variable: "--font-syne",
+  variable: "--font-jakarta",
   display: "swap",
+  weight: ["500", "600", "700", "800"],
 });
 
-const manrope = Manrope({
+const inter = Inter({
   subsets: ["latin"],
-  variable: "--font-manrope",
+  variable: "--font-inter",
   display: "swap",
 });
 
@@ -47,7 +48,7 @@ export default async function LocaleLayout({
   return (
     <html lang={locale} suppressHydrationWarning>
       <body
-        className={`${syne.variable} ${manrope.variable} ${jetbrains.variable} font-sans antialiased`}
+        className={`${jakarta.variable} ${inter.variable} ${jetbrains.variable} font-sans antialiased`}
       >
         <ThemeProvider
           attribute="class"
