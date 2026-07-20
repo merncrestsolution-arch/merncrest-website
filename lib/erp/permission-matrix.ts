@@ -38,6 +38,21 @@ export type ErpPermission = (typeof ERP_PERMISSIONS)[number];
 export const ORG_ROLE_PRESETS: Record<string, ErpPermission[] | "*"> = {
   CEO: "*",
   DIRECTOR: "*",
+  GENERAL_MANAGER: "*",
+  PROJECT_MANAGER: [
+    "erp.projects.view",
+    "erp.projects.manage",
+    "erp.dms.view",
+    "erp.analytics.view",
+    "erp.ai.view",
+  ],
+  ACCOUNTANT: [
+    "erp.finance.view",
+    "erp.finance.manage",
+    "erp.procurement.view",
+    "erp.analytics.view",
+    "erp.dms.view",
+  ],
   HR: ["erp.hr.view", "erp.hr.manage", "erp.dms.view", "erp.analytics.view"],
   FINANCE: [
     "erp.finance.view",

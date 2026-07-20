@@ -2,14 +2,16 @@ import { Link } from "@/i18n/routing";
 import { Button } from "@/components/ui/button";
 import { CatalogGrid } from "@/components/commerce/catalog-grid";
 import { PageHero } from "@/components/ui/page-hero";
+import { HostingRecommendWidget } from "@/components/hosting/hosting-recommend-widget";
+import { StitchChip } from "@/components/ui/stitch";
 
 export default function HostingPage() {
   return (
-    <div className="min-h-screen">
+    <div className="stitch-page">
       <PageHero
-        eyebrow="Hosting"
-        title="Hosting built for growth"
-        description="Shared, business, cPanel, VPS, dedicated, and AWS-backed hosting with SSL, backups, and 24/7 care."
+        eyebrow="Hosting Marketplace"
+        title="Hosting packages from trusted providers"
+        description="MernCrest resells shared, business, VPS, and cloud hosting via provider APIs — not our own servers. Activate after payment verification."
       >
         <div className="flex flex-wrap gap-3 justify-center">
           <Button asChild className="rounded-full">
@@ -21,15 +23,13 @@ export default function HostingPage() {
         </div>
       </PageHero>
 
-      <div className="container-wide section-padding pt-10">
-        <ul className="flex flex-wrap gap-2 mb-10 text-sm text-muted justify-center">
-          {["Shared", "Business", "WordPress", "cPanel", "Cloud", "VPS", "Dedicated", "AWS"].map(
+      <div className="stitch-page-body stitch-stack-lg">
+        <HostingRecommendWidget />
+        <ul className="flex flex-wrap gap-2 justify-center">
+          {["Shared", "Business", "WordPress", "cPanel", "Cloud", "VPS", "SSL", "Email"].map(
             (x) => (
-              <li
-                key={x}
-                className="border border-white/10 bg-white/[0.02] px-3 py-1 rounded-full font-mono text-xs"
-              >
-                {x}
+              <li key={x}>
+                <StitchChip>{x}</StitchChip>
               </li>
             )
           )}

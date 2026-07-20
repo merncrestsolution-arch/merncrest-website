@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Contact &amp; Inquiries | MernCrest Solutions</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;family=Inter:wght@400;500&amp;family=JetBrains+Mono:wght@500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "on-primary-container": "#ede0ff",
+                    "tertiary-fixed-dim": "#adc6ff",
+                    "secondary-fixed-dim": "#c0c1ff",
+                    "inverse-surface": "#e4e1e7",
+                    "surface-container-highest": "#353439",
+                    "text-primary": "#ffffff",
+                    "surface-container-high": "#2a292e",
+                    "tertiary": "#adc6ff",
+                    "surface-bright": "#39393d",
+                    "on-error-container": "#ffdad6",
+                    "on-tertiary": "#002e6a",
+                    "background": "#131317",
+                    "error": "#ffb4ab",
+                    "success": "#25d366",
+                    "glow-violet": "#d2bbff",
+                    "secondary-fixed": "#e1e0ff",
+                    "outline": "#958da1",
+                    "on-primary-fixed": "#25005a",
+                    "error-container": "#93000a",
+                    "on-tertiary-container": "#dce5ff",
+                    "on-surface-variant": "#ccc3d8",
+                    "on-primary-fixed-variant": "#5a00c6",
+                    "primary": "#d2bbff",
+                    "surface": "#131317",
+                    "surface-container-lowest": "#0e0e12",
+                    "on-secondary-fixed-variant": "#2e2ebe",
+                    "surface-tint": "#d2bbff",
+                    "on-surface": "#e4e1e7",
+                    "surface-container": "#1f1f23",
+                    "border-subtle": "#4a4455",
+                    "primary-fixed-dim": "#d2bbff",
+                    "outline-variant": "#4a4455",
+                    "on-secondary-container": "#acaeff",
+                    "tertiary-container": "#0062d2",
+                    "on-secondary-fixed": "#06006c",
+                    "on-error": "#690005",
+                    "primary-fixed": "#eaddff",
+                    "secondary-container": "#2e2ebe",
+                    "primary-container": "#7c3aed",
+                    "secondary": "#c0c1ff",
+                    "surface-dim": "#131317",
+                    "on-tertiary-fixed": "#001a42",
+                    "text-secondary": "#94a3b8",
+                    "tertiary-fixed": "#d8e2ff",
+                    "surface-variant": "#353439",
+                    "inverse-primary": "#732ee4",
+                    "on-primary": "#3f008e",
+                    "inverse-on-surface": "#303034",
+                    "on-secondary": "#0f00a9",
+                    "on-tertiary-fixed-variant": "#004395",
+                    "on-background": "#e4e1e7",
+                    "surface-container-low": "#1b1b1f"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "2xl": "1rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "scale-lg": "1.5rem",
+                    "margin-mobile": "16px",
+                    "gutter": "24px",
+                    "scale-xl": "2.5rem",
+                    "scale-md": "1rem",
+                    "container-max": "1440px",
+                    "scale-sm": "0.5rem",
+                    "scale-2xl": "4rem",
+                    "margin-desktop": "64px",
+                    "scale-xs": "0.25rem"
+            },
+            "fontFamily": {
+                    "headline-md": ["Plus Jakarta Sans"],
+                    "label-sm": ["JetBrains Mono"],
+                    "body-lg": ["Inter"],
+                    "headline-lg": ["Plus Jakarta Sans"],
+                    "headline-xl-mobile": ["Plus Jakarta Sans"],
+                    "label-md": ["JetBrains Mono"],
+                    "headline-xl": ["Plus Jakarta Sans"],
+                    "body-md": ["Inter"]
+            },
+            "fontSize": {
+                    "headline-md": ["24px", {"lineHeight": "1.4", "fontWeight": "600"}],
+                    "label-sm": ["12px", {"lineHeight": "1.0", "letterSpacing": "0.05em", "fontWeight": "500"}],
+                    "body-lg": ["18px", {"lineHeight": "1.6", "fontWeight": "400"}],
+                    "headline-lg": ["40px", {"lineHeight": "1.2", "fontWeight": "700"}],
+                    "headline-xl-mobile": ["40px", {"lineHeight": "1.2", "fontWeight": "800"}],
+                    "label-md": ["14px", {"lineHeight": "1.0", "fontWeight": "500"}],
+                    "headline-xl": ["64px", {"lineHeight": "1.1", "letterSpacing": "-0.02em", "fontWeight": "800"}],
+                    "body-md": ["16px", {"lineHeight": "1.6", "fontWeight": "400"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        body {
+            background-color: #131317;
+            color: #e4e1e7;
+            overflow-x: hidden;
+        }
+
+        .stitch-border {
+            border: 1px solid;
+            border-image-source: linear-gradient(45deg, #4a4455 0%, #7c3aed 100%);
+            border-image-slice: 1;
+        }
+
+        .stitch-card {
+            background: rgba(19, 19, 23, 0.6);
+            backdrop-filter: blur(20px);
+            border: 1px solid #4a4455;
+            border-radius: 1rem;
+        }
+
+        .luminous-glow {
+            box-shadow: 0 0 20px 0 rgba(210, 187, 255, 0.15);
+        }
+
+        .mesh-gradient {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            background: 
+                radial-gradient(circle at 20% 30%, rgba(124, 58, 237, 0.12) 0%, transparent 50%),
+                radial-gradient(circle at 80% 70%, rgba(49, 49, 192, 0.15) 0%, transparent 50%);
+        }
+
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+        }
+    </style>
+</head>
+<body class="font-body-md text-on-surface">
+<div class="mesh-gradient"></div>
+<!-- TopNavBar -->
+<header class="fixed top-0 w-full z-50 bg-surface/60 backdrop-blur-xl border-b border-border-subtle shadow-sm">
+<div class="flex justify-between items-center h-20 px-margin-desktop max-w-container-max mx-auto">
+<div class="font-headline-md text-headline-md font-bold text-text-primary tracking-tight">
+                MernCrest Solutions
+            </div>
+<nav class="hidden md:flex items-center gap-8">
+<a class="text-on-surface-variant font-medium hover:text-primary transition-colors duration-200" href="#">Services</a>
+<a class="text-on-surface-variant font-medium hover:text-primary transition-colors duration-200" href="#">Marketplace</a>
+<a class="text-on-surface-variant font-medium hover:text-primary transition-colors duration-200" href="#">Solutions</a>
+<a class="text-on-surface-variant font-medium hover:text-primary transition-colors duration-200" href="#">About</a>
+<a class="text-primary font-bold border-b-2 border-primary pb-1" href="#">Contact</a>
+</nav>
+<div class="flex items-center gap-6">
+<button class="hidden lg:flex items-center gap-2 px-6 py-2 bg-primary-container text-on-primary-container rounded-full font-label-md hover:opacity-90 transition-all active:scale-95">
+                    Customer Portal
+                </button>
+<button class="md:hidden text-primary">
+<span class="material-symbols-outlined">menu</span>
+</button>
+</div>
+</div>
+</header>
+<main class="pt-32 pb-scale-2xl px-margin-mobile md:px-margin-desktop max-w-container-max mx-auto">
+<!-- Hero Section -->
+<section class="mb-scale-2xl">
+<div class="max-w-3xl">
+<span class="font-label-sm text-label-sm text-primary uppercase tracking-widest mb-4 block">Connect with MernCrest</span>
+<h1 class="font-headline-xl text-headline-xl text-text-primary mb-6">Start your digital transformation journey today.</h1>
+<p class="font-body-lg text-body-lg text-on-surface-variant max-w-2xl">
+                    Whether you're looking for AI integration, cloud infrastructure, or enterprise-grade software development, our experts are ready to accelerate your mission.
+                </p>
+</div>
+</section>
+<!-- Main Grid -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-gutter">
+<!-- Side Details (Left/Top on Mobile) -->
+<div class="lg:col-span-4 space-y-gutter">
+<div class="stitch-card p-scale-lg border-primary/20">
+<h3 class="font-headline-md text-headline-md text-text-primary mb-6">Our Headquarters</h3>
+<div class="flex items-start gap-4 mb-6">
+<div class="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
+<span class="material-symbols-outlined">location_on</span>
+</div>
+<div>
+<p class="font-body-md font-bold text-text-primary">Colombo, Sri Lanka</p>
+<p class="font-body-md text-on-surface-variant">Level 18, World Trade Center</p>
+<p class="font-body-md text-on-surface-variant">Colombo 00100</p>
+</div>
+</div>
+<div class="aspect-video w-full rounded-xl overflow-hidden grayscale border border-border-subtle mb-6">
+<img class="w-full h-full object-cover" data-alt="A highly detailed satellite-style 3D architectural rendering of the World Trade Center in Colombo, Sri Lanka, at dusk. The building is glowing with interior lights against a deep indigo and violet sky. The aesthetic is clean, professional, and high-tech, fitting for a premium enterprise technology brand. Subtle light trails of traffic move along the coastline in the background." data-location="Colombo" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAwJQpm4_qcqKOAtyXluxnH_m0jhFjeSpYo_gXUdhazKM4o92wY5i002TH-qBOsRl1_1swvLpopqe0hMZRGsFS4PRD7tJPPGTKZVU1icjS-QH4o-UZu9oXzBJH6QF4CJ32J5QhVzuncTl8B81SnuVJPQqTcdd2CBppZ4YCKJvglgSPkhJ5eBE5NlxejK7ns8_oRgS_NRxgSYlX2Dv_3fa3IfpPvDow9UvqYakSChnvYtKixGX8e4u96qJb-NgDjZWde2M7G-VVPgdB4"/>
+</div>
+<a class="flex items-center justify-between p-4 rounded-xl bg-surface-container-high border border-border-subtle group hover:border-primary transition-all" href="#">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-success">chat</span>
+<div>
+<p class="font-label-md text-text-primary">WhatsApp AI Agent</p>
+<p class="text-xs text-on-surface-variant">Instant Support 24/7</p>
+</div>
+</div>
+<span class="material-symbols-outlined text-primary group-hover:translate-x-1 transition-transform">arrow_forward</span>
+</a>
+</div>
+<div class="stitch-card p-scale-lg">
+<h3 class="font-headline-md text-headline-md text-text-primary mb-4">Support Channels</h3>
+<div class="space-y-4">
+<div class="flex items-center gap-4 text-on-surface-variant hover:text-primary transition-colors">
+<span class="material-symbols-outlined">mail</span>
+<span class="font-body-md">solutions@merncrest.ai</span>
+</div>
+<div class="flex items-center gap-4 text-on-surface-variant hover:text-primary transition-colors">
+<span class="material-symbols-outlined">call</span>
+<span class="font-body-md">+94 11 234 5678</span>
+</div>
+<div class="flex items-center gap-4 text-on-surface-variant hover:text-primary transition-colors">
+<span class="material-symbols-outlined">cloud</span>
+<span class="font-body-md">Status: Systems Operational</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Contact Form (Bento Style) -->
+<div class="lg:col-span-8">
+<div class="stitch-card p-scale-lg luminous-glow relative overflow-hidden h-full">
+<!-- Subtle background light -->
+<div class="absolute -top-24 -right-24 w-64 h-64 bg-primary/10 blur-[100px] rounded-full"></div>
+<div class="relative z-10">
+<div class="flex justify-between items-start mb-8">
+<div>
+<h2 class="font-headline-lg text-headline-lg text-text-primary mb-2">Request an Inquiry</h2>
+<p class="text-on-surface-variant">Your submission will be routed directly to our CRM for immediate prioritization.</p>
+</div>
+<div class="hidden sm:block">
+<span class="font-label-sm text-label-sm px-3 py-1 bg-primary/20 text-primary border border-primary/30 rounded-full">CRM Integrated</span>
+</div>
+</div>
+<form class="grid grid-cols-1 md:grid-cols-2 gap-6">
+<div class="space-y-2">
+<label class="font-label-md text-text-primary ml-1">Full Name</label>
+<input class="w-full bg-surface-container-lowest border border-border-subtle rounded-lg px-4 py-3 text-on-surface focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all" placeholder="John Doe" type="text"/>
+</div>
+<div class="space-y-2">
+<label class="font-label-md text-text-primary ml-1">Company</label>
+<input class="w-full bg-surface-container-lowest border border-border-subtle rounded-lg px-4 py-3 text-on-surface focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all" placeholder="Luminous Ent." type="text"/>
+</div>
+<div class="md:col-span-2 space-y-2">
+<label class="font-label-md text-text-primary ml-1">Service Interest</label>
+<select class="w-full bg-surface-container-lowest border border-border-subtle rounded-lg px-4 py-3 text-on-surface focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all appearance-none">
+<option>Cloud Architecture &amp; Migration</option>
+<option>Generative AI &amp; LLM Training</option>
+<option>Enterprise Software Development</option>
+<option>Security &amp; Compliance Audit</option>
+<option>Other Solutions</option>
+</select>
+</div>
+<div class="md:col-span-2 space-y-2">
+<label class="font-label-md text-text-primary ml-1">Message</label>
+<textarea class="w-full bg-surface-container-lowest border border-border-subtle rounded-lg px-4 py-3 text-on-surface focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all resize-none" placeholder="Tell us about your project goals..." rows="5"></textarea>
+</div>
+<div class="md:col-span-2 flex flex-col sm:flex-row items-center justify-between gap-6 pt-4">
+<p class="text-xs text-on-surface-variant max-w-sm">
+                                    By submitting this form, you agree to our Privacy Policy and Terms of Service. Your data is encrypted and handled securely.
+                                </p>
+<button class="w-full sm:w-auto px-10 py-4 bg-primary-container text-on-primary-container font-bold rounded-xl shadow-lg shadow-primary/20 hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-2" type="submit">
+                                    Send Inquiry
+                                    <span class="material-symbols-outlined text-lg">send</span>
+</button>
+</div>
+</form>
+</div>
+</div>
+</div>
+</div>
+<!-- Trust Section -->
+<section class="mt-scale-2xl border-t border-border-subtle pt-scale-2xl">
+<h4 class="font-label-sm text-label-sm text-on-surface-variant text-center uppercase tracking-widest mb-12">Trusted by Global Leaders</h4>
+<div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-8 opacity-40 grayscale items-center">
+<div class="flex justify-center"><img class="h-8 w-auto" data-alt="A minimalist tech logo silhouette for a cloud computing company, rendered in white against a dark background, embodying high-end enterprise style and clean lines." src="https://lh3.googleusercontent.com/aida-public/AB6AXuC8w_cUFtInHusJl95E5t1Xr79-hUvt5p06pq4-3Bltajv4b1lgpMScJs4x-mkxcjpZ9nwukFdBLzaRCFmyW2AkaPe1GFDQX64scXWJxLoiR2BZn8wFctqILNlbY4Qep28xalWmzp6zM3Bd7HVLdljgM2HmUTZThT9a1hf2ICN6e5IkgH0TwUuiZoAueAaSFebCVkjN8t9cBqp1DlnR620EpBK-dlLPVPBBHGK2gDt_NGtW54UofzbvYXPHqhpj-PCMq2sM7L5jStQ-"/></div>
+<div class="flex justify-center"><img class="h-8 w-auto" data-alt="A sleek, modern corporate logo icon for an AI research firm, featuring geometric precision and a sophisticated minimalist aesthetic for a tech-focused UI." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAU508SwY7aEqmAzyHCgCgZ-d-OtwjStJ45sznmtZC7r4xc-bF-ZAvAiqdeHktdDBgV-eBoQZCSK0BnsII5ws44z3HschRmqVjuiHz2wDK3n7kYHF31EQJsFmTOxHPeuyICb3mYKqDu2VZLFpY7oFIRpohTHrOA95fs_ZY9pueyMv1vljtgqMaIz8uE2__ytbZZLWAvWGoVQ-Sqd1DNaulbLo6dvEoWMsQypaCJtOpKwXO-FXZMESzMV8eIYIvXlJQ1P1Y2_oI2vipA"/></div>
+<div class="flex justify-center"><img class="h-8 w-auto" data-alt="A professional fintech logo mark, clean vector design in high contrast white, representing global connectivity and financial technology security." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDTnbBc1JNwvq0umblSN3uRvSuX4Y_gu_5d0xIWmM5rJEuVdJvg4T9yoh1IyRiFYcoR9sRWVVO-Y8_fWgwpLSUoSjdjMjMbPcA_X2E7dhwysVTe__LsP9ZXKEJ9ywIkDZnPqEvnCmf9ED1EkBNvOuOH4g2aTf-XTQNvvh5aTCVh7fTsVzDdEX2REjHpYeBj_LDt5hb5vMVsGs5Yk-zYrUUJSqIXzgG-Wx2_-MKJng1jNl9WwKCv9j56Yb3Y7vRa__tJta3klJIT4O6W"/></div>
+<div class="flex justify-center"><img class="h-8 w-auto" data-alt="A contemporary cybersecurity company logo emblem, showcasing strength and technological reliability through sharp, minimalist geometric shapes." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDX-4QccbSLkO0DAdu0TcBNmbWnM2g7U2OvSX3CNs-U4oAZ7_eU6uoKDm1DkbigLn3NomP4mVDyEJml16s6dP_u7CdRNwbWVxr00-enrfeZGrIMwgRoazbY5oS_miDzw4eEQOMJU1O5pkHFkmeu0P33xwA4q09zins9PNMVHwj4FePGTdfIEJ1PwKjj0TBtBKYnbHzlKp2tPqDN2qSRh1B7LrMI_rllr2YKsI6tVhec45B4vJf42GT9ux7qIBO6xJjTcPe98olPDof5"/></div>
+<div class="flex justify-center"><img class="h-8 w-auto" data-alt="A futuristic logistics technology logo, using elegant lines and professional weight to convey efficiency and high-speed infrastructure." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAvFlnqGxbvEuoknSDue2vqKSWoKewr0UYrUO7kZIeCd-0qHAIkDN0w7oewU2DEjdtJnSM9gt204cuNJq-e35noMe43AKRv9IZlySnmJCnwTLuhXOG5_eX7PE9K2uspYet4I0Wj3SKsEP3PELn1iQi2obZoUvAobY8I-yDhPSB77RgMXBKA779XFVjn3K1uH5R9jvZX9PQMutU3RpJ3moYeV9nSAmSDOvog_9SJF6oguCLAx411n466IJExbKkeYbqIOOdyfI8H2OMx"/></div>
+<div class="flex justify-center"><img class="h-8 w-auto" data-alt="An abstract technology conglomerate logo, simple and bold, designed for dark mode interfaces with a focus on enterprise stability and innovation." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDS9LLF62EQ2I3ccsLWfnOefWLGJj2wVKOgz2edBYxROLYl2q7sKOVpNoBRFz-aG8TkOSgg7GtUFMYdNkWQ3gjWghnUclfBCOxnl35JDIXdgHZzDbtDdcuHMJRc2viZvRslNHZUHOfPMTWwdBWVIGxaNNFO0A-AP1v2ognViujkoBFaXCRsW7wKwEbMhT7w3tiyF7HN5Hsrwp55Jo4pOi7aWp0CtAwKO9PBJranXT2RT1CyOp_ZS4knU8jLmd7oC9zlO5n2pb-NICm8"/></div>
+</div>
+</section>
+</main>
+<!-- Footer -->
+<footer class="w-full relative border-t border-border-subtle bg-surface-container-lowest">
+<div class="grid grid-cols-1 md:grid-cols-4 gap-gutter py-scale-2xl px-margin-desktop max-w-container-max mx-auto">
+<div class="md:col-span-1">
+<div class="font-headline-md text-headline-md font-extrabold text-primary mb-4">MernCrest</div>
+<p class="font-body-md text-on-surface-variant mb-6">Advancing human potential through Luminous Enterprise Intelligence.</p>
+</div>
+<div class="space-y-4">
+<h5 class="font-label-md text-text-primary">Ecosystem</h5>
+<nav class="flex flex-col gap-2">
+<a class="text-on-surface-variant font-body-md hover:text-glow-violet transition-colors" href="#">Marketplace</a>
+<a class="text-on-surface-variant font-body-md hover:text-glow-violet transition-colors" href="#">Cloud Nodes</a>
+<a class="text-on-surface-variant font-body-md hover:text-glow-violet transition-colors" href="#">AI Models</a>
+</nav>
+</div>
+<div class="space-y-4">
+<h5 class="font-label-md text-text-primary">Compliance</h5>
+<nav class="flex flex-col gap-2">
+<a class="text-on-surface-variant font-body-md hover:text-glow-violet transition-colors" href="#">Privacy Policy</a>
+<a class="text-on-surface-variant font-body-md hover:text-glow-violet transition-colors" href="#">Terms of Service</a>
+<a class="text-on-surface-variant font-body-md hover:text-glow-violet transition-colors" href="#">Cloud SLA</a>
+</nav>
+</div>
+<div class="space-y-4">
+<h5 class="font-label-md text-text-primary">Contact</h5>
+<p class="font-body-md text-on-surface-variant">Global HQ: Colombo, Sri Lanka</p>
+<div class="flex gap-4">
+<a class="w-10 h-10 rounded-full bg-surface-container flex items-center justify-center border border-border-subtle hover:border-primary transition-colors" href="#">
+<span class="material-symbols-outlined text-sm">public</span>
+</a>
+<a class="w-10 h-10 rounded-full bg-surface-container flex items-center justify-center border border-border-subtle hover:border-primary transition-colors" href="#">
+<span class="material-symbols-outlined text-sm">code</span>
+</a>
+</div>
+</div>
+</div>
+<div class="border-t border-border-subtle/30 py-8 px-margin-desktop max-w-container-max mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
+<p class="font-label-sm text-label-sm text-on-surface-variant">© 2024 MernCrest Solutions. All rights reserved. Luminous Enterprise Intelligence.</p>
+<div class="flex gap-6">
+<a class="font-label-sm text-label-sm text-on-surface-variant hover:text-primary transition-colors" href="#">Cookie Settings</a>
+</div>
+</div>
+</footer>
+<script>
+        // Micro-interaction for form inputs
+        const inputs = document.querySelectorAll('input, select, textarea');
+        inputs.forEach(input => {
+            input.addEventListener('focus', () => {
+                input.parentElement.querySelector('label')?.classList.add('text-primary');
+            });
+            input.addEventListener('blur', () => {
+                input.parentElement.querySelector('label')?.classList.remove('text-primary');
+            });
+        });
+
+        // Simple form handling
+        document.querySelector('form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const btn = e.target.querySelector('button');
+            const originalContent = btn.innerHTML;
+            btn.innerHTML = '<span class="material-symbols-outlined animate-spin">progress_activity</span> Syncing...';
+            btn.disabled = true;
+            
+            setTimeout(() => {
+                btn.innerHTML = '<span class="material-symbols-outlined">check_circle</span> Inquiry Received';
+                btn.classList.replace('bg-primary-container', 'bg-success');
+                btn.classList.add('scale-105');
+            }, 1800);
+        });
+    </script>
+</body></html>

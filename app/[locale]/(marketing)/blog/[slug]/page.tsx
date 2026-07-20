@@ -51,9 +51,9 @@ export default async function BlogPostPage({
   };
 
   return (
-    <article className="min-h-screen pb-24">
+    <article className="stitch-page pb-24">
       {/* Hero Header */}
-      <div className="relative pt-32 pb-16 overflow-hidden">
+      <div className="relative pt-32 pb-16 overflow-hidden border-b border-white/[0.05]">
         <div className="absolute inset-0 z-0">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img 
@@ -61,10 +61,10 @@ export default async function BlogPostPage({
             alt={post.title}
             className="w-full h-full object-cover opacity-20"
           />
-          <div className="absolute inset-0 bg-gradient-to-b from-background/80 via-background to-background" />
+          <div className="absolute inset-0 bg-gradient-to-b from-[var(--stitch-bg)]/80 via-[var(--stitch-bg)] to-[var(--stitch-bg)]" />
         </div>
         
-        <div className="container-wide relative z-10">
+        <div className="stitch-container relative z-10">
           <Button asChild variant="ghost" className="mb-8 hover:bg-white/5 -ml-4">
             <Link href="/blog" className="text-muted hover:text-white">
               <ArrowLeft className="mr-2 h-4 w-4" />
@@ -104,20 +104,20 @@ export default async function BlogPostPage({
       </div>
 
       {/* Content Body */}
-      <div className="container-wide">
-        <div className="grid lg:grid-cols-12 gap-12">
+      <div className="stitch-container stitch-section pt-10">
+        <div className="grid lg:grid-cols-12 gap-8">
           {/* Main Content */}
           <div className="lg:col-span-8">
-            <div className="glass-panel p-8 sm:p-12 rounded-3xl border border-white/5">
+            <div className="stitch-card !p-8 sm:!p-12">
               {renderContent(post.content)}
             </div>
           </div>
 
           {/* Sidebar / Sharing */}
           <div className="lg:col-span-4">
-            <div className="sticky top-24 space-y-8">
-              <div className="glass-card p-6 rounded-2xl border border-white/5">
-                <h3 className="font-bold text-lg mb-4">Share this article</h3>
+            <div className="sticky top-24 space-y-5">
+              <div className="stitch-card">
+                <h3 className="font-display font-semibold text-lg mb-4 text-white">Share this article</h3>
                 <div className="flex gap-4">
                   <Button variant="outline" size="icon" className="rounded-full hover:text-accent hover:border-accent">
                     <Share2 className="h-4 w-4" />
@@ -131,12 +131,12 @@ export default async function BlogPostPage({
                 </div>
               </div>
 
-              <div className="glass-card p-6 rounded-2xl border border-white/5">
-                <h3 className="font-bold text-lg mb-4">About MERNcrest</h3>
+              <div className="stitch-card">
+                <h3 className="font-display font-semibold text-lg mb-4 text-white">About MERNcrest</h3>
                 <p className="text-sm text-muted mb-6 leading-relaxed">
                   MERNcrest Solutions (Pvt) Ltd is a leading software development and technology solutions provider in Sri Lanka. We specialize in custom software, cloud solutions, and digital transformation.
                 </p>
-                <Button asChild className="w-full">
+                <Button asChild className="w-full rounded-full">
                   <Link href="/contact">Work With Us</Link>
                 </Button>
               </div>

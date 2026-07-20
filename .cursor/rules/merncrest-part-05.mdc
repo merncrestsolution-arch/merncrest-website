@@ -1,0 +1,61 @@
+---
+description: MernCrest Part 05 — Complete ERP / internal OS & enterprise management rules
+alwaysApply: true
+---
+
+# MernCrest Part 05 — ERP & Internal Operations
+
+Continue from Parts 01–04. Do **not** redesign or remove existing ERP, CRM, portal, or commerce modules.
+
+## Core rule
+
+The ERP is the **internal operating system** for MernCrest and must stay **multi-tenant ready** (Organization → Branch) for future SaaS customers.
+
+Every ERP module must integrate with:
+
+- CRM
+- Finance
+- HR / ESS
+- Notifications
+- Reports / Analytics
+- Audit Logs
+
+Never duplicate business logic — reuse shared libs (`lib/erp/*`, `lib/crm/*`, `writeAuditLog`, approval hub).
+
+## Module map
+
+Hub: `/admin/erp` · Staff ESS: `/staff`
+
+Key surfaces: Organization · HRM · Finance · COA · Approvals · Procurement · Inventory · SCM · Manufacturing · Assets · ESM · FSM · Projects · CSM (Support) · IoT · Maintenance · AI · BI · DMS · Audit · Permissions · Dashboards
+
+## Organization
+
+`Organization` + `Branch` + `Department` + Employees + org roles.
+
+Primary tenant: MernCrest (`MCS`). Additional orgs = SaaS tenants later.
+
+## Approvals & audit
+
+- Leave / PO / expense / quote / project / invoice → `ApprovalRequest`
+- All material mutations → `writeAuditLog` (`AuditLog`)
+- Notifications on approval assign / decide
+
+## Finance foundation
+
+`ChartOfAccount` seeds default GL structure. Finance entries, payroll slips (`SalarySlip`), and AR/AP deepen on this COA — do not invent parallel ledgers.
+
+## ESS (Employee Self-Service)
+
+`/staff`: profile, tasks, leave, salary slips, approvals, notifications, internal chat.
+
+## Permissions
+
+Granular `erp.*.view|manage` + org roles (CEO → Auditor). Use `requirePermission` / `permission-matrix` presets. Prefer grant/revoke over hard-coding roles in UI.
+
+## Security & data
+
+UUID/cuid PKs · soft delete where present (`deletedAt`) · actor fields via audit · RBAC · department isolation where modeled.
+
+## APIs
+
+REST under `/api/erp/*` with validation, pagination/filtering where lists exist, audit on writes, version-friendly shapes.

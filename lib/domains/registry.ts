@@ -1,18 +1,13 @@
-/** Mock domain registry — replace with real registrar API adapters later. */
+/**
+ * Domain search facade.
+ * Routes .lk → DomainLK · gTLDs → Namecheap via provider registry + Pricing Engine.
+ */
 
-const RESERVED = new Set([
-  "google",
-  "facebook",
-  "microsoft",
-  "apple",
-  "amazon",
-  "merncrest",
-  "localhost",
-  "example",
-  "gov",
-]);
+import { PROVIDER_TLD_COST, normalizeDomainInput } from "@/lib/providers/mock-adapter";
+import { isLkTld } from "@/lib/providers/domainlk-adapter";
+import { getDomainSearchAdapter } from "@/lib/providers/registry";
+import { priceFromProvider } from "@/lib/providers/pricing-engine";
 
-/** priceCents: register / renew / transfer (yearly) */
 export type TldPricing = {
   register: number;
   renew: number;
@@ -20,88 +15,136 @@ export type TldPricing = {
   premium?: boolean;
 };
 
-export const TLD_CATALOG: Record<string, TldPricing> = {
-  // Sri Lanka
-  lk: { register: 590000, renew: 590000, transfer: 450000 },
-  "com.lk": { register: 490000, renew: 490000, transfer: 390000 },
-  "org.lk": { register: 490000, renew: 490000, transfer: 390000 },
-  "edu.lk": { register: 390000, renew: 390000, transfer: 350000 },
-  "sch.lk": { register: 350000, renew: 350000, transfer: 300000 },
-  "ngo.lk": { register: 450000, renew: 450000, transfer: 400000 },
-  "hotel.lk": { register: 550000, renew: 550000, transfer: 500000 },
-  "soc.lk": { register: 450000, renew: 450000, transfer: 400000 },
-  // International
-  com: { register: 250000, renew: 280000, transfer: 220000 },
-  net: { register: 280000, renew: 300000, transfer: 250000 },
-  org: { register: 280000, renew: 300000, transfer: 250000 },
-  biz: { register: 260000, renew: 280000, transfer: 240000 },
-  info: { register: 220000, renew: 240000, transfer: 200000 },
-  xyz: { register: 180000, renew: 200000, transfer: 160000 },
-  co: { register: 420000, renew: 450000, transfer: 400000 },
-  io: { register: 650000, renew: 700000, transfer: 600000 },
-  app: { register: 480000, renew: 520000, transfer: 450000 },
-  dev: { register: 480000, renew: 520000, transfer: 450000 },
-  online: { register: 200000, renew: 220000, transfer: 180000 },
-  store: { register: 350000, renew: 380000, transfer: 320000 },
-  tech: { register: 320000, renew: 350000, transfer: 300000 },
-};
+/** @deprecated Selling prices are now provider cost + margin; kept for WhatsApp fallbacks */
+export const TLD_CATALOG: Record<string, TldPricing> = Object.fromEntries(
+  Object.entries(PROVIDER_TLD_COST).map(([tld, c]) => [
+    tld,
+    {
+      register: c.register + 30000,
+      renew: c.renew + 30000,
+      transfer: c.transfer + 30000,
+      premium: c.premium,
+    },
+  ])
+);
 
-const SUGGESTION_SUFFIXES = ["online", "lk", "app", "tech", "store", "hq", "pro"];
+export { normalizeDomainInput };
 
-export function normalizeDomainInput(input: string) {
-  const cleaned = input
-    .trim()
-    .toLowerCase()
-    .replace(/^https?:\/\//, "")
-    .replace(/\/.*$/, "");
-  const parts = cleaned.split(".").filter(Boolean);
-  if (parts.length < 2) {
-    return { sld: parts[0] || "", tld: "com", fqdn: parts[0] ? `${parts[0]}.com` : "" };
+export async function searchDomainAvailabilityAsync(query: string) {
+  const { tld } = normalizeDomainInput(query);
+  const hint = tld && PROVIDER_TLD_COST[tld] ? tld : undefined;
+  // Prefer DomainLK when query is bare SLD + user likely wants .lk (Sri Lanka market)
+  const tldHint = hint && isLkTld(hint) ? hint : hint || undefined;
+
+  const { provider, adapter } = await getDomainSearchAdapter(tldHint);
+  const raw = await adapter.searchDomains(query);
+  if (raw.error) {
+    return {
+      error: raw.error,
+      results: [] as Awaited<ReturnType<typeof enrichResult>>[],
+      suggestions: [] as Awaited<ReturnType<typeof enrichResult>>[],
+      provider: provider?.code ?? "mock-a",
+    };
   }
-  // Support multi-part TLDs like com.lk
-  const knownMulti = Object.keys(TLD_CATALOG)
-    .filter((t) => t.includes("."))
-    .sort((a, b) => b.length - a.length);
-  for (const multi of knownMulti) {
-    if (cleaned.endsWith(`.${multi}`) || cleaned === multi) {
-      const sld = cleaned.slice(0, -(multi.length + 1));
-      return { sld, tld: multi, fqdn: sld ? `${sld}.${multi}` : multi };
+
+  // If searching a gTLD, also pull a few .lk suggestions from DomainLK when available
+  let crossSuggestions = raw.suggestions;
+  if (tldHint && !isLkTld(tldHint) && raw.sld) {
+    try {
+      const lk = await getDomainSearchAdapter("lk");
+      if (lk.provider && lk.provider.code !== provider?.code) {
+        const lkRaw = await lk.adapter.searchDomains(`${raw.sld}.lk`);
+        const lkHits = (lkRaw.results || [])
+          .filter((r) => r.available)
+          .slice(0, 2);
+        crossSuggestions = [...lkHits, ...crossSuggestions].slice(0, 8);
+      }
+    } catch {
+      /* ignore cross-provider soft-fail */
     }
   }
-  const tld = parts.slice(1).join(".");
-  const sld = parts[0];
-  return { sld, tld, fqdn: `${sld}.${tld}` };
+
+  const results = await Promise.all(raw.results.map(enrichResult));
+  const suggestions = await Promise.all(crossSuggestions.map(enrichResult));
+
+  return {
+    fqdn: raw.fqdn,
+    sld: raw.sld,
+    results,
+    suggestions,
+    provider: provider?.code ?? "mock-a",
+    providerId: provider?.id ?? null,
+  };
 }
 
+async function enrichResult(r: {
+  domain: string;
+  sld: string;
+  tld: string;
+  available: boolean;
+  premium?: boolean;
+  providerPriceCents: number;
+  renewProviderCents: number;
+  transferProviderCents: number;
+  currency: string;
+}) {
+  const cur = r.currency || "LKR";
+  const register = await priceFromProvider(r.providerPriceCents, "domains", 0, cur);
+  const renew = await priceFromProvider(r.renewProviderCents, "domains", 0, cur);
+  const transfer = await priceFromProvider(r.transferProviderCents, "domains", 0, cur);
+  return {
+    domain: r.domain,
+    sld: r.sld,
+    tld: r.tld,
+    available: r.available,
+    premium: Boolean(r.premium),
+    /** Customer-facing LKR selling price */
+    priceCents: register.sellingPriceCents,
+    renewPriceCents: renew.sellingPriceCents,
+    transferPriceCents: transfer.sellingPriceCents,
+    providerPriceCents: r.providerPriceCents,
+    providerCurrency: cur,
+    exchangeRate: register.exchangeRate,
+    exchangeRateLockedAt: register.exchangeRateLockedAt.toISOString(),
+    fxBufferPercent: register.fxBufferPercent,
+    /** Selling currency for checkout / invoices */
+    currency: "LKR",
+    billingPeriod: "YEARLY" as const,
+  };
+}
+
+/** Sync wrapper for legacy callers (WhatsApp). Prefer searchDomainAvailabilityAsync. */
 export function searchDomainAvailability(query: string) {
   const { sld, tld, fqdn } = normalizeDomainInput(query);
   if (!sld || sld.length < 2) {
     return {
       error: "Enter at least 2 characters",
-      results: [] as ReturnType<typeof buildResult>[],
-      suggestions: [] as ReturnType<typeof buildResult>[],
+      results: [] as ReturnType<typeof buildLegacyResult>[],
+      suggestions: [] as ReturnType<typeof buildLegacyResult>[],
     };
   }
 
   const allTlds = Object.keys(TLD_CATALOG);
   const preferred = tld && TLD_CATALOG[tld] ? tld : "com";
-  const tlds = [
-    preferred,
-    ...allTlds.filter((t) => t !== preferred),
-  ].slice(0, 12);
-
-  const results = tlds.map((t) => buildResult(sld, t));
-  const suggestions = SUGGESTION_SUFFIXES.filter((sfx) => sfx !== sld)
-    .slice(0, 4)
-    .map((sfx) => buildResult(`${sld}${sfx}`, preferred === "lk" ? "lk" : "com"));
+  const tlds = [preferred, ...allTlds.filter((t) => t !== preferred)].slice(0, 12);
+  const results = tlds.map((t) => buildLegacyResult(sld, t));
+  const primaryUnavailable = results[0] && !results[0].available;
+  const suggestions = ["online", "lk", "app", "tech", "store", "hq", "pro"]
+    .filter((sfx) => sfx !== sld)
+    .slice(0, primaryUnavailable ? 6 : 4)
+    .map((sfx) => buildLegacyResult(`${sld}${sfx}`, preferred === "lk" ? "lk" : "com"))
+    .filter((r) => r.available);
 
   return { fqdn, sld, results, suggestions };
 }
 
-function buildResult(sld: string, tld: string) {
+function buildLegacyResult(sld: string, tld: string) {
   const pricing = TLD_CATALOG[tld] ?? { register: 300000, renew: 320000, transfer: 280000 };
+  const cost = PROVIDER_TLD_COST[tld];
   const available =
-    !RESERVED.has(sld) &&
+    !["google", "facebook", "microsoft", "apple", "amazon", "merncrest", "localhost", "example", "gov"].includes(
+      sld
+    ) &&
     !/[^a-z0-9-]/i.test(sld) &&
     !sld.startsWith("-") &&
     !sld.endsWith("-");
@@ -115,6 +158,7 @@ function buildResult(sld: string, tld: string) {
     priceCents: pricing.register,
     renewPriceCents: pricing.renew,
     transferPriceCents: pricing.transfer,
+    providerPriceCents: cost?.register,
     currency: "LKR",
     billingPeriod: "YEARLY" as const,
   };

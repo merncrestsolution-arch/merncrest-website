@@ -43,7 +43,7 @@ export async function GET(
 </style></head><body>
   <button onclick="window.print()">Print / Save PDF</button>
   <h1>MernCrest Solutions</h1>
-  <p class="muted">Tax Invoice · ${invoice.invoiceNumber}</p>
+  <p class="muted">Enterprise Technology Company · Tax Invoice · ${invoice.invoiceNumber}</p>
   <p><strong>Bill to:</strong> ${invoice.user.fullName}<br/>
   ${invoice.user.email}<br/>
   ${registrant.companyName || invoice.user.company || ""}<br/>
@@ -64,7 +64,8 @@ export async function GET(
   </table>
   <p class="right"><strong>Subtotal:</strong> ${formatMoney(invoice.subtotalCents, invoice.currency)}<br/>
   <strong>Total:</strong> ${formatMoney(invoice.totalCents, invoice.currency)}</p>
-  <p class="muted">MernCrest Solutions (Pvt) Ltd · merncrest.lk</p>
+  <p class="muted">MernCrest Solutions (Pvt) Ltd · merncrest.lk<br/>
+  Domains &amp; hosting are resold via partner providers. Provider cost is retained internally for accounting.</p>
 </body></html>`;
 
   return new NextResponse(html, {

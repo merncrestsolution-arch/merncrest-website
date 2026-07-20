@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import { Link } from "@/i18n/routing";
 import { getKbArticle, kbArticles } from "@/lib/data/knowledge-base";
+import { PageHero } from "@/components/ui/page-hero";
 import { Reveal } from "@/components/motion/reveal";
 
 export function generateStaticParams() {
@@ -17,17 +18,20 @@ export default async function KbArticlePage({
   if (!article) notFound();
 
   return (
-    <article className="pt-28 section-padding">
-      <div className="container-wide max-w-2xl">
-        <Reveal>
-          <Link href="/knowledge-base" className="text-sm text-accent hover:opacity-80">
-            ← Knowledge Base
-          </Link>
-          <p className="mt-6 text-xs font-mono text-accent">{article.category}</p>
-          <h1 className="mt-2 font-display text-3xl sm:text-4xl font-bold">{article.title}</h1>
-          <p className="mt-4 text-muted text-lg">{article.summary}</p>
-        </Reveal>
-        <Reveal delay={0.1} className="mt-10 space-y-4">
+    <article className="stitch-page">
+      <PageHero
+        eyebrow={article.category}
+        title={article.title}
+        description={article.summary}
+        align="left"
+      >
+        <Link href="/knowledge-base" className="text-sm text-violet-300 hover:text-violet-200">
+          ← Knowledge Base
+        </Link>
+      </PageHero>
+
+      <div className="stitch-page-body max-w-3xl">
+        <Reveal className="stitch-card stitch-stack-md">
           {article.body.map((para) => (
             <p key={para} className="text-muted leading-relaxed">
               {para}

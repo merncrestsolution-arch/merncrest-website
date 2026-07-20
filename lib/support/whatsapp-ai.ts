@@ -121,13 +121,15 @@ ${MENU}`;
   // Hosting
   if (lower === "2" || /hosting|i need hosting|web hosting/.test(lower)) {
     return {
-      reply: `Hosting options (LKR/mo):
+      reply: `Hosting is resold via our provider partners (not MernCrest-owned servers).
+
+Popular plans (LKR/mo selling price):
 • Shared Starter — from Rs. 9,900
 • Business — from Rs. 29,900
 • WordPress — from Rs. 24,900
-• Cloud — from Rs. 49,900
+• Cloud / VPS — from Rs. 49,900
 
-Tell me: website type, expected visitors, storage, and budget — I'll recommend a plan.`,
+Describe your project (site type, visitors, storage, budget) at merncrest.lk/hosting for an AI recommendation, or reply here.`,
       locale,
     };
   }

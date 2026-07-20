@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { nextNumber } from "@/lib/commerce";
+import { writeAuditLog } from "@/lib/erp/audit";
 import { requirePermission } from "@/lib/erp/permissions";
 import { z } from "zod";
 
@@ -94,7 +95,31 @@ export async function PUT(request: Request) {
         status: "PENDING",
       },
     });
-    return NextResponse.json({ leave }, { status: 201 });
+
+    const approval = await prisma.approvalRequest.create({
+      data: {
+        requestNumber: nextNumber("APR"),
+        type: "LEAVE",
+        title: `${leave.leaveType} leave · ${auth.user.fullName}`,
+        description: leave.reason || undefined,
+        status: "PENDING",
+        requesterId: auth.user.id,
+        referenceType: "LeaveRequest",
+        referenceId: leave.id,
+      },
+    });
+    await writeAuditLog({
+      actorId: auth.user.id,
+      actorEmail: auth.user.email,
+      actorName: auth.user.fullName,
+      action: "CREATE",
+      module: "HR",
+      entityType: "LeaveRequest",
+      entityId: leave.id,
+      summary: `Leave requested: ${leave.leaveType}`,
+    });
+
+    return NextResponse.json({ leave, approval }, { status: 201 });
   }
 
   // Approve / reject
@@ -113,5 +138,29 @@ export async function PUT(request: Request) {
       approverId: auth.user.id,
     },
   });
+
+  await prisma.approvalRequest.updateMany({
+    where: {
+      referenceType: "LeaveRequest",
+      referenceId: leave.id,
+      status: "PENDING",
+    },
+    data: {
+      status: action.data.status === "APPROVED" ? "APPROVED" : action.data.status === "REJECTED" ? "REJECTED" : "CANCELLED",
+      approverId: auth.user.id,
+      decidedAt: new Date(),
+    },
+  });
+  await writeAuditLog({
+    actorId: auth.user.id,
+    actorEmail: auth.user.email,
+    actorName: auth.user.fullName,
+    action: action.data.status === "APPROVED" ? "APPROVE" : "REJECT",
+    module: "HR",
+    entityType: "LeaveRequest",
+    entityId: leave.id,
+    summary: `Leave ${action.data.status.toLowerCase()}: ${leave.leaveType}`,
+  });
+
   return NextResponse.json({ leave });
 }

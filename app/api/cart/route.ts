@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { requireUser } from "@/lib/commerce";
+import { lockFxQuote } from "@/lib/providers/fx";
 import { z } from "zod";
 
 async function getOrCreateCart(userId: string) {
@@ -35,6 +36,9 @@ const addSchema = z.object({
   productId: z.string().min(1),
   quantity: z.number().int().min(1).max(99).optional(),
   meta: z.record(z.string(), z.string()).optional(),
+  providerCurrency: z.string().optional(),
+  exchangeRate: z.number().positive().optional(),
+  fxBufferPercent: z.number().min(0).max(20).optional(),
 });
 
 export async function POST(request: Request) {
@@ -59,14 +63,43 @@ export async function POST(request: Request) {
     const qty = parsed.data.quantity ?? 1;
     const metaJson = parsed.data.meta ? JSON.stringify(parsed.data.meta) : null;
 
+    const currency = parsed.data.providerCurrency || product.currency || "LKR";
+    let fxFields: {
+      providerCurrency: string;
+      exchangeRate: number;
+      exchangeRateLockedAt: Date;
+      fxBufferPercent: number;
+    };
+
+    if (parsed.data.exchangeRate && parsed.data.providerCurrency) {
+      fxFields = {
+        providerCurrency: parsed.data.providerCurrency.toUpperCase(),
+        exchangeRate: parsed.data.exchangeRate,
+        exchangeRateLockedAt: new Date(),
+        fxBufferPercent: parsed.data.fxBufferPercent ?? 2,
+      };
+    } else {
+      const quote = await lockFxQuote(
+        product.providerPriceCents ?? product.priceCents,
+        currency,
+        parsed.data.fxBufferPercent
+      );
+      fxFields = {
+        providerCurrency: quote.providerCurrency,
+        exchangeRate: quote.exchangeRate,
+        exchangeRateLockedAt: quote.exchangeRateLockedAt,
+        fxBufferPercent: quote.fxBufferPercent,
+      };
+    }
+
     if (metaJson) {
-      // Domains / configured services: one cart line per meta snapshot
       await prisma.cartItem.create({
         data: {
           cartId: cart.id,
           productId: product.id,
           quantity: qty,
           metaJson,
+          ...fxFields,
         },
       });
     } else {
@@ -82,6 +115,7 @@ export async function POST(request: Request) {
             cartId: cart.id,
             productId: product.id,
             quantity: qty,
+            ...fxFields,
           },
         });
       }

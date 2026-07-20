@@ -52,6 +52,8 @@ model User {
   documents        Document[]      @relation("DocUploader")
   internalMessages InternalMessage[] @relation("MsgSender")
   vendorsManaged   Vendor[]        @relation("VendorOwner")
+  activities       CustomerActivity[]
+  downloads        CustomerDownload[]
 
   @@index([role])
 }
@@ -62,6 +64,7 @@ model CustomerProfile {
   user               User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   /// Public unique customer ID e.g. MC-A1B2C3
   customerCode       String?  @unique
+  photoUrl           String?
   phone              String?
   whatsapp           String?
   address            String?
@@ -69,14 +72,82 @@ model CustomerProfile {
   province           String?
   postalCode         String?
   country            String?  @default("Sri Lanka")
+  /// Encrypted at rest (AES-256-GCM) — see lib/security/pii.ts. Retention: policy TBD (PDPA).
   businessReg        String?
+  /// Encrypted at rest (AES-256-GCM) — see lib/security/pii.ts. Retention: policy TBD (PDPA).
   nicPassport        String?
   timezone           String?  @default("Asia/Colombo")
   preferredLanguage  String?  @default("en")
+  /// Communication preferences
+  notifyEmail        Boolean  @default(true)
+  notifyWhatsApp     Boolean  @default(true)
+  notifySms          Boolean  @default(false)
+  marketingOptIn     Boolean  @default(false)
+  /// Assigned staff (Customer 360)
+  assignedSalesId    String?
+  assignedSupportId  String?
+  /// GOOD | AVERAGE | AT_RISK | VIP
+  customerRating     String?  @default("GOOD")
   creditBalanceCents Int      @default(0)
   notes              String?
   createdAt          DateTime @default(now())
   updatedAt          DateTime @updatedAt
+}
+
+/// Portal / CRM-linked customer activity trail
+model CustomerActivity {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  /// ORDER | PAYMENT | TICKET | DOMAIN | HOSTING | LOGIN | PROFILE | SYSTEM
+  category  String   @default("SYSTEM")
+  title     String
+  body      String?
+  href      String?
+  metaJson  String?
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([createdAt])
+  @@index([category])
+}
+
+/// Platform announcements shown on customer portal dashboard
+model Announcement {
+  id        String    @id @default(cuid())
+  title     String
+  body      String
+  /// INFO | WARNING | SUCCESS | PROMO
+  tone      String    @default("INFO")
+  href      String?
+  active    Boolean   @default(true)
+  startsAt  DateTime  @default(now())
+  endsAt    DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  @@index([active])
+  @@index([startsAt])
+}
+
+/// Customer downloadable assets (invoices PDF links, licenses, manuals)
+model CustomerDownload {
+  id          String   @id @default(cuid())
+  userId      String?
+  user        User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  /// Global assets when userId is null
+  title       String
+  description String?
+  /// INVOICE | RECEIPT | LICENSE | MANUAL | SOFTWARE | DOCUMENT
+  category    String   @default("DOCUMENT")
+  fileUrl     String
+  fileType    String?  @default("PDF")
+  active      Boolean  @default(true)
+  createdAt   DateTime @default(now())
+
+  @@index([userId])
+  @@index([category])
+  @@index([active])
 }
 
 model Session {
@@ -106,27 +177,94 @@ model LoginHistory {
   @@index([createdAt])
 }
 
-model Product {
+/// Third-party reseller provider (domains, hosting, VPS, SSL, email, cloud).
+/// MernCrest does NOT own hosting infrastructure — services are purchased via Provider APIs.
+model Provider {
+  id                 String    @id @default(cuid())
+  name               String
+  /// Stable code e.g. mock-a | provider-b
+  code               String    @unique
+  /// DOMAIN | HOSTING | SSL | EMAIL | CLOUD | MULTI
+  providerType       String    @default("MULTI")
+  apiUrl             String?
+  apiKey             String?
+  apiSecret          String?
+  /// JSON array: ["domains","hosting","vps","ssl","email","cloud"]
+  supportedServices  String    @default("[]")
+  /// ACTIVE | INACTIVE | ERROR
+  status             String    @default("ACTIVE")
+  /// Lower = higher priority when routing
+  priority           Int       @default(100)
+  /// IDLE | SYNCING | SUCCESS | FAILED
+  syncStatus         String    @default("IDLE")
+  lastSyncedAt       DateTime?
+  /// Fallback fixed margin (cents) when category margin missing
+  defaultMarginCents Int       @default(0)
+  notes              String?
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+
+  products        Product[]
+  domains         Domain[]
+  hostingAccounts HostingAccount[]
+
+  @@index([status])
+  @@index([priority])
+}
+
+/// Configurable profit margins by product category.
+/// Selling Price = Provider Price + Margin (fixed and/or percent).
+model PricingMargin {
   id            String   @id @default(cuid())
-  slug          String   @unique
-  name          String
-  description   String
-  category      String
-  priceCents    Int
-  currency      String   @default("LKR")
-  /// ONCE | MONTHLY | YEARLY
-  billingPeriod String   @default("ONCE")
-  active        Boolean  @default(true)
-  featured      Boolean  @default(false)
-  sortOrder     Int      @default(0)
+  /// domains | hosting | vps | ssl | email | cloud
+  category      String   @unique
+  marginCents   Int      @default(0)
+  marginPercent Float    @default(0)
+  /// FIXED | PERCENT | BOTH — FIXED uses marginCents; PERCENT uses marginPercent; BOTH adds both.
+  /// Existing rows keep FIXED (do not silently change stored values). New USD products default to PERCENT.
+  marginMode    String   @default("FIXED")
+  /// Extra % on FX conversion (USD→LKR) to absorb rate movement between quote and purchase
+  fxBufferPercent Float  @default(2)
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
+}
+
+model Product {
+  id                 String    @id @default(cuid())
+  slug               String    @unique
+  name               String
+  description        String
+  category           String
+  /// Public selling price (provider cost + margin)
+  priceCents         Int
+  /// Internal provider cost (hidden from customer invoices)
+  providerPriceCents Int?
+  currency           String    @default("LKR")
+  /// ONCE | MONTHLY | YEARLY
+  billingPeriod      String    @default("ONCE")
+  active             Boolean   @default(true)
+  featured           Boolean   @default(false)
+  sortOrder          Int       @default(0)
+  providerId         String?
+  provider           Provider? @relation(fields: [providerId], references: [id], onDelete: SetNull)
+  /// External SKU / package id at the provider
+  providerProductId  String?
+  /// Admin marketing overrides (public catalog still uses name/description as fallback)
+  marketingTitle     String?
+  marketingBanner    String?
+  marketingBody      String?
+  /// JSON package specs synced from provider
+  specsJson          String?
+  lastSyncedAt       DateTime?
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
 
   cartItems  CartItem[]
   orderItems OrderItem[]
 
   @@index([category])
   @@index([active])
+  @@index([providerId])
 }
 
 model Cart {
@@ -147,6 +285,12 @@ model CartItem {
   quantity  Int     @default(1)
   /// JSON: domainName, tld, planCode, etc.
   metaJson  String?
+  /// Provider wholesale currency at quote (USD | LKR)
+  providerCurrency     String?
+  /// Locked USD→LKR rate at quote time (units of LKR per 1 USD)
+  exchangeRate         Float?
+  exchangeRateLockedAt DateTime?
+  fxBufferPercent      Float?
 
   @@index([cartId])
 }
@@ -156,7 +300,7 @@ model Order {
   orderNumber String      @unique
   userId      String
   user        User        @relation(fields: [userId], references: [id])
-  /// PENDING | PAID | PROCESSING | COMPLETED | CANCELLED
+  /// DRAFT | PENDING | WAITING_PAYMENT | PAID | PROCESSING | PROVISIONING | PROVISIONING_FAILED | COMPLETED | CANCELLED | REFUNDED
   status      String      @default("PENDING")
   subtotalCents Int
   taxCents      Int       @default(0)
@@ -167,6 +311,9 @@ model Order {
   /// JSON registrant / billing contact snapshot
   registrantJson String?
   notes         String?
+  /// Auto-provision retry counter (max 3 per activateOrderServices run)
+  provisioningAttempts Int @default(0)
+  lastProvisionError   String?
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
@@ -184,18 +331,26 @@ model Order {
 }
 
 model OrderItem {
-  id            String  @id @default(cuid())
-  orderId       String
-  order         Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  productId     String?
-  product       Product? @relation(fields: [productId], references: [id], onDelete: SetNull)
-  productName   String
-  productSlug   String
-  quantity      Int
-  unitPriceCents Int
-  totalCents    Int
-  billingPeriod String  @default("ONCE")
-  metaJson      String?
+  id                 String   @id @default(cuid())
+  orderId            String
+  order              Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId          String?
+  product            Product? @relation(fields: [productId], references: [id], onDelete: SetNull)
+  productName        String
+  productSlug        String
+  quantity           Int
+  unitPriceCents     Int
+  totalCents         Int
+  /// Internal provider cost snapshot in selling currency (LKR cents after FX)
+  providerCostCents  Int?
+  /// Original provider currency before FX (USD | LKR)
+  providerCurrency     String?
+  /// Locked USD→LKR rate used for this line
+  exchangeRate         Float?
+  exchangeRateLockedAt DateTime?
+  fxBufferPercent      Float?
+  billingPeriod      String   @default("ONCE")
+  metaJson           String?
 }
 
 model Invoice {
@@ -223,25 +378,35 @@ model Invoice {
 }
 
 model Payment {
-  id          String   @id @default(cuid())
-  userId      String
-  user        User     @relation(fields: [userId], references: [id])
-  orderId     String
-  order       Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  invoiceId   String?
-  invoice     Invoice? @relation(fields: [invoiceId], references: [id], onDelete: SetNull)
-  amountCents Int
-  currency    String   @default("LKR")
-  /// MANUAL | DEMO | PAYHERE | STRIPE
-  method      String   @default("DEMO")
-  /// PENDING | SUCCEEDED | FAILED
-  status      String   @default("PENDING")
-  providerRef String?
-  createdAt   DateTime @default(now())
+  id           String    @id @default(cuid())
+  userId       String
+  user         User      @relation(fields: [userId], references: [id])
+  orderId      String
+  order        Order     @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  invoiceId    String?
+  invoice      Invoice?  @relation(fields: [invoiceId], references: [id], onDelete: SetNull)
+  amountCents  Int
+  currency     String    @default("LKR")
+  /// MANUAL | BANK_TRANSFER | DEMO | PAYHERE | STRIPE
+  method       String    @default("MANUAL")
+  /// PENDING | AWAITING_VERIFICATION | SUCCEEDED | FAILED | REJECTED
+  status       String    @default("PENDING")
+  providerRef  String?
+  /// Bank transfer reference / customer note (legacy — prefer referenceNumber)
+  proofNote    String?
+  /// Bank transfer reference number (required for new submissions)
+  referenceNumber String?
+  /// Receipt / screenshot URL (required for new bank-transfer submissions)
+  proofImageUrl   String?
+  adminNote    String?
+  verifiedById String?
+  verifiedAt   DateTime?
+  createdAt    DateTime  @default(now())
 
   @@index([userId])
   @@index([orderId])
   @@index([status])
+  @@index([createdAt])
 }
 
 model Domain {
@@ -250,6 +415,10 @@ model Domain {
   user         User      @relation(fields: [userId], references: [id])
   orderId      String?
   order        Order?    @relation(fields: [orderId], references: [id], onDelete: SetNull)
+  providerId   String?
+  provider     Provider? @relation(fields: [providerId], references: [id], onDelete: SetNull)
+  /// External registration id at the provider
+  providerRef  String?
   name         String
   tld          String
   /// PENDING | ACTIVE | EXPIRED | TRANSFERRING | LOCKED
@@ -258,7 +427,8 @@ model Domain {
   locked       Boolean   @default(false)
   registeredAt DateTime?
   expiresAt    DateTime?
-  nameservers  String    @default("ns1.merncrest.lk,ns2.merncrest.lk")
+  /// Reseller nameservers (provider-managed; not MernCrest-owned infra)
+  nameservers  String    @default("ns1.provider.example,ns2.provider.example")
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
 
@@ -268,6 +438,7 @@ model Domain {
   @@index([userId])
   @@index([status])
   @@index([expiresAt])
+  @@index([providerId])
 }
 
 model DnsRecord {
@@ -287,33 +458,39 @@ model DnsRecord {
 }
 
 model HostingAccount {
-  id            String    @id @default(cuid())
-  userId        String
-  user          User      @relation(fields: [userId], references: [id])
-  orderId       String?
-  order         Order?    @relation(fields: [orderId], references: [id], onDelete: SetNull)
-  label         String
-  planCode      String
+  id              String    @id @default(cuid())
+  userId          String
+  user            User      @relation(fields: [userId], references: [id])
+  orderId         String?
+  order           Order?    @relation(fields: [orderId], references: [id], onDelete: SetNull)
+  providerId      String?
+  provider        Provider? @relation(fields: [providerId], references: [id], onDelete: SetNull)
+  /// External account id at the provider
+  providerRef     String?
+  label           String
+  planCode        String
   /// PENDING | PROVISIONING | ACTIVE | SUSPENDED | CANCELLED
-  status        String    @default("PENDING")
-  primaryDomain String?
-  diskMb        Int       @default(10240)
-  diskUsedMb    Int       @default(0)
-  bandwidthGb   Int       @default(100)
-  bandwidthUsedGb Int     @default(0)
-  cpuPercent    Int       @default(5)
-  ramMb         Int       @default(512)
-  ramUsedMb     Int       @default(128)
-  sslStatus     String    @default("PENDING")
-  backupStatus  String    @default("OK")
-  panelUrl      String?
-  activatedAt   DateTime?
-  renewsAt      DateTime?
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  status          String    @default("PENDING")
+  primaryDomain   String?
+  diskMb          Int       @default(10240)
+  diskUsedMb      Int       @default(0)
+  bandwidthGb     Int       @default(100)
+  bandwidthUsedGb Int       @default(0)
+  cpuPercent      Int       @default(5)
+  ramMb           Int       @default(512)
+  ramUsedMb       Int       @default(128)
+  sslStatus       String    @default("PENDING")
+  backupStatus    String    @default("OK")
+  /// Provider control panel URL (not MernCrest-owned servers)
+  panelUrl        String?
+  activatedAt     DateTime?
+  renewsAt        DateTime?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
 
   @@index([userId])
   @@index([status])
+  @@index([providerId])
 }
 
 model Subscription {
@@ -424,7 +601,9 @@ model TicketMessage {
 /// Sales / support CRM lead
 model CrmLead {
   id          String    @id @default(cuid())
-  /// NEW | ASSIGNED | CONTACTED | MEETING | QUOTATION | NEGOTIATION | WON | LOST
+  leadNumber  String?   @unique
+  /// NEW | ASSIGNED | QUALIFIED | MEETING | QUOTATION | NEGOTIATION | WON | LOST | ON_HOLD
+  /// Legacy CONTACTED was migrated to QUALIFIED (see scripts/migrate-crm-contacted.ts)
   stage       String    @default("NEW")
   source      String    @default("WEBSITE")
   fullName    String
@@ -437,6 +616,9 @@ model CrmLead {
   budgetCents Int       @default(0)
   /// LOW | MEDIUM | HIGH | URGENT
   priority    String    @default("MEDIUM")
+  /// 0–100 lead score
+  leadScore   Int       @default(0)
+  timeline    String?
   followUpAt  DateTime?
   ownerId     String?
   owner       User?     @relation("LeadOwner", fields: [ownerId], references: [id], onDelete: SetNull)
@@ -445,11 +627,14 @@ model CrmLead {
 
   activities  CrmActivity[]
   quotations  Quotation[]
+  followUps   CrmFollowUp[]
+  meetings    CrmMeeting[]
 
   @@index([stage])
   @@index([email])
   @@index([ownerId])
   @@index([followUpAt])
+  @@index([leadScore])
 }
 
 model CrmActivity {
@@ -458,12 +643,77 @@ model CrmActivity {
   lead      CrmLead? @relation(fields: [leadId], references: [id], onDelete: Cascade)
   userId    String?
   user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
-  /// NOTE | CALL | EMAIL | WHATSAPP | MEETING | STATUS
+  /// NOTE | CALL | EMAIL | WHATSAPP | MEETING | STATUS | CHAT | IVR | FORM
   type      String   @default("NOTE")
   body      String
+  /// Optional channel link e.g. whatsapp message id
+  channelRef String?
   createdAt DateTime @default(now())
 
   @@index([leadId])
+  @@index([createdAt])
+}
+
+model CrmFollowUp {
+  id          String    @id @default(cuid())
+  leadId      String
+  lead        CrmLead   @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  assigneeId  String?
+  /// CALL | WHATSAPP | EMAIL | MEETING | DEMO | REMINDER | ESCALATION
+  type        String    @default("CALL")
+  title       String
+  notes       String?
+  dueAt       DateTime
+  /// PENDING | DONE | OVERDUE | CANCELLED
+  status      String    @default("PENDING")
+  completedAt DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([leadId])
+  @@index([dueAt])
+  @@index([status])
+}
+
+model CrmMeeting {
+  id          String    @id @default(cuid())
+  leadId      String?
+  lead        CrmLead?  @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  userId      String?
+  /// CONSULTATION | ONLINE | OFFICE | TECHNICAL | SALES
+  meetingType String    @default("CONSULTATION")
+  title       String
+  location    String?
+  scheduledAt DateTime
+  durationMin Int       @default(30)
+  /// SCHEDULED | COMPLETED | CANCELLED | NO_SHOW
+  status      String    @default("SCHEDULED")
+  notes       String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([leadId])
+  @@index([scheduledAt])
+  @@index([status])
+}
+
+/// CSAT / NPS after ticket, call, meeting, project
+model CustomerSatisfaction {
+  id          String   @id @default(cuid())
+  userId      String?
+  leadId      String?
+  /// TICKET | CALL | MEETING | PROJECT | CHAT | GENERAL
+  channel     String   @default("GENERAL")
+  referenceId String?
+  rating      Int
+  /// 0–10 NPS
+  npsScore    Int?
+  feedback    String?
+  suggestions String?
+  createdAt   DateTime @default(now())
+
+  @@index([userId])
+  @@index([channel])
   @@index([createdAt])
 }
 
@@ -1138,4 +1388,296 @@ model AiInsight {
   createdAt DateTime @default(now())
 
   @@index([category])
+}
+
+/// —— Part 05: Organization OS (multi-tenant ready) ——
+
+model Organization {
+  id          String   @id @default(cuid())
+  code        String   @unique
+  name        String
+  legalName   String?
+  taxId       String?
+  email       String?
+  phone       String?
+  address     String?
+  country     String?  @default("Sri Lanka")
+  /// ACTIVE | INACTIVE
+  status      String   @default("ACTIVE")
+  /// SaaS tenant flag — MernCrest is primary tenant
+  isPrimary   Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  deletedAt   DateTime?
+
+  branches Branch[]
+
+  @@index([status])
+}
+
+model Branch {
+  id             String       @id @default(cuid())
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  code           String
+  name           String
+  city           String?
+  address        String?
+  phone          String?
+  /// ACTIVE | INACTIVE
+  status         String       @default("ACTIVE")
+  isHeadOffice   Boolean      @default(false)
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  deletedAt      DateTime?
+
+  @@unique([organizationId, code])
+  @@index([organizationId])
+  @@index([status])
+}
+
+/// System-wide audit trail for ERP / CRM / Finance actions
+model AuditLog {
+  id         String   @id @default(cuid())
+  actorId    String?
+  actorEmail String?
+  actorName  String?
+  /// LOGIN | LOGOUT | CREATE | UPDATE | DELETE | APPROVE | REJECT | PAYMENT | INVENTORY | FINANCE | SETTINGS | EXPORT
+  action     String
+  module     String
+  entityType String?
+  entityId   String?
+  summary    String
+  metaJson   String?
+  ip         String?
+  createdAt  DateTime @default(now())
+
+  @@index([module])
+  @@index([action])
+  @@index([actorId])
+  @@index([createdAt])
+  @@index([entityType, entityId])
+}
+
+/// Generic multi-level approval requests (leave, PO, expense, quote, project, invoice)
+model ApprovalRequest {
+  id           String    @id @default(cuid())
+  requestNumber String   @unique
+  /// LEAVE | PURCHASE | EXPENSE | QUOTATION | PROJECT | INVOICE | DOCUMENT | CUSTOM
+  type         String
+  title        String
+  description  String?
+  /// PENDING | APPROVED | REJECTED | CANCELLED
+  status       String    @default("PENDING")
+  requesterId  String
+  approverId   String?
+  referenceType String?
+  referenceId  String?
+  amountCents  Int?
+  decidedAt    DateTime?
+  decisionNote String?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  @@index([type])
+  @@index([status])
+  @@index([requesterId])
+  @@index([approverId])
+  @@index([createdAt])
+}
+
+/// Chart of Accounts — foundation for GL / AR / AP
+model ChartOfAccount {
+  id          String   @id @default(cuid())
+  code        String   @unique
+  name        String
+  /// ASSET | LIABILITY | EQUITY | REVENUE | EXPENSE
+  type        String
+  parentCode  String?
+  description String?
+  active      Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([type])
+  @@index([active])
+}
+
+/// ESS salary slips generated from payroll runs
+model SalarySlip {
+  id           String   @id @default(cuid())
+  slipNumber   String   @unique
+  employeeId   String
+  payrollRunId String?
+  periodLabel  String
+  grossCents   Int
+  deductionsCents Int   @default(0)
+  netCents     Int
+  currency     String   @default("LKR")
+  /// DRAFT | ISSUED | PAID
+  status       String   @default("ISSUED")
+  issuedAt     DateTime @default(now())
+  metaJson     String?
+  createdAt    DateTime @default(now())
+
+  @@index([employeeId])
+  @@index([payrollRunId])
+  @@index([periodLabel])
+}
+
+/// —— Part 06: Platform Administration (database-driven config) ——
+
+/// Key/value platform settings (company, branding, security, email, maintenance…)
+model SystemSetting {
+  id          String   @id @default(cuid())
+  /// e.g. company.name | branding.primaryColor | security.sessionDays | maintenance.enabled
+  key         String   @unique
+  value       String
+  /// STRING | NUMBER | BOOLEAN | JSON
+  valueType   String   @default("STRING")
+  group       String   @default("general")
+  label       String?
+  description String?
+  updatedById String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([group])
+}
+
+model FeatureFlag {
+  id          String   @id @default(cuid())
+  key         String   @unique
+  name        String
+  description String?
+  enabled     Boolean  @default(false)
+  /// STABLE | BETA | EXPERIMENTAL
+  tier        String   @default("STABLE")
+  updatedById String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([enabled])
+  @@index([tier])
+}
+
+/// CMS pages for public website content (database-driven, not hardcoded)
+model CmsPage {
+  id              String    @id @default(cuid())
+  slug            String    @unique
+  title           String
+  /// HOME | ABOUT | SERVICES | PORTFOLIO | PRICING | LEGAL | BLOG | CUSTOM
+  pageType        String    @default("CUSTOM")
+  locale          String    @default("en")
+  excerpt         String?
+  bodyHtml        String?
+  heroTitle       String?
+  heroSubtitle    String?
+  heroImageUrl    String?
+  seoTitle        String?
+  seoDescription  String?
+  /// DRAFT | PUBLISHED | ARCHIVED
+  status          String    @default("DRAFT")
+  publishedAt     DateTime?
+  version         Int       @default(1)
+  updatedById     String?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  @@index([pageType])
+  @@index([status])
+  @@index([locale])
+}
+
+model MediaAsset {
+  id          String   @id @default(cuid())
+  filename    String
+  title       String?
+  /// IMAGE | VIDEO | PDF | DOCUMENT | ICON | LOGO | BANNER | OTHER
+  kind        String   @default("IMAGE")
+  mimeType    String?
+  url         String
+  folder      String   @default("general")
+  sizeBytes   Int?
+  width       Int?
+  height      Int?
+  altText     String?
+  uploadedById String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  deletedAt   DateTime?
+
+  @@index([kind])
+  @@index([folder])
+  @@index([createdAt])
+}
+
+/// Platform API keys for integrations / partners (not reseller Provider keys)
+model PlatformApiKey {
+  id          String    @id @default(cuid())
+  name        String
+  keyPrefix   String
+  keyHash     String    @unique
+  scopesJson  String?
+  /// ACTIVE | REVOKED
+  status      String    @default("ACTIVE")
+  lastUsedAt  DateTime?
+  expiresAt   DateTime?
+  createdById String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([status])
+}
+
+model WebhookEndpoint {
+  id          String   @id @default(cuid())
+  name        String
+  url         String
+  /// ORDER | PAYMENT | TICKET | LEAD | ALL
+  eventTypes  String   @default("ALL")
+  secret      String?
+  active      Boolean  @default(true)
+  lastStatus  String?
+  lastFiredAt DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([active])
+}
+
+model BackupRecord {
+  id          String   @id @default(cuid())
+  label       String
+  /// MANUAL | SCHEDULED | SYSTEM
+  type        String   @default("MANUAL")
+  /// PENDING | COMPLETED | FAILED
+  status      String   @default("PENDING")
+  location    String?
+  sizeBytes   Int?
+  notes       String?
+  createdById String?
+  completedAt DateTime?
+  createdAt   DateTime @default(now())
+
+  @@index([status])
+  @@index([createdAt])
+}
+
+model EmailTemplate {
+  id          String   @id @default(cuid())
+  key         String   @unique
+  name        String
+  subject     String
+  bodyHtml    String
+  bodyText    String?
+  /// en | ta | si
+  locale      String   @default("en")
+  active      Boolean  @default(true)
+  updatedById String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([locale])
+  @@index([active])
 }

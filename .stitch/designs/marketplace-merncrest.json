@@ -1,0 +1,28 @@
+﻿{
+    "id":  1,
+    "jsonrpc":  "2.0",
+    "result":  {
+                   "content":  [
+                                   {
+                                       "text":  "{\"name\":\"projects/17402065891171962495/screens/fb53877b26e94ae2a505fd457a10f53e\",\"title\":\"Marketplace — MernCrest\",\"screenshot\":{\"name\":\"projects/17402065891171962495/files/052fef59409b494b89abf6eead0f9581\",\"downloadUrl\":\"https://lh3.googleusercontent.com/aida/AP1WRLuUdA0SUxiApSQmp5a1wT31M1gzmkPLj2gW5An2OdIG51jqWeldgghf3r5YtA83jMMg9OaKaf9TW0i84wcemFKBzmPuHgxgKF3HdSQpZYzv8ZnBfbnI0-IlaeqgyDJDmWw-e80cXUrJPDHManbwjUoT3J09BbXViVL1478tsVGYOH5vdpnGAFE44_q_sb6ZInXbZlFyV4o8aof0v6OQGLmYgA9xqySWCSKrlRGTLBreYnXdjp3l4Va0cIRZ\"},\"htmlCode\":{\"name\":\"projects/17402065891171962495/files/08eb9c16f62a4b42b55fad62ec5329dd\",\"downloadUrl\":\"https://contribution.usercontent.google.com/download?c=CgthaWRhX2NvZGVmeBJ8Eh1hcHBfY29tcGFuaW9uX2dlbmVyYXRlZF9maWxlcxpbCiVodG1sXzFhODYzMTRiNGJmMjQyNDc4YTY1ODI0NjIxNDE3NjVlEgsSBxDk1Kj0qBAYAZIBJAoKcHJvamVjdF9pZBIWQhQxNzQwMjA2NTg5MTE3MTk2MjQ5NQ\u0026filename=\u0026opi=89354086\",\"mimeType\":\"text/html\"},\"width\":\"2560\",\"height\":\"6078\",\"deviceType\":\"DESKTOP\"}",
+                                       "type":  "text"
+                                   }
+                               ],
+                   "structuredContent":  {
+                                             "deviceType":  "DESKTOP",
+                                             "height":  "6078",
+                                             "htmlCode":  {
+                                                              "downloadUrl":  "https://contribution.usercontent.google.com/download?c=CgthaWRhX2NvZGVmeBJ8Eh1hcHBfY29tcGFuaW9uX2dlbmVyYXRlZF9maWxlcxpbCiVodG1sXzFhODYzMTRiNGJmMjQyNDc4YTY1ODI0NjIxNDE3NjVlEgsSBxDk1Kj0qBAYAZIBJAoKcHJvamVjdF9pZBIWQhQxNzQwMjA2NTg5MTE3MTk2MjQ5NQ\u0026filename=\u0026opi=89354086",
+                                                              "mimeType":  "text/html",
+                                                              "name":  "projects/17402065891171962495/files/08eb9c16f62a4b42b55fad62ec5329dd"
+                                                          },
+                                             "name":  "projects/17402065891171962495/screens/fb53877b26e94ae2a505fd457a10f53e",
+                                             "screenshot":  {
+                                                                "downloadUrl":  "https://lh3.googleusercontent.com/aida/AP1WRLuUdA0SUxiApSQmp5a1wT31M1gzmkPLj2gW5An2OdIG51jqWeldgghf3r5YtA83jMMg9OaKaf9TW0i84wcemFKBzmPuHgxgKF3HdSQpZYzv8ZnBfbnI0-IlaeqgyDJDmWw-e80cXUrJPDHManbwjUoT3J09BbXViVL1478tsVGYOH5vdpnGAFE44_q_sb6ZInXbZlFyV4o8aof0v6OQGLmYgA9xqySWCSKrlRGTLBreYnXdjp3l4Va0cIRZ",
+                                                                "name":  "projects/17402065891171962495/files/052fef59409b494b89abf6eead0f9581"
+                                                            },
+                                             "title":  "Marketplace — MernCrest",
+                                             "width":  "2560"
+                                         }
+               }
+}

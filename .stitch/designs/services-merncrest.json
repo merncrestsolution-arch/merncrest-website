@@ -1,0 +1,28 @@
+﻿{
+    "id":  1,
+    "jsonrpc":  "2.0",
+    "result":  {
+                   "content":  [
+                                   {
+                                       "text":  "{\"name\":\"projects/17402065891171962495/screens/042336c749be43089ea31880c0d739a8\",\"title\":\"Services — MernCrest\",\"screenshot\":{\"name\":\"projects/17402065891171962495/files/77f76cfbed67476482d75ab21962aa15\",\"downloadUrl\":\"https://lh3.googleusercontent.com/aida/AP1WRLuePTpfLygtp3QwLdigwQW8wlDNjtoCSAsZz82tcGYjNHDMMaZmtTOIgDHTg0EJ8L3ncHcSEcY8S1XbPN2VnwNnsQjiybcj2sBMPrOiNQNgshGYK6lnvYXdjkwPbiFaAH0ZtEgMMrU5umfGoPzneYvZNZGiZv79i84cBDCPlnKV08kSx1SST37RoWvhK7uWr-JK0FyQXAC8dEZ5S_Gx-qGjWpnPZwl_kio_mFODZtrF5sDmJOeK2xfVdh-J\"},\"htmlCode\":{\"name\":\"projects/17402065891171962495/files/5eb78af4eef6446ca1ca639e514e9c18\",\"downloadUrl\":\"https://contribution.usercontent.google.com/download?c=CgthaWRhX2NvZGVmeBJ8Eh1hcHBfY29tcGFuaW9uX2dlbmVyYXRlZF9maWxlcxpbCiVodG1sX2JhODg4MDA1MDI4NTRiMWViMDUwZThiYzAzOGVkZDIyEgsSBxDk1Kj0qBAYAZIBJAoKcHJvamVjdF9pZBIWQhQxNzQwMjA2NTg5MTE3MTk2MjQ5NQ\u0026filename=\u0026opi=89354086\",\"mimeType\":\"text/html\"},\"width\":\"2560\",\"height\":\"6210\",\"deviceType\":\"DESKTOP\"}",
+                                       "type":  "text"
+                                   }
+                               ],
+                   "structuredContent":  {
+                                             "deviceType":  "DESKTOP",
+                                             "height":  "6210",
+                                             "htmlCode":  {
+                                                              "downloadUrl":  "https://contribution.usercontent.google.com/download?c=CgthaWRhX2NvZGVmeBJ8Eh1hcHBfY29tcGFuaW9uX2dlbmVyYXRlZF9maWxlcxpbCiVodG1sX2JhODg4MDA1MDI4NTRiMWViMDUwZThiYzAzOGVkZDIyEgsSBxDk1Kj0qBAYAZIBJAoKcHJvamVjdF9pZBIWQhQxNzQwMjA2NTg5MTE3MTk2MjQ5NQ\u0026filename=\u0026opi=89354086",
+                                                              "mimeType":  "text/html",
+                                                              "name":  "projects/17402065891171962495/files/5eb78af4eef6446ca1ca639e514e9c18"
+                                                          },
+                                             "name":  "projects/17402065891171962495/screens/042336c749be43089ea31880c0d739a8",
+                                             "screenshot":  {
+                                                                "downloadUrl":  "https://lh3.googleusercontent.com/aida/AP1WRLuePTpfLygtp3QwLdigwQW8wlDNjtoCSAsZz82tcGYjNHDMMaZmtTOIgDHTg0EJ8L3ncHcSEcY8S1XbPN2VnwNnsQjiybcj2sBMPrOiNQNgshGYK6lnvYXdjkwPbiFaAH0ZtEgMMrU5umfGoPzneYvZNZGiZv79i84cBDCPlnKV08kSx1SST37RoWvhK7uWr-JK0FyQXAC8dEZ5S_Gx-qGjWpnPZwl_kio_mFODZtrF5sDmJOeK2xfVdh-J",
+                                                                "name":  "projects/17402065891171962495/files/77f76cfbed67476482d75ab21962aa15"
+                                                            },
+                                             "title":  "Services — MernCrest",
+                                             "width":  "2560"
+                                         }
+               }
+}

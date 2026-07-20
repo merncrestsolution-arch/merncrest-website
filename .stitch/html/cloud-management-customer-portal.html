@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Cloud Infrastructure | MernCrest Solutions</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;family=Inter:wght@400;500;600&amp;family=JetBrains+Mono:wght@500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        body {
+            background-color: #131317;
+            color: #e4e1e7;
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
+        }
+        .font-headline-xl { font-family: 'Plus Jakarta Sans', sans-serif; }
+        .font-headline-lg { font-family: 'Plus Jakarta Sans', sans-serif; }
+        .font-headline-md { font-family: 'Plus Jakarta Sans', sans-serif; }
+        .font-label-md { font-family: 'JetBrains Mono', monospace; }
+        .font-label-sm { font-family: 'JetBrains Mono', monospace; }
+
+        .stitch-border {
+            position: relative;
+            background: #131317;
+            border-radius: 1rem;
+        }
+        .stitch-border::after {
+            content: '';
+            position: absolute;
+            inset: -1px;
+            background: linear-gradient(45deg, #4a4455, #7c3aed);
+            border-radius: 1.05rem;
+            z-index: -1;
+            opacity: 0.5;
+        }
+
+        .luminous-glow {
+            box-shadow: 0 0 20px 0 rgba(210, 187, 255, 0.15);
+        }
+
+        .glass-panel {
+            background: rgba(19, 19, 23, 0.6);
+            backdrop-filter: blur(20px);
+            border: 1px solid #4a4455;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #4a4455;
+            border-radius: 10px;
+        }
+
+        @keyframes pulse-soft {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+        .animate-pulse-soft {
+            animation: pulse-soft 3s ease-in-out infinite;
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                "surface-container-lowest": "#0e0e12",
+                "secondary-fixed-dim": "#c0c1ff",
+                "on-tertiary-container": "#dce5ff",
+                "surface-container-highest": "#353439",
+                "primary-container": "#7c3aed",
+                "inverse-surface": "#e4e1e7",
+                "surface-bright": "#39393d",
+                "tertiary-fixed-dim": "#adc6ff",
+                "on-primary-fixed-variant": "#5a00c6",
+                "on-error": "#690005",
+                "background": "#131317",
+                "primary-fixed-dim": "#d2bbff",
+                "error": "#ffb4ab",
+                "surface-container-high": "#2a292e",
+                "surface": "#131317",
+                "inverse-primary": "#732ee4",
+                "inverse-on-surface": "#303034",
+                "surface-dim": "#131317",
+                "glow-violet": "#d2bbff",
+                "tertiary-container": "#0062d2",
+                "tertiary": "#adc6ff",
+                "outline-variant": "#4a4455",
+                "tertiary-fixed": "#d8e2ff",
+                "on-tertiary-fixed-variant": "#004395",
+                "secondary": "#c0c1ff",
+                "error-container": "#93000a",
+                "success": "#25d366",
+                "surface-tint": "#d2bbff",
+                "outline": "#958da1",
+                "on-secondary-fixed": "#06006c",
+                "on-primary": "#3f008e",
+                "on-error-container": "#ffdad6",
+                "on-secondary-container": "#acaeff",
+                "surface-container": "#1f1f23",
+                "on-tertiary": "#002e6a",
+                "surface-variant": "#353439",
+                "on-surface-variant": "#ccc3d8",
+                "text-primary": "#ffffff",
+                "primary-fixed": "#eaddff",
+                "text-secondary": "#94a3b8",
+                "primary": "#d2bbff",
+                "border-subtle": "#4a4455",
+                "secondary-fixed": "#e1e0ff",
+                "on-secondary-fixed-variant": "#2e2ebe",
+                "on-primary-container": "#ede0ff",
+                "surface-container-low": "#1b1b1f",
+                "on-surface": "#e4e1e7",
+                "on-primary-fixed": "#25005a",
+                "on-secondary": "#0f00a9",
+                "secondary-container": "#2e2ebe",
+                "on-tertiary-fixed": "#001a42",
+                "on-background": "#e4e1e7"
+              },
+              "spacing": {
+                "gutter": "24px",
+                "scale-lg": "1.5rem",
+                "scale-2xl": "4rem",
+                "margin-mobile": "16px",
+                "container-max": "1440px",
+                "scale-sm": "0.5rem",
+                "scale-xl": "2.5rem",
+                "margin-desktop": "64px",
+                "scale-xs": "0.25rem",
+                "scale-md": "1rem"
+              }
+            }
+          }
+        }
+    </script>
+</head>
+<body class="flex min-h-screen bg-background text-on-surface">
+<!-- Mesh Gradient Backgrounds -->
+<div class="fixed inset-0 overflow-hidden pointer-events-none z-0">
+<div class="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-primary/10 blur-[120px]"></div>
+<div class="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] rounded-full bg-tertiary-container/10 blur-[150px]"></div>
+<div class="absolute top-[20%] right-[10%] w-[30%] h-[30%] rounded-full bg-secondary-container/5 blur-[100px]"></div>
+</div>
+<!-- SideNavBar Component -->
+<aside class="hidden md:flex flex-col h-screen w-72 fixed left-0 bg-background border-r border-border-subtle z-40 py-scale-lg transition-all duration-300">
+<div class="px-scale-lg mb-scale-xl">
+<h1 class="font-headline-md text-headline-md font-black text-on-surface flex items-center gap-2">
+<span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 1;">cloud_queue</span>
+                MernCrest
+            </h1>
+<p class="text-[12px] uppercase tracking-widest text-on-surface-variant/60 font-medium mt-1">Enterprise Portal</p>
+</div>
+<nav class="flex-1 space-y-2 px-4">
+<a class="flex items-center gap-3 bg-secondary-container/20 text-primary border-r-4 border-primary px-4 py-3 rounded-l-lg translate-x-1 transition-transform duration-200" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">cloud_queue</span>
+<span class="font-label-md">Services</span>
+</a>
+<a class="flex items-center gap-3 text-on-surface-variant hover:text-on-surface hover:bg-surface-container transition-all duration-300 px-4 py-3 rounded-lg" href="#">
+<span class="material-symbols-outlined">receipt_long</span>
+<span class="font-label-md">Billing</span>
+</a>
+<a class="flex items-center gap-3 text-on-surface-variant hover:text-on-surface hover:bg-surface-container transition-all duration-300 px-4 py-3 rounded-lg" href="#">
+<span class="material-symbols-outlined">contact_support</span>
+<span class="font-label-md">Support</span>
+</a>
+<a class="flex items-center gap-3 text-on-surface-variant hover:text-on-surface hover:bg-surface-container transition-all duration-300 px-4 py-3 rounded-lg" href="#">
+<span class="material-symbols-outlined">tune</span>
+<span class="font-label-md">Settings</span>
+</a>
+</nav>
+<div class="px-6 mb-8">
+<button class="w-full bg-primary-container text-on-primary-container font-bold py-3 px-4 rounded-xl flex items-center justify-center gap-2 luminous-glow hover:opacity-90 transition-all">
+<span class="material-symbols-outlined">add</span>
+<span>New Request</span>
+</button>
+</div>
+<div class="mt-auto px-4 space-y-2">
+<a class="flex items-center gap-3 text-on-surface-variant hover:text-on-surface transition-all px-4 py-2" href="#">
+<span class="material-symbols-outlined">menu_book</span>
+<span class="text-sm">Documentation</span>
+</a>
+<a class="flex items-center gap-3 text-on-surface-variant hover:text-on-surface transition-all px-4 py-2" href="#">
+<span class="material-symbols-outlined">gavel</span>
+<span class="text-sm">Legal</span>
+</a>
+</div>
+</aside>
+<!-- Main Content Canvas -->
+<main class="flex-1 md:ml-72 min-h-screen relative z-10">
+<!-- TopNavBar Component -->
+<header class="sticky top-0 z-50 w-full h-20 bg-surface/60 backdrop-blur-xl border-b border-border-subtle flex justify-between items-center px-margin-desktop">
+<div class="flex items-center gap-8">
+<h2 class="font-headline-md text-headline-md font-bold text-primary">Enterprise</h2>
+<nav class="hidden lg:flex items-center gap-6">
+<a class="text-on-surface-variant font-normal hover:text-primary transition-colors duration-200" href="#">Dashboard</a>
+<a class="text-primary font-bold border-b-2 border-primary pb-1" href="#">Enterprise</a>
+<a class="text-on-surface-variant font-normal hover:text-primary transition-colors duration-200" href="#">Insights</a>
+</nav>
+</div>
+<div class="flex items-center gap-4">
+<div class="relative hidden sm:block">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-lg">search</span>
+<input class="bg-surface-container-low border border-border-subtle rounded-full pl-10 pr-4 py-2 text-sm focus:outline-none focus:border-primary w-64 transition-all" placeholder="Search clusters..." type="text"/>
+</div>
+<button class="material-symbols-outlined text-on-surface-variant hover:text-primary transition-colors">notifications</button>
+<button class="material-symbols-outlined text-on-surface-variant hover:text-primary transition-colors">settings</button>
+<div class="w-10 h-10 rounded-full border-2 border-primary overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="Professional studio headshot of a senior cloud engineer with a clean tech aesthetic, set against a subtle dark grey background with violet neon accents, mirroring the luminous enterprise design system of MernCrest Solutions." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDEIf5w5jtXnJOOS34WRTI5vk0H4wbGM1mf2sSwqnhhRLlFep7kkwrMTQq0qIp1ln_hN78-2Dfw7sMVwVrB7hc6wLLq5xTdM3C_61f8Xu85-Or4JrvqEMOGiNYJPnyZ7RoV4mk_mQ3rRr8SiaQX0NYIUZzo504cORYJ9BiE2kyzq1O_U2UODHuFT607fKPxj_8yo3lsN3yiBrbgbq5L57HzD1ffMeDPJMJR9YHg_bzRsoFLliojvy6SkJ8ocQSzSBrDJ033O9Lr_Dr9"/>
+</div>
+</div>
+</header>
+<div class="max-w-container-max mx-auto px-margin-desktop py-scale-xl">
+<!-- Page Header -->
+<div class="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-scale-2xl">
+<div>
+<h3 class="font-headline-lg text-headline-lg text-white mb-2">Cloud Infrastructure</h3>
+<div class="flex items-center gap-2 bg-success/10 text-success px-3 py-1 rounded-full w-fit border border-success/20">
+<span class="w-2 h-2 rounded-full bg-success animate-pulse"></span>
+<span class="font-label-sm">All Nodes Operational</span>
+</div>
+</div>
+<button class="bg-primary hover:bg-primary-fixed-dim text-on-primary font-bold px-8 py-4 rounded-2xl flex items-center gap-3 transition-all luminous-glow">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">rocket_launch</span>
+                    Deploy New Node
+                </button>
+</div>
+<!-- Summary Metrics Bento Grid -->
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-gutter mb-scale-2xl">
+<div class="glass-panel p-scale-lg rounded-2xl flex items-center gap-4">
+<div class="w-12 h-12 rounded-xl bg-primary/20 flex items-center justify-center text-primary">
+<span class="material-symbols-outlined">memory</span>
+</div>
+<div>
+<p class="text-on-surface-variant text-sm font-label-md">Total vCPUs</p>
+<p class="text-2xl font-bold">128 <span class="text-sm text-on-surface-variant/60">Cores</span></p>
+</div>
+</div>
+<div class="glass-panel p-scale-lg rounded-2xl flex items-center gap-4">
+<div class="w-12 h-12 rounded-xl bg-secondary-container/20 flex items-center justify-center text-secondary">
+<span class="material-symbols-outlined">database</span>
+</div>
+<div>
+<p class="text-on-surface-variant text-sm font-label-md">Total RAM</p>
+<p class="text-2xl font-bold">512 <span class="text-sm text-on-surface-variant/60">GB</span></p>
+</div>
+</div>
+<div class="glass-panel p-scale-lg rounded-2xl flex items-center gap-4">
+<div class="w-12 h-12 rounded-xl bg-tertiary-container/20 flex items-center justify-center text-tertiary">
+<span class="material-symbols-outlined">storage</span>
+</div>
+<div>
+<p class="text-on-surface-variant text-sm font-label-md">Cloud Storage</p>
+<p class="text-2xl font-bold">12.4 <span class="text-sm text-on-surface-variant/60">TB</span></p>
+</div>
+</div>
+<div class="glass-panel p-scale-lg rounded-2xl flex items-center gap-4">
+<div class="w-12 h-12 rounded-xl bg-success/20 flex items-center justify-center text-success">
+<span class="material-symbols-outlined">lan</span>
+</div>
+<div>
+<p class="text-on-surface-variant text-sm font-label-md">Active Nodes</p>
+<p class="text-2xl font-bold">14 <span class="text-sm text-on-surface-variant/60">Active</span></p>
+</div>
+</div>
+</div>
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-gutter">
+<!-- Active Instances List -->
+<div class="lg:col-span-2 space-y-gutter">
+<div class="glass-panel rounded-2xl overflow-hidden">
+<div class="px-scale-lg py-scale-md border-b border-border-subtle flex justify-between items-center bg-surface-container-low/50">
+<h4 class="font-headline-md text-white">Active Instances</h4>
+<button class="text-primary font-label-sm hover:underline">View All</button>
+</div>
+<div class="overflow-x-auto custom-scrollbar">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="text-on-surface-variant/60 text-xs font-label-sm uppercase tracking-wider">
+<th class="px-scale-lg py-4 border-b border-border-subtle">Node Name</th>
+<th class="px-scale-lg py-4 border-b border-border-subtle">IP / Region</th>
+<th class="px-scale-lg py-4 border-b border-border-subtle">Status</th>
+<th class="px-scale-lg py-4 border-b border-border-subtle">Resources</th>
+<th class="px-scale-lg py-4 border-b border-border-subtle text-right">Actions</th>
+</tr>
+</thead>
+<tbody class="text-sm">
+<tr class="hover:bg-surface-container/30 transition-colors group">
+<td class="px-scale-lg py-5 border-b border-border-subtle">
+<div class="flex flex-col">
+<span class="font-bold text-white">MernCrest-V-Premium</span>
+<span class="text-xs text-on-surface-variant">ID: mc-v-9210-p</span>
+</div>
+</td>
+<td class="px-scale-lg py-5 border-b border-border-subtle">
+<div class="flex flex-col">
+<span class="font-label-sm">192.168.1.104</span>
+<span class="text-xs text-on-surface-variant">AWS US-East-1</span>
+</div>
+</td>
+<td class="px-scale-lg py-5 border-b border-border-subtle">
+<span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-success/10 text-success text-xs font-medium border border-success/20">
+<span class="w-1.5 h-1.5 rounded-full bg-success"></span> Running
+                                            </span>
+</td>
+<td class="px-scale-lg py-5 border-b border-border-subtle">
+<div class="space-y-2 w-32">
+<div class="flex justify-between text-[10px] font-label-sm mb-0.5">
+<span>CPU</span>
+<span>74%</span>
+</div>
+<div class="w-full h-1.5 bg-surface-container-highest rounded-full overflow-hidden">
+<div class="h-full bg-primary" style="width: 74%"></div>
+</div>
+<div class="flex justify-between text-[10px] font-label-sm mb-0.5">
+<span>RAM</span>
+<span>42%</span>
+</div>
+<div class="w-full h-1.5 bg-surface-container-highest rounded-full overflow-hidden">
+<div class="h-full bg-secondary" style="width: 42%"></div>
+</div>
+</div>
+</td>
+<td class="px-scale-lg py-5 border-b border-border-subtle text-right">
+<div class="flex justify-end gap-2">
+<button class="p-2 rounded-lg bg-surface-container hover:bg-surface-container-high transition-colors text-on-surface-variant" title="Console">
+<span class="material-symbols-outlined text-[18px]">terminal</span>
+</button>
+<button class="p-2 rounded-lg bg-surface-container hover:bg-surface-container-high transition-colors text-on-surface-variant" title="Reboot">
+<span class="material-symbols-outlined text-[18px]">restart_alt</span>
+</button>
+<button class="p-2 rounded-lg bg-surface-container hover:bg-surface-container-high transition-colors text-on-surface-variant" title="Resize">
+<span class="material-symbols-outlined text-[18px]">open_in_full</span>
+</button>
+</div>
+</td>
+</tr>
+<tr class="hover:bg-surface-container/30 transition-colors group">
+<td class="px-scale-lg py-5 border-b border-border-subtle">
+<div class="flex flex-col">
+<span class="font-bold text-white">DataLake-Shard-01</span>
+<span class="text-xs text-on-surface-variant">ID: dl-sh-01-z</span>
+</div>
+</td>
+<td class="px-scale-lg py-5 border-b border-border-subtle">
+<div class="flex flex-col">
+<span class="font-label-sm">172.16.0.45</span>
+<span class="text-xs text-on-surface-variant">Azure West-EU</span>
+</div>
+</td>
+<td class="px-scale-lg py-5 border-b border-border-subtle">
+<span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-success/10 text-success text-xs font-medium border border-success/20">
+<span class="w-1.5 h-1.5 rounded-full bg-success"></span> Running
+                                            </span>
+</td>
+<td class="px-scale-lg py-5 border-b border-border-subtle">
+<div class="space-y-2 w-32">
+<div class="flex justify-between text-[10px] font-label-sm mb-0.5">
+<span>CPU</span>
+<span>12%</span>
+</div>
+<div class="w-full h-1.5 bg-surface-container-highest rounded-full overflow-hidden">
+<div class="h-full bg-primary" style="width: 12%"></div>
+</div>
+<div class="flex justify-between text-[10px] font-label-sm mb-0.5">
+<span>RAM</span>
+<span>89%</span>
+</div>
+<div class="w-full h-1.5 bg-surface-container-highest rounded-full overflow-hidden">
+<div class="h-full bg-secondary" style="width: 89%"></div>
+</div>
+</div>
+</td>
+<td class="px-scale-lg py-5 border-b border-border-subtle text-right">
+<div class="flex justify-end gap-2">
+<button class="p-2 rounded-lg bg-surface-container hover:bg-surface-container-high transition-colors text-on-surface-variant" title="Console">
+<span class="material-symbols-outlined text-[18px]">terminal</span>
+</button>
+<button class="p-2 rounded-lg bg-surface-container hover:bg-surface-container-high transition-colors text-on-surface-variant" title="Reboot">
+<span class="material-symbols-outlined text-[18px]">restart_alt</span>
+</button>
+<button class="p-2 rounded-lg bg-surface-container hover:bg-surface-container-high transition-colors text-on-surface-variant" title="Resize">
+<span class="material-symbols-outlined text-[18px]">open_in_full</span>
+</button>
+</div>
+</td>
+</tr>
+<tr class="hover:bg-surface-container/30 transition-colors group">
+<td class="px-scale-lg py-5 border-b border-border-subtle">
+<div class="flex flex-col">
+<span class="font-bold text-white">AI-Training-GPU-4</span>
+<span class="text-xs text-on-surface-variant">ID: ai-gpu-v100-4</span>
+</div>
+</td>
+<td class="px-scale-lg py-5 border-b border-border-subtle">
+<div class="flex flex-col">
+<span class="font-label-sm">10.0.4.122</span>
+<span class="text-xs text-on-surface-variant">GCP us-central1</span>
+</div>
+</td>
+<td class="px-scale-lg py-5 border-b border-border-subtle">
+<span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-on-surface-variant/10 text-on-surface-variant text-xs font-medium border border-on-surface-variant/20">
+<span class="w-1.5 h-1.5 rounded-full bg-on-surface-variant"></span> Stopped
+                                            </span>
+</td>
+<td class="px-scale-lg py-5 border-b border-border-subtle">
+<div class="space-y-2 w-32">
+<div class="flex justify-between text-[10px] font-label-sm mb-0.5">
+<span>CPU</span>
+<span>0%</span>
+</div>
+<div class="w-full h-1.5 bg-surface-container-highest rounded-full overflow-hidden">
+<div class="h-full bg-primary" style="width: 0%"></div>
+</div>
+<div class="flex justify-between text-[10px] font-label-sm mb-0.5">
+<span>RAM</span>
+<span>0%</span>
+</div>
+<div class="w-full h-1.5 bg-surface-container-highest rounded-full overflow-hidden">
+<div class="h-full bg-secondary" style="width: 0%"></div>
+</div>
+</div>
+</td>
+<td class="px-scale-lg py-5 border-b border-border-subtle text-right">
+<div class="flex justify-end gap-2">
+<button class="p-2 rounded-lg bg-success/20 hover:bg-success/30 transition-colors text-success" title="Start">
+<span class="material-symbols-outlined text-[18px]">play_arrow</span>
+</button>
+<button class="p-2 rounded-lg bg-surface-container hover:bg-surface-container-high transition-colors text-on-surface-variant" title="Resize">
+<span class="material-symbols-outlined text-[18px]">open_in_full</span>
+</button>
+</div>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<!-- Resource Scaling & Insights -->
+<div class="lg:col-span-1 space-y-gutter">
+<!-- Resource Scaling Card -->
+<div class="glass-panel rounded-2xl p-scale-lg">
+<div class="flex justify-between items-center mb-6">
+<h4 class="font-headline-md text-white">Resource Usage</h4>
+<select class="bg-surface-container border-none text-xs rounded-lg text-on-surface-variant focus:ring-1 focus:ring-primary">
+<option>Last 24 Hours</option>
+<option>Last 7 Days</option>
+</select>
+</div>
+<div class="relative h-48 w-full overflow-hidden mb-6">
+<!-- Simplified CSS Visual Chart Representation -->
+<div class="absolute inset-0 flex items-end gap-1">
+<div class="flex-1 bg-primary/20 rounded-t border-t border-primary/50" style="height: 40%"></div>
+<div class="flex-1 bg-primary/20 rounded-t border-t border-primary/50" style="height: 55%"></div>
+<div class="flex-1 bg-primary/20 rounded-t border-t border-primary/50" style="height: 45%"></div>
+<div class="flex-1 bg-primary/20 rounded-t border-t border-primary/50" style="height: 70%"></div>
+<div class="flex-1 bg-primary/30 rounded-t border-t-2 border-primary" style="height: 85%"></div>
+<div class="flex-1 bg-primary/20 rounded-t border-t border-primary/50" style="height: 60%"></div>
+<div class="flex-1 bg-primary/20 rounded-t border-t border-primary/50" style="height: 40%"></div>
+<div class="flex-1 bg-primary/20 rounded-t border-t border-primary/50" style="height: 30%"></div>
+<div class="flex-1 bg-primary/20 rounded-t border-t border-primary/50" style="height: 50%"></div>
+<div class="flex-1 bg-primary/20 rounded-t border-t border-primary/50" style="height: 65%"></div>
+<div class="flex-1 bg-primary/20 rounded-t border-t border-primary/50" style="height: 80%"></div>
+<div class="flex-1 bg-primary/20 rounded-t border-t border-primary/50" style="height: 55%"></div>
+</div>
+<div class="absolute inset-0 flex flex-col justify-between pointer-events-none py-2">
+<div class="border-t border-white/5 w-full"></div>
+<div class="border-t border-white/5 w-full"></div>
+<div class="border-t border-white/5 w-full"></div>
+<div class="border-t border-white/5 w-full"></div>
+</div>
+</div>
+<div class="space-y-4">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="w-3 h-3 rounded-sm bg-primary"></span>
+<span class="text-sm font-label-md text-on-surface-variant">CPU Usage</span>
+</div>
+<span class="text-sm font-bold text-white">Avg. 62%</span>
+</div>
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="w-3 h-3 rounded-sm bg-secondary"></span>
+<span class="text-sm font-label-md text-on-surface-variant">RAM Allocation</span>
+</div>
+<span class="text-sm font-bold text-white">Avg. 78%</span>
+</div>
+</div>
+</div>
+<!-- AI Optimization Card -->
+<div class="stitch-border p-scale-lg relative overflow-hidden group">
+<div class="absolute top-0 right-0 p-4 opacity-20 group-hover:opacity-40 transition-opacity">
+<span class="material-symbols-outlined text-4xl text-primary">psychology</span>
+</div>
+<h4 class="font-headline-md text-white mb-2">AI Optimization</h4>
+<p class="text-sm text-on-surface-variant mb-6 leading-relaxed">
+                            MernCrest AI detects underutilized nodes in Azure West-EU. Resize now to save <span class="text-primary font-bold">$240/mo</span>.
+                        </p>
+<button class="w-full py-3 rounded-xl border border-primary/30 text-primary font-bold hover:bg-primary hover:text-on-primary transition-all flex items-center justify-center gap-2">
+<span>Execute Resize</span>
+<span class="material-symbols-outlined text-[18px]">bolt</span>
+</button>
+</div>
+<!-- Regional Distribution -->
+<div class="glass-panel rounded-2xl p-scale-lg">
+<h4 class="font-headline-md text-white mb-6">Regional Footprint</h4>
+<div class="space-y-4">
+<div class="flex items-center gap-4">
+<div class="w-8 h-8 rounded-full overflow-hidden bg-surface-container flex items-center justify-center">
+<span class="material-symbols-outlined text-sm">public</span>
+</div>
+<div class="flex-1">
+<div class="flex justify-between mb-1">
+<span class="text-xs font-label-md">North America</span>
+<span class="text-xs font-bold">64%</span>
+</div>
+<div class="w-full h-1 bg-surface-container-highest rounded-full">
+<div class="h-full bg-primary" style="width: 64%"></div>
+</div>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<div class="w-8 h-8 rounded-full overflow-hidden bg-surface-container flex items-center justify-center">
+<span class="material-symbols-outlined text-sm">public</span>
+</div>
+<div class="flex-1">
+<div class="flex justify-between mb-1">
+<span class="text-xs font-label-md">Europe</span>
+<span class="text-xs font-bold">28%</span>
+</div>
+<div class="w-full h-1 bg-surface-container-highest rounded-full">
+<div class="h-full bg-secondary" style="width: 28%"></div>
+</div>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<div class="w-8 h-8 rounded-full overflow-hidden bg-surface-container flex items-center justify-center">
+<span class="material-symbols-outlined text-sm">public</span>
+</div>
+<div class="flex-1">
+<div class="flex justify-between mb-1">
+<span class="text-xs font-label-md">Asia Pacific</span>
+<span class="text-xs font-bold">8%</span>
+</div>
+<div class="w-full h-1 bg-surface-container-highest rounded-full">
+<div class="h-full bg-tertiary" style="width: 8%"></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- Mobile Navigation Bar -->
+<nav class="md:hidden fixed bottom-0 left-0 right-0 bg-surface/80 backdrop-blur-xl border-t border-border-subtle z-50 flex justify-around items-center h-16">
+<button class="flex flex-col items-center text-primary">
+<span class="material-symbols-outlined">dashboard</span>
+<span class="text-[10px] font-label-sm">Home</span>
+</button>
+<button class="flex flex-col items-center text-on-surface-variant">
+<span class="material-symbols-outlined">cloud_queue</span>
+<span class="text-[10px] font-label-sm">Services</span>
+</button>
+<button class="w-12 h-12 -mt-10 bg-primary rounded-full flex items-center justify-center shadow-lg shadow-primary/20 text-on-primary">
+<span class="material-symbols-outlined">add</span>
+</button>
+<button class="flex flex-col items-center text-on-surface-variant">
+<span class="material-symbols-outlined">receipt_long</span>
+<span class="text-[10px] font-label-sm">Billing</span>
+</button>
+<button class="flex flex-col items-center text-on-surface-variant">
+<span class="material-symbols-outlined">account_circle</span>
+<span class="text-[10px] font-label-sm">Profile</span>
+</button>
+</nav>
+<script>
+        // Micro-interaction for table rows
+        document.querySelectorAll('tbody tr').forEach(row => {
+            row.addEventListener('mouseenter', () => {
+                row.style.transform = 'translateX(4px)';
+                row.style.transition = 'transform 0.2s ease-out';
+            });
+            row.addEventListener('mouseleave', () => {
+                row.style.transform = 'translateX(0)';
+            });
+        });
+
+        // Search bar focus effect
+        const searchInput = document.querySelector('input[placeholder="Search clusters..."]');
+        searchInput.addEventListener('focus', () => {
+            searchInput.parentElement.classList.add('ring-2', 'ring-primary/20');
+        });
+        searchInput.addEventListener('blur', () => {
+            searchInput.parentElement.classList.remove('ring-2', 'ring-primary/20');
+        });
+    </script>
+</body></html>

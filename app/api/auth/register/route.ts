@@ -9,6 +9,9 @@ import {
 } from "@/lib/auth";
 import { sendVerificationEmail } from "@/lib/mail";
 import { registerSchema } from "@/lib/validations/auth";
+import { onCustomerRegistered } from "@/lib/crm/customer-hooks";
+import { notifyUser } from "@/lib/support/notify";
+import { encryptPii } from "@/lib/security/pii";
 
 export async function POST(request: Request) {
   try {
@@ -61,7 +64,7 @@ export async function POST(request: Request) {
             whatsapp: bodyExtra.mobile?.trim() || null,
             country: bodyExtra.country?.trim() || "Sri Lanka",
             address: bodyExtra.address?.trim() || null,
-            nicPassport: bodyExtra.nic?.trim() || null,
+            nicPassport: encryptPii(bodyExtra.nic?.trim() || null),
             preferredLanguage: "en",
             timezone: "Asia/Colombo",
           },
@@ -77,6 +80,21 @@ export async function POST(request: Request) {
     const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || null;
     const { token, expiresAt } = await createSession(user.id, { userAgent: ua, ip });
     await setSessionCookie(token, expiresAt);
+
+    void onCustomerRegistered({
+      userId: user.id,
+      email: user.email,
+      fullName: user.fullName,
+      company: user.company,
+      phone: bodyExtra.mobile?.trim() || null,
+    });
+    void notifyUser({
+      userId: user.id,
+      title: "Welcome to MernCrest",
+      body: "Your customer portal is ready. Verify your email and explore the marketplace.",
+      category: "SYSTEM",
+      href: "/portal",
+    });
 
     return NextResponse.json(
       {

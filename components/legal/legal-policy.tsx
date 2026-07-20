@@ -1,4 +1,5 @@
 import { Link } from "@/i18n/routing";
+import { PageHero } from "@/components/ui/page-hero";
 
 const policies: Record<
   string,
@@ -72,17 +73,22 @@ export default function LegalPolicyPage({
   const pageTitle = title || policy.title;
 
   return (
-    <div className="pt-28 section-padding">
-      <div className="container-wide max-w-3xl">
-        <Link href="/" className="text-sm text-accent hover:opacity-80">
+    <div className="stitch-page">
+      <PageHero
+        eyebrow="Legal"
+        title={pageTitle}
+        description="MernCrest Solutions (Pvt) Ltd · Last updated 2026"
+        align="left"
+      >
+        <Link href="/" className="text-sm text-violet-300 hover:text-violet-200">
           ← Home
         </Link>
-        <h1 className="mt-4 font-display text-4xl font-bold">{pageTitle}</h1>
-        <p className="mt-2 text-sm text-muted">MernCrest Solutions (Pvt) Ltd · Last updated 2026</p>
-        <div className="mt-10 space-y-8">
+      </PageHero>
+      <div className="stitch-page-body max-w-3xl">
+        <div className="stitch-card stitch-stack-lg">
           {policy.sections.map((s) => (
             <section key={s.heading}>
-              <h2 className="font-display text-xl font-semibold mb-2">{s.heading}</h2>
+              <h2 className="font-display text-xl font-semibold text-white mb-2">{s.heading}</h2>
               <p className="text-muted leading-relaxed">{s.body}</p>
             </section>
           ))}

@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { isAutomaticGatewayEnabled } from "@/lib/payments/config";
 import { prisma } from "@/lib/db";
 import { requireUser } from "@/lib/commerce";
 import {
@@ -12,10 +13,25 @@ const schema = z.object({
   invoiceId: z.string().min(1),
 });
 
-/** Create PayHere checkout payload (sandbox or live). Falls back to demo if not configured. */
+/**
+ * PayHere checkout — disabled unless PAYMENT_GATEWAY_ENABLED=true.
+ * Kept in place so Stripe/PayHere can be enabled later without redesign.
+ */
 export async function POST(request: Request) {
   const auth = await requireUser();
   if (auth.error) return auth.error;
+
+  if (!isAutomaticGatewayEnabled()) {
+    return NextResponse.json(
+      {
+        error: "Automatic payment gateways are disabled",
+        mode: "manual",
+        message:
+          "Please use Manual / Bank Transfer payment. Gateways (PayHere, Stripe) can be enabled later via PAYMENT_GATEWAY_ENABLED.",
+      },
+      { status: 503 }
+    );
+  }
 
   try {
     const body = await request.json();
@@ -39,7 +55,7 @@ export async function POST(request: Request) {
     if (!config.configured) {
       return NextResponse.json({
         mode: "demo",
-        message: "PayHere not configured — use demo pay or set PAYHERE_MERCHANT_ID/SECRET",
+        message: "PayHere not configured — use manual payment or set PAYHERE_MERCHANT_ID/SECRET",
       });
     }
 

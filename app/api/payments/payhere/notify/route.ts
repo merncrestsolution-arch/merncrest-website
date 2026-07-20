@@ -51,6 +51,19 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Invoice not found" }, { status: 404 });
     }
 
+    // Mark any pending PayHere attempt as succeeded before fulfillment
+    await prisma.payment.updateMany({
+      where: {
+        invoiceId: invoice.id,
+        method: "PAYHERE",
+        status: { in: ["PENDING", "AWAITING_VERIFICATION"] },
+      },
+      data: {
+        status: "SUCCEEDED",
+        providerRef: paymentId || orderId,
+      },
+    });
+
     await markInvoicePaid({
       invoiceId: invoice.id,
       userId: invoice.userId,

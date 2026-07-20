@@ -1,0 +1,28 @@
+﻿{
+    "id":  1,
+    "jsonrpc":  "2.0",
+    "result":  {
+                   "content":  [
+                                   {
+                                       "text":  "{\"name\":\"projects/17402065891171962495/screens/2745761c06994a01a593d2e87e557fa4\",\"title\":\"Cloud Management — Customer Portal\",\"screenshot\":{\"name\":\"projects/17402065891171962495/files/fa54a7eda1b243b8b41b3b37e9ac2ef1\",\"downloadUrl\":\"https://lh3.googleusercontent.com/aida/AP1WRLt-NMrkBJDqahzX7595sisNa-9BEVkXumiA84LzVvc9eCntlCQiBRXRE0rVaGAtCpSHVaE-tUeJbeMX_aNSZ9mW2jn5wSniHMACTtP8EqXI98nO-eZmhyTG1AX36RaiSWqxilzBWAZPCpYKXqm9a5ri7XyDKB6QSSEu655pdVQNPY4E_SZshJLJmIauvz3ZSduTYhdtfFKcg9JF5di1Nbm24RYFDAczQ-QJ2IVWli8cqVApxgnztKsSvNE\"},\"htmlCode\":{\"name\":\"projects/17402065891171962495/files/377e2fd0421c4804acf628f9539640fa\",\"downloadUrl\":\"https://contribution.usercontent.google.com/download?c=CgthaWRhX2NvZGVmeBJ8Eh1hcHBfY29tcGFuaW9uX2dlbmVyYXRlZF9maWxlcxpbCiVodG1sXzgyYWVkODQ2NjI3OTQ2OTZhYzRiY2EyY2E2ZWI5ODRjEgsSBxDk1Kj0qBAYAZIBJAoKcHJvamVjdF9pZBIWQhQxNzQwMjA2NTg5MTE3MTk2MjQ5NQ\u0026filename=\u0026opi=89354086\",\"mimeType\":\"text/html\"},\"width\":\"2560\",\"height\":\"2842\",\"deviceType\":\"DESKTOP\"}",
+                                       "type":  "text"
+                                   }
+                               ],
+                   "structuredContent":  {
+                                             "deviceType":  "DESKTOP",
+                                             "height":  "2842",
+                                             "htmlCode":  {
+                                                              "downloadUrl":  "https://contribution.usercontent.google.com/download?c=CgthaWRhX2NvZGVmeBJ8Eh1hcHBfY29tcGFuaW9uX2dlbmVyYXRlZF9maWxlcxpbCiVodG1sXzgyYWVkODQ2NjI3OTQ2OTZhYzRiY2EyY2E2ZWI5ODRjEgsSBxDk1Kj0qBAYAZIBJAoKcHJvamVjdF9pZBIWQhQxNzQwMjA2NTg5MTE3MTk2MjQ5NQ\u0026filename=\u0026opi=89354086",
+                                                              "mimeType":  "text/html",
+                                                              "name":  "projects/17402065891171962495/files/377e2fd0421c4804acf628f9539640fa"
+                                                          },
+                                             "name":  "projects/17402065891171962495/screens/2745761c06994a01a593d2e87e557fa4",
+                                             "screenshot":  {
+                                                                "downloadUrl":  "https://lh3.googleusercontent.com/aida/AP1WRLt-NMrkBJDqahzX7595sisNa-9BEVkXumiA84LzVvc9eCntlCQiBRXRE0rVaGAtCpSHVaE-tUeJbeMX_aNSZ9mW2jn5wSniHMACTtP8EqXI98nO-eZmhyTG1AX36RaiSWqxilzBWAZPCpYKXqm9a5ri7XyDKB6QSSEu655pdVQNPY4E_SZshJLJmIauvz3ZSduTYhdtfFKcg9JF5di1Nbm24RYFDAczQ-QJ2IVWli8cqVApxgnztKsSvNE",
+                                                                "name":  "projects/17402065891171962495/files/fa54a7eda1b243b8b41b3b37e9ac2ef1"
+                                                            },
+                                             "title":  "Cloud Management — Customer Portal",
+                                             "width":  "2560"
+                                         }
+               }
+}

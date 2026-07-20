@@ -1,0 +1,28 @@
+﻿{
+    "id":  1,
+    "jsonrpc":  "2.0",
+    "result":  {
+                   "content":  [
+                                   {
+                                       "text":  "{\"name\":\"projects/17402065891171962495/screens/742307e050d44f26836919a0263fb23f\",\"title\":\"MernCrest — Homepage\",\"screenshot\":{\"name\":\"projects/17402065891171962495/files/9d46d40f0f4448218cbca46335690477\",\"downloadUrl\":\"https://lh3.googleusercontent.com/aida/AP1WRLuVyMW8aXclXtrzWZKWG4KS6s7lSrhOF11bDHcmvkJokU15Rrx6NloGNo3xMaI1_9k60ujBatRqXwozmuvflgoHs1fmh7HIDA6zOr0wMJRB_UDAXD6buJV5Vkf35o2fcmujvFn6k78o-OwKNfhB3dBZ1zgLdSWM__sfi4WokhoIlVCkl3OyNDcDBZ2L5RvA5L2iWF3A1gSTNak_N1btOE18gHsG-NIbeN_N5-Brsrpf9RQtvpFjFxwZxZk\"},\"htmlCode\":{\"name\":\"projects/17402065891171962495/files/a4a2964a3b9c45fe9ef9934fba7f1256\",\"downloadUrl\":\"https://contribution.usercontent.google.com/download?c=CgthaWRhX2NvZGVmeBJ8Eh1hcHBfY29tcGFuaW9uX2dlbmVyYXRlZF9maWxlcxpbCiVodG1sX2E5NTMzZmEzNTg3ZjQ1MDc5NmE2ZTc4ODNlNTA4ZDc1EgsSBxDk1Kj0qBAYAZIBJAoKcHJvamVjdF9pZBIWQhQxNzQwMjA2NTg5MTE3MTk2MjQ5NQ\u0026filename=\u0026opi=89354086\",\"mimeType\":\"text/html\"},\"width\":\"2560\",\"height\":\"7942\",\"deviceType\":\"DESKTOP\"}",
+                                       "type":  "text"
+                                   }
+                               ],
+                   "structuredContent":  {
+                                             "deviceType":  "DESKTOP",
+                                             "height":  "7942",
+                                             "htmlCode":  {
+                                                              "downloadUrl":  "https://contribution.usercontent.google.com/download?c=CgthaWRhX2NvZGVmeBJ8Eh1hcHBfY29tcGFuaW9uX2dlbmVyYXRlZF9maWxlcxpbCiVodG1sX2E5NTMzZmEzNTg3ZjQ1MDc5NmE2ZTc4ODNlNTA4ZDc1EgsSBxDk1Kj0qBAYAZIBJAoKcHJvamVjdF9pZBIWQhQxNzQwMjA2NTg5MTE3MTk2MjQ5NQ\u0026filename=\u0026opi=89354086",
+                                                              "mimeType":  "text/html",
+                                                              "name":  "projects/17402065891171962495/files/a4a2964a3b9c45fe9ef9934fba7f1256"
+                                                          },
+                                             "name":  "projects/17402065891171962495/screens/742307e050d44f26836919a0263fb23f",
+                                             "screenshot":  {
+                                                                "downloadUrl":  "https://lh3.googleusercontent.com/aida/AP1WRLuVyMW8aXclXtrzWZKWG4KS6s7lSrhOF11bDHcmvkJokU15Rrx6NloGNo3xMaI1_9k60ujBatRqXwozmuvflgoHs1fmh7HIDA6zOr0wMJRB_UDAXD6buJV5Vkf35o2fcmujvFn6k78o-OwKNfhB3dBZ1zgLdSWM__sfi4WokhoIlVCkl3OyNDcDBZ2L5RvA5L2iWF3A1gSTNak_N1btOE18gHsG-NIbeN_N5-Brsrpf9RQtvpFjFxwZxZk",
+                                                                "name":  "projects/17402065891171962495/files/9d46d40f0f4448218cbca46335690477"
+                                                            },
+                                             "title":  "MernCrest — Homepage",
+                                             "width":  "2560"
+                                         }
+               }
+}

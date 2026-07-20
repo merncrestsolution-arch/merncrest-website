@@ -1,6 +1,7 @@
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { Link } from "@/i18n/routing";
 import { Button } from "@/components/ui/button";
+import { PageHero } from "@/components/ui/page-hero";
 import { ArrowRight } from "lucide-react";
 import { PortfolioGrid } from "@/components/sections/portfolio-grid";
 
@@ -26,27 +27,29 @@ export default async function PortfolioPage({
   setRequestLocale(locale);
 
   return (
-    <div className="container-wide section-padding pt-32 min-h-screen">
-      <div className="text-center max-w-2xl mx-auto mb-20">
-        <p className="text-accent font-mono text-sm uppercase tracking-wider mb-3">
-          Our Work
-        </p>
-        <h1 className="text-4xl sm:text-5xl font-bold mb-6 font-display text-balance">
-          Case Studies & Projects
-        </h1>
-        <p className="text-muted text-lg">
-          Explore a selection of our most impactful digital transformations across various industries worldwide.
-        </p>
-      </div>
+    <div className="stitch-page">
+      <PageHero
+        eyebrow="Our Work"
+        title="Case studies & projects"
+        description="Explore a selection of our most impactful digital transformations across various industries worldwide."
+      />
 
-      {/* Interactive Framer Motion Grid Component */}
-      <PortfolioGrid />
+      <div className="stitch-page-body stitch-stack-lg">
+        <PortfolioGrid />
 
-      <div className="mt-32 text-center">
-        <h2 className="text-3xl font-bold mb-6">Have a project in mind?</h2>
-        <Button asChild size="lg" className="h-14 px-8 text-base">
-          <Link href="/contact">Let's Build It Together <ArrowRight className="ml-2 h-5 w-5" /></Link>
-        </Button>
+        <div className="stitch-card text-center !py-12 relative overflow-hidden">
+          <div className="pointer-events-none absolute inset-0 brand-mesh opacity-40" aria-hidden />
+          <div className="relative z-10 stitch-stack-md max-w-xl mx-auto">
+            <h2 className="font-display text-2xl sm:text-3xl font-bold text-white">
+              Have a project in mind?
+            </h2>
+            <Button asChild size="lg" className="rounded-full">
+              <Link href="/contact">
+                Let&apos;s Build It Together <ArrowRight className="ml-2 h-5 w-5" />
+              </Link>
+            </Button>
+          </div>
+        </div>
       </div>
     </div>
   );

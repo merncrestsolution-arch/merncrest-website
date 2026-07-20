@@ -17,6 +17,9 @@ export async function GET() {
       workOrders,
       income,
       expense,
+      approvalsPending,
+      auditCount,
+      organizations,
     ] = await Promise.all([
       prisma.employee.count({ where: { status: "ACTIVE" } }),
       prisma.leaveRequest.count({ where: { status: "PENDING" } }),
@@ -32,6 +35,9 @@ export async function GET() {
         where: { type: "EXPENSE" },
         _sum: { amountCents: true },
       }),
+      prisma.approvalRequest.count({ where: { status: "PENDING" } }),
+      prisma.auditLog.count(),
+      prisma.organization.count({ where: { deletedAt: null } }),
     ]);
 
     const lowStock = inventoryItems.filter((i) => i.quantity <= i.reorderLevel).slice(0, 5);
@@ -49,6 +55,9 @@ export async function GET() {
         expenseCents: expense._sum.amountCents ?? 0,
         netCents: (income._sum.amountCents ?? 0) - (expense._sum.amountCents ?? 0),
         lowStockCount: lowStock.length,
+        approvalsPending,
+        auditCount,
+        organizations,
       },
       lowStock,
     });

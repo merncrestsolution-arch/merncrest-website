@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import { Link } from "@/i18n/routing";
 import { getProductCategory, productCategories } from "@/lib/data/products";
 import { Button } from "@/components/ui/button";
+import { PageHero } from "@/components/ui/page-hero";
 import { Reveal } from "@/components/motion/reveal";
 import { CatalogGrid } from "@/components/commerce/catalog-grid";
 
@@ -19,22 +20,27 @@ export default async function ProductCategoryPage({
   if (!cat) notFound();
 
   return (
-    <div className="pt-28 section-padding">
-      <div className="container-wide max-w-3xl">
-        <Reveal>
-          <Link href="/products" className="text-sm text-accent hover:opacity-80">
-            ← Products
-          </Link>
-          <h1 className="mt-4 font-display text-4xl sm:text-5xl font-bold">{cat.title}</h1>
-          <p className="mt-4 text-lg text-muted leading-relaxed">{cat.description}</p>
-        </Reveal>
+    <div className="stitch-page">
+      <PageHero
+        eyebrow="Products"
+        title={cat.title}
+        description={cat.description}
+        align="left"
+      >
+        <Link href="/products" className="text-sm text-violet-300 hover:text-violet-200">
+          ← All products
+        </Link>
+      </PageHero>
 
-        <Reveal delay={0.1} className="mt-10 space-y-3">
-          <h2 className="font-display text-xl font-semibold">Included capabilities</h2>
-          <ul className="space-y-2">
+      <div className="stitch-page-body stitch-stack-lg">
+        <Reveal>
+          <h2 className="font-display text-xl font-semibold text-white mb-4">
+            Included capabilities
+          </h2>
+          <ul className="grid sm:grid-cols-2 gap-3">
             {cat.items.map((item) => (
-              <li key={item} className="flex items-center gap-3 text-muted">
-                <span className="h-1.5 w-1.5 rounded-full bg-accent" />
+              <li key={item} className="stitch-card !py-4 flex items-center gap-3 text-sm text-muted">
+                <span className="h-1.5 w-1.5 rounded-full bg-violet-400" />
                 {item}
               </li>
             ))}
@@ -43,11 +49,9 @@ export default async function ProductCategoryPage({
 
         <CatalogGrid category={category} />
 
-        <Reveal delay={0.15} className="mt-10 flex flex-wrap gap-3">
-          <Button asChild variant="outline">
-            <Link href="/contact">Request custom quote</Link>
-          </Button>
-        </Reveal>
+        <Button asChild variant="outline" className="rounded-full">
+          <Link href="/contact">Request custom quote</Link>
+        </Button>
       </div>
     </div>
   );

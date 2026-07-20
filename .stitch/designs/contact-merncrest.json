@@ -1,0 +1,28 @@
+﻿{
+    "id":  1,
+    "jsonrpc":  "2.0",
+    "result":  {
+                   "content":  [
+                                   {
+                                       "text":  "{\"name\":\"projects/17402065891171962495/screens/ef4016303fb243d98cd83a314107db1a\",\"title\":\"Contact — MernCrest\",\"screenshot\":{\"name\":\"projects/17402065891171962495/files/409208399dd6423cb38e71e726115e25\",\"downloadUrl\":\"https://lh3.googleusercontent.com/aida/AP1WRLsh1sMasVhbOAxXne32ga4LZLqTk9wiPAUA8XlBse_YUDxPyVezKl3y-VXpipEAmYwTUSj07krWBB-Un7vSgsiivFzsqREFWhnSwZzS_YwM0eit583N5TOBpLIDpE4yT6gMecHlQJrZIfkVCdYmDBJYUimkLnG5P4-z5rWjeJ3qbwvZFrHjyb3CELUv9ESlwT3fWcaeGnzoS6pDwmbOWPeRfOiiswiNN1y4irLVyz2c1xK-1gl1fBug86FD\"},\"htmlCode\":{\"name\":\"projects/17402065891171962495/files/259659a0de4b46ec84f9a6bee8505304\",\"downloadUrl\":\"https://contribution.usercontent.google.com/download?c=CgthaWRhX2NvZGVmeBJ8Eh1hcHBfY29tcGFuaW9uX2dlbmVyYXRlZF9maWxlcxpbCiVodG1sX2ZjNGFiZmE5YzJlYzQxMTdhOTc2NjI2YmRhNTdmMzdlEgsSBxDk1Kj0qBAYAZIBJAoKcHJvamVjdF9pZBIWQhQxNzQwMjA2NTg5MTE3MTk2MjQ5NQ\u0026filename=\u0026opi=89354086\",\"mimeType\":\"text/html\"},\"width\":\"2560\",\"height\":\"3738\",\"deviceType\":\"DESKTOP\"}",
+                                       "type":  "text"
+                                   }
+                               ],
+                   "structuredContent":  {
+                                             "deviceType":  "DESKTOP",
+                                             "height":  "3738",
+                                             "htmlCode":  {
+                                                              "downloadUrl":  "https://contribution.usercontent.google.com/download?c=CgthaWRhX2NvZGVmeBJ8Eh1hcHBfY29tcGFuaW9uX2dlbmVyYXRlZF9maWxlcxpbCiVodG1sX2ZjNGFiZmE5YzJlYzQxMTdhOTc2NjI2YmRhNTdmMzdlEgsSBxDk1Kj0qBAYAZIBJAoKcHJvamVjdF9pZBIWQhQxNzQwMjA2NTg5MTE3MTk2MjQ5NQ\u0026filename=\u0026opi=89354086",
+                                                              "mimeType":  "text/html",
+                                                              "name":  "projects/17402065891171962495/files/259659a0de4b46ec84f9a6bee8505304"
+                                                          },
+                                             "name":  "projects/17402065891171962495/screens/ef4016303fb243d98cd83a314107db1a",
+                                             "screenshot":  {
+                                                                "downloadUrl":  "https://lh3.googleusercontent.com/aida/AP1WRLsh1sMasVhbOAxXne32ga4LZLqTk9wiPAUA8XlBse_YUDxPyVezKl3y-VXpipEAmYwTUSj07krWBB-Un7vSgsiivFzsqREFWhnSwZzS_YwM0eit583N5TOBpLIDpE4yT6gMecHlQJrZIfkVCdYmDBJYUimkLnG5P4-z5rWjeJ3qbwvZFrHjyb3CELUv9ESlwT3fWcaeGnzoS6pDwmbOWPeRfOiiswiNN1y4irLVyz2c1xK-1gl1fBug86FD",
+                                                                "name":  "projects/17402065891171962495/files/409208399dd6423cb38e71e726115e25"
+                                                            },
+                                             "title":  "Contact — MernCrest",
+                                             "width":  "2560"
+                                         }
+               }
+}

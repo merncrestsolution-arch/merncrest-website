@@ -43,3 +43,6 @@ yarn-error.log*
 /prisma/dev.db-journal
 /prisma/*.db
 /prisma/*.db-journal
+
+tsconfig.tsbuildinfo
+

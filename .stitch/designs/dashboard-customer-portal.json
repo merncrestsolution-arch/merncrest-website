@@ -1,0 +1,28 @@
+﻿{
+    "id":  1,
+    "jsonrpc":  "2.0",
+    "result":  {
+                   "content":  [
+                                   {
+                                       "text":  "{\"name\":\"projects/17402065891171962495/screens/9336961f5fa24b3d912b984f06c380f8\",\"title\":\"Dashboard — Customer Portal\",\"screenshot\":{\"name\":\"projects/17402065891171962495/files/a1ca9d8185204d27846f58f12272653f\",\"downloadUrl\":\"https://lh3.googleusercontent.com/aida/AP1WRLt44U-i3yM1pVFYt80b1t9tL7nxlkO2ZZkzu23y5kmMiyInfwOVgLlQQNdhD9isJlF6zK-gcXmi8kC2pfe4XhslhcrKu6yAxamHA8mHKSIzvSYcfT4XNAP-2BzMCY-Z6ePM7aNdsIOfQt8bhY0J2dIQApuEp1kz2KBZ_df-EDy3mVbjai2lJ75_XyF9XsvCS6A2kO9SU_Ml5pW12DUwzCPlwZDoZi85e028A3oD4cihn8tXrrWjTMEuH6pY\"},\"htmlCode\":{\"name\":\"projects/17402065891171962495/files/e53097edefc04d13877257b1118d88c3\",\"downloadUrl\":\"https://contribution.usercontent.google.com/download?c=CgthaWRhX2NvZGVmeBJ8Eh1hcHBfY29tcGFuaW9uX2dlbmVyYXRlZF9maWxlcxpbCiVodG1sX2I1YmY1YTNmNWM5ZTQ2OGJiMzVhYTMxMGExMmYwZWIyEgsSBxDk1Kj0qBAYAZIBJAoKcHJvamVjdF9pZBIWQhQxNzQwMjA2NTg5MTE3MTk2MjQ5NQ\u0026filename=\u0026opi=89354086\",\"mimeType\":\"text/html\"},\"width\":\"2560\",\"height\":\"3150\",\"deviceType\":\"DESKTOP\"}",
+                                       "type":  "text"
+                                   }
+                               ],
+                   "structuredContent":  {
+                                             "deviceType":  "DESKTOP",
+                                             "height":  "3150",
+                                             "htmlCode":  {
+                                                              "downloadUrl":  "https://contribution.usercontent.google.com/download?c=CgthaWRhX2NvZGVmeBJ8Eh1hcHBfY29tcGFuaW9uX2dlbmVyYXRlZF9maWxlcxpbCiVodG1sX2I1YmY1YTNmNWM5ZTQ2OGJiMzVhYTMxMGExMmYwZWIyEgsSBxDk1Kj0qBAYAZIBJAoKcHJvamVjdF9pZBIWQhQxNzQwMjA2NTg5MTE3MTk2MjQ5NQ\u0026filename=\u0026opi=89354086",
+                                                              "mimeType":  "text/html",
+                                                              "name":  "projects/17402065891171962495/files/e53097edefc04d13877257b1118d88c3"
+                                                          },
+                                             "name":  "projects/17402065891171962495/screens/9336961f5fa24b3d912b984f06c380f8",
+                                             "screenshot":  {
+                                                                "downloadUrl":  "https://lh3.googleusercontent.com/aida/AP1WRLt44U-i3yM1pVFYt80b1t9tL7nxlkO2ZZkzu23y5kmMiyInfwOVgLlQQNdhD9isJlF6zK-gcXmi8kC2pfe4XhslhcrKu6yAxamHA8mHKSIzvSYcfT4XNAP-2BzMCY-Z6ePM7aNdsIOfQt8bhY0J2dIQApuEp1kz2KBZ_df-EDy3mVbjai2lJ75_XyF9XsvCS6A2kO9SU_Ml5pW12DUwzCPlwZDoZi85e028A3oD4cihn8tXrrWjTMEuH6pY",
+                                                                "name":  "projects/17402065891171962495/files/a1ca9d8185204d27846f58f12272653f"
+                                                            },
+                                             "title":  "Dashboard — Customer Portal",
+                                             "width":  "2560"
+                                         }
+               }
+}

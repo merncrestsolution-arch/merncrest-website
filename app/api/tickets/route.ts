@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { nextNumber, requireUser } from "@/lib/commerce";
 import { notifyUser } from "@/lib/support/notify";
+import { onCustomerTicketCreated } from "@/lib/crm/customer-hooks";
 import { z } from "zod";
 
 export async function GET() {
@@ -72,6 +73,15 @@ export async function POST(request: Request) {
       body: ticket.subject,
       category: "SUPPORT",
       href: "/portal/tickets",
+    });
+
+    void onCustomerTicketCreated({
+      userId: auth.user.id,
+      email: auth.user.email,
+      fullName: auth.user.fullName,
+      ticketNumber: ticket.ticketNumber,
+      subject: ticket.subject,
+      department: ticket.department,
     });
 
     return NextResponse.json({ ticket }, { status: 201 });

@@ -152,10 +152,10 @@
   .stitch-card,
   .glass-card,
   .glass-panel {
-    background: rgba(255, 255, 255, 0.03);
-    border: 1px solid rgba(255, 255, 255, 0.05);
-    border-radius: 0.75rem;
-    backdrop-filter: blur(12px);
+    background: rgba(19, 19, 23, 0.6);
+    border: 1px solid #4a4455;
+    border-radius: 1rem;
+    backdrop-filter: blur(20px);
   }
 
   .stitch-card {
@@ -167,9 +167,35 @@
   }
 
   .stitch-card-hover:hover {
-    border-color: rgba(167, 139, 250, 0.4);
-    background: rgba(124, 58, 237, 0.06);
-    box-shadow: 0 0 40px rgba(124, 58, 237, 0.18);
+    border-color: #7c3aed;
+    box-shadow: 0 0 20px rgba(210, 187, 255, 0.1);
+  }
+
+  .luminous-border {
+    position: relative;
+    background: #131317;
+    border: 1px solid transparent;
+    background-clip: padding-box;
+  }
+
+  .luminous-border::after {
+    content: "";
+    position: absolute;
+    inset: -1px;
+    background: linear-gradient(45deg, #4a4455, #7c3aed);
+    z-index: -1;
+    border-radius: inherit;
+  }
+
+  .mesh-gradient-fixed {
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background:
+      radial-gradient(circle at 20% 30%, rgba(124, 58, 237, 0.1) 0%, transparent 40%),
+      radial-gradient(circle at 80% 70%, rgba(49, 49, 192, 0.1) 0%, transparent 40%);
+    filter: blur(80px);
   }
 
   .gradient-text {

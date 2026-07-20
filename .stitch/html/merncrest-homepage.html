@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>MernCrest Solutions | Powering Enterprise Intelligence</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;family=Inter:wght@400;500;600&amp;family=JetBrains+Mono:wght@500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind Configuration -->
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                "on-primary-container": "#ede0ff",
+                "tertiary-fixed-dim": "#adc6ff",
+                "secondary-fixed-dim": "#c0c1ff",
+                "inverse-surface": "#e4e1e7",
+                "surface-container-highest": "#353439",
+                "text-primary": "#ffffff",
+                "surface-container-high": "#2a292e",
+                "tertiary": "#adc6ff",
+                "surface-bright": "#39393d",
+                "on-error-container": "#ffdad6",
+                "on-tertiary": "#002e6a",
+                "background": "#131317",
+                "error": "#ffb4ab",
+                "success": "#25d366",
+                "glow-violet": "#d2bbff",
+                "secondary-fixed": "#e1e0ff",
+                "outline": "#958da1",
+                "on-primary-fixed": "#25005a",
+                "error-container": "#93000a",
+                "on-tertiary-container": "#dce5ff",
+                "on-surface-variant": "#ccc3d8",
+                "on-primary-fixed-variant": "#5a00c6",
+                "primary": "#d2bbff",
+                "surface": "#131317",
+                "surface-container-lowest": "#0e0e12",
+                "on-secondary-fixed-variant": "#2e2ebe",
+                "surface-tint": "#d2bbff",
+                "on-surface": "#e4e1e7",
+                "surface-container": "#1f1f23",
+                "border-subtle": "#4a4455",
+                "primary-fixed-dim": "#d2bbff",
+                "outline-variant": "#4a4455",
+                "on-secondary-container": "#acaeff",
+                "tertiary-container": "#0062d2",
+                "on-secondary-fixed": "#06006c",
+                "on-error": "#690005",
+                "primary-fixed": "#eaddff",
+                "secondary-container": "#2e2ebe",
+                "primary-container": "#7c3aed",
+                "secondary": "#c0c1ff",
+                "surface-dim": "#131317",
+                "on-tertiary-fixed": "#001a42",
+                "text-secondary": "#94a3b8",
+                "tertiary-fixed": "#d8e2ff",
+                "surface-variant": "#353439",
+                "inverse-primary": "#732ee4",
+                "on-primary": "#3f008e",
+                "inverse-on-surface": "#303034",
+                "on-secondary": "#0f00a9",
+                "on-tertiary-fixed-variant": "#004395",
+                "on-background": "#e4e1e7",
+                "surface-container-low": "#1b1b1f"
+            },
+            "borderRadius": {
+                "DEFAULT": "0.25rem",
+                "lg": "0.5rem",
+                "xl": "0.75rem",
+                "2xl": "1rem",
+                "full": "9999px"
+            },
+            "spacing": {
+                "scale-lg": "1.5rem",
+                "margin-mobile": "16px",
+                "gutter": "24px",
+                "scale-xl": "2.5rem",
+                "scale-md": "1rem",
+                "container-max": "1440px",
+                "scale-sm": "0.5rem",
+                "scale-2xl": "4rem",
+                "margin-desktop": "64px",
+                "scale-xs": "0.25rem"
+            },
+            "fontFamily": {
+                "headline-md": ["Plus Jakarta Sans"],
+                "label-sm": ["JetBrains Mono"],
+                "body-lg": ["Inter"],
+                "headline-lg": ["Plus Jakarta Sans"],
+                "headline-xl-mobile": ["Plus Jakarta Sans"],
+                "label-md": ["JetBrains Mono"],
+                "headline-xl": ["Plus Jakarta Sans"],
+                "body-md": ["Inter"]
+            },
+            "fontSize": {
+                "headline-md": ["24px", {"lineHeight": "1.4", "fontWeight": "600"}],
+                "label-sm": ["12px", {"lineHeight": "1.0", "letterSpacing": "0.05em", "fontWeight": "500"}],
+                "body-lg": ["18px", {"lineHeight": "1.6", "fontWeight": "400"}],
+                "headline-lg": ["40px", {"lineHeight": "1.2", "fontWeight": "700"}],
+                "headline-xl-mobile": ["40px", {"lineHeight": "1.2", "fontWeight": "800"}],
+                "label-md": ["14px", {"lineHeight": "1.0", "fontWeight": "500"}],
+                "headline-xl": ["64px", {"lineHeight": "1.1", "letterSpacing": "-0.02em", "fontWeight": "800"}],
+                "body-md": ["16px", {"lineHeight": "1.6", "fontWeight": "400"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        body {
+            background-color: #0e0e12;
+            color: #e4e1e7;
+            overflow-x: hidden;
+        }
+
+        .mesh-gradient {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            background: radial-gradient(circle at 20% 30%, rgba(124, 58, 237, 0.1) 0%, transparent 40%),
+                        radial-gradient(circle at 80% 70%, rgba(49, 49, 192, 0.1) 0%, transparent 40%);
+            filter: blur(80px);
+        }
+
+        .stitch-card {
+            background: rgba(19, 19, 23, 0.6);
+            backdrop-filter: blur(20px);
+            border: 1px solid #4a4455;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .stitch-card:hover {
+            border-color: #7c3aed;
+            box-shadow: 0 0 20px rgba(210, 187, 255, 0.1);
+        }
+
+        .luminous-border {
+            position: relative;
+            background: #131317;
+            border: 1px solid transparent;
+            background-clip: padding-box;
+        }
+
+        .luminous-border::after {
+            content: '';
+            position: absolute;
+            top: -1px; bottom: -1px;
+            left: -1px; right: -1px;
+            background: linear-gradient(45deg, #4a4455, #7c3aed);
+            z-index: -1;
+            border-radius: inherit;
+        }
+
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+
+        .glass-nav {
+            background: rgba(19, 19, 23, 0.6);
+            backdrop-filter: blur(20px);
+        }
+    </style>
+</head>
+<body class="font-body-md text-on-background">
+<div class="mesh-gradient"></div>
+<!-- TopNavBar -->
+<header class="fixed top-0 w-full z-50 bg-surface/60 backdrop-blur-xl border-b border-border-subtle shadow-sm">
+<nav class="flex justify-between items-center h-20 px-margin-mobile md:px-margin-desktop max-w-container-max mx-auto">
+<div class="flex items-center gap-2">
+<span class="font-headline-md text-headline-md font-bold text-text-primary tracking-tight">MernCrest Solutions</span>
+</div>
+<!-- Desktop Nav -->
+<div class="hidden md:flex items-center gap-8">
+<a class="text-on-surface-variant font-medium hover:text-primary transition-colors duration-200" href="#">Services</a>
+<a class="text-on-surface-variant font-medium hover:text-primary transition-colors duration-200" href="#">Marketplace</a>
+<a class="text-on-surface-variant font-medium hover:text-primary transition-colors duration-200" href="#">Solutions</a>
+<a class="text-on-surface-variant font-medium hover:text-primary transition-colors duration-200" href="#">About</a>
+<a class="text-on-surface-variant font-medium hover:text-primary transition-colors duration-200" href="#">Contact</a>
+</div>
+<div class="flex items-center gap-4">
+<button class="hidden lg:flex items-center px-6 py-2 rounded-full bg-primary-container text-on-primary-container font-label-md hover:opacity-90 transition-all active:scale-95">
+                    Customer Portal
+                </button>
+<button class="md:hidden text-text-primary">
+<span class="material-symbols-outlined">menu</span>
+</button>
+</div>
+</nav>
+</header>
+<main class="pt-20">
+<!-- Hero Section -->
+<section class="relative min-h-[921px] flex items-center justify-center overflow-hidden px-margin-mobile md:px-margin-desktop py-scale-2xl">
+<div class="absolute inset-0 z-0">
+
+</div>
+<div class="relative z-10 max-w-4xl text-center">
+<div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-border-subtle bg-surface-container-low mb-8 animate-fade-in">
+<span class="w-2 h-2 rounded-full bg-success animate-pulse"></span>
+<span class="font-label-sm text-label-sm uppercase tracking-widest text-primary">Next-Gen Intelligence</span>
+</div>
+<h1 class="font-headline-xl-mobile md:font-headline-xl text-headline-xl-mobile md:text-headline-xl text-text-primary mb-6 leading-tight">
+                    Powering <span class="text-transparent bg-clip-text bg-gradient-to-r from-primary to-glow-violet">Enterprise Intelligence</span>
+</h1>
+<p class="font-body-lg text-body-lg text-on-surface-variant mb-10 max-w-2xl mx-auto">
+                    The core operating system for modern business digital transformation. We bridge the gap between legacy reliability and AI-first futures.
+                </p>
+<div class="flex flex-col sm:flex-row gap-4 justify-center items-center">
+<button class="w-full sm:w-auto px-8 py-4 rounded-xl bg-primary-container text-on-primary-container font-headline-md shadow-[0_0_20px_rgba(210,187,255,0.2)] hover:scale-105 transition-transform">
+                        Explore Solutions
+                    </button>
+<button class="w-full sm:w-auto px-8 py-4 rounded-xl border border-border-subtle bg-surface/40 backdrop-blur-md text-text-primary font-headline-md hover:border-primary transition-all">
+                        Get Started
+                    </button>
+</div>
+</div>
+</section>
+<!-- Trust Bar -->
+<section class="border-y border-border-subtle bg-surface-container-lowest py-10">
+<div class="max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop">
+<p class="font-label-sm text-label-sm text-center text-outline mb-8 uppercase tracking-[0.2em]">Trusted Global Infrastructure Partners</p>
+<div class="flex flex-wrap justify-center items-center gap-12 opacity-60 grayscale hover:grayscale-0 transition-all duration-500">
+<div class="h-8 w-32 flex items-center justify-center">
+<img class="max-h-full object-contain" data-alt="Official logo of Amazon Web Services (AWS) in a clean, minimalist monochrome white style, high resolution vector aesthetic for corporate trust." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAxCMeo5AQ14enAgJsAxT9Yibb1quRXOjgHoMBClmUnlEf7kHnCsuGE1CdWMudeXGmTYknQ-6pjl7tLi3rXRsBqMWokGM-gwcUfX8mqNEJh8w66pkJ6CyC5p3BRSQ0BjbpqBNSn1VmtLcs-jhsYgriCZ_fQCMbvya02Evs8SHMf58TXM7dnUTjsdq6FlRz3BEssZ2NBXvV-j2-vWLlzfMtNPxCbSO0lHwYmPbimnFe9zSbgOgaJwi-WNAEpIOueOprvuRAuHQ9J1B6y"/>
+</div>
+<div class="h-8 w-32 flex items-center justify-center">
+<img class="max-h-full object-contain" data-alt="Official logo of Google Cloud Platform (GCP) in a minimalist monochrome white style, modern corporate branding for technology partnership." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCup1pCwLf6Oopmoq3UK06CRXA2ND7yt1m-KR2a4tRkFXYsYOgbSzU0dOCl8KQNwtyl0Sv-kSIpMyy5ZUSXT9ps1oFz8q55mHXs43GdBlGQgGCgyuOZ63IVWbGPkWWPzUW2M62D_UvyhbxLxUpURetvVUOKF3kW4EpfahbmEA78fZG6VAdNRTZvJFGkok35ddjx-c5kotMlwGWF3xhsZ679-R4wvMlL5ovI_XI7MeuYx_x4t1K2JUehQtvLoikKUuvkJ-LMDl_oJ-uJ"/>
+</div>
+<div class="h-8 w-32 flex items-center justify-center">
+<img class="max-h-full object-contain" data-alt="Official logo of Microsoft Azure in a minimalist monochrome white style, professional enterprise technology branding." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDOiKA278XWwzYwurO67DHNcWjZisnj6wg-gcj4_ALH-_yIrdYLGylG1fsrXlsF32AsAGeSmN7eVAPsndEUD_gRx4q51RAQJCW9RV1ZwhjOld-9b4YBajY3RV_LBuhYtyl-xfkucNWuZV-lJ7pKyA8y7zuEC46iwXmEuiBb0Chx-KIUmRpdjEfmkemaAmW6hlNMaAoJm4QXwqRZkUXHVrLJjfpiI-uy6GihsLS4pY00NLo2xnGTqW0qGVnSKL6pj7TsZ0IYHkiNI5Ry"/>
+</div>
+<div class="h-8 w-32 flex items-center justify-center">
+<img class="max-h-full object-contain" data-alt="Official logo of Cloudflare in a minimalist monochrome white style, emphasizing security and network intelligence." src="https://lh3.googleusercontent.com/aida-public/AB6AXuD92VGf_54JvopwQLaJVctgkQtPFQcDnY5OC--BTwXV01slFDytln0-9fonagJdtg0ijoNbWNDqsSJIgapcXkBRUua1b82_3mB60wwjGdnIwDZfyg_PxscczmVfGtoQw5VkqJzUyqWXvkadaVLGSPfmSSGIZdol4k8tIJVI7ba-5fP2q7BFlz4HP2cQ42jXK7Zi0nGN0uwkdY0AJQeMr1XpEgP52j7cJvZG-UTs2pZ3sw-DTQk9Cgqn1nTLt17oSnVLB_4mNq8_gpHE"/>
+</div>
+</div>
+</div>
+</section>
+<!-- Services Grid -->
+<section class="py-scale-2xl px-margin-mobile md:px-margin-desktop max-w-container-max mx-auto">
+<div class="mb-16 text-center md:text-left">
+<h2 class="font-headline-lg text-headline-lg text-text-primary mb-4">Strategic Transformation Pillars</h2>
+<p class="font-body-md text-body-md text-on-surface-variant max-w-xl">Comprehensive service architecture designed to scale with your enterprise ambitions.</p>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-gutter">
+<!-- Pillar 1 -->
+<div class="stitch-card p-scale-lg rounded-2xl flex flex-col h-full">
+<div class="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center mb-6">
+<span class="material-symbols-outlined text-primary text-3xl">terminal</span>
+</div>
+<h3 class="font-headline-md text-headline-md text-text-primary mb-4">Custom Software</h3>
+<p class="font-body-md text-body-md text-on-surface-variant flex-grow">Bespoke application development utilizing the latest MERN stack and cloud-native architectures.</p>
+<a class="mt-6 flex items-center gap-2 text-primary font-label-md hover:underline" href="#">
+                        Learn More <span class="material-symbols-outlined text-sm">arrow_forward</span>
+</a>
+</div>
+<!-- Pillar 2 -->
+<div class="stitch-card p-scale-lg rounded-2xl flex flex-col h-full border-primary/40 shadow-[0_0_15px_rgba(124,58,237,0.1)]">
+<div class="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center mb-6">
+<span class="material-symbols-outlined text-primary text-3xl">psychology</span>
+</div>
+<h3 class="font-headline-md text-headline-md text-text-primary mb-4">AI Solutions</h3>
+<p class="font-body-md text-body-md text-on-surface-variant flex-grow">Integrating Large Language Models and predictive analytics into your existing business workflows.</p>
+<a class="mt-6 flex items-center gap-2 text-primary font-label-md hover:underline" href="#">
+                        Explore AI <span class="material-symbols-outlined text-sm">arrow_forward</span>
+</a>
+</div>
+<!-- Pillar 3 -->
+<div class="stitch-card p-scale-lg rounded-2xl flex flex-col h-full">
+<div class="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center mb-6">
+<span class="material-symbols-outlined text-primary text-3xl">cloud</span>
+</div>
+<h3 class="font-headline-md text-headline-md text-text-primary mb-4">Cloud Consulting</h3>
+<p class="font-body-md text-body-md text-on-surface-variant flex-grow">Optimization, migration, and architecture design for scalable multi-cloud enterprise environments.</p>
+<a class="mt-6 flex items-center gap-2 text-primary font-label-md hover:underline" href="#">
+                        View Services <span class="material-symbols-outlined text-sm">arrow_forward</span>
+</a>
+</div>
+<!-- Pillar 4 -->
+<div class="stitch-card p-scale-lg rounded-2xl flex flex-col h-full">
+<div class="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center mb-6">
+<span class="material-symbols-outlined text-primary text-3xl">hub</span>
+</div>
+<h3 class="font-headline-md text-headline-md text-text-primary mb-4">ERP/CRM</h3>
+<p class="font-body-md text-body-md text-on-surface-variant flex-grow">Deploying unified resource planning systems that connect every department in real-time.</p>
+<a class="mt-6 flex items-center gap-2 text-primary font-label-md hover:underline" href="#">
+                        Enterprise Suite <span class="material-symbols-outlined text-sm">arrow_forward</span>
+</a>
+</div>
+</div>
+</section>
+<!-- Marketplace Teaser -->
+<section class="py-scale-2xl bg-surface-container-low/30">
+<div class="max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop">
+<div class="stitch-card p-12 rounded-2xl overflow-hidden relative border-border-subtle">
+<div class="absolute top-0 right-0 w-1/3 h-full opacity-10 pointer-events-none">
+
+</div>
+<div class="max-w-2xl relative z-10">
+<h2 class="font-headline-lg text-headline-lg text-text-primary mb-4">Infrastructure Marketplace</h2>
+<p class="font-body-md text-body-md text-on-surface-variant mb-8">Secure your digital identity and hosting foundation instantly. Connect your enterprise to the global web with premium domain assets.</p>
+<div class="relative max-w-lg">
+<input class="w-full h-14 bg-surface-container-lowest border border-border-subtle rounded-xl px-12 text-on-surface focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all" placeholder="Search available domains (e.g. yourbrand.ai)" type="text"/>
+<span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-outline">search</span>
+<button class="absolute right-2 top-1/2 -translate-y-1/2 bg-primary text-on-primary font-label-md px-4 py-2 rounded-lg hover:opacity-90">Check</button>
+</div>
+<div class="flex gap-4 mt-6">
+<span class="font-label-sm text-label-sm text-outline">Popular: .ai, .cloud, .io, .tech</span>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- CRM/AI Highlight Section -->
+<section class="py-scale-2xl px-margin-mobile md:px-margin-desktop max-w-container-max mx-auto">
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-20 items-center">
+<div class="relative order-2 lg:order-1">
+<div class="aspect-square rounded-2xl overflow-hidden border border-border-subtle luminous-border">
+<img class="w-full h-full object-cover opacity-80" data-alt="A sophisticated UI dashboard on a high-end glass monitor showing complex AI-driven data visualizations, unified communication charts, and real-time enterprise metrics. The lighting is dark and cinematic with violet and deep blue accents, reflecting a premium technology brand aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuD5EOyOU4hkgRbMfkiS-a2sctIsxXjjTSaVFlIwcYB_3b_hRHmtBivl9-3nKeAKLgUgnzFVY67Sd6wA4U4y8iUGNFaeJkXOAeEBwLaKNQPPhM-o-9iTjLIuSpLMrvav8vA9jJyMs00yiA4--_iufg3bt1JuCmgpKSMxnZtxEVttOhA_6Gxo1NbSM7s6wtkDh5Tpr0Vyu4pweKDk8F9CESZgjIupXRijWuP5kWkpLnavHIHfXNvzUCedb4txV8xynzAxm76dXwbzS1V8"/>
+</div>
+<div class="absolute -bottom-6 -right-6 p-6 stitch-card rounded-2xl max-w-[240px] shadow-xl">
+<div class="flex items-center gap-3 mb-2">
+<span class="material-symbols-outlined text-success">auto_awesome</span>
+<span class="font-label-sm text-label-sm text-text-primary">AI Sync Active</span>
+</div>
+<p class="text-[12px] text-on-surface-variant">Real-time cross-platform communication unified via MernCrest Intelligence Layer.</p>
+</div>
+</div>
+<div class="order-1 lg:order-2">
+<span class="font-label-sm text-label-sm text-primary uppercase tracking-widest block mb-4">Unified Ecosystem</span>
+<h2 class="font-headline-lg text-headline-lg text-text-primary mb-6">Harmonize Your Enterprise Communication</h2>
+<p class="font-body-lg text-body-lg text-on-surface-variant mb-8">
+                        Stop juggling disconnected tools. Our platform unifies CRM data, team communication, and customer interactions into a single intelligent stream powered by proprietary AI models.
+                    </p>
+<ul class="space-y-4 mb-10">
+<li class="flex items-center gap-3">
+<span class="material-symbols-outlined text-primary">check_circle</span>
+<span class="text-on-surface">Integrated VoIP and Messaging Systems</span>
+</li>
+<li class="flex items-center gap-3">
+<span class="material-symbols-outlined text-primary">check_circle</span>
+<span class="text-on-surface">Automated Lead Scoring &amp; Sentiment Analysis</span>
+</li>
+<li class="flex items-center gap-3">
+<span class="material-symbols-outlined text-primary">check_circle</span>
+<span class="text-on-surface">Single-Pane-of-Glass Customer Journey</span>
+</li>
+</ul>
+<button class="px-8 py-3 border border-primary text-primary rounded-xl font-headline-md hover:bg-primary/10 transition-all">
+                        Request CRM Demo
+                    </button>
+</div>
+</div>
+</section>
+<!-- CTA Section -->
+<section class="py-scale-2xl px-margin-mobile md:px-margin-desktop max-w-container-max mx-auto">
+<div class="bg-gradient-to-br from-primary-container/80 to-secondary-container/80 rounded-[2rem] p-12 md:p-24 text-center relative overflow-hidden">
+<div class="absolute inset-0 opacity-20 pointer-events-none">
+
+</div>
+<div class="relative z-10 max-w-2xl mx-auto">
+<h2 class="font-headline-xl text-headline-xl-mobile md:text-headline-xl text-on-primary-container mb-6">Ready to Transform?</h2>
+<p class="font-body-lg text-body-lg text-on-primary-container/80 mb-10">
+                        Join hundreds of enterprises that have optimized their operations with MernCrest Solutions.
+                    </p>
+<div class="flex flex-col sm:flex-row gap-4 justify-center">
+<a class="px-10 py-4 bg-white text-primary-container font-headline-md rounded-xl hover:shadow-lg transition-all" href="#">
+                            Access Portal
+                        </a>
+<a class="px-10 py-4 border border-white/30 text-white font-headline-md rounded-xl hover:bg-white/10 transition-all" href="#">
+                            Speak to an Expert
+                        </a>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- Footer -->
+<footer class="bg-surface-container-lowest border-t border-border-subtle mt-scale-2xl py-scale-2xl">
+<div class="max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop">
+<div class="grid grid-cols-1 md:grid-cols-4 gap-gutter mb-16">
+<div class="md:col-span-1">
+<span class="font-headline-md text-headline-md font-extrabold text-primary block mb-6">MernCrest Solutions</span>
+<p class="font-body-md text-body-md text-on-surface-variant">Luminous Enterprise Intelligence for the next generation of cloud computing.</p>
+</div>
+<div>
+<h4 class="font-label-md text-label-md text-text-primary mb-6">Ecosystem</h4>
+<ul class="space-y-4">
+<li><a class="text-on-surface-variant hover:text-glow-violet transition-colors" href="#">Cloud Platforms</a></li>
+<li><a class="text-on-surface-variant hover:text-glow-violet transition-colors" href="#">AI Models</a></li>
+<li><a class="text-on-surface-variant hover:text-glow-violet transition-colors" href="#">Data Lakehouse</a></li>
+<li><a class="text-on-surface-variant hover:text-glow-violet transition-colors" href="#">Security</a></li>
+</ul>
+</div>
+<div>
+<h4 class="font-label-md text-label-md text-text-primary mb-6">Resources</h4>
+<ul class="space-y-4">
+<li><a class="text-on-surface-variant hover:text-glow-violet transition-colors" href="#">Documentation</a></li>
+<li><a class="text-on-surface-variant hover:text-glow-violet transition-colors" href="#">Case Studies</a></li>
+<li><a class="text-on-surface-variant hover:text-glow-violet transition-colors" href="#">Developer Portal</a></li>
+<li><a class="text-on-surface-variant hover:text-glow-violet transition-colors" href="#">Cloud Status</a></li>
+</ul>
+</div>
+<div>
+<h4 class="font-label-md text-label-md text-text-primary mb-6">Support</h4>
+<ul class="space-y-4">
+<li><a class="text-on-surface-variant hover:text-glow-violet transition-colors" href="#">Help Center</a></li>
+<li><a class="text-on-surface-variant hover:text-glow-violet transition-colors" href="#">24/7 Concierge</a></li>
+<li><a class="text-on-surface-variant hover:text-glow-violet transition-colors" href="#">Enterprise SLA</a></li>
+<li><a class="text-on-surface-variant hover:text-glow-violet transition-colors" href="#">Contact Sales</a></li>
+</ul>
+</div>
+</div>
+<div class="flex flex-col md:flex-row justify-between items-center pt-8 border-t border-border-subtle gap-4">
+<p class="font-label-sm text-label-sm text-on-surface-variant">
+                    © 2024 MernCrest Solutions. All rights reserved. Luminous Enterprise Intelligence.
+                </p>
+<div class="flex gap-6">
+<a class="font-label-sm text-label-sm text-on-surface-variant hover:text-primary" href="#">Privacy Policy</a>
+<a class="font-label-sm text-label-sm text-on-surface-variant hover:text-primary" href="#">Terms of Service</a>
+<a class="font-label-sm text-label-sm text-on-surface-variant hover:text-primary" href="#">Cloud SLA</a>
+<a class="font-label-sm text-label-sm text-on-surface-variant hover:text-primary" href="#">Cookie Settings</a>
+</div>
+</div>
+</div>
+</footer>
+<script>
+        // Micro-interactions for glass cards
+        document.querySelectorAll('.stitch-card').forEach(card => {
+            card.addEventListener('mousemove', (e) => {
+                const rect = card.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                card.style.setProperty('--mouse-x', `${x}px`);
+                card.style.setProperty('--mouse-y', `${y}px`);
+            });
+        });
+    </script>
+</body></html>

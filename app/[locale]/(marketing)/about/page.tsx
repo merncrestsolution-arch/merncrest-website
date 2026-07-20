@@ -1,7 +1,9 @@
 import { getTranslations, setRequestLocale } from "next-intl/server";
+import Image from "next/image";
 import { Link } from "@/i18n/routing";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, CheckCircle2, Globe2, Users2, Zap } from "lucide-react";
+import { PageHero } from "@/components/ui/page-hero";
+import { ArrowRight, Globe2, Users2, Zap } from "lucide-react";
 
 export async function generateMetadata({
   params,
@@ -13,7 +15,8 @@ export async function generateMetadata({
 
   return {
     title: `${t("about")} | MERNcrest Solutions`,
-    description: "Learn more about MERNcrest Solutions, our mission, vision, and the core values that drive our technology services.",
+    description:
+      "Learn more about MERNcrest Solutions, our mission, vision, and the core values that drive our technology services.",
   };
 }
 
@@ -26,83 +29,104 @@ export default async function AboutPage({
   setRequestLocale(locale);
 
   const values = [
-    { title: "Innovation First", icon: Zap, desc: "We constantly explore bleeding-edge tech to give our clients the ultimate advantage." },
-    { title: "Client Success", icon: Users2, desc: "Your growth is our metric for success. We partner deeply to ensure maximum ROI." },
-    { title: "Global Standards", icon: Globe2, desc: "World-class code quality, strict security protocols, and international compliances." }
+    {
+      title: "Innovation First",
+      icon: Zap,
+      desc: "We constantly explore bleeding-edge tech to give our clients the ultimate advantage.",
+    },
+    {
+      title: "Client Success",
+      icon: Users2,
+      desc: "Your growth is our metric for success. We partner deeply to ensure maximum ROI.",
+    },
+    {
+      title: "Global Standards",
+      icon: Globe2,
+      desc: "World-class code quality, strict security protocols, and international compliances.",
+    },
   ];
 
   return (
-    <div className="min-h-screen">
-      {/* Hero Section */}
-      <section className="relative pt-32 pb-20 lg:pt-48 lg:pb-32 overflow-hidden">
-        <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1522071820081-009f0129c71c?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80')] bg-cover bg-center mix-blend-overlay opacity-10" />
-        <div className="absolute inset-0 bg-gradient-to-b from-background/50 via-background to-background" />
-        
-        <div className="container-wide relative z-10 text-center max-w-4xl mx-auto">
-          <p className="text-accent font-mono text-sm uppercase tracking-wider mb-4">Our Story</p>
-          <h1 className="text-5xl lg:text-7xl font-bold font-display mb-6 text-balance leading-tight">
-            Engineering the <span className="gradient-text">Future</span> of Business.
-          </h1>
-          <p className="text-xl text-muted leading-relaxed">
-            MERNcrest Solutions is an elite software engineering agency based in Sri Lanka, dedicated to architecting scalable, secure, and beautiful digital experiences for modern enterprises.
-          </p>
-        </div>
-      </section>
+    <div className="stitch-page">
+      <PageHero
+        eyebrow="Our Story"
+        title="Engineering the future of business"
+        description="MernCrest Solutions is an enterprise technology company based in Sri Lanka — delivering custom software, ERP, CRM, AI solutions, business automation, digital marketing, and cloud consulting. We also operate a domain & hosting marketplace that resells services through provider partners (we do not own hosting infrastructure)."
+      />
 
-      {/* Mission & Vision */}
-      <section className="py-20 bg-secondary/30 border-y border-white/5">
-        <div className="container-wide">
-          <div className="grid md:grid-cols-2 gap-12 lg:gap-24">
-            <div className="glass-card p-10 rounded-3xl border border-white/5 relative overflow-hidden">
-              <div className="absolute top-0 right-0 w-40 h-40 bg-accent/10 blur-[60px] rounded-full" />
-              <h2 className="text-3xl font-bold mb-6">Our Mission</h2>
-              <p className="text-muted text-lg leading-relaxed">
-                To empower businesses with transformative technology solutions that drastically reduce operational friction, unlock new revenue streams, and create unforgettable experiences for their customers.
-              </p>
-            </div>
-            <div className="glass-card p-10 rounded-3xl border border-white/5 relative overflow-hidden">
-              <div className="absolute bottom-0 left-0 w-40 h-40 bg-accent-alt/10 blur-[60px] rounded-full" />
-              <h2 className="text-3xl font-bold mb-6">Our Vision</h2>
-              <p className="text-muted text-lg leading-relaxed">
-                To be the undisputed leader in software innovation across South Asia, recognized globally for engineering excellence, agile delivery, and unparalleled client success.
-              </p>
-            </div>
+      <div className="stitch-page-body stitch-stack-lg">
+        <div className="relative overflow-hidden rounded-xl border border-white/10 h-52 sm:h-64">
+          <Image
+            src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=1600&q=80"
+            alt="MernCrest team collaboration"
+            fill
+            className="object-cover opacity-70"
+            sizes="100vw"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-[var(--stitch-bg)] via-transparent to-transparent" />
+        </div>
+
+        <div className="grid md:grid-cols-2 gap-5">
+          <div className="stitch-card relative overflow-hidden">
+            <div className="pointer-events-none absolute top-0 right-0 h-32 w-32 rounded-full bg-violet-500/10 blur-[50px]" />
+            <h2 className="font-display text-2xl font-bold text-white mb-4">Our Mission</h2>
+            <p className="text-muted leading-relaxed">
+              To empower businesses with transformative technology solutions that drastically reduce
+              operational friction, unlock new revenue streams, and create unforgettable experiences
+              for their customers.
+            </p>
+          </div>
+          <div className="stitch-card relative overflow-hidden">
+            <div className="pointer-events-none absolute bottom-0 left-0 h-32 w-32 rounded-full bg-indigo-500/10 blur-[50px]" />
+            <h2 className="font-display text-2xl font-bold text-white mb-4">Our Vision</h2>
+            <p className="text-muted leading-relaxed">
+              To be the undisputed leader in software innovation across South Asia, recognized
+              globally for engineering excellence, agile delivery, and unparalleled client success.
+            </p>
           </div>
         </div>
-      </section>
 
-      {/* Core Values */}
-      <section className="py-24">
-        <div className="container-wide">
-          <div className="text-center max-w-2xl mx-auto mb-16">
-            <h2 className="text-3xl sm:text-4xl font-bold mb-4 font-display">Core Values</h2>
-            <p className="text-muted text-lg">The foundational principles that guide every line of code we write and every strategy we build.</p>
+        <div>
+          <div className="max-w-2xl mb-8">
+            <h2 className="font-display text-2xl sm:text-3xl font-bold text-white mb-2">
+              Core Values
+            </h2>
+            <p className="text-muted">
+              The foundational principles that guide every line of code we write and every strategy
+              we build.
+            </p>
           </div>
-
-          <div className="grid md:grid-cols-3 gap-8">
-            {values.map((v, i) => (
-              <div key={i} className="glass-panel p-8 rounded-2xl border border-white/5 hover:border-accent/30 transition-colors group">
-                <div className="h-14 w-14 rounded-xl bg-accent/10 flex items-center justify-center mb-6 group-hover:bg-accent/20 transition-colors">
-                  <v.icon className="h-7 w-7 text-accent" />
+          <div className="grid md:grid-cols-3 gap-5">
+            {values.map((v) => (
+              <div key={v.title} className="stitch-card stitch-card-hover">
+                <div className="mb-5 flex h-12 w-12 items-center justify-center rounded-xl bg-violet-500/15 text-violet-300">
+                  <v.icon className="h-6 w-6" />
                 </div>
-                <h3 className="text-xl font-bold mb-3">{v.title}</h3>
-                <p className="text-muted leading-relaxed">{v.desc}</p>
+                <h3 className="font-display text-xl font-semibold text-white mb-2">{v.title}</h3>
+                <p className="text-sm text-muted leading-relaxed">{v.desc}</p>
               </div>
             ))}
           </div>
         </div>
-      </section>
 
-      {/* CTA */}
-      <section className="py-24 bg-accent/5">
-        <div className="container-wide text-center max-w-3xl mx-auto">
-          <h2 className="text-4xl font-bold mb-6">Ready to scale your business?</h2>
-          <p className="text-xl text-muted mb-8">Join the growing list of enterprises that trust MERNcrest with their digital transformation.</p>
-          <Button asChild size="lg" className="h-14 px-8 text-base shadow-[0_0_20px_rgba(99,102,241,0.3)]">
-            <Link href="/contact">Get in Touch <ArrowRight className="ml-2 h-5 w-5" /></Link>
-          </Button>
+        <div className="stitch-card text-center !py-12 relative overflow-hidden">
+          <div className="pointer-events-none absolute inset-0 brand-mesh opacity-40" aria-hidden />
+          <div className="relative z-10 max-w-xl mx-auto stitch-stack-md">
+            <h2 className="font-display text-2xl sm:text-3xl font-bold text-white">
+              Ready to scale your business?
+            </h2>
+            <p className="text-muted">
+              Join the growing list of enterprises that trust MERNcrest with their digital
+              transformation.
+            </p>
+            <Button asChild size="lg" className="rounded-full">
+              <Link href="/contact">
+                Get in Touch <ArrowRight className="ml-2 h-5 w-5" />
+              </Link>
+            </Button>
+          </div>
         </div>
-      </section>
+      </div>
     </div>
   );
 }

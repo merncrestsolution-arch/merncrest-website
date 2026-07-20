@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { formatMoney, nextNumber, requireUser } from "@/lib/commerce";
 import { sendOrderConfirmationEmail } from "@/lib/mail";
+import { onCustomerOrderCreated } from "@/lib/crm/customer-hooks";
+import { notifyUser } from "@/lib/support/notify";
 import { z } from "zod";
 
 const TAX_RATE = 0;
@@ -132,11 +134,16 @@ export async function POST(request: Request) {
           items: {
             create: cart.items.map((i) => ({
               productId: i.productId,
-              productName: i.product.name,
+              productName: i.product.marketingTitle || i.product.name,
               productSlug: i.product.slug,
               quantity: i.quantity,
               unitPriceCents: i.product.priceCents,
               totalCents: i.product.priceCents * i.quantity,
+              providerCostCents: i.product.providerPriceCents ?? null,
+              providerCurrency: i.providerCurrency ?? i.product.currency ?? "LKR",
+              exchangeRate: i.exchangeRate ?? null,
+              exchangeRateLockedAt: i.exchangeRateLockedAt ?? null,
+              fxBufferPercent: i.fxBufferPercent ?? null,
               billingPeriod: i.product.billingPeriod,
               metaJson: i.metaJson,
             })),
@@ -174,6 +181,8 @@ export async function POST(request: Request) {
       });
     });
 
+    const itemSummary = order.items.map((i) => `${i.productName} ×${i.quantity}`).join(", ");
+
     if (order.invoice) {
       void sendOrderConfirmationEmail({
         to: auth.user.email,
@@ -183,6 +192,23 @@ export async function POST(request: Request) {
         items: order.items.map((i) => `${i.productName} ×${i.quantity}`),
       });
     }
+
+    void onCustomerOrderCreated({
+      userId: auth.user.id,
+      email: auth.user.email,
+      fullName: auth.user.fullName,
+      company: auth.user.company,
+      orderNumber: order.orderNumber,
+      totalCents: order.totalCents,
+      itemSummary,
+    });
+    void notifyUser({
+      userId: auth.user.id,
+      title: `Order ${order.orderNumber} created`,
+      body: `Total ${formatMoney(order.totalCents)}. Complete payment from Billing.`,
+      category: "ORDER",
+      href: "/portal/invoices",
+    });
 
     return NextResponse.json(
       {

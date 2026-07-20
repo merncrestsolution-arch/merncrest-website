@@ -14,6 +14,8 @@ const DEPT: Record<string, string> = {
   "5": "BILLING",
   "6": "ENTERPRISE",
   "7": "CARE",
+  "8": "CARE",
+  "9": "VOICEMAIL",
 };
 
 /** Simulate IVR call flow / log real telephony webhooks later */
@@ -24,7 +26,7 @@ export async function POST(request: Request) {
       phone: z.string().min(8),
       fullName: z.string().optional(),
       languageKey: z.enum(["1", "2", "3"]).optional(),
-      departmentKey: z.enum(["1", "2", "3", "4", "5", "6", "7"]).optional(),
+      departmentKey: z.enum(["1", "2", "3", "4", "5", "6", "7", "8", "9"]).optional(),
       agentAvailable: z.boolean().optional(),
       voicemail: z.string().optional(),
       durationSec: z.number().int().min(0).optional(),
@@ -50,7 +52,10 @@ export async function POST(request: Request) {
         phone: parsed.data.phone,
         language,
         department,
-        status,
+        status:
+          parsed.data.departmentKey === "9" && !available
+            ? "VOICEMAIL"
+            : status,
         durationSec: parsed.data.durationSec ?? (available ? 120 : 0),
         notes: parsed.data.voicemail || parsed.data.fullName || undefined,
         disposition: available ? "CONNECTED" : "CALLBACK_QUEUED",
@@ -58,15 +63,28 @@ export async function POST(request: Request) {
       },
     });
 
+    const { ensureLeadFromChannel } = await import("@/lib/crm/channels");
+    await ensureLeadFromChannel({
+      channel: "IVR",
+      fullName: parsed.data.fullName || `Caller ${parsed.data.phone}`,
+      email: sessionUser?.email,
+      phone: parsed.data.phone,
+      interest: `IVR ${department}`,
+      activityType: "IVR",
+      activityBody: `Call ${call.callNumber} · ${call.status} · ${department} · lang ${language}`,
+      channelRef: call.id,
+      userId: sessionUser?.id,
+    });
+
     let ticketNumber: string | null = null;
-    if (status === "MISSED" || status === "VOICEMAIL") {
+    if (call.status === "MISSED" || call.status === "VOICEMAIL" || parsed.data.departmentKey === "9") {
       const ticket = await prisma.ticket.create({
         data: {
           ticketNumber: nextNumber("TKT"),
           userId: sessionUser?.id,
           guestName: parsed.data.fullName || `Caller ${parsed.data.phone}`,
-          subject: `IVR ${status}: ${department}`,
-          department: department === "CARE" ? "GENERAL" : department === "SALES" ? "SALES" : "TECHNICAL",
+          subject: `IVR ${call.status}: ${department}`,
+          department: department === "CARE" || department === "VOICEMAIL" ? "GENERAL" : department === "SALES" ? "SALES" : "TECHNICAL",
           priority: "HIGH",
           channel: "IVR",
           status: "OPEN",
@@ -94,21 +112,6 @@ export async function POST(request: Request) {
         },
       });
 
-      await prisma.crmLead.create({
-        data: {
-          fullName: parsed.data.fullName || `Caller ${parsed.data.phone}`,
-          email: sessionUser?.email || `${parsed.data.phone.replace(/\D/g, "")}@ivr.local`,
-          phone: parsed.data.phone,
-          interest: `IVR ${department}`,
-          source: "IVR",
-          stage: "NEW",
-          priority: "HIGH",
-          activities: {
-            create: { type: "CALL", body: `Call ${call.callNumber} · ${status}` },
-          },
-        },
-      });
-
       if (sessionUser) {
         await notifyUser({
           userId: sessionUser.id,
@@ -128,16 +131,18 @@ export async function POST(request: Request) {
           "1": "Sales",
           "2": "Technical Support",
           "3": "Hosting",
-          "4": "Domain Services",
+          "4": "Domains",
           "5": "Billing",
-          "6": "Enterprise Solutions",
-          "7": "Customer Care",
+          "6": "Enterprise Software",
+          "7": "Existing Customers",
+          "8": "Speak to Customer Care",
+          "9": "Leave Voice Message",
         },
       },
       message:
-        status === "ANSWERED"
-          ? "Connected to agent (simulated)."
-          : "No agent available — voicemail/ticket + callback created.",
+        call.status === "ANSWERED"
+          ? "Connected to agent (simulated). Professional recorded IVR — no AI voice."
+          : "No agent available — voicemail/ticket + callback created in CRM.",
     });
   } catch (error) {
     console.error("[ivr]", error);

@@ -39,7 +39,11 @@ export async function POST(request: Request) {
     if (!order) {
       return NextResponse.json({ error: "Order not found" }, { status: 404 });
     }
-    if (order.status !== "COMPLETED" && order.status !== "PAID" && order.status !== "PROCESSING") {
+    if (
+      !["COMPLETED", "PAID", "PROCESSING", "PROVISIONING", "PROVISIONING_FAILED"].includes(
+        order.status
+      )
+    ) {
       return NextResponse.json({ error: "Order not eligible for refund" }, { status: 400 });
     }
 

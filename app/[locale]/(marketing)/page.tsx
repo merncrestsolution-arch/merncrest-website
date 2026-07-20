@@ -1,11 +1,10 @@
 import type { Metadata } from "next";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { HeroSection } from "@/components/sections/hero-section";
-import { HighlightsSection } from "@/components/sections/highlights-section";
+import { TrustPartnersSection } from "@/components/sections/trust-partners-section";
 import { FeaturedServicesSection } from "@/components/sections/featured-services-section";
-import { WhyChooseSection } from "@/components/sections/why-choose-section";
+import { MarketplaceTeaserSection } from "@/components/sections/marketplace-teaser-section";
 import { PlatformSection } from "@/components/sections/platform-section";
-import { SolutionsSection } from "@/components/sections/solutions-section";
 import { PortfolioSection } from "@/components/sections/portfolio-section";
 import { TestimonialsSection } from "@/components/sections/testimonials-section";
 import { BlogSection } from "@/components/sections/blog-section";
@@ -37,6 +36,7 @@ export async function generateMetadata({
   };
 }
 
+/** Homepage composition matches Stitch screen: MernCrest - Homepage */
 export default async function HomePage({
   params,
 }: {
@@ -48,11 +48,10 @@ export default async function HomePage({
   return (
     <>
       <HeroSection />
-      <HighlightsSection />
+      <TrustPartnersSection />
       <FeaturedServicesSection />
-      <WhyChooseSection />
+      <MarketplaceTeaserSection />
       <PlatformSection />
-      <SolutionsSection />
       <PortfolioSection />
       <TestimonialsSection />
       <BlogSection />

@@ -17,6 +17,9 @@ type Stats = {
   expenseCents: number;
   netCents: number;
   lowStockCount: number;
+  approvalsPending?: number;
+  auditCount?: number;
+  organizations?: number;
 };
 
 export function ErpDashboard() {
@@ -63,6 +66,10 @@ export function ErpDashboard() {
               { label: "Active projects", value: String(stats.projects) },
               { label: "Net P&L", value: formatMoney(stats.netCents) },
               { label: "Work orders", value: String(stats.workOrders) },
+              { label: "Pending approvals", value: String(stats.approvalsPending ?? 0) },
+              { label: "Organizations", value: String(stats.organizations ?? 0) },
+              { label: "Audit events", value: String(stats.auditCount ?? 0) },
+              { label: "Leave pending", value: String(stats.leavePending) },
             ].map((s) => (
               <div key={s.label} className="rounded-xl border border-white/10 p-4">
                 <p className="text-xs font-mono uppercase text-muted">{s.label}</p>
@@ -116,6 +123,10 @@ export function ErpDashboard() {
 
       <div className="flex flex-wrap gap-2">
         <Button asChild size="sm"><Link href="/staff">Staff portal</Link></Button>
+        <Button asChild size="sm" variant="outline"><Link href="/admin/erp/organization">Organization</Link></Button>
+        <Button asChild size="sm" variant="outline"><Link href="/admin/erp/approvals">Approvals</Link></Button>
+        <Button asChild size="sm" variant="outline"><Link href="/admin/erp/coa">Chart of Accounts</Link></Button>
+        <Button asChild size="sm" variant="outline"><Link href="/admin/erp/audit">Audit logs</Link></Button>
         <Button asChild size="sm" variant="outline"><Link href="/admin/erp/dashboards">Executive dashboards</Link></Button>
         <Button asChild size="sm" variant="outline"><Link href="/admin/reports">BI / Reports</Link></Button>
       </div>

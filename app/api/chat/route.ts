@@ -83,6 +83,19 @@ export async function POST(request: Request) {
       },
     });
 
+    // Unified CRM — every live chat lands on one lead profile
+    const { ensureLeadFromChannel } = await import("@/lib/crm/channels");
+    await ensureLeadFromChannel({
+      channel: "LIVE_CHAT",
+      fullName: user?.fullName || "Live chat visitor",
+      email: user?.email,
+      interest: "Live chat",
+      activityType: "CHAT",
+      activityBody: parsed.data.message.slice(0, 240),
+      channelRef: session.id,
+      userId: user?.id,
+    });
+
     const handoff = wantsHumanHandoff(parsed.data.message);
     let reply = aiReply(parsed.data.message, parsed.data.locale ?? session.locale);
     let ticketNumber: string | null = null;

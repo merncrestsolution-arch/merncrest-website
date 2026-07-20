@@ -10,7 +10,12 @@ export async function GET() {
   if (auth.error) return auth.error;
 
   const permissions = await getUserPermissions(auth.user);
-  const [tasks, leave, notifications, messages, employee] = await Promise.all([
+  const employee = await prisma.employee.findFirst({
+    where: { userId: auth.user.id },
+    include: { department: true },
+  });
+
+  const [tasks, leave, notifications, messages, slips, approvals] = await Promise.all([
     prisma.projectTask.findMany({
       where: { assigneeId: auth.user.id, status: { not: "DONE" } },
       include: { project: { select: { name: true, projectCode: true } } },
@@ -31,9 +36,19 @@ export async function GET() {
       orderBy: { createdAt: "desc" },
       take: 30,
     }),
-    prisma.employee.findFirst({
-      where: { userId: auth.user.id },
-      include: { department: true },
+    employee
+      ? prisma.salarySlip.findMany({
+          where: { employeeId: employee.id },
+          orderBy: { issuedAt: "desc" },
+          take: 6,
+        })
+      : Promise.resolve([]),
+    prisma.approvalRequest.findMany({
+      where: {
+        OR: [{ requesterId: auth.user.id }, { approverId: auth.user.id, status: "PENDING" }],
+      },
+      orderBy: { createdAt: "desc" },
+      take: 10,
     }),
   ]);
 
@@ -45,6 +60,8 @@ export async function GET() {
     leave,
     notifications,
     messages,
+    salarySlips: slips,
+    approvals,
   });
 }
 

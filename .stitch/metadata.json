@@ -1,0 +1,16 @@
+﻿{
+  "projectId": "17402065891171962495",
+  "projectTitle": "MernCrest Enterprise AI Platform",
+  "designSystem": "Luminous Enterprise",
+  "source": "https://stitch.withgoogle.com/projects/17402065891171962495",
+  "screens": [
+    {"title": "MernCrest - Homepage", "route": "/", "file": "merncrest-homepage"},
+    {"title": "Public Website - MernCrest Platform", "route": "/", "file": "public-website-merncrest-platform", "note": "alternate home/platform composition"},
+    {"title": "Services - MernCrest", "route": "/services", "file": "services-merncrest"},
+    {"title": "Marketplace - MernCrest", "route": "/products", "file": "marketplace-merncrest"},
+    {"title": "Contact - MernCrest", "route": "/contact", "file": "contact-merncrest"},
+    {"title": "Dashboard - Customer Portal", "route": "/portal", "file": "dashboard-customer-portal"},
+    {"title": "Cloud Management - Customer Portal", "route": "/portal", "file": "cloud-management-customer-portal", "note": "portal cloud services widget"},
+    {"title": "Supply Chain - MernCrest ERP", "route": "/admin/erp", "file": "supply-chain-merncrest-erp"}
+  ]
+}

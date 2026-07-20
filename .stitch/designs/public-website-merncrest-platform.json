@@ -1,0 +1,28 @@
+﻿{
+    "id":  1,
+    "jsonrpc":  "2.0",
+    "result":  {
+                   "content":  [
+                                   {
+                                       "text":  "{\"name\":\"projects/17402065891171962495/screens/66831e09992f47429951a620b38ffe66\",\"title\":\"Public Website — MernCrest Platform\",\"screenshot\":{\"name\":\"projects/17402065891171962495/files/cbf8e52c2f9b43b2b39a619c52147325\",\"downloadUrl\":\"https://lh3.googleusercontent.com/aida/AP1WRLtu0yCBm4hg8G4_r4BR6oZPCAzGk5Xi_Nm2fa5ctSsgpUuXiT8HVkcDosdHMVVnXiYnCk0GwqiBblnchWRt_OcigKF0tQkvnjt2YeXZfr_zxa-k3eziosw_0fWIB49j6Qdq7wX8DTOqDV75s38zbob7kQ7Lzykri9WnwbpPW5asGfx7lwfgMdqUsGiJ1SnP5lHWxkUsJE4HRyaNTar39dq0KJCv6aRGLCJr4S_dBLzvB9shPVEamnKwsXSY\"},\"htmlCode\":{\"name\":\"projects/17402065891171962495/files/8f1cbccb551d41139bb0702e06fa1c54\",\"downloadUrl\":\"https://contribution.usercontent.google.com/download?c=CgthaWRhX2NvZGVmeBJ8Eh1hcHBfY29tcGFuaW9uX2dlbmVyYXRlZF9maWxlcxpbCiVodG1sXzFhZTM1Nzg0MjNmMTQ1MjJiMzIwN2M2YjdlYzcwYjZkEgsSBxDk1Kj0qBAYAZIBJAoKcHJvamVjdF9pZBIWQhQxNzQwMjA2NTg5MTE3MTk2MjQ5NQ\u0026filename=\u0026opi=89354086\",\"mimeType\":\"text/html\"},\"width\":\"2560\",\"height\":\"7392\",\"deviceType\":\"DESKTOP\"}",
+                                       "type":  "text"
+                                   }
+                               ],
+                   "structuredContent":  {
+                                             "deviceType":  "DESKTOP",
+                                             "height":  "7392",
+                                             "htmlCode":  {
+                                                              "downloadUrl":  "https://contribution.usercontent.google.com/download?c=CgthaWRhX2NvZGVmeBJ8Eh1hcHBfY29tcGFuaW9uX2dlbmVyYXRlZF9maWxlcxpbCiVodG1sXzFhZTM1Nzg0MjNmMTQ1MjJiMzIwN2M2YjdlYzcwYjZkEgsSBxDk1Kj0qBAYAZIBJAoKcHJvamVjdF9pZBIWQhQxNzQwMjA2NTg5MTE3MTk2MjQ5NQ\u0026filename=\u0026opi=89354086",
+                                                              "mimeType":  "text/html",
+                                                              "name":  "projects/17402065891171962495/files/8f1cbccb551d41139bb0702e06fa1c54"
+                                                          },
+                                             "name":  "projects/17402065891171962495/screens/66831e09992f47429951a620b38ffe66",
+                                             "screenshot":  {
+                                                                "downloadUrl":  "https://lh3.googleusercontent.com/aida/AP1WRLtu0yCBm4hg8G4_r4BR6oZPCAzGk5Xi_Nm2fa5ctSsgpUuXiT8HVkcDosdHMVVnXiYnCk0GwqiBblnchWRt_OcigKF0tQkvnjt2YeXZfr_zxa-k3eziosw_0fWIB49j6Qdq7wX8DTOqDV75s38zbob7kQ7Lzykri9WnwbpPW5asGfx7lwfgMdqUsGiJ1SnP5lHWxkUsJE4HRyaNTar39dq0KJCv6aRGLCJr4S_dBLzvB9shPVEamnKwsXSY",
+                                                                "name":  "projects/17402065891171962495/files/cbf8e52c2f9b43b2b39a619c52147325"
+                                                            },
+                                             "title":  "Public Website — MernCrest Platform",
+                                             "width":  "2560"
+                                         }
+               }
+}

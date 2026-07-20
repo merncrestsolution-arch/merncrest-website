@@ -63,7 +63,10 @@ export function PageHero({
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.12 }}
-            className="mt-4 text-base sm:text-lg text-muted leading-relaxed max-w-2xl mx-auto"
+            className={cn(
+              "mt-4 text-base sm:text-lg text-muted leading-relaxed max-w-2xl",
+              align === "center" && "mx-auto"
+            )}
           >
             {description}
           </motion.p>

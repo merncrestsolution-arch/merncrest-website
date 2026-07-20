@@ -21,7 +21,7 @@ export default function KnowledgeBasePage() {
   }, [q]);
 
   return (
-    <div className="min-h-screen">
+    <div className="stitch-page">
       <PageHero
         eyebrow="Resources"
         title="Knowledge Base"
@@ -47,8 +47,8 @@ export default function KnowledgeBasePage() {
         </div>
       </PageHero>
 
-      <div className="container-wide section-padding pt-10">
-        <div className="flex flex-wrap gap-2 mb-12 justify-center">
+      <div className="stitch-page-body stitch-stack-lg">
+        <div className="flex flex-wrap gap-2 justify-center">
           {kbCategories.map((c) => (
             <span
               key={c}
@@ -64,7 +64,7 @@ export default function KnowledgeBasePage() {
             <Reveal key={article.slug} delay={i * 0.04}>
               <Link
                 href={`/knowledge-base/${article.slug}`}
-                className="group block h-full rounded-2xl border border-white/10 bg-white/[0.03] p-6 transition-all hover:border-violet-400/40 hover:bg-violet-500/[0.06]"
+                className="group block h-full stitch-card stitch-card-hover"
               >
                 <p className="text-xs font-mono text-violet-300">{article.category}</p>
                 <h2 className="mt-2 font-display text-xl font-semibold text-white group-hover:text-violet-200 transition-colors">

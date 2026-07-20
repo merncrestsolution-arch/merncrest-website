@@ -1,0 +1,144 @@
+﻿{
+    "id":  2,
+    "jsonrpc":  "2.0",
+    "result":  {
+                   "content":  [
+                                   {
+                                       "text":  "{\"screens\":[{\"name\":\"projects/17402065891171962495/screens/9336961f5fa24b3d912b984f06c380f8\",\"title\":\"Dashboard — Customer Portal\",\"screenshot\":{\"name\":\"projects/17402065891171962495/files/a1ca9d8185204d27846f58f12272653f\",\"downloadUrl\":\"https://lh3.googleusercontent.com/aida/AP1WRLt44U-i3yM1pVFYt80b1t9tL7nxlkO2ZZkzu23y5kmMiyInfwOVgLlQQNdhD9isJlF6zK-gcXmi8kC2pfe4XhslhcrKu6yAxamHA8mHKSIzvSYcfT4XNAP-2BzMCY-Z6ePM7aNdsIOfQt8bhY0J2dIQApuEp1kz2KBZ_df-EDy3mVbjai2lJ75_XyF9XsvCS6A2kO9SU_Ml5pW12DUwzCPlwZDoZi85e028A3oD4cihn8tXrrWjTMEuH6pY\"},\"htmlCode\":{\"name\":\"projects/17402065891171962495/files/e53097edefc04d13877257b1118d88c3\",\"downloadUrl\":\"https://contribution.usercontent.google.com/download?c=CgthaWRhX2NvZGVmeBJ8Eh1hcHBfY29tcGFuaW9uX2dlbmVyYXRlZF9maWxlcxpbCiVodG1sX2I1YmY1YTNmNWM5ZTQ2OGJiMzVhYTMxMGExMmYwZWIyEgsSBxDk1Kj0qBAYAZIBJAoKcHJvamVjdF9pZBIWQhQxNzQwMjA2NTg5MTE3MTk2MjQ5NQ\u0026filename=\u0026opi=89354086\",\"mimeType\":\"text/html\"},\"width\":\"2560\",\"height\":\"3150\",\"deviceType\":\"DESKTOP\"},{\"name\":\"projects/17402065891171962495/screens/2745761c06994a01a593d2e87e557fa4\",\"title\":\"Cloud Management — Customer Portal\",\"screenshot\":{\"name\":\"projects/17402065891171962495/files/fa54a7eda1b243b8b41b3b37e9ac2ef1\",\"downloadUrl\":\"https://lh3.googleusercontent.com/aida/AP1WRLt-NMrkBJDqahzX7595sisNa-9BEVkXumiA84LzVvc9eCntlCQiBRXRE0rVaGAtCpSHVaE-tUeJbeMX_aNSZ9mW2jn5wSniHMACTtP8EqXI98nO-eZmhyTG1AX36RaiSWqxilzBWAZPCpYKXqm9a5ri7XyDKB6QSSEu655pdVQNPY4E_SZshJLJmIauvz3ZSduTYhdtfFKcg9JF5di1Nbm24RYFDAczQ-QJ2IVWli8cqVApxgnztKsSvNE\"},\"htmlCode\":{\"name\":\"projects/17402065891171962495/files/377e2fd0421c4804acf628f9539640fa\",\"downloadUrl\":\"https://contribution.usercontent.google.com/download?c=CgthaWRhX2NvZGVmeBJ8Eh1hcHBfY29tcGFuaW9uX2dlbmVyYXRlZF9maWxlcxpbCiVodG1sXzgyYWVkODQ2NjI3OTQ2OTZhYzRiY2EyY2E2ZWI5ODRjEgsSBxDk1Kj0qBAYAZIBJAoKcHJvamVjdF9pZBIWQhQxNzQwMjA2NTg5MTE3MTk2MjQ5NQ\u0026filename=\u0026opi=89354086\",\"mimeType\":\"text/html\"},\"width\":\"2560\",\"height\":\"2842\",\"deviceType\":\"DESKTOP\"},{\"name\":\"projects/17402065891171962495/screens/042336c749be43089ea31880c0d739a8\",\"title\":\"Services — MernCrest\",\"screenshot\":{\"name\":\"projects/17402065891171962495/files/77f76cfbed67476482d75ab21962aa15\",\"downloadUrl\":\"https://lh3.googleusercontent.com/aida/AP1WRLuePTpfLygtp3QwLdigwQW8wlDNjtoCSAsZz82tcGYjNHDMMaZmtTOIgDHTg0EJ8L3ncHcSEcY8S1XbPN2VnwNnsQjiybcj2sBMPrOiNQNgshGYK6lnvYXdjkwPbiFaAH0ZtEgMMrU5umfGoPzneYvZNZGiZv79i84cBDCPlnKV08kSx1SST37RoWvhK7uWr-JK0FyQXAC8dEZ5S_Gx-qGjWpnPZwl_kio_mFODZtrF5sDmJOeK2xfVdh-J\"},\"htmlCode\":{\"name\":\"projects/17402065891171962495/files/5eb78af4eef6446ca1ca639e514e9c18\",\"downloadUrl\":\"https://contribution.usercontent.google.com/download?c=CgthaWRhX2NvZGVmeBJ8Eh1hcHBfY29tcGFuaW9uX2dlbmVyYXRlZF9maWxlcxpbCiVodG1sX2JhODg4MDA1MDI4NTRiMWViMDUwZThiYzAzOGVkZDIyEgsSBxDk1Kj0qBAYAZIBJAoKcHJvamVjdF9pZBIWQhQxNzQwMjA2NTg5MTE3MTk2MjQ5NQ\u0026filename=\u0026opi=89354086\",\"mimeType\":\"text/html\"},\"width\":\"2560\",\"height\":\"6210\",\"deviceType\":\"DESKTOP\"},{\"name\":\"projects/17402065891171962495/screens/ef4016303fb243d98cd83a314107db1a\",\"title\":\"Contact — MernCrest\",\"screenshot\":{\"name\":\"projects/17402065891171962495/files/409208399dd6423cb38e71e726115e25\",\"downloadUrl\":\"https://lh3.googleusercontent.com/aida/AP1WRLsh1sMasVhbOAxXne32ga4LZLqTk9wiPAUA8XlBse_YUDxPyVezKl3y-VXpipEAmYwTUSj07krWBB-Un7vSgsiivFzsqREFWhnSwZzS_YwM0eit583N5TOBpLIDpE4yT6gMecHlQJrZIfkVCdYmDBJYUimkLnG5P4-z5rWjeJ3qbwvZFrHjyb3CELUv9ESlwT3fWcaeGnzoS6pDwmbOWPeRfOiiswiNN1y4irLVyz2c1xK-1gl1fBug86FD\"},\"htmlCode\":{\"name\":\"projects/17402065891171962495/files/259659a0de4b46ec84f9a6bee8505304\",\"downloadUrl\":\"https://contribution.usercontent.google.com/download?c=CgthaWRhX2NvZGVmeBJ8Eh1hcHBfY29tcGFuaW9uX2dlbmVyYXRlZF9maWxlcxpbCiVodG1sX2ZjNGFiZmE5YzJlYzQxMTdhOTc2NjI2YmRhNTdmMzdlEgsSBxDk1Kj0qBAYAZIBJAoKcHJvamVjdF9pZBIWQhQxNzQwMjA2NTg5MTE3MTk2MjQ5NQ\u0026filename=\u0026opi=89354086\",\"mimeType\":\"text/html\"},\"width\":\"2560\",\"height\":\"3738\",\"deviceType\":\"DESKTOP\"},{\"name\":\"projects/17402065891171962495/screens/742307e050d44f26836919a0263fb23f\",\"title\":\"MernCrest — Homepage\",\"screenshot\":{\"name\":\"projects/17402065891171962495/files/9d46d40f0f4448218cbca46335690477\",\"downloadUrl\":\"https://lh3.googleusercontent.com/aida/AP1WRLuVyMW8aXclXtrzWZKWG4KS6s7lSrhOF11bDHcmvkJokU15Rrx6NloGNo3xMaI1_9k60ujBatRqXwozmuvflgoHs1fmh7HIDA6zOr0wMJRB_UDAXD6buJV5Vkf35o2fcmujvFn6k78o-OwKNfhB3dBZ1zgLdSWM__sfi4WokhoIlVCkl3OyNDcDBZ2L5RvA5L2iWF3A1gSTNak_N1btOE18gHsG-NIbeN_N5-Brsrpf9RQtvpFjFxwZxZk\"},\"htmlCode\":{\"name\":\"projects/17402065891171962495/files/a4a2964a3b9c45fe9ef9934fba7f1256\",\"downloadUrl\":\"https://contribution.usercontent.google.com/download?c=CgthaWRhX2NvZGVmeBJ8Eh1hcHBfY29tcGFuaW9uX2dlbmVyYXRlZF9maWxlcxpbCiVodG1sX2E5NTMzZmEzNTg3ZjQ1MDc5NmE2ZTc4ODNlNTA4ZDc1EgsSBxDk1Kj0qBAYAZIBJAoKcHJvamVjdF9pZBIWQhQxNzQwMjA2NTg5MTE3MTk2MjQ5NQ\u0026filename=\u0026opi=89354086\",\"mimeType\":\"text/html\"},\"width\":\"2560\",\"height\":\"7942\",\"deviceType\":\"DESKTOP\"},{\"name\":\"projects/17402065891171962495/screens/fb53877b26e94ae2a505fd457a10f53e\",\"title\":\"Marketplace — MernCrest\",\"screenshot\":{\"name\":\"projects/17402065891171962495/files/052fef59409b494b89abf6eead0f9581\",\"downloadUrl\":\"https://lh3.googleusercontent.com/aida/AP1WRLuUdA0SUxiApSQmp5a1wT31M1gzmkPLj2gW5An2OdIG51jqWeldgghf3r5YtA83jMMg9OaKaf9TW0i84wcemFKBzmPuHgxgKF3HdSQpZYzv8ZnBfbnI0-IlaeqgyDJDmWw-e80cXUrJPDHManbwjUoT3J09BbXViVL1478tsVGYOH5vdpnGAFE44_q_sb6ZInXbZlFyV4o8aof0v6OQGLmYgA9xqySWCSKrlRGTLBreYnXdjp3l4Va0cIRZ\"},\"htmlCode\":{\"name\":\"projects/17402065891171962495/files/08eb9c16f62a4b42b55fad62ec5329dd\",\"downloadUrl\":\"https://contribution.usercontent.google.com/download?c=CgthaWRhX2NvZGVmeBJ8Eh1hcHBfY29tcGFuaW9uX2dlbmVyYXRlZF9maWxlcxpbCiVodG1sXzFhODYzMTRiNGJmMjQyNDc4YTY1ODI0NjIxNDE3NjVlEgsSBxDk1Kj0qBAYAZIBJAoKcHJvamVjdF9pZBIWQhQxNzQwMjA2NTg5MTE3MTk2MjQ5NQ\u0026filename=\u0026opi=89354086\",\"mimeType\":\"text/html\"},\"width\":\"2560\",\"height\":\"6078\",\"deviceType\":\"DESKTOP\"},{\"name\":\"projects/17402065891171962495/screens/ba7ca90a444d4d8993dee6d38eda43e3\",\"title\":\"Supply Chain — MernCrest ERP\",\"screenshot\":{\"name\":\"projects/17402065891171962495/files/0dcad16e2ddf4790803400646cc9884c\",\"downloadUrl\":\"https://lh3.googleusercontent.com/aida/AP1WRLvI0p6iAlpJn99cSllC1abs2DNvvbVGazwgPIogRUm4nEyGmGQcfUwLL_KQGEsGBcNT3Fk1V9QwbJq7j9EUGtX1bZ2xC7c6df4WAhX198korVEj7viGIh_a-_zGFBEzWZFlox8Fa950XDBWXMazloEY5eAGUGIqt_ezi1w2S2I61lSmWSILNclOGX8LSYx2Mf1iDHcIQpuqGmGDpYw2jP6kLHRnfVf7QXRUEliMCWr6Msq3JgMZpYjnQUla\"},\"htmlCode\":{\"name\":\"projects/17402065891171962495/files/d7f7289ca72343dab4057c7e857d7ac1\",\"downloadUrl\":\"https://contribution.usercontent.google.com/download?c=CgthaWRhX2NvZGVmeBJ8Eh1hcHBfY29tcGFuaW9uX2dlbmVyYXRlZF9maWxlcxpbCiVodG1sXzFjZWUzZDM3ZjY2MzRjZjZhMDc2MDFjOTYzMWU0MzVlEgsSBxDk1Kj0qBAYAZIBJAoKcHJvamVjdF9pZBIWQhQxNzQwMjA2NTg5MTE3MTk2MjQ5NQ\u0026filename=\u0026opi=89354086\",\"mimeType\":\"text/html\"},\"width\":\"2560\",\"height\":\"3780\",\"deviceType\":\"DESKTOP\"},{\"name\":\"projects/17402065891171962495/screens/66831e09992f47429951a620b38ffe66\",\"title\":\"Public Website — MernCrest Platform\",\"screenshot\":{\"name\":\"projects/17402065891171962495/files/cbf8e52c2f9b43b2b39a619c52147325\",\"downloadUrl\":\"https://lh3.googleusercontent.com/aida/AP1WRLtu0yCBm4hg8G4_r4BR6oZPCAzGk5Xi_Nm2fa5ctSsgpUuXiT8HVkcDosdHMVVnXiYnCk0GwqiBblnchWRt_OcigKF0tQkvnjt2YeXZfr_zxa-k3eziosw_0fWIB49j6Qdq7wX8DTOqDV75s38zbob7kQ7Lzykri9WnwbpPW5asGfx7lwfgMdqUsGiJ1SnP5lHWxkUsJE4HRyaNTar39dq0KJCv6aRGLCJr4S_dBLzvB9shPVEamnKwsXSY\"},\"htmlCode\":{\"name\":\"projects/17402065891171962495/files/8f1cbccb551d41139bb0702e06fa1c54\",\"downloadUrl\":\"https://contribution.usercontent.google.com/download?c=CgthaWRhX2NvZGVmeBJ8Eh1hcHBfY29tcGFuaW9uX2dlbmVyYXRlZF9maWxlcxpbCiVodG1sXzFhZTM1Nzg0MjNmMTQ1MjJiMzIwN2M2YjdlYzcwYjZkEgsSBxDk1Kj0qBAYAZIBJAoKcHJvamVjdF9pZBIWQhQxNzQwMjA2NTg5MTE3MTk2MjQ5NQ\u0026filename=\u0026opi=89354086\",\"mimeType\":\"text/html\"},\"width\":\"2560\",\"height\":\"7392\",\"deviceType\":\"DESKTOP\"}]}",
+                                       "type":  "text"
+                                   }
+                               ],
+                   "structuredContent":  {
+                                             "screens":  [
+                                                             {
+                                                                 "deviceType":  "DESKTOP",
+                                                                 "height":  "3150",
+                                                                 "htmlCode":  {
+                                                                                  "downloadUrl":  "https://contribution.usercontent.google.com/download?c=CgthaWRhX2NvZGVmeBJ8Eh1hcHBfY29tcGFuaW9uX2dlbmVyYXRlZF9maWxlcxpbCiVodG1sX2I1YmY1YTNmNWM5ZTQ2OGJiMzVhYTMxMGExMmYwZWIyEgsSBxDk1Kj0qBAYAZIBJAoKcHJvamVjdF9pZBIWQhQxNzQwMjA2NTg5MTE3MTk2MjQ5NQ\u0026filename=\u0026opi=89354086",
+                                                                                  "mimeType":  "text/html",
+                                                                                  "name":  "projects/17402065891171962495/files/e53097edefc04d13877257b1118d88c3"
+                                                                              },
+                                                                 "name":  "projects/17402065891171962495/screens/9336961f5fa24b3d912b984f06c380f8",
+                                                                 "screenshot":  {
+                                                                                    "downloadUrl":  "https://lh3.googleusercontent.com/aida/AP1WRLt44U-i3yM1pVFYt80b1t9tL7nxlkO2ZZkzu23y5kmMiyInfwOVgLlQQNdhD9isJlF6zK-gcXmi8kC2pfe4XhslhcrKu6yAxamHA8mHKSIzvSYcfT4XNAP-2BzMCY-Z6ePM7aNdsIOfQt8bhY0J2dIQApuEp1kz2KBZ_df-EDy3mVbjai2lJ75_XyF9XsvCS6A2kO9SU_Ml5pW12DUwzCPlwZDoZi85e028A3oD4cihn8tXrrWjTMEuH6pY",
+                                                                                    "name":  "projects/17402065891171962495/files/a1ca9d8185204d27846f58f12272653f"
+                                                                                },
+                                                                 "title":  "Dashboard — Customer Portal",
+                                                                 "width":  "2560"
+                                                             },
+                                                             {
+                                                                 "deviceType":  "DESKTOP",
+                                                                 "height":  "2842",
+                                                                 "htmlCode":  {
+                                                                                  "downloadUrl":  "https://contribution.usercontent.google.com/download?c=CgthaWRhX2NvZGVmeBJ8Eh1hcHBfY29tcGFuaW9uX2dlbmVyYXRlZF9maWxlcxpbCiVodG1sXzgyYWVkODQ2NjI3OTQ2OTZhYzRiY2EyY2E2ZWI5ODRjEgsSBxDk1Kj0qBAYAZIBJAoKcHJvamVjdF9pZBIWQhQxNzQwMjA2NTg5MTE3MTk2MjQ5NQ\u0026filename=\u0026opi=89354086",
+                                                                                  "mimeType":  "text/html",
+                                                                                  "name":  "projects/17402065891171962495/files/377e2fd0421c4804acf628f9539640fa"
+                                                                              },
+                                                                 "name":  "projects/17402065891171962495/screens/2745761c06994a01a593d2e87e557fa4",
+                                                                 "screenshot":  {
+                                                                                    "downloadUrl":  "https://lh3.googleusercontent.com/aida/AP1WRLt-NMrkBJDqahzX7595sisNa-9BEVkXumiA84LzVvc9eCntlCQiBRXRE0rVaGAtCpSHVaE-tUeJbeMX_aNSZ9mW2jn5wSniHMACTtP8EqXI98nO-eZmhyTG1AX36RaiSWqxilzBWAZPCpYKXqm9a5ri7XyDKB6QSSEu655pdVQNPY4E_SZshJLJmIauvz3ZSduTYhdtfFKcg9JF5di1Nbm24RYFDAczQ-QJ2IVWli8cqVApxgnztKsSvNE",
+                                                                                    "name":  "projects/17402065891171962495/files/fa54a7eda1b243b8b41b3b37e9ac2ef1"
+                                                                                },
+                                                                 "title":  "Cloud Management — Customer Portal",
+                                                                 "width":  "2560"
+                                                             },
+                                                             {
+                                                                 "deviceType":  "DESKTOP",
+                                                                 "height":  "6210",
+                                                                 "htmlCode":  {
+                                                                                  "downloadUrl":  "https://contribution.usercontent.google.com/download?c=CgthaWRhX2NvZGVmeBJ8Eh1hcHBfY29tcGFuaW9uX2dlbmVyYXRlZF9maWxlcxpbCiVodG1sX2JhODg4MDA1MDI4NTRiMWViMDUwZThiYzAzOGVkZDIyEgsSBxDk1Kj0qBAYAZIBJAoKcHJvamVjdF9pZBIWQhQxNzQwMjA2NTg5MTE3MTk2MjQ5NQ\u0026filename=\u0026opi=89354086",
+                                                                                  "mimeType":  "text/html",
+                                                                                  "name":  "projects/17402065891171962495/files/5eb78af4eef6446ca1ca639e514e9c18"
+                                                                              },
+                                                                 "name":  "projects/17402065891171962495/screens/042336c749be43089ea31880c0d739a8",
+                                                                 "screenshot":  {
+                                                                                    "downloadUrl":  "https://lh3.googleusercontent.com/aida/AP1WRLuePTpfLygtp3QwLdigwQW8wlDNjtoCSAsZz82tcGYjNHDMMaZmtTOIgDHTg0EJ8L3ncHcSEcY8S1XbPN2VnwNnsQjiybcj2sBMPrOiNQNgshGYK6lnvYXdjkwPbiFaAH0ZtEgMMrU5umfGoPzneYvZNZGiZv79i84cBDCPlnKV08kSx1SST37RoWvhK7uWr-JK0FyQXAC8dEZ5S_Gx-qGjWpnPZwl_kio_mFODZtrF5sDmJOeK2xfVdh-J",
+                                                                                    "name":  "projects/17402065891171962495/files/77f76cfbed67476482d75ab21962aa15"
+                                                                                },
+                                                                 "title":  "Services — MernCrest",
+                                                                 "width":  "2560"
+                                                             },
+                                                             {
+                                                                 "deviceType":  "DESKTOP",
+                                                                 "height":  "3738",
+                                                                 "htmlCode":  {
+                                                                                  "downloadUrl":  "https://contribution.usercontent.google.com/download?c=CgthaWRhX2NvZGVmeBJ8Eh1hcHBfY29tcGFuaW9uX2dlbmVyYXRlZF9maWxlcxpbCiVodG1sX2ZjNGFiZmE5YzJlYzQxMTdhOTc2NjI2YmRhNTdmMzdlEgsSBxDk1Kj0qBAYAZIBJAoKcHJvamVjdF9pZBIWQhQxNzQwMjA2NTg5MTE3MTk2MjQ5NQ\u0026filename=\u0026opi=89354086",
+                                                                                  "mimeType":  "text/html",
+                                                                                  "name":  "projects/17402065891171962495/files/259659a0de4b46ec84f9a6bee8505304"
+                                                                              },
+                                                                 "name":  "projects/17402065891171962495/screens/ef4016303fb243d98cd83a314107db1a",
+                                                                 "screenshot":  {
+                                                                                    "downloadUrl":  "https://lh3.googleusercontent.com/aida/AP1WRLsh1sMasVhbOAxXne32ga4LZLqTk9wiPAUA8XlBse_YUDxPyVezKl3y-VXpipEAmYwTUSj07krWBB-Un7vSgsiivFzsqREFWhnSwZzS_YwM0eit583N5TOBpLIDpE4yT6gMecHlQJrZIfkVCdYmDBJYUimkLnG5P4-z5rWjeJ3qbwvZFrHjyb3CELUv9ESlwT3fWcaeGnzoS6pDwmbOWPeRfOiiswiNN1y4irLVyz2c1xK-1gl1fBug86FD",
+                                                                                    "name":  "projects/17402065891171962495/files/409208399dd6423cb38e71e726115e25"
+                                                                                },
+                                                                 "title":  "Contact — MernCrest",
+                                                                 "width":  "2560"
+                                                             },
+                                                             {
+                                                                 "deviceType":  "DESKTOP",
+                                                                 "height":  "7942",
+                                                                 "htmlCode":  {
+                                                                                  "downloadUrl":  "https://contribution.usercontent.google.com/download?c=CgthaWRhX2NvZGVmeBJ8Eh1hcHBfY29tcGFuaW9uX2dlbmVyYXRlZF9maWxlcxpbCiVodG1sX2E5NTMzZmEzNTg3ZjQ1MDc5NmE2ZTc4ODNlNTA4ZDc1EgsSBxDk1Kj0qBAYAZIBJAoKcHJvamVjdF9pZBIWQhQxNzQwMjA2NTg5MTE3MTk2MjQ5NQ\u0026filename=\u0026opi=89354086",
+                                                                                  "mimeType":  "text/html",
+                                                                                  "name":  "projects/17402065891171962495/files/a4a2964a3b9c45fe9ef9934fba7f1256"
+                                                                              },
+                                                                 "name":  "projects/17402065891171962495/screens/742307e050d44f26836919a0263fb23f",
+                                                                 "screenshot":  {
+                                                                                    "downloadUrl":  "https://lh3.googleusercontent.com/aida/AP1WRLuVyMW8aXclXtrzWZKWG4KS6s7lSrhOF11bDHcmvkJokU15Rrx6NloGNo3xMaI1_9k60ujBatRqXwozmuvflgoHs1fmh7HIDA6zOr0wMJRB_UDAXD6buJV5Vkf35o2fcmujvFn6k78o-OwKNfhB3dBZ1zgLdSWM__sfi4WokhoIlVCkl3OyNDcDBZ2L5RvA5L2iWF3A1gSTNak_N1btOE18gHsG-NIbeN_N5-Brsrpf9RQtvpFjFxwZxZk",
+                                                                                    "name":  "projects/17402065891171962495/files/9d46d40f0f4448218cbca46335690477"
+                                                                                },
+                                                                 "title":  "MernCrest — Homepage",
+                                                                 "width":  "2560"
+                                                             },
+                                                             {
+                                                                 "deviceType":  "DESKTOP",
+                                                                 "height":  "6078",
+                                                                 "htmlCode":  {
+                                                                                  "downloadUrl":  "https://contribution.usercontent.google.com/download?c=CgthaWRhX2NvZGVmeBJ8Eh1hcHBfY29tcGFuaW9uX2dlbmVyYXRlZF9maWxlcxpbCiVodG1sXzFhODYzMTRiNGJmMjQyNDc4YTY1ODI0NjIxNDE3NjVlEgsSBxDk1Kj0qBAYAZIBJAoKcHJvamVjdF9pZBIWQhQxNzQwMjA2NTg5MTE3MTk2MjQ5NQ\u0026filename=\u0026opi=89354086",
+                                                                                  "mimeType":  "text/html",
+                                                                                  "name":  "projects/17402065891171962495/files/08eb9c16f62a4b42b55fad62ec5329dd"
+                                                                              },
+                                                                 "name":  "projects/17402065891171962495/screens/fb53877b26e94ae2a505fd457a10f53e",
+                                                                 "screenshot":  {
+                                                                                    "downloadUrl":  "https://lh3.googleusercontent.com/aida/AP1WRLuUdA0SUxiApSQmp5a1wT31M1gzmkPLj2gW5An2OdIG51jqWeldgghf3r5YtA83jMMg9OaKaf9TW0i84wcemFKBzmPuHgxgKF3HdSQpZYzv8ZnBfbnI0-IlaeqgyDJDmWw-e80cXUrJPDHManbwjUoT3J09BbXViVL1478tsVGYOH5vdpnGAFE44_q_sb6ZInXbZlFyV4o8aof0v6OQGLmYgA9xqySWCSKrlRGTLBreYnXdjp3l4Va0cIRZ",
+                                                                                    "name":  "projects/17402065891171962495/files/052fef59409b494b89abf6eead0f9581"
+                                                                                },
+                                                                 "title":  "Marketplace — MernCrest",
+                                                                 "width":  "2560"
+                                                             },
+                                                             {
+                                                                 "deviceType":  "DESKTOP",
+                                                                 "height":  "3780",
+                                                                 "htmlCode":  {
+                                                                                  "downloadUrl":  "https://contribution.usercontent.google.com/download?c=CgthaWRhX2NvZGVmeBJ8Eh1hcHBfY29tcGFuaW9uX2dlbmVyYXRlZF9maWxlcxpbCiVodG1sXzFjZWUzZDM3ZjY2MzRjZjZhMDc2MDFjOTYzMWU0MzVlEgsSBxDk1Kj0qBAYAZIBJAoKcHJvamVjdF9pZBIWQhQxNzQwMjA2NTg5MTE3MTk2MjQ5NQ\u0026filename=\u0026opi=89354086",
+                                                                                  "mimeType":  "text/html",
+                                                                                  "name":  "projects/17402065891171962495/files/d7f7289ca72343dab4057c7e857d7ac1"
+                                                                              },
+                                                                 "name":  "projects/17402065891171962495/screens/ba7ca90a444d4d8993dee6d38eda43e3",
+                                                                 "screenshot":  {
+                                                                                    "downloadUrl":  "https://lh3.googleusercontent.com/aida/AP1WRLvI0p6iAlpJn99cSllC1abs2DNvvbVGazwgPIogRUm4nEyGmGQcfUwLL_KQGEsGBcNT3Fk1V9QwbJq7j9EUGtX1bZ2xC7c6df4WAhX198korVEj7viGIh_a-_zGFBEzWZFlox8Fa950XDBWXMazloEY5eAGUGIqt_ezi1w2S2I61lSmWSILNclOGX8LSYx2Mf1iDHcIQpuqGmGDpYw2jP6kLHRnfVf7QXRUEliMCWr6Msq3JgMZpYjnQUla",
+                                                                                    "name":  "projects/17402065891171962495/files/0dcad16e2ddf4790803400646cc9884c"
+                                                                                },
+                                                                 "title":  "Supply Chain — MernCrest ERP",
+                                                                 "width":  "2560"
+                                                             },
+                                                             {
+                                                                 "deviceType":  "DESKTOP",
+                                                                 "height":  "7392",
+                                                                 "htmlCode":  {
+                                                                                  "downloadUrl":  "https://contribution.usercontent.google.com/download?c=CgthaWRhX2NvZGVmeBJ8Eh1hcHBfY29tcGFuaW9uX2dlbmVyYXRlZF9maWxlcxpbCiVodG1sXzFhZTM1Nzg0MjNmMTQ1MjJiMzIwN2M2YjdlYzcwYjZkEgsSBxDk1Kj0qBAYAZIBJAoKcHJvamVjdF9pZBIWQhQxNzQwMjA2NTg5MTE3MTk2MjQ5NQ\u0026filename=\u0026opi=89354086",
+                                                                                  "mimeType":  "text/html",
+                                                                                  "name":  "projects/17402065891171962495/files/8f1cbccb551d41139bb0702e06fa1c54"
+                                                                              },
+                                                                 "name":  "projects/17402065891171962495/screens/66831e09992f47429951a620b38ffe66",
+                                                                 "screenshot":  {
+                                                                                    "downloadUrl":  "https://lh3.googleusercontent.com/aida/AP1WRLtu0yCBm4hg8G4_r4BR6oZPCAzGk5Xi_Nm2fa5ctSsgpUuXiT8HVkcDosdHMVVnXiYnCk0GwqiBblnchWRt_OcigKF0tQkvnjt2YeXZfr_zxa-k3eziosw_0fWIB49j6Qdq7wX8DTOqDV75s38zbob7kQ7Lzykri9WnwbpPW5asGfx7lwfgMdqUsGiJ1SnP5lHWxkUsJE4HRyaNTar39dq0KJCv6aRGLCJr4S_dBLzvB9shPVEamnKwsXSY",
+                                                                                    "name":  "projects/17402065891171962495/files/cbf8e52c2f9b43b2b39a619c52147325"
+                                                                                },
+                                                                 "title":  "Public Website — MernCrest Platform",
+                                                                 "width":  "2560"
+                                                             }
+                                                         ]
+                                         }
+               }
+}

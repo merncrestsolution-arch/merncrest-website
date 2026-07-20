@@ -1,0 +1,42 @@
+---
+description: MernCrest Part 04 — Omnichannel CRM, WhatsApp, Live Chat, IVR communication rules
+alwaysApply: true
+---
+
+# MernCrest Part 04 — Communication & CRM
+
+Continue from Parts 01–03. Do not redesign or remove modules.
+
+## Core rule
+
+Every communication channel must connect to **ONE centralized CRM**.
+
+Never leave customer conversations isolated.
+
+```text
+Customer → Website | WhatsApp | Live Chat | Email | IVR | Portal
+→ Communication Hub → CRM → Departments
+```
+
+## Customer 360
+
+One Customer ID. Profile aggregates orders, invoices, domains, hosting, tickets, WhatsApp, chat, calls, meetings, documents, timeline, renewals, assigned sales/support.
+
+## Leads
+
+Every inquiry becomes a lead (auto via `ensureLeadFromChannel`).
+
+Stages: NEW → ASSIGNED → QUALIFIED → MEETING → QUOTATION → NEGOTIATION → WON | LOST | ON_HOLD
+
+Kanban drag-and-drop in Admin CRM. Lead score + follow-ups + meetings required for sales workflow.
+
+## Channels
+
+- WhatsApp: business assistant (EN/TA/SI) + CRM identity by phone
+- Live Chat: AI + human handoff → ticket + CRM
+- Email inbound → ticket + CRM
+- IVR: recorded voice only (no AI voice); menus 1–9; miss → voicemail/ticket/callback/CRM
+
+## Quality
+
+Searchable conversations · linked to customer · no duplicate leads when email/phone known · event-driven CRM updates · integrate Notifications / Analytics / Audit.

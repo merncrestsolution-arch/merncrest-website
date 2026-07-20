@@ -4,17 +4,17 @@ const FAQS: { keys: string[]; answer: string }[] = [
   {
     keys: ["domain", "dns", "nameserver", ".lk", "register"],
     answer:
-      "You can search and register domains at /domains. After payment we auto-provision DNS (A, CNAME, MX, TXT). Manage nameservers and lock from Portal → Domains.",
+      "Search and register domains at /domains. Availability and pricing come from our reseller Provider API. After admin-verified payment we provision via the provider. Manage DNS from Portal → Domains.",
   },
   {
     keys: ["hosting", "cpanel", "vps", "server", "ssl"],
     answer:
-      "Hosting packages (Shared, Business, WordPress, VPS, AWS) are under /hosting. After Demo/PayHere payment, accounts activate with SSL and panel access in Portal → Hosting.",
+      "Hosting packages are synced from provider partners (we don’t own the servers). Browse /hosting or describe your project for an AI recommendation. After bank-transfer verification, accounts activate via Provider API in Portal → Hosting.",
   },
   {
     keys: ["invoice", "pay", "payment", "bill", "refund"],
     answer:
-      "Open Portal → Billing to view invoices, pay with PayHere or Demo pay, or download PDF. Refunds can be requested from Portal → Refunds after payment.",
+      "Open Portal → Billing to view invoices. Pay by bank transfer / manual payment — an admin verifies before services activate. Automatic gateways (PayHere/Stripe) can be enabled later. Download branded PDF invoices anytime.",
   },
   {
     keys: ["ticket", "support", "help", "issue"],
@@ -29,7 +29,12 @@ const FAQS: { keys: string[]; answer: string }[] = [
   {
     keys: ["price", "pricing", "cost", "plan"],
     answer:
-      "See /pricing for packages. Catalog prices are in LKR. Coupons like WELCOME10 (10%) apply at checkout.",
+      "See /pricing and the marketplace catalog. Selling price = provider cost + configurable margin. Coupons like WELCOME10 (10%) apply at checkout.",
+  },
+  {
+    keys: ["software", "erp", "crm", "ai", "enterprise", "consulting"],
+    answer:
+      "MernCrest is primarily an enterprise technology company — custom software, ERP, CRM, AI solutions, automation, digital marketing, and cloud consulting. Domains and hosting are an additional marketplace channel.",
   },
 ];
 

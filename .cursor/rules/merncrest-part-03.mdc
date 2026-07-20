@@ -1,0 +1,41 @@
+---
+description: MernCrest Part 03 — Customer Portal self-service and CRM integration rules
+alwaysApply: true
+---
+
+# MernCrest Part 03 — Customer Portal
+
+Continue from Part 01. Do not redesign or remove modules.
+
+## Portal role
+
+The Customer Portal is the customer’s complete self-service dashboard.
+
+- Unique profile per customer (`customerCode`)
+- Purchased services appear automatically after provider activation
+- Dashboard must surface: welcome, profile, orders, services, invoices, tickets, announcements, notifications, renewals, pending payments, quick actions, activity
+
+## Reseller (unchanged)
+
+```text
+Customer → MernCrest Marketplace → Provider API → Service Activated
+```
+
+Never hardcode a single provider. Prefer priority-ordered active providers.
+
+## CRM integration rule
+
+Customer events (register, order, ticket, payment submit) MUST update:
+
+- Portal `CustomerActivity`
+- CRM lead/activity
+- Portal notifications where relevant
+
+## Payments
+
+Manual / bank transfer → pending → admin verification. Gateways remain future-ready.
+
+## Quality
+
+Reusable modules · no duplicated business logic · validate APIs · enterprise quality only.
+Integrate with CRM, Finance, Support, Analytics, Notifications, Reports, Audit Logs.

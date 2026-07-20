@@ -14,8 +14,9 @@ export default async function PrivacyPage({
   setRequestLocale(locale);
 
   return (
-    <div className="container-wide section-padding pt-32 min-h-screen">
-      <div className="max-w-4xl mx-auto glass-panel p-8 md:p-12 rounded-3xl border border-white/10">
+    <div className="stitch-page">
+      <div className="stitch-container stitch-section pt-32 max-w-4xl mx-auto">
+      <div className="stitch-card !p-8 md:!p-12">
         <div className="mb-12 border-b border-white/10 pb-8">
           <h1 className="text-4xl md:text-5xl font-bold font-display mb-4">Privacy Policy</h1>
           <div className="text-muted space-y-2">
@@ -268,6 +269,7 @@ export default async function PrivacyPage({
             </div>
           </section>
         </div>
+      </div>
       </div>
     </div>
   );

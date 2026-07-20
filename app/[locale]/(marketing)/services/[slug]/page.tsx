@@ -109,15 +109,15 @@ const serviceContent: Record<string, any> = {
     benefits: ["Avoid costly tech debt", "Align IT with business KPIs", "Objective expert advice"]
   },
   "hosting-domain": {
-    title: "Hosting & Domain Management",
+    title: "Domain & Hosting Marketplace",
     icon: Server,
-    description: "Reliable, blazing-fast hosting and secure domain registration. Let us handle the technical plumbing so you can focus on your business.",
+    description: "Domains, hosting, VPS, SSL, and business email resold through trusted provider partners. MernCrest is not a registrar or hosting infrastructure company — we orchestrate provider APIs for you.",
     features: [
-      { title: "Managed Hosting", desc: "Fully managed VPS and dedicated servers." },
-      { title: "Domain Privacy", desc: "Protecting your WHOIS information." },
-      { title: "SSL Certificates", desc: "End-to-end encryption setup and renewal." }
+      { title: "Reseller Hosting", desc: "Packages synced from Provider A/B/C and activated via API." },
+      { title: "Domain Search", desc: "Availability, pricing, register, renew, and transfer." },
+      { title: "SSL & Email", desc: "Certificates and business email provisioned via providers." }
     ],
-    benefits: ["Ultra-fast TTFB", "Automated daily backups", "24/7 technical support"]
+    benefits: ["Multi-provider ready", "Transparent selling margins", "Admin-verified payments"]
   }
 };
 
@@ -147,60 +147,59 @@ export default async function ServiceSubPage({
   const Icon = data.icon;
 
   return (
-    <div className="container-wide section-padding pt-32 min-h-screen">
-      {/* Hero Section */}
-      <div className="max-w-4xl mb-24">
-        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-accent/10 text-accent text-sm font-medium mb-6">
+    <div className="stitch-page">
+      <div className="stitch-container pt-32 pb-10">
+        <div className="inline-flex items-center gap-2 rounded-full border border-violet-500/20 bg-violet-500/10 px-3 py-1 text-sm font-medium text-violet-300 mb-6">
           <Icon className="h-4 w-4" />
           <span>Core Service</span>
         </div>
-        <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold mb-6 font-display text-balance tracking-tight">
+        <h1 className="font-display text-3xl sm:text-4xl lg:text-5xl font-bold text-white text-balance tracking-tight max-w-4xl">
           {data.title}
         </h1>
-        <p className="text-xl text-muted leading-relaxed max-w-3xl">
-          {data.description}
-        </p>
+        <p className="mt-4 text-lg text-muted leading-relaxed max-w-3xl">{data.description}</p>
       </div>
 
-      <div className="grid lg:grid-cols-3 gap-12 mb-24">
-        {/* Main Content */}
-        <div className="lg:col-span-2 space-y-12">
-          <div>
-            <h2 className="text-3xl font-bold mb-8">What We Deliver</h2>
-            <div className="grid sm:grid-cols-2 gap-6">
-              {data.features.map((feature: any, i: number) => (
-                <div key={i} className="glass-panel p-6 rounded-2xl border border-white/5 hover:border-accent/30 transition-colors">
-                  <h3 className="text-xl font-bold mb-3 text-foreground">{feature.title}</h3>
-                  <p className="text-muted leading-relaxed">{feature.desc}</p>
+      <div className="stitch-page-body !pt-0">
+        <div className="grid lg:grid-cols-3 gap-8">
+          <div className="lg:col-span-2">
+            <h2 className="font-display text-2xl font-bold text-white mb-6">What We Deliver</h2>
+            <div className="grid sm:grid-cols-2 gap-5">
+              {data.features.map((feature: { title: string; desc: string }, i: number) => (
+                <div key={i} className="stitch-card stitch-card-hover">
+                  <h3 className="font-display text-lg font-semibold text-white mb-2">{feature.title}</h3>
+                  <p className="text-sm text-muted leading-relaxed">{feature.desc}</p>
                 </div>
               ))}
             </div>
           </div>
-        </div>
 
-        {/* Sidebar */}
-        <div className="space-y-8">
-          <div className="glass-card p-8 rounded-3xl border border-white/5">
-            <h3 className="text-xl font-bold mb-6">Key Benefits</h3>
-            <ul className="space-y-4">
-              {data.benefits.map((benefit: string, i: number) => (
-                <li key={i} className="flex items-start gap-3 text-muted">
-                  <CheckCircle2 className="h-6 w-6 text-accent shrink-0" />
-                  <span>{benefit}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
+          <div className="space-y-5">
+            <div className="stitch-card">
+              <h3 className="font-display text-lg font-semibold text-white mb-5">Key Benefits</h3>
+              <ul className="space-y-4">
+                {data.benefits.map((benefit: string, i: number) => (
+                  <li key={i} className="flex items-start gap-3 text-sm text-muted">
+                    <CheckCircle2 className="h-5 w-5 text-violet-300 shrink-0" />
+                    <span>{benefit}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
 
-          <div className="glass-card p-8 rounded-3xl border border-accent/20 bg-accent/5 relative overflow-hidden text-center">
-            <div className="absolute inset-0 bg-gradient-to-b from-accent/10 to-transparent pointer-events-none" />
-            <h3 className="text-2xl font-bold mb-4 relative z-10">Ready to start?</h3>
-            <p className="text-muted mb-6 relative z-10">
-              Let's discuss how our {data.title.toLowerCase()} can transform your business.
-            </p>
-            <Button asChild className="w-full relative z-10 h-12">
-              <Link href="/contact">Get a Free Quote <ArrowRight className="ml-2 h-4 w-4" /></Link>
-            </Button>
+            <div className="stitch-card text-center relative overflow-hidden border-violet-500/20 bg-violet-500/[0.06]">
+              <div className="pointer-events-none absolute inset-0 brand-mesh opacity-40" />
+              <h3 className="relative z-10 font-display text-xl font-bold text-white mb-3">
+                Ready to start?
+              </h3>
+              <p className="relative z-10 text-sm text-muted mb-5">
+                Let&apos;s discuss how our {data.title.toLowerCase()} can transform your business.
+              </p>
+              <Button asChild className="relative z-10 w-full rounded-full h-11">
+                <Link href="/contact">
+                  Get a Free Quote <ArrowRight className="ml-2 h-4 w-4" />
+                </Link>
+              </Button>
+            </div>
           </div>
         </div>
       </div>

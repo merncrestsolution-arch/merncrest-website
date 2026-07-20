@@ -1,0 +1,232 @@
+﻿{
+    "id":  1,
+    "jsonrpc":  "2.0",
+    "result":  {
+                   "content":  [
+                                   {
+                                       "text":  "{\"name\":\"projects/17402065891171962495\",\"title\":\"MernCrest Enterprise AI Platform\",\"visibility\":\"PRIVATE\",\"createTime\":\"2026-07-20T14:11:12.515418Z\",\"updateTime\":\"2026-07-20T14:19:51.983949Z\",\"projectType\":\"TEXT_TO_UI_PRO\",\"thumbnailScreenshot\":{\"name\":\"projects/17402065891171962495/files/77f76cfbed67476482d75ab21962aa15\",\"downloadUrl\":\"https://lh3.googleusercontent.com/aida/AP1WRLuePTpfLygtp3QwLdigwQW8wlDNjtoCSAsZz82tcGYjNHDMMaZmtTOIgDHTg0EJ8L3ncHcSEcY8S1XbPN2VnwNnsQjiybcj2sBMPrOiNQNgshGYK6lnvYXdjkwPbiFaAH0ZtEgMMrU5umfGoPzneYvZNZGiZv79i84cBDCPlnKV08kSx1SST37RoWvhK7uWr-JK0FyQXAC8dEZ5S_Gx-qGjWpnPZwl_kio_mFODZtrF5sDmJOeK2xfVdh-J\"},\"origin\":\"STITCH\",\"deviceType\":\"DESKTOP\",\"designTheme\":{\"colorMode\":\"DARK\",\"font\":\"PLUS_JAKARTA_SANS\",\"roundness\":\"ROUND_EIGHT\",\"customColor\":\"#7c3aed\",\"headlineFont\":\"PLUS_JAKARTA_SANS\",\"bodyFont\":\"INTER\",\"labelFont\":\"JETBRAINS_MONO\",\"namedColors\":{\"surface_container_high\":\"#2a292e\",\"on_secondary\":\"#0f00a9\",\"on_primary_fixed_variant\":\"#5a00c6\",\"on_surface_variant\":\"#ccc3d8\",\"primary\":\"#d2bbff\",\"surface\":\"#131317\",\"on_tertiary\":\"#002e6a\",\"on_tertiary_fixed\":\"#001a42\",\"tertiary\":\"#adc6ff\",\"on_error_container\":\"#ffdad6\",\"background\":\"#131317\",\"surface_dim\":\"#131317\",\"on_secondary_fixed\":\"#06006c\",\"tertiary_fixed\":\"#d8e2ff\",\"surface_container\":\"#1f1f23\",\"surface_tint\":\"#d2bbff\",\"text-primary\":\"#ffffff\",\"inverse_on_surface\":\"#303034\",\"success\":\"#25d366\",\"on_error\":\"#690005\",\"border-subtle\":\"#4a4455\",\"surface_bright\":\"#39393d\",\"text-secondary\":\"#94a3b8\",\"on_primary_fixed\":\"#25005a\",\"primary_fixed\":\"#eaddff\",\"on_primary_container\":\"#ede0ff\",\"glow-violet\":\"#d2bbff\",\"outline_variant\":\"#4a4455\",\"primary_fixed_dim\":\"#d2bbff\",\"tertiary_container\":\"#0062d2\",\"on_secondary_fixed_variant\":\"#2e2ebe\",\"on_background\":\"#e4e1e7\",\"surface_variant\":\"#353439\",\"error_container\":\"#93000a\",\"inverse_surface\":\"#e4e1e7\",\"inverse_primary\":\"#732ee4\",\"surface_container_highest\":\"#353439\",\"on_tertiary_fixed_variant\":\"#004395\",\"surface_container_lowest\":\"#0e0e12\",\"outline\":\"#958da1\",\"tertiary_fixed_dim\":\"#adc6ff\",\"secondary_container\":\"#2e2ebe\",\"secondary_fixed_dim\":\"#c0c1ff\",\"primary_container\":\"#7c3aed\",\"on_tertiary_container\":\"#dce5ff\",\"on_surface\":\"#e4e1e7\",\"on_secondary_container\":\"#acaeff\",\"on_primary\":\"#3f008e\",\"secondary_fixed\":\"#e1e0ff\",\"secondary\":\"#c0c1ff\",\"error\":\"#ffb4ab\",\"surface_container_low\":\"#1b1b1f\"},\"designMd\":\"---\\nname: Luminous Enterprise\\ncolors:\\n  surface: \u0027#131317\u0027\\n  surface-dim: \u0027#131317\u0027\\n  surface-bright: \u0027#39393d\u0027\\n  surface-container-lowest: \u0027#0e0e12\u0027\\n  surface-container-low: \u0027#1b1b1f\u0027\\n  surface-container: \u0027#1f1f23\u0027\\n  surface-container-high: \u0027#2a292e\u0027\\n  surface-container-highest: \u0027#353439\u0027\\n  on-surface: \u0027#e4e1e7\u0027\\n  on-surface-variant: \u0027#ccc3d8\u0027\\n  inverse-surface: \u0027#e4e1e7\u0027\\n  inverse-on-surface: \u0027#303034\u0027\\n  outline: \u0027#958da1\u0027\\n  outline-variant: \u0027#4a4455\u0027\\n  surface-tint: \u0027#d2bbff\u0027\\n  primary: \u0027#d2bbff\u0027\\n  on-primary: \u0027#3f008e\u0027\\n  primary-container: \u0027#7c3aed\u0027\\n  on-primary-container: \u0027#ede0ff\u0027\\n  inverse-primary: \u0027#732ee4\u0027\\n  secondary: \u0027#c0c1ff\u0027\\n  on-secondary: \u0027#0f00a9\u0027\\n  secondary-container: \u0027#2e2ebe\u0027\\n  on-secondary-container: \u0027#acaeff\u0027\\n  tertiary: \u0027#adc6ff\u0027\\n  on-tertiary: \u0027#002e6a\u0027\\n  tertiary-container: \u0027#0062d2\u0027\\n  on-tertiary-container: \u0027#dce5ff\u0027\\n  error: \u0027#ffb4ab\u0027\\n  on-error: \u0027#690005\u0027\\n  error-container: \u0027#93000a\u0027\\n  on-error-container: \u0027#ffdad6\u0027\\n  primary-fixed: \u0027#eaddff\u0027\\n  primary-fixed-dim: \u0027#d2bbff\u0027\\n  on-primary-fixed: \u0027#25005a\u0027\\n  on-primary-fixed-variant: \u0027#5a00c6\u0027\\n  secondary-fixed: \u0027#e1e0ff\u0027\\n  secondary-fixed-dim: \u0027#c0c1ff\u0027\\n  on-secondary-fixed: \u0027#06006c\u0027\\n  on-secondary-fixed-variant: \u0027#2e2ebe\u0027\\n  tertiary-fixed: \u0027#d8e2ff\u0027\\n  tertiary-fixed-dim: \u0027#adc6ff\u0027\\n  on-tertiary-fixed: \u0027#001a42\u0027\\n  on-tertiary-fixed-variant: \u0027#004395\u0027\\n  background: \u0027#131317\u0027\\n  on-background: \u0027#e4e1e7\u0027\\n  surface-variant: \u0027#353439\u0027\\n  border-subtle: \u0027#4a4455\u0027\\n  glow-violet: \u0027#d2bbff\u0027\\n  success: \u0027#25d366\u0027\\n  text-primary: \u0027#ffffff\u0027\\n  text-secondary: \u0027#94a3b8\u0027\\ntypography:\\n  headline-xl:\\n    fontFamily: Plus Jakarta Sans\\n    fontSize: 64px\\n    fontWeight: \u0027800\u0027\\n    lineHeight: \u00271.1\u0027\\n    letterSpacing: -0.02em\\n  headline-xl-mobile:\\n    fontFamily: Plus Jakarta Sans\\n    fontSize: 40px\\n    fontWeight: \u0027800\u0027\\n    lineHeight: \u00271.2\u0027\\n  headline-lg:\\n    fontFamily: Plus Jakarta Sans\\n    fontSize: 40px\\n    fontWeight: \u0027700\u0027\\n    lineHeight: \u00271.2\u0027\\n  headline-md:\\n    fontFamily: Plus Jakarta Sans\\n    fontSize: 24px\\n    fontWeight: \u0027600\u0027\\n    lineHeight: \u00271.4\u0027\\n  body-lg:\\n    fontFamily: Inter\\n    fontSize: 18px\\n    fontWeight: \u0027400\u0027\\n    lineHeight: \u00271.6\u0027\\n  body-md:\\n    fontFamily: Inter\\n    fontSize: 16px\\n    fontWeight: \u0027400\u0027\\n    lineHeight: \u00271.6\u0027\\n  label-sm:\\n    fontFamily: JetBrains Mono\\n    fontSize: 12px\\n    fontWeight: \u0027500\u0027\\n    lineHeight: \u00271.0\u0027\\n    letterSpacing: 0.05em\\n  label-md:\\n    fontFamily: JetBrains Mono\\n    fontSize: 14px\\n    fontWeight: \u0027500\u0027\\n    lineHeight: \u00271.0\u0027\\nrounded:\\n  sm: 0.25rem\\n  DEFAULT: 0.5rem\\n  md: 0.75rem\\n  lg: 1rem\\n  xl: 1.5rem\\n  full: 9999px\\nspacing:\\n  container-max: 1440px\\n  gutter: 24px\\n  margin-mobile: 16px\\n  margin-desktop: 64px\\n  scale-xs: 0.25rem\\n  scale-sm: 0.5rem\\n  scale-md: 1rem\\n  scale-lg: 1.5rem\\n  scale-xl: 2.5rem\\n  scale-2xl: 4rem\\n---\\n\\n## Brand \u0026 Style\\n\\nThis design system is engineered for MernCrest Solutions, a high-end Enterprise Technology, AI, and Cloud partner. The visual narrative centers on a \\\"Luminous Enterprise\\\" aesthetic—fusing the gravitas of corporate reliability with the cutting-edge energy of next-generation cloud computing.\\n\\nThe design system utilizes a sophisticated **Dark Mode** foundation to evoke a sense of premium precision. The style is a hybrid of **Modern Corporate** and **Glassmorphism**, characterized by:\\n- **Atmospheric Depth:** Usage of subtle mesh gradients that appear to glow from behind UI surfaces.\\n- **High Fidelity:** Thin, low-opacity borders and crisp typography that signal meticulous attention to detail.\\n- **Luminous Accents:** Strategic use of violet light to guide the user\u0027s eye toward primary actions and critical data points.\\n\\n## Colors\\n\\nThe color palette is anchored in a deep-space neutral range to ensure high contrast for the luminous brand elements.\\n\\n- **Primary Violet (#7c3aed):** Represents innovation and the AI-driven core of the enterprise.\\n- **Glow Variant (#d2bbff):** Used for \\\"Luminous\\\" effects—outer glows, active states, and focus rings—to simulate light emission.\\n- **Surface Layering:** The background remains at `#0e0e12`, while elevated \\\"Stitch\\\" components use `#131317`.\\n- **Accents:** Secondary Indigo and Tertiary Blue provide variety for data visualization and status indicators without diluting the primary brand identity.\\n\\n## Typography\\n\\nThis design system uses a hierarchical font strategy to balance personality with readability:\\n- **Display \u0026 Headings:** Plus Jakarta Sans provides a modern, approachable geometric feel for all headers.\\n- **Body \u0026 Interface:** Inter is the workhorse for high-density enterprise data and long-form content, chosen for its exceptional legibility at small sizes.\\n- **Technical Accents:** JetBrains Mono is used for chips, badges, code snippets, and metadata to reinforce the technical/engineering prowess of the brand.\\n\\n## Layout \u0026 Spacing\\n\\nThe layout follows a **Fixed-Fluid Hybrid** model. Content is centered within a maximum container width of 1440px to maintain readability on ultra-wide monitors, while the inner grid remains fluid.\\n\\n- **Grid System:** A 12-column grid with 24px gutters.\\n- **Stitch Rhythm:** Sections should be separated by large vertical gaps (`scale-2xl`) to allow the atmospheric mesh gradients room to breathe.\\n- **Padding:** \\\"StitchCard\\\" components utilize a consistent `scale-lg` (24px) internal padding to maintain an airy, premium feel.\\n\\n## Elevation \u0026 Depth\\n\\nDepth is achieved through **Tonal Layering** and **Atmospheric Glassmorphism** rather than traditional heavy shadows.\\n\\n- **Surfaces:** Use `#131317` for card surfaces with a `0.6` opacity backdrop blur (20px) when positioned over mesh gradients.\\n- **Borders:** Every container must have a subtle `1px` solid border using `#4a4455`. For primary components, use a \\\"Stitch\\\" border—a linear gradient border from `#4a4455` to `#7c3aed` at 45 degrees.\\n- **Luminous Glow:** Primary active elements should feature a soft, `20px` spread outer glow using `#d2bbff` at `0.15` opacity to simulate light emission.\\n\\n## Shapes\\n\\nThe design system employs a **Rounded-2XL** language. All major containers, cards, and large buttons use a `1rem` (16px) corner radius. This softness balances the technical nature of the typography, making the enterprise software feel more accessible and modern. Smaller elements like inputs and chips scale down to `0.5rem` (8px).\\n\\n## Components\\n\\n- **StitchCard:** The primary container. Must include a `#131317` background, the standard `rounded-2xl` corners, and the subtle `#4a4455` border. For featured content, apply the \\\"luminous\\\" violet border gradient.\\n- **Buttons:** \\n  - *Primary:* Solid `#7c3aed` with a soft violet shadow.\\n  - *Secondary:* Ghost style with the subtle border and white text.\\n- **Input Fields:** Dark background (`#0e0e12`), `rounded-lg`, with a `1px` border that transitions to the Primary Violet on focus.\\n- **Chips (JetBrains Mono):** Use a low-opacity primary violet fill with high-contrast text. These are used for tagging AI models or Cloud regions.\\n- **StitchHeader:** A sticky navigation component featuring a heavy backdrop blur (`blur-xl`) and a bottom border to delineate the scroll area without creating visual bulk.\\n- **Mesh Gradients:** Not a component per se, but a required background primitive. Use radial gradients of `#7c3aed` and `#3131c0` at low opacities (10-15%) scattered behind the main content area.\",\"colorVariant\":\"FIDELITY\",\"overridePrimaryColor\":\"#7c3aed\",\"overrideSecondaryColor\":\"#3131c0\",\"overrideTertiaryColor\":\"#3b82f6\",\"overrideNeutralColor\":\"#0e0e12\",\"spacingScale\":2,\"typography\":{\"headline-xl-mobile\":{\"fontFamily\":\"Plus Jakarta Sans\",\"fontSize\":\"40px\",\"fontWeight\":\"800\",\"lineHeight\":\"1.2\"},\"headline-md\":{\"fontFamily\":\"Plus Jakarta Sans\",\"fontSize\":\"24px\",\"fontWeight\":\"600\",\"lineHeight\":\"1.4\"},\"body-md\":{\"fontFamily\":\"Inter\",\"fontSize\":\"16px\",\"fontWeight\":\"400\",\"lineHeight\":\"1.6\"},\"label-sm\":{\"fontFamily\":\"JetBrains Mono\",\"fontSize\":\"12px\",\"fontWeight\":\"500\",\"lineHeight\":\"1.0\",\"letterSpacing\":\"0.05em\"},\"headline-xl\":{\"fontFamily\":\"Plus Jakarta Sans\",\"fontSize\":\"64px\",\"fontWeight\":\"800\",\"lineHeight\":\"1.1\",\"letterSpacing\":\"-0.02em\"},\"label-md\":{\"fontFamily\":\"JetBrains Mono\",\"fontSize\":\"14px\",\"fontWeight\":\"500\",\"lineHeight\":\"1.0\"},\"headline-lg\":{\"fontFamily\":\"Plus Jakarta Sans\",\"fontSize\":\"40px\",\"fontWeight\":\"700\",\"lineHeight\":\"1.2\"},\"body-lg\":{\"fontFamily\":\"Inter\",\"fontSize\":\"18px\",\"fontWeight\":\"400\",\"lineHeight\":\"1.6\"}},\"spacing\":{\"margin-desktop\":\"64px\",\"scale-xs\":\"0.25rem\",\"container-max\":\"1440px\",\"gutter\":\"24px\",\"scale-sm\":\"0.5rem\",\"margin-mobile\":\"16px\",\"scale-md\":\"1rem\",\"scale-2xl\":\"4rem\",\"scale-lg\":\"1.5rem\",\"scale-xl\":\"2.5rem\"},\"headlineFontFamily\":\"Plus Jakarta Sans\",\"bodyFontFamily\":\"Inter\",\"labelFontFamily\":\"Jetbrains Mono\"},\"screenInstances\":[{\"id\":\"042336c749be43089ea31880c0d739a8\",\"sourceScreen\":\"projects/17402065891171962495/screens/042336c749be43089ea31880c0d739a8\",\"x\":3712,\"width\":1280,\"height\":1341},{\"id\":\"2745761c06994a01a593d2e87e557fa4\",\"sourceScreen\":\"projects/17402065891171962495/screens/2745761c06994a01a593d2e87e557fa4\",\"y\":5004,\"width\":1280,\"height\":1389},{\"id\":\"66831e09992f47429951a620b38ffe66\",\"sourceScreen\":\"projects/17402065891171962495/screens/66831e09992f47429951a620b38ffe66\",\"y\":6649,\"width\":1280,\"height\":3786},{\"id\":\"742307e050d44f26836919a0263fb23f\",\"sourceScreen\":\"projects/17402065891171962495/screens/742307e050d44f26836919a0263fb23f\",\"x\":1024,\"width\":1280,\"height\":2917},{\"id\":\"9336961f5fa24b3d912b984f06c380f8\",\"sourceScreen\":\"projects/17402065891171962495/screens/9336961f5fa24b3d912b984f06c380f8\",\"y\":3173,\"width\":1280,\"height\":1575},{\"id\":\"assets_389f985e18354cf892cdf7ebfca8771e\",\"width\":960,\"height\":540,\"sourceAsset\":\"assets/389f985e18354cf892cdf7ebfca8771e\",\"type\":\"DESIGN_SYSTEM_INSTANCE\"},{\"id\":\"ba7ca90a444d4d8993dee6d38eda43e3\",\"sourceScreen\":\"projects/17402065891171962495/screens/ba7ca90a444d4d8993dee6d38eda43e3\",\"x\":1344,\"y\":6649,\"width\":1280,\"height\":1966},{\"id\":\"ef4016303fb243d98cd83a314107db1a\",\"sourceScreen\":\"projects/17402065891171962495/screens/ef4016303fb243d98cd83a314107db1a\",\"x\":5056,\"width\":1280,\"height\":1840},{\"id\":\"fb53877b26e94ae2a505fd457a10f53e\",\"sourceScreen\":\"projects/17402065891171962495/screens/fb53877b26e94ae2a505fd457a10f53e\",\"x\":2368,\"width\":1280,\"height\":1263}],\"metadata\":{\"userRole\":\"OWNER\"}}",
+                                       "type":  "text"
+                                   }
+                               ],
+                   "structuredContent":  {
+                                             "createTime":  "2026-07-20T14:11:12.515418Z",
+                                             "designTheme":  {
+                                                                 "bodyFont":  "INTER",
+                                                                 "bodyFontFamily":  "Inter",
+                                                                 "colorMode":  "DARK",
+                                                                 "colorVariant":  "FIDELITY",
+                                                                 "customColor":  "#7c3aed",
+                                                                 "designMd":  "---\nname: Luminous Enterprise\ncolors:\n  surface: \u0027#131317\u0027\n  surface-dim: \u0027#131317\u0027\n  surface-bright: \u0027#39393d\u0027\n  surface-container-lowest: \u0027#0e0e12\u0027\n  surface-container-low: \u0027#1b1b1f\u0027\n  surface-container: \u0027#1f1f23\u0027\n  surface-container-high: \u0027#2a292e\u0027\n  surface-container-highest: \u0027#353439\u0027\n  on-surface: \u0027#e4e1e7\u0027\n  on-surface-variant: \u0027#ccc3d8\u0027\n  inverse-surface: \u0027#e4e1e7\u0027\n  inverse-on-surface: \u0027#303034\u0027\n  outline: \u0027#958da1\u0027\n  outline-variant: \u0027#4a4455\u0027\n  surface-tint: \u0027#d2bbff\u0027\n  primary: \u0027#d2bbff\u0027\n  on-primary: \u0027#3f008e\u0027\n  primary-container: \u0027#7c3aed\u0027\n  on-primary-container: \u0027#ede0ff\u0027\n  inverse-primary: \u0027#732ee4\u0027\n  secondary: \u0027#c0c1ff\u0027\n  on-secondary: \u0027#0f00a9\u0027\n  secondary-container: \u0027#2e2ebe\u0027\n  on-secondary-container: \u0027#acaeff\u0027\n  tertiary: \u0027#adc6ff\u0027\n  on-tertiary: \u0027#002e6a\u0027\n  tertiary-container: \u0027#0062d2\u0027\n  on-tertiary-container: \u0027#dce5ff\u0027\n  error: \u0027#ffb4ab\u0027\n  on-error: \u0027#690005\u0027\n  error-container: \u0027#93000a\u0027\n  on-error-container: \u0027#ffdad6\u0027\n  primary-fixed: \u0027#eaddff\u0027\n  primary-fixed-dim: \u0027#d2bbff\u0027\n  on-primary-fixed: \u0027#25005a\u0027\n  on-primary-fixed-variant: \u0027#5a00c6\u0027\n  secondary-fixed: \u0027#e1e0ff\u0027\n  secondary-fixed-dim: \u0027#c0c1ff\u0027\n  on-secondary-fixed: \u0027#06006c\u0027\n  on-secondary-fixed-variant: \u0027#2e2ebe\u0027\n  tertiary-fixed: \u0027#d8e2ff\u0027\n  tertiary-fixed-dim: \u0027#adc6ff\u0027\n  on-tertiary-fixed: \u0027#001a42\u0027\n  on-tertiary-fixed-variant: \u0027#004395\u0027\n  background: \u0027#131317\u0027\n  on-background: \u0027#e4e1e7\u0027\n  surface-variant: \u0027#353439\u0027\n  border-subtle: \u0027#4a4455\u0027\n  glow-violet: \u0027#d2bbff\u0027\n  success: \u0027#25d366\u0027\n  text-primary: \u0027#ffffff\u0027\n  text-secondary: \u0027#94a3b8\u0027\ntypography:\n  headline-xl:\n    fontFamily: Plus Jakarta Sans\n    fontSize: 64px\n    fontWeight: \u0027800\u0027\n    lineHeight: \u00271.1\u0027\n    letterSpacing: -0.02em\n  headline-xl-mobile:\n    fontFamily: Plus Jakarta Sans\n    fontSize: 40px\n    fontWeight: \u0027800\u0027\n    lineHeight: \u00271.2\u0027\n  headline-lg:\n    fontFamily: Plus Jakarta Sans\n    fontSize: 40px\n    fontWeight: \u0027700\u0027\n    lineHeight: \u00271.2\u0027\n  headline-md:\n    fontFamily: Plus Jakarta Sans\n    fontSize: 24px\n    fontWeight: \u0027600\u0027\n    lineHeight: \u00271.4\u0027\n  body-lg:\n    fontFamily: Inter\n    fontSize: 18px\n    fontWeight: \u0027400\u0027\n    lineHeight: \u00271.6\u0027\n  body-md:\n    fontFamily: Inter\n    fontSize: 16px\n    fontWeight: \u0027400\u0027\n    lineHeight: \u00271.6\u0027\n  label-sm:\n    fontFamily: JetBrains Mono\n    fontSize: 12px\n    fontWeight: \u0027500\u0027\n    lineHeight: \u00271.0\u0027\n    letterSpacing: 0.05em\n  label-md:\n    fontFamily: JetBrains Mono\n    fontSize: 14px\n    fontWeight: \u0027500\u0027\n    lineHeight: \u00271.0\u0027\nrounded:\n  sm: 0.25rem\n  DEFAULT: 0.5rem\n  md: 0.75rem\n  lg: 1rem\n  xl: 1.5rem\n  full: 9999px\nspacing:\n  container-max: 1440px\n  gutter: 24px\n  margin-mobile: 16px\n  margin-desktop: 64px\n  scale-xs: 0.25rem\n  scale-sm: 0.5rem\n  scale-md: 1rem\n  scale-lg: 1.5rem\n  scale-xl: 2.5rem\n  scale-2xl: 4rem\n---\n\n## Brand \u0026 Style\n\nThis design system is engineered for MernCrest Solutions, a high-end Enterprise Technology, AI, and Cloud partner. The visual narrative centers on a \"Luminous Enterprise\" aesthetic—fusing the gravitas of corporate reliability with the cutting-edge energy of next-generation cloud computing.\n\nThe design system utilizes a sophisticated **Dark Mode** foundation to evoke a sense of premium precision. The style is a hybrid of **Modern Corporate** and **Glassmorphism**, characterized by:\n- **Atmospheric Depth:** Usage of subtle mesh gradients that appear to glow from behind UI surfaces.\n- **High Fidelity:** Thin, low-opacity borders and crisp typography that signal meticulous attention to detail.\n- **Luminous Accents:** Strategic use of violet light to guide the user\u0027s eye toward primary actions and critical data points.\n\n## Colors\n\nThe color palette is anchored in a deep-space neutral range to ensure high contrast for the luminous brand elements.\n\n- **Primary Violet (#7c3aed):** Represents innovation and the AI-driven core of the enterprise.\n- **Glow Variant (#d2bbff):** Used for \"Luminous\" effects—outer glows, active states, and focus rings—to simulate light emission.\n- **Surface Layering:** The background remains at `#0e0e12`, while elevated \"Stitch\" components use `#131317`.\n- **Accents:** Secondary Indigo and Tertiary Blue provide variety for data visualization and status indicators without diluting the primary brand identity.\n\n## Typography\n\nThis design system uses a hierarchical font strategy to balance personality with readability:\n- **Display \u0026 Headings:** Plus Jakarta Sans provides a modern, approachable geometric feel for all headers.\n- **Body \u0026 Interface:** Inter is the workhorse for high-density enterprise data and long-form content, chosen for its exceptional legibility at small sizes.\n- **Technical Accents:** JetBrains Mono is used for chips, badges, code snippets, and metadata to reinforce the technical/engineering prowess of the brand.\n\n## Layout \u0026 Spacing\n\nThe layout follows a **Fixed-Fluid Hybrid** model. Content is centered within a maximum container width of 1440px to maintain readability on ultra-wide monitors, while the inner grid remains fluid.\n\n- **Grid System:** A 12-column grid with 24px gutters.\n- **Stitch Rhythm:** Sections should be separated by large vertical gaps (`scale-2xl`) to allow the atmospheric mesh gradients room to breathe.\n- **Padding:** \"StitchCard\" components utilize a consistent `scale-lg` (24px) internal padding to maintain an airy, premium feel.\n\n## Elevation \u0026 Depth\n\nDepth is achieved through **Tonal Layering** and **Atmospheric Glassmorphism** rather than traditional heavy shadows.\n\n- **Surfaces:** Use `#131317` for card surfaces with a `0.6` opacity backdrop blur (20px) when positioned over mesh gradients.\n- **Borders:** Every container must have a subtle `1px` solid border using `#4a4455`. For primary components, use a \"Stitch\" border—a linear gradient border from `#4a4455` to `#7c3aed` at 45 degrees.\n- **Luminous Glow:** Primary active elements should feature a soft, `20px` spread outer glow using `#d2bbff` at `0.15` opacity to simulate light emission.\n\n## Shapes\n\nThe design system employs a **Rounded-2XL** language. All major containers, cards, and large buttons use a `1rem` (16px) corner radius. This softness balances the technical nature of the typography, making the enterprise software feel more accessible and modern. Smaller elements like inputs and chips scale down to `0.5rem` (8px).\n\n## Components\n\n- **StitchCard:** The primary container. Must include a `#131317` background, the standard `rounded-2xl` corners, and the subtle `#4a4455` border. For featured content, apply the \"luminous\" violet border gradient.\n- **Buttons:** \n  - *Primary:* Solid `#7c3aed` with a soft violet shadow.\n  - *Secondary:* Ghost style with the subtle border and white text.\n- **Input Fields:** Dark background (`#0e0e12`), `rounded-lg`, with a `1px` border that transitions to the Primary Violet on focus.\n- **Chips (JetBrains Mono):** Use a low-opacity primary violet fill with high-contrast text. These are used for tagging AI models or Cloud regions.\n- **StitchHeader:** A sticky navigation component featuring a heavy backdrop blur (`blur-xl`) and a bottom border to delineate the scroll area without creating visual bulk.\n- **Mesh Gradients:** Not a component per se, but a required background primitive. Use radial gradients of `#7c3aed` and `#3131c0` at low opacities (10-15%) scattered behind the main content area.",
+                                                                 "font":  "PLUS_JAKARTA_SANS",
+                                                                 "headlineFont":  "PLUS_JAKARTA_SANS",
+                                                                 "headlineFontFamily":  "Plus Jakarta Sans",
+                                                                 "labelFont":  "JETBRAINS_MONO",
+                                                                 "labelFontFamily":  "Jetbrains Mono",
+                                                                 "namedColors":  {
+                                                                                     "background":  "#131317",
+                                                                                     "border-subtle":  "#4a4455",
+                                                                                     "error":  "#ffb4ab",
+                                                                                     "error_container":  "#93000a",
+                                                                                     "glow-violet":  "#d2bbff",
+                                                                                     "inverse_on_surface":  "#303034",
+                                                                                     "inverse_primary":  "#732ee4",
+                                                                                     "inverse_surface":  "#e4e1e7",
+                                                                                     "on_background":  "#e4e1e7",
+                                                                                     "on_error":  "#690005",
+                                                                                     "on_error_container":  "#ffdad6",
+                                                                                     "on_primary":  "#3f008e",
+                                                                                     "on_primary_container":  "#ede0ff",
+                                                                                     "on_primary_fixed":  "#25005a",
+                                                                                     "on_primary_fixed_variant":  "#5a00c6",
+                                                                                     "on_secondary":  "#0f00a9",
+                                                                                     "on_secondary_container":  "#acaeff",
+                                                                                     "on_secondary_fixed":  "#06006c",
+                                                                                     "on_secondary_fixed_variant":  "#2e2ebe",
+                                                                                     "on_surface":  "#e4e1e7",
+                                                                                     "on_surface_variant":  "#ccc3d8",
+                                                                                     "on_tertiary":  "#002e6a",
+                                                                                     "on_tertiary_container":  "#dce5ff",
+                                                                                     "on_tertiary_fixed":  "#001a42",
+                                                                                     "on_tertiary_fixed_variant":  "#004395",
+                                                                                     "outline":  "#958da1",
+                                                                                     "outline_variant":  "#4a4455",
+                                                                                     "primary":  "#d2bbff",
+                                                                                     "primary_container":  "#7c3aed",
+                                                                                     "primary_fixed":  "#eaddff",
+                                                                                     "primary_fixed_dim":  "#d2bbff",
+                                                                                     "secondary":  "#c0c1ff",
+                                                                                     "secondary_container":  "#2e2ebe",
+                                                                                     "secondary_fixed":  "#e1e0ff",
+                                                                                     "secondary_fixed_dim":  "#c0c1ff",
+                                                                                     "success":  "#25d366",
+                                                                                     "surface":  "#131317",
+                                                                                     "surface_bright":  "#39393d",
+                                                                                     "surface_container":  "#1f1f23",
+                                                                                     "surface_container_high":  "#2a292e",
+                                                                                     "surface_container_highest":  "#353439",
+                                                                                     "surface_container_low":  "#1b1b1f",
+                                                                                     "surface_container_lowest":  "#0e0e12",
+                                                                                     "surface_dim":  "#131317",
+                                                                                     "surface_tint":  "#d2bbff",
+                                                                                     "surface_variant":  "#353439",
+                                                                                     "tertiary":  "#adc6ff",
+                                                                                     "tertiary_container":  "#0062d2",
+                                                                                     "tertiary_fixed":  "#d8e2ff",
+                                                                                     "tertiary_fixed_dim":  "#adc6ff",
+                                                                                     "text-primary":  "#ffffff",
+                                                                                     "text-secondary":  "#94a3b8"
+                                                                                 },
+                                                                 "overrideNeutralColor":  "#0e0e12",
+                                                                 "overridePrimaryColor":  "#7c3aed",
+                                                                 "overrideSecondaryColor":  "#3131c0",
+                                                                 "overrideTertiaryColor":  "#3b82f6",
+                                                                 "roundness":  "ROUND_EIGHT",
+                                                                 "spacing":  {
+                                                                                 "container-max":  "1440px",
+                                                                                 "gutter":  "24px",
+                                                                                 "margin-desktop":  "64px",
+                                                                                 "margin-mobile":  "16px",
+                                                                                 "scale-2xl":  "4rem",
+                                                                                 "scale-lg":  "1.5rem",
+                                                                                 "scale-md":  "1rem",
+                                                                                 "scale-sm":  "0.5rem",
+                                                                                 "scale-xl":  "2.5rem",
+                                                                                 "scale-xs":  "0.25rem"
+                                                                             },
+                                                                 "spacingScale":  2,
+                                                                 "typography":  {
+                                                                                    "body-lg":  {
+                                                                                                    "fontFamily":  "Inter",
+                                                                                                    "fontSize":  "18px",
+                                                                                                    "fontWeight":  "400",
+                                                                                                    "lineHeight":  "1.6"
+                                                                                                },
+                                                                                    "body-md":  {
+                                                                                                    "fontFamily":  "Inter",
+                                                                                                    "fontSize":  "16px",
+                                                                                                    "fontWeight":  "400",
+                                                                                                    "lineHeight":  "1.6"
+                                                                                                },
+                                                                                    "headline-lg":  {
+                                                                                                        "fontFamily":  "Plus Jakarta Sans",
+                                                                                                        "fontSize":  "40px",
+                                                                                                        "fontWeight":  "700",
+                                                                                                        "lineHeight":  "1.2"
+                                                                                                    },
+                                                                                    "headline-md":  {
+                                                                                                        "fontFamily":  "Plus Jakarta Sans",
+                                                                                                        "fontSize":  "24px",
+                                                                                                        "fontWeight":  "600",
+                                                                                                        "lineHeight":  "1.4"
+                                                                                                    },
+                                                                                    "headline-xl":  {
+                                                                                                        "fontFamily":  "Plus Jakarta Sans",
+                                                                                                        "fontSize":  "64px",
+                                                                                                        "fontWeight":  "800",
+                                                                                                        "letterSpacing":  "-0.02em",
+                                                                                                        "lineHeight":  "1.1"
+                                                                                                    },
+                                                                                    "headline-xl-mobile":  {
+                                                                                                               "fontFamily":  "Plus Jakarta Sans",
+                                                                                                               "fontSize":  "40px",
+                                                                                                               "fontWeight":  "800",
+                                                                                                               "lineHeight":  "1.2"
+                                                                                                           },
+                                                                                    "label-md":  {
+                                                                                                     "fontFamily":  "JetBrains Mono",
+                                                                                                     "fontSize":  "14px",
+                                                                                                     "fontWeight":  "500",
+                                                                                                     "lineHeight":  "1.0"
+                                                                                                 },
+                                                                                    "label-sm":  {
+                                                                                                     "fontFamily":  "JetBrains Mono",
+                                                                                                     "fontSize":  "12px",
+                                                                                                     "fontWeight":  "500",
+                                                                                                     "letterSpacing":  "0.05em",
+                                                                                                     "lineHeight":  "1.0"
+                                                                                                 }
+                                                                                }
+                                                             },
+                                             "deviceType":  "DESKTOP",
+                                             "metadata":  {
+                                                              "userRole":  "OWNER"
+                                                          },
+                                             "name":  "projects/17402065891171962495",
+                                             "origin":  "STITCH",
+                                             "projectType":  "TEXT_TO_UI_PRO",
+                                             "screenInstances":  [
+                                                                     {
+                                                                         "height":  1341,
+                                                                         "id":  "042336c749be43089ea31880c0d739a8",
+                                                                         "sourceScreen":  "projects/17402065891171962495/screens/042336c749be43089ea31880c0d739a8",
+                                                                         "width":  1280,
+                                                                         "x":  3712
+                                                                     },
+                                                                     {
+                                                                         "height":  1389,
+                                                                         "id":  "2745761c06994a01a593d2e87e557fa4",
+                                                                         "sourceScreen":  "projects/17402065891171962495/screens/2745761c06994a01a593d2e87e557fa4",
+                                                                         "width":  1280,
+                                                                         "y":  5004
+                                                                     },
+                                                                     {
+                                                                         "height":  3786,
+                                                                         "id":  "66831e09992f47429951a620b38ffe66",
+                                                                         "sourceScreen":  "projects/17402065891171962495/screens/66831e09992f47429951a620b38ffe66",
+                                                                         "width":  1280,
+                                                                         "y":  6649
+                                                                     },
+                                                                     {
+                                                                         "height":  2917,
+                                                                         "id":  "742307e050d44f26836919a0263fb23f",
+                                                                         "sourceScreen":  "projects/17402065891171962495/screens/742307e050d44f26836919a0263fb23f",
+                                                                         "width":  1280,
+                                                                         "x":  1024
+                                                                     },
+                                                                     {
+                                                                         "height":  1575,
+                                                                         "id":  "9336961f5fa24b3d912b984f06c380f8",
+                                                                         "sourceScreen":  "projects/17402065891171962495/screens/9336961f5fa24b3d912b984f06c380f8",
+                                                                         "width":  1280,
+                                                                         "y":  3173
+                                                                     },
+                                                                     {
+                                                                         "height":  540,
+                                                                         "id":  "assets_389f985e18354cf892cdf7ebfca8771e",
+                                                                         "sourceAsset":  "assets/389f985e18354cf892cdf7ebfca8771e",
+                                                                         "type":  "DESIGN_SYSTEM_INSTANCE",
+                                                                         "width":  960
+                                                                     },
+                                                                     {
+                                                                         "height":  1966,
+                                                                         "id":  "ba7ca90a444d4d8993dee6d38eda43e3",
+                                                                         "sourceScreen":  "projects/17402065891171962495/screens/ba7ca90a444d4d8993dee6d38eda43e3",
+                                                                         "width":  1280,
+                                                                         "x":  1344,
+                                                                         "y":  6649
+                                                                     },
+                                                                     {
+                                                                         "height":  1840,
+                                                                         "id":  "ef4016303fb243d98cd83a314107db1a",
+                                                                         "sourceScreen":  "projects/17402065891171962495/screens/ef4016303fb243d98cd83a314107db1a",
+                                                                         "width":  1280,
+                                                                         "x":  5056
+                                                                     },
+                                                                     {
+                                                                         "height":  1263,
+                                                                         "id":  "fb53877b26e94ae2a505fd457a10f53e",
+                                                                         "sourceScreen":  "projects/17402065891171962495/screens/fb53877b26e94ae2a505fd457a10f53e",
+                                                                         "width":  1280,
+                                                                         "x":  2368
+                                                                     }
+                                                                 ],
+                                             "thumbnailScreenshot":  {
+                                                                         "downloadUrl":  "https://lh3.googleusercontent.com/aida/AP1WRLuePTpfLygtp3QwLdigwQW8wlDNjtoCSAsZz82tcGYjNHDMMaZmtTOIgDHTg0EJ8L3ncHcSEcY8S1XbPN2VnwNnsQjiybcj2sBMPrOiNQNgshGYK6lnvYXdjkwPbiFaAH0ZtEgMMrU5umfGoPzneYvZNZGiZv79i84cBDCPlnKV08kSx1SST37RoWvhK7uWr-JK0FyQXAC8dEZ5S_Gx-qGjWpnPZwl_kio_mFODZtrF5sDmJOeK2xfVdh-J",
+                                                                         "name":  "projects/17402065891171962495/files/77f76cfbed67476482d75ab21962aa15"
+                                                                     },
+                                             "title":  "MernCrest Enterprise AI Platform",
+                                             "updateTime":  "2026-07-20T14:19:51.983949Z",
+                                             "visibility":  "PRIVATE"
+                                         }
+               }
+}

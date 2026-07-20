@@ -1,6 +1,10 @@
 import { getTranslations, setRequestLocale } from "next-intl/server";
+import Image from "next/image";
 import { ContactForm } from "@/components/sections/contact-form";
-import { Mail, MapPin, Phone } from "lucide-react";
+import { PageHero } from "@/components/ui/page-hero";
+import { BrandStrip } from "@/components/ui/brand-logo";
+import { techBrands } from "@/lib/data/resources";
+import { Mail, MapPin, Phone, Cloud } from "lucide-react";
 
 export async function generateMetadata({
   params,
@@ -15,6 +19,7 @@ export async function generateMetadata({
   };
 }
 
+/** Stitch screen: Contact - MernCrest */
 export default async function ContactPage({
   params,
 }: {
@@ -22,73 +27,93 @@ export default async function ContactPage({
 }) {
   const { locale } = await params;
   setRequestLocale(locale);
-  const t = await getTranslations({ locale, namespace: "nav" });
 
   return (
-    <div className="container-wide section-padding pt-32 min-h-screen">
-      <div className="text-center max-w-2xl mx-auto mb-16 relative">
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-[120%] bg-accent/5 blur-[100px] rounded-full pointer-events-none -z-10" />
-        
-        <p className="text-accent font-mono text-sm uppercase tracking-wider mb-3">
-          Get In Touch
-        </p>
-        <h1 className="text-4xl sm:text-5xl font-bold mb-4 font-display text-balance">
-          Let's Build Something Great Together
-        </h1>
-        <p className="text-muted text-lg">
-          Whether you have a question, a project idea, or just want to say hi, we'll try our best to get back to you!
-        </p>
-      </div>
+    <div className="stitch-page">
+      <PageHero
+        eyebrow="Connect with MernCrest"
+        title="Start your digital transformation journey today."
+        description="Whether you need AI integration, cloud infrastructure, or custom software — our team is ready to help."
+      />
 
-      <div className="glass-card rounded-[2.5rem] overflow-hidden border border-black/5 dark:border-white/5 shadow-2xl relative z-10 flex flex-col lg:flex-row">
-        
-        {/* Contact Information */}
-        <div className="lg:w-2/5 p-10 lg:p-14 relative overflow-hidden bg-gradient-to-br from-indigo-600 via-indigo-800 to-purple-900 text-white">
-          <div className="absolute top-0 right-0 w-64 h-64 bg-accent/30 blur-[80px] rounded-full pointer-events-none translate-x-1/3 -translate-y-1/3" />
-          <div className="absolute bottom-0 left-0 w-64 h-64 bg-purple-500/30 blur-[80px] rounded-full pointer-events-none -translate-x-1/3 translate-y-1/3" />
-          
-          <div className="relative z-10">
-            <h3 className="text-3xl font-bold mb-8 text-white">Contact Information</h3>
-            
-            <div className="space-y-8">
-              <div className="flex items-start gap-5 group">
-                <div className="h-12 w-12 rounded-xl bg-white/10 flex items-center justify-center shrink-0 group-hover:bg-white/20 group-hover:scale-110 transition-all">
-                  <MapPin className="h-6 w-6 text-white" />
-                </div>
-                <div>
-                  <h4 className="text-lg font-semibold text-white">Our Office</h4>
-                  <p className="text-white/70 mt-1 leading-relaxed">87/B Galle Road Kollupity ,<br />Colombo 003, Sri Lanka</p>
+      <div className="stitch-page-body stitch-stack-lg">
+        <div className="grid lg:grid-cols-12 gap-6">
+          <div className="lg:col-span-5 space-y-5">
+            <div className="stitch-card overflow-hidden !p-0">
+              <div className="relative h-40 w-full">
+                <Image
+                  src="https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=1200&q=80"
+                  alt="Colombo skyline"
+                  fill
+                  className="object-cover opacity-70"
+                  sizes="40vw"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-[#131317] to-transparent" />
+              </div>
+              <div className="p-6">
+                <div className="flex items-start gap-3 mb-3">
+                  <MapPin className="h-5 w-5 text-[#d2bbff] shrink-0 mt-0.5" />
+                  <div>
+                    <h3 className="font-display font-semibold text-white">Our Headquarters</h3>
+                    <p className="mt-1 text-sm text-[#ccc3d8] leading-relaxed">
+                      87/B Galle Road Kollupity,
+                      <br />
+                      Colombo 003, Sri Lanka
+                    </p>
+                  </div>
                 </div>
               </div>
-              
-              <div className="flex items-start gap-5 group">
-                <div className="h-12 w-12 rounded-xl bg-white/10 flex items-center justify-center shrink-0 group-hover:bg-white/20 group-hover:scale-110 transition-all">
-                  <Mail className="h-6 w-6 text-white" />
-                </div>
+            </div>
+
+            <div className="stitch-card space-y-5">
+              <h3 className="font-display font-semibold text-white">Support Channels</h3>
+              <div className="flex items-start gap-3">
+                <Mail className="h-5 w-5 text-[#d2bbff] shrink-0" />
                 <div>
-                  <h4 className="text-lg font-semibold text-white">Email Us</h4>
-                  <p className="text-white/70 mt-1 leading-relaxed">merncrestsolution@gmail.com<br />support@merncrest.lk</p>
+                  <p className="text-sm text-white">Email</p>
+                  <p className="text-sm text-[#ccc3d8]">merncrestsolution@gmail.com</p>
                 </div>
               </div>
-
-              <div className="flex items-start gap-5 group">
-                <div className="h-12 w-12 rounded-xl bg-white/10 flex items-center justify-center shrink-0 group-hover:bg-white/20 group-hover:scale-110 transition-all">
-                  <Phone className="h-6 w-6 text-white" />
-                </div>
+              <div className="flex items-start gap-3">
+                <Phone className="h-5 w-5 text-[#d2bbff] shrink-0" />
                 <div>
-                  <h4 className="text-lg font-semibold text-white">Call Us</h4>
-                  <p className="text-white/70 mt-1 leading-relaxed">+94 713838638</p>
+                  <p className="text-sm text-white">Phone</p>
+                  <p className="text-sm text-[#ccc3d8]">+94 713838638</p>
+                </div>
+              </div>
+              <div className="flex items-start gap-3">
+                <Cloud className="h-5 w-5 text-[#25d366] shrink-0" />
+                <div>
+                  <p className="text-sm text-white">System Status</p>
+                  <p className="text-sm text-[#25d366]">Systems Operational</p>
                 </div>
               </div>
             </div>
           </div>
+
+          <div className="lg:col-span-7">
+            <div className="stitch-card">
+              <div className="flex items-center justify-between gap-3 mb-6">
+                <h3 className="font-display text-2xl font-bold text-white">Request an Inquiry</h3>
+                <span className="rounded-full border border-[#7c3aed]/40 bg-[#7c3aed]/15 px-3 py-1 font-mono text-[11px] text-[#d2bbff]">
+                  CRM Integrated
+                </span>
+              </div>
+              <ContactForm />
+            </div>
+          </div>
         </div>
 
-        {/* Contact Form */}
-        <div className="lg:w-3/5 p-10 lg:p-14 bg-background/50 dark:bg-black/20 relative">
-          <div className="absolute bottom-0 right-0 w-32 h-32 bg-accent/5 blur-[50px] rounded-full pointer-events-none" />
-          <h3 className="text-3xl font-bold mb-8">Send us a message</h3>
-          <ContactForm />
+        <div className="pt-6">
+          <p className="font-mono text-[12px] text-center text-[#958da1] mb-6 uppercase tracking-[0.2em]">
+            Trusted by Global Leaders
+          </p>
+          <BrandStrip
+            items={techBrands.filter((b) =>
+              ["amazonaws", "microsoft", "googlecloud", "docker", "kubernetes"].includes(b.slug)
+            )}
+            className="opacity-60"
+          />
         </div>
       </div>
     </div>

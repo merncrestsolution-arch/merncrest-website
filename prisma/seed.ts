@@ -318,6 +318,148 @@ async function main() {
     });
   }
 
+  // —— Reseller providers + pricing margins ——
+  // Priority: Namecheap (gTLD) + DomainLK (.lk) first; mocks remain for hosting/dev.
+  const providerDefs = [
+    {
+      code: "namecheap",
+      name: "Namecheap",
+      providerType: "DOMAIN",
+      priority: 5,
+      apiUrl: process.env.NAMECHEAP_API_URL || null,
+      apiKey: process.env.NAMECHEAP_API_KEY || null,
+      apiSecret: process.env.NAMECHEAP_API_USER || null,
+      supportedServices: JSON.stringify(["domains"]),
+      defaultMarginCents: 0,
+      notes:
+        "International domains (gTLD). Set NAMECHEAP_API_KEY / NAMECHEAP_API_USER / NAMECHEAP_CLIENT_IP. Without keys → search mock + register PENDING.",
+    },
+    {
+      code: "domainlk",
+      name: "DomainLK",
+      providerType: "DOMAIN",
+      priority: 6,
+      apiUrl: process.env.DOMAINLK_API_URL || null,
+      apiKey: process.env.DOMAINLK_API_KEY || null,
+      apiSecret: process.env.DOMAINLK_API_SECRET || null,
+      supportedServices: JSON.stringify(["domains"]),
+      defaultMarginCents: 0,
+      notes:
+        ".lk ccTLD reseller API. Set DOMAINLK_API_URL + DOMAINLK_API_KEY after registrar partnership. Without keys → .lk search mock + register PENDING.",
+    },
+    {
+      code: "provider-a",
+      name: "Provider A (Mock)",
+      providerType: "MULTI",
+      priority: 50,
+      apiUrl: "https://api.provider-a.example",
+      apiKey: "demo-key-a",
+      apiSecret: "demo-secret-a",
+      supportedServices: JSON.stringify([
+        "domains",
+        "hosting",
+        "vps",
+        "ssl",
+        "email",
+        "cloud",
+      ]),
+      defaultMarginCents: 0,
+      notes: "Dev/demo multi-service mock — not for production domains",
+    },
+    {
+      code: "provider-b",
+      name: "Provider B (Hosting Mock)",
+      providerType: "HOSTING",
+      priority: 60,
+      apiUrl: "https://api.provider-b.example",
+      apiKey: "demo-key-b",
+      apiSecret: "demo-secret-b",
+      supportedServices: JSON.stringify(["hosting", "vps", "ssl"]),
+      defaultMarginCents: 0,
+      notes: "Hosting / VPS specialist (mock API)",
+    },
+    {
+      code: "provider-c",
+      name: "Provider C (Email Mock)",
+      providerType: "EMAIL",
+      priority: 70,
+      apiUrl: "https://api.provider-c.example",
+      apiKey: "demo-key-c",
+      apiSecret: "demo-secret-c",
+      supportedServices: JSON.stringify(["email", "ssl", "cloud"]),
+      defaultMarginCents: 0,
+      notes: "Email / SSL / cloud specialist (mock API)",
+    },
+  ];
+
+  for (const pd of providerDefs) {
+    await prisma.provider.upsert({
+      where: { code: pd.code },
+      update: {
+        name: pd.name,
+        providerType: pd.providerType,
+        priority: pd.priority,
+        apiUrl: pd.apiUrl,
+        apiKey: pd.apiKey,
+        apiSecret: pd.apiSecret,
+        supportedServices: pd.supportedServices,
+        status: "ACTIVE",
+        notes: pd.notes,
+      },
+      create: {
+        ...pd,
+        status: "ACTIVE",
+        syncStatus: "IDLE",
+      },
+    });
+  }
+
+  const defaultMargins = [
+    { category: "domains", marginCents: 30000, marginPercent: 0 },
+    { category: "hosting", marginCents: 300000, marginPercent: 0 },
+    { category: "vps", marginCents: 1000000, marginPercent: 0 },
+    { category: "ssl", marginCents: 100000, marginPercent: 0 },
+    { category: "email", marginCents: 50000, marginPercent: 0 },
+    { category: "cloud", marginCents: 1000000, marginPercent: 0 },
+  ];
+  for (const m of defaultMargins) {
+    await prisma.pricingMargin.upsert({
+      where: { category: m.category },
+      update: { marginCents: m.marginCents, marginPercent: m.marginPercent },
+      create: m,
+    });
+  }
+
+  const primaryProvider = await prisma.provider.findUnique({ where: { code: "provider-a" } });
+  if (primaryProvider) {
+    const marginByCat: Record<string, number> = Object.fromEntries(
+      defaultMargins.map((m) => [m.category, m.marginCents])
+    );
+    const resellerCategories = ["domains", "hosting", "vps", "ssl", "email", "cloud", "security"];
+    const products = await prisma.product.findMany({
+      where: { category: { in: resellerCategories } },
+    });
+    for (const prod of products) {
+      const catKey =
+        prod.category === "security" ? "ssl" : prod.category === "vps" ? "vps" : prod.category;
+      const margin = marginByCat[catKey] ?? marginByCat.hosting ?? 0;
+      const providerPriceCents = Math.max(0, prod.priceCents - margin);
+      await prisma.product.update({
+        where: { id: prod.id },
+        data: {
+          providerId: primaryProvider.id,
+          providerProductId: prod.slug,
+          providerPriceCents,
+          lastSyncedAt: new Date(),
+        },
+      });
+    }
+    await prisma.provider.update({
+      where: { id: primaryProvider.id },
+      data: { syncStatus: "SUCCESS", lastSyncedAt: new Date() },
+    });
+  }
+
   for (const c of coupons) {
     await prisma.coupon.upsert({
       where: { code: c.code },
@@ -705,11 +847,128 @@ async function main() {
     }
   }
 
+  // —— Part 03 portal announcements + downloads ——
+  const announcementExists = await prisma.announcement.findFirst({
+    where: { title: "Welcome to your Customer Portal" },
+  });
+  if (!announcementExists) {
+    await prisma.announcement.create({
+      data: {
+        title: "Welcome to your Customer Portal",
+        body: "Manage domains, hosting, invoices, and support from one workspace. Domains and hosting are activated via our reseller provider network after payment verification.",
+        tone: "INFO",
+        href: "/portal/services",
+        active: true,
+      },
+    });
+    await prisma.announcement.create({
+      data: {
+        title: "Bank transfer payments",
+        body: "Submit your payment reference under Billing. An admin verifies and provisions services through the Provider API.",
+        tone: "PROMO",
+        href: "/portal/invoices",
+        active: true,
+      },
+    });
+  }
+
+  const manualExists = await prisma.customerDownload.findFirst({
+    where: { title: "Hosting Buyer Guide", userId: null },
+  });
+  if (!manualExists) {
+    await prisma.customerDownload.createMany({
+      data: [
+        {
+          userId: null,
+          title: "Hosting Buyer Guide",
+          description: "Choose shared, VPS, or cloud packages from our marketplace.",
+          category: "MANUAL",
+          fileUrl: "/downloads",
+          fileType: "PDF",
+        },
+        {
+          userId: null,
+          title: "Service Catalog",
+          description: "Enterprise software, ERP, CRM, and marketplace offerings.",
+          category: "DOCUMENT",
+          fileUrl: "/downloads",
+          fileType: "PDF",
+        },
+      ],
+    });
+  }
+
+  // Part 05 — primary organization + Colombo HO + COA defaults
+  const org = await prisma.organization.upsert({
+    where: { code: "MCS" },
+    update: { name: "MernCrest Solutions (Pvt) Ltd", isPrimary: true, status: "ACTIVE" },
+    create: {
+      code: "MCS",
+      name: "MernCrest Solutions (Pvt) Ltd",
+      legalName: "MernCrest Solutions (Private) Limited",
+      country: "Sri Lanka",
+      email: "hello@merncrest.lk",
+      isPrimary: true,
+      status: "ACTIVE",
+    },
+  });
+  await prisma.branch.upsert({
+    where: { organizationId_code: { organizationId: org.id, code: "CMB-HO" } },
+    update: { name: "Colombo Head Office", isHeadOffice: true, city: "Colombo" },
+    create: {
+      organizationId: org.id,
+      code: "CMB-HO",
+      name: "Colombo Head Office",
+      city: "Colombo",
+      isHeadOffice: true,
+      status: "ACTIVE",
+    },
+  });
+
+  const coaDefaults = [
+    { code: "1000", name: "Cash & Bank", type: "ASSET" },
+    { code: "1100", name: "Accounts Receivable", type: "ASSET" },
+    { code: "1200", name: "Inventory", type: "ASSET" },
+    { code: "2000", name: "Accounts Payable", type: "LIABILITY" },
+    { code: "3000", name: "Owner Equity", type: "EQUITY" },
+    { code: "4000", name: "Sales Revenue", type: "REVENUE" },
+    { code: "4100", name: "Service Revenue", type: "REVENUE" },
+    { code: "5000", name: "Cost of Sales", type: "EXPENSE" },
+    { code: "5100", name: "Operating Expenses", type: "EXPENSE" },
+    { code: "5200", name: "Payroll Expenses", type: "EXPENSE" },
+  ];
+  for (const a of coaDefaults) {
+    await prisma.chartOfAccount.upsert({
+      where: { code: a.code },
+      update: { name: a.name, type: a.type, active: true },
+      create: { ...a, active: true },
+    });
+  }
+
+  const staffEmp = await prisma.employee.findFirst({
+    where: { email: "staff@merncrest.lk" },
+  });
+  if (staffEmp && (await prisma.salarySlip.count({ where: { employeeId: staffEmp.id } })) === 0) {
+    await prisma.salarySlip.create({
+      data: {
+        slipNumber: "SLIP-SEED-001",
+        employeeId: staffEmp.id,
+        periodLabel: "2026-06",
+        grossCents: 12000000,
+        deductionsCents: 1200000,
+        netCents: 10800000,
+        currency: "LKR",
+        status: "ISSUED",
+      },
+    });
+  }
+
   console.log("Seeded users +", catalog.length, "products +", coupons.length, "coupons + CRM/ERP samples");
   console.log("  OWNER: owner@merncrest.lk / ChangeMe123!");
   console.log("  STAFF: staff@merncrest.lk / ChangeMe123!  → /staff + /admin/erp");
   console.log("  CUSTOMER: demo@merncrest.lk / ChangeMe123!");
   console.log("  Coupons: WELCOME10 (10%), SAVE20 (Rs. 2,000 off)");
+  console.log("  Org: MCS · Branch CMB-HO · COA seeded · sample salary slip");
 }
 
 main()

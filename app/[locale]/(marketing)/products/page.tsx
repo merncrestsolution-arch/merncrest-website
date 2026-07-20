@@ -7,20 +7,20 @@ import { PageHero } from "@/components/ui/page-hero";
 
 export default function ProductsPage() {
   return (
-    <div className="min-h-screen">
+    <div className="stitch-page">
       <PageHero
         eyebrow="Marketplace"
-        title="Products"
+        title="Infrastructure Marketplace"
         description="Domains, hosting, software, cloud, security, and email — purchase and manage from one account."
       />
 
-      <div className="container-wide section-padding pt-10">
-        <div className="grid md:grid-cols-2 gap-5 mb-16">
+      <div className="stitch-page-body stitch-stack-lg">
+        <div className="grid md:grid-cols-2 gap-5">
           {productCategories.map((cat, i) => (
             <Reveal key={cat.slug} delay={i * 0.04}>
               <Link
                 href={`/products/${cat.slug}`}
-                className="group block h-full rounded-2xl border border-white/10 bg-white/[0.03] p-6 transition-all hover:border-violet-400/40 hover:bg-violet-500/[0.06]"
+                className="group block h-full stitch-card stitch-card-hover"
               >
                 <h2 className="font-display text-2xl font-semibold text-white group-hover:text-violet-200 transition-colors flex items-center gap-2">
                   {cat.title}
@@ -32,11 +32,13 @@ export default function ProductsPage() {
           ))}
         </div>
 
-        <Reveal>
-          <h2 className="font-display text-2xl font-bold mb-2 text-white">Buy online</h2>
-          <p className="text-muted mb-6">Live catalog SKUs — add to cart after login.</p>
-        </Reveal>
-        <CatalogGrid />
+        <div>
+          <Reveal>
+            <h2 className="font-display text-2xl font-bold mb-2 text-white">Buy online</h2>
+            <p className="text-muted mb-6">Live catalog SKUs — add to cart after login.</p>
+          </Reveal>
+          <CatalogGrid />
+        </div>
       </div>
     </div>
   );

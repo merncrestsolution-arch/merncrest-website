@@ -40,7 +40,7 @@ export function RefundsPanel() {
       if (!rRes.ok) throw new Error(rData.error || "Failed");
       setRefunds(rData.refunds ?? []);
       const eligible = (oData.orders ?? []).filter((o: Order) =>
-        ["PAID", "PROCESSING", "COMPLETED"].includes(o.status)
+        ["PAID", "PROCESSING", "PROVISIONING", "PROVISIONING_FAILED", "COMPLETED"].includes(o.status)
       );
       setOrders(eligible);
       setOrderId((prev) => prev || eligible[0]?.id || "");

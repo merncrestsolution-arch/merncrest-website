@@ -39,26 +39,29 @@ const channels = [
 
 export default function SupportCenterPage() {
   return (
-    <div className="min-h-screen">
+    <div className="stitch-page">
       <PageHero
         eyebrow="Support Center"
         title="How can we help?"
         description="Omnichannel care: tickets, live chat, WhatsApp, email, knowledge base, and IVR — all linked to CRM."
       />
 
-      <div className="container-wide section-padding pt-10">
-        <div className="grid sm:grid-cols-2 gap-5 mb-14">
+      <div className="stitch-page-body stitch-stack-lg">
+        <div className="grid sm:grid-cols-2 gap-5">
           {channels.map((c, i) => {
             const Icon = c.icon;
             return (
               <Reveal key={c.title} delay={i * 0.05}>
-                <div className="h-full rounded-2xl border border-white/10 bg-white/[0.03] p-6 transition-colors hover:border-violet-400/35">
+                <div className="h-full stitch-card stitch-card-hover">
                   <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-xl bg-violet-500/15 text-violet-300">
                     <Icon className="h-5 w-5" />
                   </div>
                   <h2 className="font-display text-xl font-semibold text-white">{c.title}</h2>
                   <p className="mt-2 text-sm text-muted">{c.body}</p>
-                  <Link href={c.href} className="mt-4 inline-block text-sm text-violet-300 hover:text-violet-200">
+                  <Link
+                    href={c.href}
+                    className="mt-4 inline-block text-sm text-violet-300 hover:text-violet-200"
+                  >
                     {c.cta} →
                   </Link>
                 </div>
@@ -66,18 +69,20 @@ export default function SupportCenterPage() {
             );
           })}
         </div>
-        <div className="grid lg:grid-cols-2 gap-5 mb-10">
+
+        <div className="grid lg:grid-cols-2 gap-5">
           <Reveal>
-            <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-6">
+            <div className="stitch-card">
               <CallbackForm />
             </div>
           </Reveal>
           <Reveal delay={0.05}>
-            <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-6">
+            <div className="stitch-card">
               <IvrSimulator />
             </div>
           </Reveal>
         </div>
+
         <div className="flex flex-wrap gap-3">
           <Button asChild className="rounded-full">
             <Link href="/login">Customer login</Link>

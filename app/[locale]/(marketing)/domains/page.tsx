@@ -3,14 +3,15 @@ import { Button } from "@/components/ui/button";
 import { PageHero } from "@/components/ui/page-hero";
 import { CatalogGrid } from "@/components/commerce/catalog-grid";
 import { DomainSearch } from "@/components/domains/domain-search";
+import { StitchChip } from "@/components/ui/stitch";
 
 export default function DomainsPage() {
   return (
-    <div className="min-h-screen">
+    <div className="stitch-page">
       <PageHero
-        eyebrow="Domains"
-        title="Domain registration & DNS"
-        description="Search, register, transfer, renew, and manage DNS for .lk, .com, .net, .org, and hundreds of TLDs."
+        eyebrow="Domain Marketplace"
+        title="Search, register & transfer domains"
+        description="Domain availability and pricing come from our reseller provider network. Register, renew, transfer, and manage DNS — MernCrest is not a domain registrar."
       >
         <div className="flex flex-wrap gap-3 justify-center">
           <Button asChild className="rounded-full">
@@ -22,21 +23,19 @@ export default function DomainsPage() {
         </div>
       </PageHero>
 
-      <div className="container-wide section-padding pt-10">
-        <div className="mb-12 max-w-2xl mx-auto rounded-2xl border border-violet-500/20 bg-white/[0.03] p-5 shadow-glow">
+      <div className="stitch-page-body stitch-stack-lg">
+        <div className="max-w-2xl mx-auto stitch-card shadow-glow border-violet-500/20">
           <DomainSearch />
         </div>
 
-        <ul className="flex flex-wrap gap-2 mb-10 text-sm text-muted justify-center">
+        <ul className="flex flex-wrap gap-2 justify-center">
           {["Registration", "Transfer", "Renewal", "DNS", "WHOIS"].map((x) => (
-            <li
-              key={x}
-              className="border border-white/10 bg-white/[0.02] px-3 py-1 rounded-full font-mono text-xs"
-            >
-              {x}
+            <li key={x}>
+              <StitchChip>{x}</StitchChip>
             </li>
           ))}
         </ul>
+
         <CatalogGrid category="domains" />
       </div>
     </div>

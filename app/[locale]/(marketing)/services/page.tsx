@@ -23,7 +23,7 @@ export default async function ServicesPage({
   setRequestLocale(locale);
 
   return (
-    <div className="min-h-screen">
+    <div className="stitch-page min-h-screen">
       <ServicesSection hideViewAll={true} />
     </div>
   );

@@ -1,0 +1,50 @@
+---
+description: MernCrest Part 01 master platform rules — business model, reseller architecture, and enterprise development standards
+alwaysApply: true
+---
+
+# MernCrest Enterprise AI Platform — Part 01
+
+Foundation for all work. Full bible: `PROJECT_DETAILS.md`.
+
+## What this platform is
+
+A complete **Enterprise Digital Business Platform** (company OS), not a brochure site.
+
+MernCrest is primarily: Enterprise Technology · Software Development · AI Solutions · Cloud Consulting · Digital Transformation Partner.
+
+Also sells (reseller only): Domains · Hosting · VPS · Cloud Hosting · SSL · Business Email.
+
+## Non-negotiable business rules
+
+- NEVER design as a hosting/infrastructure company
+- NEVER assume MernCrest owns datacenters or hosting servers
+- ALWAYS use Reseller Marketplace flow:
+
+```text
+Customer → MernCrest Platform → Provider API → Customer receives service
+```
+
+- Architecture MUST support multiple providers (configurable from Admin)
+- Selling price = Provider price + configurable margin (Pricing Engine)
+
+## Development rules
+
+- NEVER remove existing features or break compatibility
+- Improve architecture in place; do not rebuild from scratch
+- TypeScript · Prisma · validated APIs · consistent JSON
+- Separate UI from business logic; no duplicated domain logic
+- New modules MUST integrate with: CRM, Notifications, Reports, Analytics, Permissions, Audit Logs
+
+## Stack direction
+
+Current: Next.js 14 App Router, React, Tailwind, shadcn/ui, PostgreSQL, Prisma, session RBAC.  
+Target: Next.js 15, Session + JWT + RBAC, AWS (Docker, Nginx, PM2, Cloudflare), Redis.
+
+## Design
+
+Dark enterprise UI, purple brand, responsive, accessible, professional — match existing design system.
+
+## Roles
+
+Expand toward Guest / Customer / Sales / Support / Developer / Finance / HR / Manager / Administrator / Owner / CEO without breaking existing `CUSTOMER` | `STAFF` | `ADMIN` | `OWNER` guards.

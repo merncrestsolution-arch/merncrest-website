@@ -246,12 +246,15 @@
     "customers": "Customers",
     "orders": "Orders",
     "billing": "Billing",
+    "payments": "Payments",
+    "providers": "Providers",
+    "catalog": "Catalog",
     "crm": "CRM",
     "support": "Support",
     "erp": "ERP",
     "reports": "Reports",
     "settings": "Settings",
     "welcome": "Owner Dashboard",
-    "welcomeBody": "Revenue, customers, tickets, and operations — shell ready for live analytics."
+    "welcomeBody": "Revenue, customers, tickets, reseller providers, and operations."
   }
 }

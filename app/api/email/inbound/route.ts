@@ -43,6 +43,18 @@ export async function POST(request: Request) {
       },
     });
 
+    const { ensureLeadFromChannel } = await import("@/lib/crm/channels");
+    await ensureLeadFromChannel({
+      channel: "EMAIL",
+      fullName: parsed.data.fromName || user?.fullName || parsed.data.from,
+      email: parsed.data.from,
+      interest: parsed.data.subject,
+      activityType: "EMAIL",
+      activityBody: `Email → ${ticket.ticketNumber}: ${parsed.data.subject}`,
+      channelRef: ticket.id,
+      userId: user?.id,
+    });
+
     return NextResponse.json({
       ticket,
       message: `Email converted to ${ticket.ticketNumber}`,

@@ -1,0 +1,28 @@
+﻿{
+    "id":  1,
+    "jsonrpc":  "2.0",
+    "result":  {
+                   "content":  [
+                                   {
+                                       "text":  "{\"name\":\"projects/17402065891171962495/screens/ba7ca90a444d4d8993dee6d38eda43e3\",\"title\":\"Supply Chain — MernCrest ERP\",\"screenshot\":{\"name\":\"projects/17402065891171962495/files/0dcad16e2ddf4790803400646cc9884c\",\"downloadUrl\":\"https://lh3.googleusercontent.com/aida/AP1WRLvI0p6iAlpJn99cSllC1abs2DNvvbVGazwgPIogRUm4nEyGmGQcfUwLL_KQGEsGBcNT3Fk1V9QwbJq7j9EUGtX1bZ2xC7c6df4WAhX198korVEj7viGIh_a-_zGFBEzWZFlox8Fa950XDBWXMazloEY5eAGUGIqt_ezi1w2S2I61lSmWSILNclOGX8LSYx2Mf1iDHcIQpuqGmGDpYw2jP6kLHRnfVf7QXRUEliMCWr6Msq3JgMZpYjnQUla\"},\"htmlCode\":{\"name\":\"projects/17402065891171962495/files/d7f7289ca72343dab4057c7e857d7ac1\",\"downloadUrl\":\"https://contribution.usercontent.google.com/download?c=CgthaWRhX2NvZGVmeBJ8Eh1hcHBfY29tcGFuaW9uX2dlbmVyYXRlZF9maWxlcxpbCiVodG1sXzFjZWUzZDM3ZjY2MzRjZjZhMDc2MDFjOTYzMWU0MzVlEgsSBxDk1Kj0qBAYAZIBJAoKcHJvamVjdF9pZBIWQhQxNzQwMjA2NTg5MTE3MTk2MjQ5NQ\u0026filename=\u0026opi=89354086\",\"mimeType\":\"text/html\"},\"width\":\"2560\",\"height\":\"3780\",\"deviceType\":\"DESKTOP\"}",
+                                       "type":  "text"
+                                   }
+                               ],
+                   "structuredContent":  {
+                                             "deviceType":  "DESKTOP",
+                                             "height":  "3780",
+                                             "htmlCode":  {
+                                                              "downloadUrl":  "https://contribution.usercontent.google.com/download?c=CgthaWRhX2NvZGVmeBJ8Eh1hcHBfY29tcGFuaW9uX2dlbmVyYXRlZF9maWxlcxpbCiVodG1sXzFjZWUzZDM3ZjY2MzRjZjZhMDc2MDFjOTYzMWU0MzVlEgsSBxDk1Kj0qBAYAZIBJAoKcHJvamVjdF9pZBIWQhQxNzQwMjA2NTg5MTE3MTk2MjQ5NQ\u0026filename=\u0026opi=89354086",
+                                                              "mimeType":  "text/html",
+                                                              "name":  "projects/17402065891171962495/files/d7f7289ca72343dab4057c7e857d7ac1"
+                                                          },
+                                             "name":  "projects/17402065891171962495/screens/ba7ca90a444d4d8993dee6d38eda43e3",
+                                             "screenshot":  {
+                                                                "downloadUrl":  "https://lh3.googleusercontent.com/aida/AP1WRLvI0p6iAlpJn99cSllC1abs2DNvvbVGazwgPIogRUm4nEyGmGQcfUwLL_KQGEsGBcNT3Fk1V9QwbJq7j9EUGtX1bZ2xC7c6df4WAhX198korVEj7viGIh_a-_zGFBEzWZFlox8Fa950XDBWXMazloEY5eAGUGIqt_ezi1w2S2I61lSmWSILNclOGX8LSYx2Mf1iDHcIQpuqGmGDpYw2jP6kLHRnfVf7QXRUEliMCWr6Msq3JgMZpYjnQUla",
+                                                                "name":  "projects/17402065891171962495/files/0dcad16e2ddf4790803400646cc9884c"
+                                                            },
+                                             "title":  "Supply Chain — MernCrest ERP",
+                                             "width":  "2560"
+                                         }
+               }
+}

@@ -4,111 +4,70 @@ import { motion } from "framer-motion";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/routing";
 import { Button } from "@/components/ui/button";
-import { ArrowRight } from "lucide-react";
 import { HeroAtmosphere } from "./hero-atmosphere";
-import { SearchTrigger } from "@/components/layout/command-search";
 
-const TRUST_KEYS = [
-  "trustProjects",
-  "trustClients",
-  "trustExperience",
-  "trustSupport",
-] as const;
-
+/** Stitch project screen: MernCrest - Homepage hero */
 export function HeroSection() {
   const t = useTranslations("hero");
 
   return (
-    <section className="relative min-h-[100svh] flex items-end sm:items-center overflow-hidden">
+    <section className="relative min-h-[min(100svh,921px)] flex items-center justify-center overflow-hidden">
       <HeroAtmosphere />
 
-      <div className="container-wide relative z-10 pb-20 pt-40 sm:pt-36 lg:py-36">
-        <div className="max-w-3xl space-y-6 sm:space-y-7">
-          <motion.p
-            initial={{ opacity: 0, y: 16 }}
+      <div className="stitch-container relative z-10 py-32 sm:py-40 text-center">
+        <div className="mx-auto max-w-4xl">
+          <motion.div
+            initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
-            className="font-display text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-white"
+            className="inline-flex items-center gap-2 rounded-full border border-[#4a4455] bg-[#1b1b1f] px-4 py-1.5 mb-8"
           >
-            MernCrest{" "}
-            <span className="text-accent-blue">Solutions</span>
-          </motion.p>
+            <span className="h-2 w-2 rounded-full bg-[#25d366] animate-pulse" />
+            <span className="font-mono text-[12px] uppercase tracking-[0.05em] text-[#d2bbff]">
+              Next-Gen Intelligence
+            </span>
+          </motion.div>
 
           <motion.h1
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1 }}
-            className="font-display text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold leading-[1.12] text-balance text-white"
+            transition={{ delay: 0.08 }}
+            className="font-display text-4xl sm:text-5xl md:text-[64px] font-extrabold tracking-[-0.02em] leading-[1.1] text-white text-balance"
           >
-            {t("headlinePrefix")}{" "}
-            <span className="text-accent">{t("headlineHighlight")}</span>
+            Powering{" "}
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#d2bbff] to-[#d2bbff]/t("headlineHighlight")}</span>
           </motion.h1>
 
           <motion.p
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-            className="text-base sm:text-lg text-muted max-w-xl leading-relaxed"
+            transition={{ delay: 0.16 }}
+            className="mt-6 text-lg text-[#ccc3d8] max-w-2xl mx-auto leading-relaxed"
           >
             {t("subheadline")}
           </motion.p>
 
           <motion.div
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.28 }}
-            className="pt-1"
-          >
-            <SearchTrigger className="w-full sm:w-auto max-w-md justify-start rounded-2xl border-white/15 bg-white/[0.06] px-4 py-3 text-base shadow-glow hover:border-violet-400/50" />
-          </motion.div>
-
-          <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.35 }}
-            className="flex flex-col sm:flex-row flex-wrap gap-3 pt-1"
+            transition={{ delay: 0.24 }}
+            className="mt-10 flex flex-col sm:flex-row gap-4 justify-center items-center"
           >
-            <Button asChild size="lg" className="rounded-full px-8">
-              <Link href="/contact">{t("ctaConsultation")}</Link>
+            <Button
+              asChild
+              size="lg"
+              className="h-14 px-8 rounded-xl bg-[#7c3aed] text-[#ede0ff] shadow-[0_0_20px_rgba(210,187,255,0.2)] hover:opacity-90"
+            >
+              <Link href="/solutions">Explore Solutions</Link>
             </Button>
             <Button
               asChild
-              variant="outline"
               size="lg"
-              className="rounded-full border-white/30 text-white hover:bg-white/10"
+              variant="outline"
+              className="h-14 px-8 rounded-xl border-[#4a4455] bg-white/[0.04] backdrop-blur-md text-white hover:border-[#7c3aed]"
             >
-              <Link href="/portfolio">
-                {t("ctaPortfolio")}
-                <ArrowRight className="ml-1 h-4 w-4" />
-              </Link>
+              <Link href="/contact">{t("ctaConsultation")}</Link>
             </Button>
           </motion.div>
-
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.4 }}
-          >
-            <Link
-              href="/contact"
-              className="text-sm text-white underline underline-offset-4 hover:text-accent transition-colors"
-            >
-              {t("ctaProposal")}
-            </Link>
-          </motion.div>
-
-          <motion.ul
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.45 }}
-            className="flex flex-wrap gap-x-5 gap-y-2 pt-2"
-          >
-            {TRUST_KEYS.map((key) => (
-              <li key={key} className="flex items-center gap-2 text-sm text-muted">
-                <span className="h-1.5 w-1.5 rounded-full bg-success shrink-0" />
-                {t(key)}
-              </li>
-            ))}
-          </motion.ul>
         </div>
       </div>
     </section>

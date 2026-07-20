@@ -13,6 +13,9 @@ import {
   Settings,
   LogOut,
   Building2,
+  Network,
+  Package,
+  BadgeCheck,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -21,6 +24,9 @@ const links = [
   { key: "customers", href: "/admin/customers", icon: Users },
   { key: "orders", href: "/admin/orders", icon: ShoppingBag },
   { key: "billing", href: "/admin/billing", icon: CreditCard },
+  { key: "payments", href: "/admin/payments", icon: BadgeCheck },
+  { key: "providers", href: "/admin/providers", icon: Network },
+  { key: "catalog", href: "/admin/catalog", icon: Package },
   { key: "crm", href: "/admin/crm", icon: Contact },
   { key: "support", href: "/admin/support", icon: LifeBuoy },
   { key: "erp", href: "/admin/erp", icon: Building2 },

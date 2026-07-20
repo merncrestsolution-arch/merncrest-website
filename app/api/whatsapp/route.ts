@@ -34,6 +34,18 @@ export async function POST(request: Request) {
       },
     });
 
+    // Always land WhatsApp traffic in centralized CRM
+    const { ensureLeadFromChannel } = await import("@/lib/crm/channels");
+    await ensureLeadFromChannel({
+      channel: "WHATSAPP",
+      fullName: `WhatsApp ${String(phone).slice(-4)}`,
+      phone: String(phone),
+      interest: "WhatsApp conversation",
+      activityType: "WHATSAPP",
+      activityBody: `IN: ${String(text).slice(0, 240)}`,
+      channelRef: inbound.id,
+    });
+
     const handled = await handleWhatsAppMessage(String(phone), String(text), body.locale);
     const outbound = await prisma.whatsAppMessage.create({
       data: {
