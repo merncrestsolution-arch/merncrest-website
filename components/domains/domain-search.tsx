@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { Globe } from "lucide-react";
 import { useRouter } from "@/i18n/routing";
 import { Button } from "@/components/ui/button";
 import { formatMoney } from "@/lib/commerce-format";
@@ -14,6 +15,8 @@ type Result = {
   priceCents: number;
   renewPriceCents?: number;
   transferPriceCents?: number;
+  providerCostLkrCents?: number;
+  marginLkrCents?: number;
   currency: string;
 };
 
@@ -25,19 +28,40 @@ export function DomainSearch() {
   const [loading, setLoading] = useState(false);
   const [busy, setBusy] = useState<string | null>(null);
   const [error, setError] = useState("");
+  const [warning, setWarning] = useState("");
   const [message, setMessage] = useState("");
+  const [normalizedHint, setNormalizedHint] = useState("");
+
+  function prepareQuery(raw: string) {
+    const trimmed = raw.trim();
+    const normalized = trimmed.replace(/\s+/g, "").toLowerCase();
+    if (trimmed && normalized !== trimmed.toLowerCase()) {
+      setNormalizedHint(`Searching as ${normalized || "…"} (spaces removed — domains can't contain spaces)`);
+    } else {
+      setNormalizedHint("");
+    }
+    return normalized;
+  }
 
   async function search(e: React.FormEvent) {
     e.preventDefault();
     setLoading(true);
     setError("");
+    setWarning("");
     setMessage("");
+    const query = prepareQuery(q);
+    if (query.length < 2) {
+      setError("Enter at least 2 characters");
+      setLoading(false);
+      return;
+    }
     try {
-      const res = await fetch(`/api/domains/search?q=${encodeURIComponent(q)}`);
+      const res = await fetch(`/api/domains/search?q=${encodeURIComponent(query)}`);
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Search failed");
       setResults(data.results ?? []);
       setSuggestions(data.suggestions ?? []);
+      if (data.warning) setWarning(data.warning);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Search failed");
     } finally {
@@ -87,7 +111,7 @@ export function DomainSearch() {
 
   function ResultRow({ r }: { r: Result }) {
     return (
-      <li className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-white/10 pb-3">
+      <li className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-stitch-outline pb-3">
         <div>
           <p className="font-mono font-medium">
             {r.domain}
@@ -98,6 +122,9 @@ export function DomainSearch() {
             {r.available && (
               <>
                 {" · "}Register {formatMoney(r.priceCents)}/yr
+                {r.providerCostLkrCents != null && r.marginLkrCents != null && (
+                  <> ({formatMoney(r.providerCostLkrCents)} + {formatMoney(r.marginLkrCents)} fee)</>
+                )}
                 {r.renewPriceCents != null && <> · Renew {formatMoney(r.renewPriceCents)}</>}
                 {r.transferPriceCents != null && <> · Transfer {formatMoney(r.transferPriceCents)}</>}
               </>
@@ -115,17 +142,30 @@ export function DomainSearch() {
 
   return (
     <div className="space-y-6">
-      <form onSubmit={search} className="flex flex-col sm:flex-row gap-3">
-        <input
-          value={q}
-          onChange={(e) => setQ(e.target.value)}
-          placeholder="Search your perfect domain — e.g. mybrand.lk"
-          className="flex-1 h-12 rounded-full border border-violet-500/25 bg-black/20 px-5 text-sm text-white outline-none placeholder:text-white/35 focus:border-violet-400/50 focus:ring-2 focus:ring-violet-500/30"
-        />
-        <Button type="submit" size="lg" disabled={loading} className="rounded-full px-8 shadow-glow">
+      <form onSubmit={search} className="flex flex-col gap-3 sm:flex-row">
+        <div className="relative flex-1">
+          <Globe className="pointer-events-none absolute left-5 top-1/2 h-5 w-5 -translate-y-1/2 text-stitch-primary" />
+          <input
+            value={q}
+            onChange={(e) => {
+              setQ(e.target.value);
+              setNormalizedHint("");
+            }}
+            placeholder="Search your perfect domain — e.g. mybrand.lk"
+            className="h-14 w-full rounded-full border border-stitch-outline bg-white pl-12 pr-5 text-base text-foreground shadow-sm outline-none transition placeholder:text-muted-foreground/70 focus:border-stitch-primary focus:ring-2 focus:ring-stitch-primary/25"
+          />
+        </div>
+        <Button
+          type="submit"
+          size="lg"
+          disabled={loading}
+          className="h-14 rounded-full bg-gradient-accent px-8 text-white shadow-glow hover:opacity-90"
+        >
           {loading ? "Searching…" : "Search Domains"}
         </Button>
       </form>
+      {normalizedHint && <p className="text-sm text-muted">{normalizedHint}</p>}
+      {warning && <p className="text-sm text-amber-600">{warning}</p>}
       {error && <p className="text-sm text-red-400">{error}</p>}
       {message && <p className="text-sm text-success">{message}</p>}
       <ul className="space-y-3">

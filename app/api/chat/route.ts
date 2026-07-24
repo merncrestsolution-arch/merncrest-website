@@ -1,192 +1,176 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { getSessionUser } from "@/lib/auth";
-import { nextNumber } from "@/lib/commerce";
-import { aiReply, wantsHumanHandoff } from "@/lib/support/ai-replies";
-import { notifyUser } from "@/lib/support/notify";
+import { resolveVisitor } from "@/lib/chat/visitor";
+import {
+  appendUserMessage,
+  getOrCreateOpenSession,
+  listMessages,
+  requestHandoff,
+} from "@/lib/chat/conversations";
+import { clientIp, rateLimit } from "@/lib/chat/rate-limit";
+import { wantsHumanHandoff } from "@/lib/support/ai-replies";
 import { z } from "zod";
-import { createHash, randomUUID } from "crypto";
 
-function visitorCookie(request: Request) {
-  const cookie = request.headers.get("cookie") || "";
-  const match = cookie.match(/mc_visitor=([^;]+)/);
-  return match?.[1] || null;
-}
+/** Legacy adapter — prefer /api/chat/conversations */
 
 export async function GET(request: Request) {
-  const visitorId = visitorCookie(request);
-  if (!visitorId) {
-    return NextResponse.json({ messages: [], sessionId: null });
-  }
+  const visitor = await resolveVisitor(request);
+  const url = new URL(request.url);
+  const storedSessionId = url.searchParams.get("sessionId");
 
-  const session = await prisma.chatSession.findFirst({
-    where: { visitorId, status: { in: ["OPEN", "HANDOFF"] } },
-    include: { messages: { orderBy: { createdAt: "asc" }, take: 40 } },
+  const openWhere = {
+    visitorId: visitor.visitorId,
+    status: { in: ["OPEN", "HANDOFF", "PENDING"] as string[] },
+  };
+
+  let session = await prisma.chatSession.findFirst({
+    where: openWhere,
+    include: {
+      agent: { select: { id: true, displayName: true, avatarUrl: true, status: true } },
+      messages: { orderBy: { createdAt: "asc" }, take: 40 },
+    },
     orderBy: { updatedAt: "desc" },
   });
 
-  return NextResponse.json({
+  // Return recently closed session so visitor can submit CSAT
+  if (!session && storedSessionId) {
+    session = await prisma.chatSession.findFirst({
+      where: {
+        id: storedSessionId,
+        visitorId: visitor.visitorId,
+        status: "CLOSED",
+        csatRequestedAt: { not: null },
+        csatRating: null,
+      },
+      include: {
+        agent: { select: { id: true, displayName: true, avatarUrl: true, status: true } },
+        messages: { orderBy: { createdAt: "asc" }, take: 40 },
+      },
+    });
+  }
+
+  const res = NextResponse.json({
     sessionId: session?.id ?? null,
     status: session?.status ?? null,
+    handlerType: session?.handlerType ?? null,
+    csatRequested: Boolean(session?.csatRequestedAt && !session?.csatRating),
+    csatRating: session?.csatRating ?? null,
+    agent: session?.agent
+      ? {
+          id: session.agent.id,
+          displayName: session.agent.displayName,
+          avatarUrl: session.agent.avatarUrl,
+          online: session.agent.status === "ONLINE",
+        }
+      : null,
     messages: session?.messages ?? [],
   });
+  visitor.setCookies.forEach((c) => res.headers.append("Set-Cookie", c));
+  return res;
 }
 
 const postSchema = z.object({
   message: z.string().min(1).max(2000),
-  locale: z.string().optional(),
-  sessionId: z.string().optional(),
+  locale: z.string().max(16).optional(),
+  sessionId: z.string().max(64).optional(),
+  clientMessageId: z.string().min(1).max(120).optional(),
+  pageContext: z.string().max(500).optional(),
+  visitorName: z.string().max(120).optional(),
 });
+
+function normalizeChatBody(raw: unknown) {
+  if (!raw || typeof raw !== "object") return raw;
+  const body = { ...(raw as Record<string, unknown>) };
+  if (typeof body.message === "string") body.message = body.message.trim().slice(0, 2000);
+  if (typeof body.pageContext === "string") body.pageContext = body.pageContext.slice(0, 500);
+  if (typeof body.visitorName === "string") body.visitorName = body.visitorName.slice(0, 120);
+  if (typeof body.clientMessageId === "string") {
+    body.clientMessageId = body.clientMessageId.slice(0, 120);
+    if (body.clientMessageId.length < 1) delete body.clientMessageId;
+  } else {
+    delete body.clientMessageId;
+  }
+  if (body.sessionId === "" || body.sessionId == null) delete body.sessionId;
+  return body;
+}
 
 export async function POST(request: Request) {
   try {
-    const body = await request.json();
+    const ip = clientIp(request);
+    const rl = rateLimit({ key: `chat:legacy:${ip}`, limit: 60, windowMs: 60_000 });
+    if (!rl.ok) {
+      return NextResponse.json({ error: "Too many requests" }, { status: 429 });
+    }
+
+    const body = normalizeChatBody(await request.json());
     const parsed = postSchema.safeParse(body);
     if (!parsed.success) {
-      return NextResponse.json({ error: "Invalid message" }, { status: 400 });
+      console.error("[chat] invalid body", parsed.error.flatten());
+      return NextResponse.json({ error: "Invalid message", details: parsed.error.flatten() }, { status: 400 });
     }
 
     const user = await getSessionUser();
-    let visitorId = visitorCookie(request);
-    const setCookies: string[] = [];
+    const visitor = await resolveVisitor(request);
 
-    if (!visitorId) {
-      visitorId = createHash("sha256").update(randomUUID()).digest("hex").slice(0, 24);
-      setCookies.push(`mc_visitor=${visitorId}; Path=/; Max-Age=31536000; SameSite=Lax`);
-    }
-
-    let session =
-      (parsed.data.sessionId
-        ? await prisma.chatSession.findUnique({ where: { id: parsed.data.sessionId } })
-        : null) ||
-      (await prisma.chatSession.findFirst({
-        where: { visitorId, status: { in: ["OPEN", "HANDOFF"] } },
-        orderBy: { updatedAt: "desc" },
-      }));
-
-    if (!session) {
-      session = await prisma.chatSession.create({
-        data: {
-          visitorId,
-          userId: user?.id,
-          locale: parsed.data.locale ?? "en",
-          status: "OPEN",
-        },
-      });
-    }
-
-    await prisma.chatMessage.create({
-      data: {
-        sessionId: session.id,
-        role: "USER",
-        body: parsed.data.message,
-      },
-    });
-
-    // Unified CRM — every live chat lands on one lead profile
-    const { ensureLeadFromChannel } = await import("@/lib/crm/channels");
-    await ensureLeadFromChannel({
-      channel: "LIVE_CHAT",
-      fullName: user?.fullName || "Live chat visitor",
-      email: user?.email,
-      interest: "Live chat",
-      activityType: "CHAT",
-      activityBody: parsed.data.message.slice(0, 240),
-      channelRef: session.id,
+    const session = await getOrCreateOpenSession({
+      visitorId: visitor.visitorId,
       userId: user?.id,
+      locale: parsed.data.locale,
+      sessionId: parsed.data.sessionId,
+      channel: "WEB",
     });
 
-    const handoff = wantsHumanHandoff(parsed.data.message);
-    let reply = aiReply(parsed.data.message, parsed.data.locale ?? session.locale);
+    await appendUserMessage({
+      sessionId: session.id,
+      body: parsed.data.message,
+      clientMessageId: parsed.data.clientMessageId,
+      userId: user?.id,
+      visitorName: parsed.data.visitorName || user?.fullName,
+    });
+
+    let handoff = false;
     let ticketNumber: string | null = null;
+    let assignedToLiveAgent = false;
 
-    if (handoff) {
-      const dept =
-        /bill|invoice|pay/i.test(parsed.data.message)
-          ? "Billing"
-          : /host|server|vps/i.test(parsed.data.message)
-            ? "Hosting"
-            : /domain|dns/i.test(parsed.data.message)
-              ? "Domain"
-              : /sale|quote|website|erp/i.test(parsed.data.message)
-                ? "Sales"
-                : "Technical Support";
-      reply = `Connecting you with ${dept}. I've opened a support ticket from this chat — our team will follow up shortly.`;
-      await prisma.chatSession.update({
-        where: { id: session.id },
-        data: { status: "HANDOFF", userId: user?.id ?? session.userId, department: dept },
-      });
+    // If assigned agent went offline, reclaim for Aira before answering
+    const { ensureLiveHandler } = await import("@/lib/chat/agent-router");
+    await ensureLiveHandler(session.id);
 
-      const ticket = await prisma.ticket.create({
-        data: {
-          ticketNumber: nextNumber("TKT"),
-          userId: user?.id,
-          guestEmail: user?.email,
-          guestName: user?.fullName || "Live chat visitor",
-          subject: `Live chat → ${dept}: ${parsed.data.message.slice(0, 60)}`,
-          department:
-            dept === "Billing"
-              ? "BILLING"
-              : dept === "Hosting"
-                ? "HOSTING"
-                : dept === "Domain"
-                  ? "DOMAIN"
-                  : dept === "Sales"
-                    ? "SALES"
-                    : "TECHNICAL",
-          priority: "HIGH",
-          channel: "LIVE_CHAT",
-          status: "OPEN",
-          messages: {
-            create: {
-              authorId: user?.id,
-              authorName: user?.fullName || "Visitor",
-              authorRole: "CUSTOMER",
-              body: parsed.data.message,
-            },
-          },
-        },
-      });
-      ticketNumber = ticket.ticketNumber;
-
-      if (user) {
-        await notifyUser({
-          userId: user.id,
-          title: `Chat escalated · ${ticket.ticketNumber}`,
-          body: `Routed to ${dept}. An agent will reply on your ticket shortly.`,
-          category: "SUPPORT",
-          href: "/portal/tickets",
-        });
-      }
+    if (wantsHumanHandoff(parsed.data.message)) {
+      const route = await requestHandoff(session.id, "Customer requested human");
+      handoff = true;
+      assignedToLiveAgent = route.handlerType === "AGENT";
     }
 
-    const aiMsg = await prisma.chatMessage.create({
-      data: {
+    let aiMsg = null;
+    const fresh = await prisma.chatSession.findUnique({ where: { id: session.id } });
+    // Aira replies whenever no live agent is on the chat (including failed handoff,
+    // where requestHandoff already posted her "no agent online" message).
+    if (fresh?.handlerType === "AI" && !assignedToLiveAgent && !handoff) {
+      const { handleAiTurn } = await import("@/lib/ai/chat-orchestrator");
+      aiMsg = await handleAiTurn({
         sessionId: session.id,
-        role: handoff ? "SYSTEM" : "AI",
-        body: reply,
-      },
-    });
+        userMessage: parsed.data.message,
+        pageContext: parsed.data.pageContext,
+        locale: parsed.data.locale ?? session.locale,
+      });
+    }
 
-    await prisma.chatSession.update({
-      where: { id: session.id },
-      data: { updatedAt: new Date(), userId: user?.id ?? session.userId },
-    });
-
-    const messages = await prisma.chatMessage.findMany({
-      where: { sessionId: session.id },
-      orderBy: { createdAt: "asc" },
-      take: 40,
-    });
-
+    const messages = await listMessages(session.id, 40);
+    const latestAi =
+      aiMsg ||
+      [...messages].reverse().find((m) => m.role === "AI") ||
+      null;
     const res = NextResponse.json({
       sessionId: session.id,
       messages,
-      latest: aiMsg,
+      latest: latestAi,
       ticketNumber,
       handoff,
+      handlerType: fresh?.handlerType ?? session.handlerType,
     });
-    setCookies.forEach((c) => res.headers.append("Set-Cookie", c));
+    visitor.setCookies.forEach((c) => res.headers.append("Set-Cookie", c));
     return res;
   } catch (error) {
     console.error("[chat]", error);

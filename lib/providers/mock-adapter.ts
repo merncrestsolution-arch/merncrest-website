@@ -8,32 +8,33 @@ import type {
   ResellerProviderAdapter,
 } from "@/lib/providers/types";
 
-/** Wholesale (provider) TLD costs — selling price applied by Pricing Engine. */
+/** LK Domain Registry wholesale (domains.lk) — before MernCrest margin. */
 const PROVIDER_TLD_COST: Record<
   string,
   { register: number; renew: number; transfer: number; premium?: boolean }
 > = {
-  lk: { register: 160000, renew: 160000, transfer: 140000 },
-  "com.lk": { register: 140000, renew: 140000, transfer: 120000 },
-  "org.lk": { register: 140000, renew: 140000, transfer: 120000 },
-  "edu.lk": { register: 110000, renew: 110000, transfer: 100000 },
-  "sch.lk": { register: 100000, renew: 100000, transfer: 90000 },
-  "ngo.lk": { register: 130000, renew: 130000, transfer: 110000 },
-  "hotel.lk": { register: 150000, renew: 150000, transfer: 130000 },
-  "soc.lk": { register: 130000, renew: 130000, transfer: 110000 },
-  com: { register: 190000, renew: 200000, transfer: 170000 },
-  net: { register: 200000, renew: 210000, transfer: 180000 },
-  org: { register: 200000, renew: 210000, transfer: 180000 },
-  biz: { register: 190000, renew: 200000, transfer: 170000 },
-  info: { register: 160000, renew: 170000, transfer: 150000 },
-  xyz: { register: 120000, renew: 130000, transfer: 110000 },
-  co: { register: 320000, renew: 340000, transfer: 300000 },
-  io: { register: 450000, renew: 480000, transfer: 420000 },
-  app: { register: 350000, renew: 370000, transfer: 330000 },
-  dev: { register: 350000, renew: 370000, transfer: 330000 },
-  online: { register: 140000, renew: 150000, transfer: 130000 },
-  store: { register: 250000, renew: 270000, transfer: 230000 },
-  tech: { register: 220000, renew: 240000, transfer: 200000 },
+  lk: { register: 500000, renew: 500000, transfer: 500000 },
+  "com.lk": { register: 100000, renew: 100000, transfer: 100000 },
+  "org.lk": { register: 100000, renew: 100000, transfer: 100000 },
+  "edu.lk": { register: 100000, renew: 100000, transfer: 100000 },
+  "sch.lk": { register: 100000, renew: 100000, transfer: 100000 },
+  "ngo.lk": { register: 100000, renew: 100000, transfer: 100000 },
+  "hotel.lk": { register: 800000, renew: 800000, transfer: 800000 },
+  "soc.lk": { register: 100000, renew: 100000, transfer: 100000 },
+  // gTLD fallbacks (USD cents) — live Namecheap API overrides these in production.
+  com: { register: 1200, renew: 1400, transfer: 1100 },
+  net: { register: 1300, renew: 1500, transfer: 1200 },
+  org: { register: 1300, renew: 1500, transfer: 1200 },
+  biz: { register: 1200, renew: 1400, transfer: 1100 },
+  info: { register: 1000, renew: 1100, transfer: 900 },
+  xyz: { register: 800, renew: 900, transfer: 700 },
+  co: { register: 2000, renew: 2200, transfer: 1900 },
+  io: { register: 3500, renew: 3800, transfer: 3300 },
+  app: { register: 1400, renew: 1600, transfer: 1300 },
+  dev: { register: 1400, renew: 1600, transfer: 1300 },
+  online: { register: 900, renew: 1000, transfer: 800 },
+  store: { register: 1500, renew: 1700, transfer: 1400 },
+  tech: { register: 1200, renew: 1400, transfer: 1100 },
 };
 
 const RESERVED = new Set([
@@ -54,49 +55,49 @@ const MOCK_PACKAGES: ProviderPackage[] = [
   {
     providerProductId: "pkg-shared-starter",
     name: "Shared Hosting — Starter",
-    description: "1 CPU · 512MB RAM · 10GB SSD · Unlimited bandwidth · Free SSL · Daily backups.",
+    description: "1 site · 5GB SSD · Free SSL · Daily backups · cPanel included.",
     category: "hosting",
-    providerPriceCents: 690000,
+    providerPriceCents: 84900,
     currency: "LKR",
     billingPeriod: "MONTHLY",
-    specs: { diskMb: 10240, bandwidthGb: 100, ramMb: 512, cpu: 1 },
+    specs: { diskMb: 5120, bandwidthGb: 100, ramMb: 512, cpu: 1 },
   },
   {
     providerProductId: "pkg-business",
     name: "Business Hosting",
-    description: "2 CPU · 2GB RAM · 50GB SSD · Free migration · Priority support · cPanel.",
+    description: "3 sites · 20GB SSD · Free migration · Priority support · cPanel.",
     category: "hosting",
-    providerPriceCents: 2490000,
+    providerPriceCents: 174900,
     currency: "LKR",
     billingPeriod: "MONTHLY",
-    specs: { diskMb: 51200, bandwidthGb: 500, ramMb: 2048, cpu: 2 },
+    specs: { diskMb: 20480, bandwidthGb: 500, ramMb: 2048, cpu: 2 },
   },
   {
     providerProductId: "pkg-wordpress",
     name: "WordPress Hosting",
-    description: "Optimized WordPress stack · Staging · Auto updates · Free SSL · Daily backups.",
+    description: "WP-optimized · Staging · Auto updates · Free SSL · cPanel.",
     category: "hosting",
-    providerPriceCents: 1990000,
+    providerPriceCents: 124900,
     currency: "LKR",
     billingPeriod: "MONTHLY",
-    specs: { diskMb: 25600, bandwidthGb: 300, ramMb: 1024, cpu: 2 },
+    specs: { diskMb: 15360, bandwidthGb: 300, ramMb: 1024, cpu: 2 },
   },
   {
     providerProductId: "pkg-cpanel",
     name: "cPanel Hosting",
     description: "Full cPanel · Softaculous · Email · MySQL · Free SSL · 24/7 support.",
     category: "hosting",
-    providerPriceCents: 1590000,
+    providerPriceCents: 104900,
     currency: "LKR",
     billingPeriod: "MONTHLY",
-    specs: { diskMb: 20480, bandwidthGb: 200, ramMb: 1024, cpu: 1 },
+    specs: { diskMb: 10240, bandwidthGb: 200, ramMb: 1024, cpu: 1 },
   },
   {
     providerProductId: "pkg-cloud",
     name: "Cloud Hosting",
     description: "Scalable cloud · Auto scaling · SSD · Load-balanced · Monitoring.",
     category: "cloud",
-    providerPriceCents: 3990000,
+    providerPriceCents: 394900,
     currency: "LKR",
     billingPeriod: "MONTHLY",
     specs: { diskMb: 102400, bandwidthGb: 2000, ramMb: 4096, cpu: 4 },
@@ -106,7 +107,7 @@ const MOCK_PACKAGES: ProviderPackage[] = [
     name: "Linux VPS — Basic",
     description: "2 vCPU · 4GB RAM · 80GB SSD · Root access · Optional managed support.",
     category: "vps",
-    providerPriceCents: 6990000,
+    providerPriceCents: 294900,
     currency: "LKR",
     billingPeriod: "MONTHLY",
     specs: { diskMb: 81920, bandwidthGb: 1000, ramMb: 4096, cpu: 2 },
@@ -116,7 +117,7 @@ const MOCK_PACKAGES: ProviderPackage[] = [
     name: "Windows VPS",
     description: "2 vCPU · 4GB RAM · Windows Server · RDP · Managed option available.",
     category: "vps",
-    providerPriceCents: 8990000,
+    providerPriceCents: 444900,
     currency: "LKR",
     billingPeriod: "MONTHLY",
     specs: { diskMb: 81920, bandwidthGb: 1000, ramMb: 4096, cpu: 2 },
@@ -164,30 +165,42 @@ function normalizeDomainInput(input: string) {
     .trim()
     .toLowerCase()
     .replace(/^https?:\/\//, "")
-    .replace(/\/.*$/, "");
+    .replace(/\/.*$/, "")
+  // Domain names cannot contain spaces — strip them (e.g. "mern code" → "merncode").
+    .replace(/\s+/g, "");
   const parts = cleaned.split(".").filter(Boolean);
   if (parts.length < 2) {
-    return { sld: parts[0] || "", tld: "com", fqdn: parts[0] ? `${parts[0]}.com` : "" };
+    const sld = sanitizeSld(parts[0] || "");
+    return { sld, tld: "com", fqdn: sld ? `${sld}.com` : "" };
   }
   const knownMulti = Object.keys(PROVIDER_TLD_COST)
     .filter((t) => t.includes("."))
     .sort((a, b) => b.length - a.length);
   for (const multi of knownMulti) {
     if (cleaned.endsWith(`.${multi}`) || cleaned === multi) {
-      const sld = cleaned.slice(0, -(multi.length + 1));
+      const sld = sanitizeSld(cleaned.slice(0, -(multi.length + 1)));
       return { sld, tld: multi, fqdn: sld ? `${sld}.${multi}` : multi };
     }
   }
   const tld = parts.slice(1).join(".");
-  const sld = parts[0];
-  return { sld, tld, fqdn: `${sld}.${tld}` };
+  const sld = sanitizeSld(parts[0]);
+  return { sld, tld, fqdn: sld ? `${sld}.${tld}` : "" };
+}
+
+function sanitizeSld(sld: string) {
+  return sld.replace(/[^a-z0-9-]/g, "");
+}
+
+function isLkTldCost(tld: string) {
+  return tld === "lk" || tld.endsWith(".lk");
 }
 
 function buildResult(sld: string, tld: string): ProviderDomainResult {
+  const isLk = isLkTldCost(tld);
   const pricing = PROVIDER_TLD_COST[tld] ?? {
-    register: 200000,
-    renew: 210000,
-    transfer: 180000,
+    register: isLk ? 500000 : 1200,
+    renew: isLk ? 500000 : 1400,
+    transfer: isLk ? 500000 : 1100,
   };
   const available =
     !RESERVED.has(sld) &&
@@ -204,7 +217,7 @@ function buildResult(sld: string, tld: string): ProviderDomainResult {
     providerPriceCents: pricing.register,
     renewProviderCents: pricing.renew,
     transferProviderCents: pricing.transfer,
-    currency: "LKR",
+    currency: isLk ? "LKR" : "USD",
   };
 }
 

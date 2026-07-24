@@ -1,10 +1,10 @@
 import { CartView } from "@/components/commerce/cart-view";
+import { RlkPage } from "@/components/rlk/rlk-page";
 
 export default function PortalCartPage() {
   return (
-    <div className="space-y-6">
-      <h1 className="font-display text-2xl font-bold">Cart</h1>
+    <RlkPage title="Cart" description="Review items and proceed to checkout.">
       <CartView />
-    </div>
+    </RlkPage>
   );
 }

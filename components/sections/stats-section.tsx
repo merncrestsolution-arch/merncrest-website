@@ -33,12 +33,11 @@ function Counter({ from, to, duration = 2 }: { from: number; to: number; duratio
 export function StatsSection() {
   const tSection = useTranslations("statsSnippet");
 
-  const stats = [
-    { value: 50, suffix: "+", label: "Projects Delivered" },
-    { value: 30, suffix: "+", label: "Happy Clients" },
-    { value: 5, suffix: "+", label: "Years Experience" },
-    { value: 99, suffix: "%", label: "Client Retention" },
-  ];
+  // Only real, verifiable numbers. Invented "projects delivered / happy clients"
+  // counts were removed ("no fabricated content"). Add real metrics to re-enable.
+  const stats: { value: number; suffix: string; label: string }[] = [];
+
+  if (stats.length === 0) return null;
 
   return (
     <section className="relative py-16 md:py-24 bg-accent/5 overflow-hidden">

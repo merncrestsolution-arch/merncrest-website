@@ -1,0 +1,8 @@
+{
+  "projectId": "17402065891171962495",
+  "screenId": "fdea5d20cfc840af85518c737add6d7b",
+  "title": "Calendar & Meetings — MernCrest Solutions Staff Portal",
+  "route": "/staff/calendar",
+  "component": "StaffCalendarPanel",
+  "designSystem": "assets/060de6acb3a74722a6e7f79ec90a20d0"
+}

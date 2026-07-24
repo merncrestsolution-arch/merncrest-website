@@ -1,7 +1,46 @@
 import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcryptjs";
+import { blogs } from "../lib/data/blogs";
+import { kbArticles } from "../lib/data/knowledge-base";
 
 const prisma = new PrismaClient();
+
+/** Real internship openings (careers page). Kept honest & consistent with ToS. */
+const jobOpenings = [
+  {
+    title: "Junior Software Developer (Intern)",
+    department: "Engineering",
+    location: "Remote",
+    employmentType: "INTERNSHIP",
+    isInternship: true,
+    description:
+      "Kickstart your career in full-stack development. Learn modern frameworks, contribute to live projects, and get mentored by our engineers.",
+    requirementsJson: JSON.stringify([
+      "Familiarity with JavaScript/TypeScript and React basics",
+      "Eagerness to learn the MERN stack and Git workflows",
+      "Good written English communication",
+    ]),
+  },
+  {
+    title: "Python Developer Intern",
+    department: "Engineering",
+    location: "Remote / Colombo",
+    employmentType: "INTERNSHIP",
+    isInternship: true,
+    description:
+      "Gain hands-on experience in backend engineering and automation. Work alongside senior engineers on real-world Python projects.",
+    requirementsJson: JSON.stringify([
+      "Python fundamentals and basic data structures",
+      "Interest in APIs, automation, and testing",
+      "Self-motivated and reliable in a remote setting",
+    ]),
+  },
+];
+
+function parseReadTime(readTime: string): number {
+  const m = /(\d+)/.exec(readTime || "");
+  return m ? Math.max(1, Math.min(120, Number(m[1]))) : 4;
+}
 
 const catalog = [
   // Domains
@@ -45,13 +84,13 @@ const catalog = [
     featured: false,
     sortOrder: 4,
   },
-  // Hosting
+  // Hosting — competitive Sri Lanka reseller retail (benchmark: register.lk ~Rs 10,950–16,950/yr with free cPanel)
   {
     slug: "shared-hosting-starter",
     name: "Shared Hosting — Starter",
-    description: "1 CPU · 512MB RAM · 10GB SSD · Unlimited bandwidth · Free SSL · Daily backups.",
+    description: "1 site · 5GB SSD · Free SSL · Daily backups · cPanel included.",
     category: "hosting",
-    priceCents: 990000,
+    priceCents: 89900,
     billingPeriod: "MONTHLY",
     featured: true,
     sortOrder: 10,
@@ -59,9 +98,9 @@ const catalog = [
   {
     slug: "business-hosting",
     name: "Business Hosting",
-    description: "2 CPU · 2GB RAM · 50GB SSD · Free migration · Priority support · cPanel.",
+    description: "3 sites · 20GB SSD · Priority support · Free migration · cPanel.",
     category: "hosting",
-    priceCents: 2990000,
+    priceCents: 179900,
     billingPeriod: "MONTHLY",
     featured: true,
     sortOrder: 11,
@@ -69,9 +108,9 @@ const catalog = [
   {
     slug: "wordpress-hosting",
     name: "WordPress Hosting",
-    description: "Optimized WordPress stack · Staging · Auto updates · Free SSL · Daily backups.",
+    description: "WP-optimized · Staging · Auto updates · Free SSL · cPanel · Daily backups.",
     category: "hosting",
-    priceCents: 2490000,
+    priceCents: 129900,
     billingPeriod: "MONTHLY",
     featured: true,
     sortOrder: 12,
@@ -81,9 +120,9 @@ const catalog = [
     name: "cPanel Hosting",
     description: "Full cPanel · Softaculous · Email · MySQL · Free SSL · 24/7 support.",
     category: "hosting",
-    priceCents: 1990000,
+    priceCents: 109900,
     billingPeriod: "MONTHLY",
-    featured: false,
+    featured: true,
     sortOrder: 13,
   },
   {
@@ -91,7 +130,7 @@ const catalog = [
     name: "Cloud Hosting",
     description: "Scalable cloud · Auto scaling · SSD · Load-balanced · Monitoring.",
     category: "hosting",
-    priceCents: 4990000,
+    priceCents: 399900,
     billingPeriod: "MONTHLY",
     featured: true,
     sortOrder: 14,
@@ -101,7 +140,7 @@ const catalog = [
     name: "Linux VPS — Basic",
     description: "2 vCPU · 4GB RAM · 80GB SSD · Root access · Optional managed support.",
     category: "hosting",
-    priceCents: 7990000,
+    priceCents: 299900,
     billingPeriod: "MONTHLY",
     featured: true,
     sortOrder: 15,
@@ -111,7 +150,7 @@ const catalog = [
     name: "Windows VPS",
     description: "2 vCPU · 4GB RAM · Windows Server · RDP · Managed option available.",
     category: "hosting",
-    priceCents: 9990000,
+    priceCents: 449900,
     billingPeriod: "MONTHLY",
     featured: false,
     sortOrder: 16,
@@ -121,7 +160,7 @@ const catalog = [
     name: "Dedicated Server",
     description: "Enterprise dedicated hardware · Full root · Custom RAID · 24/7 monitoring.",
     category: "hosting",
-    priceCents: 45000000,
+    priceCents: 2499900,
     billingPeriod: "MONTHLY",
     featured: false,
     sortOrder: 17,
@@ -131,7 +170,7 @@ const catalog = [
     name: "AWS Managed Hosting",
     description: "Managed EC2/Lightsail · Monitoring · Backups · Cost optimization.",
     category: "cloud",
-    priceCents: 15000000,
+    priceCents: 999900,
     billingPeriod: "MONTHLY",
     featured: true,
     sortOrder: 18,
@@ -196,6 +235,17 @@ const catalog = [
     billingPeriod: "MONTHLY",
     featured: true,
     sortOrder: 31,
+  },
+  {
+    slug: "custom-project-service",
+    name: "Custom Project (Sales-priced)",
+    description:
+      "Placeholder for Sales-approved custom software, website, mobile app, and project services. Cart price is set by Sales.",
+    category: "software",
+    priceCents: 0,
+    billingPeriod: "ONCE",
+    featured: false,
+    sortOrder: 99,
   },
 ];
 
@@ -416,7 +466,7 @@ async function main() {
 
   const defaultMargins = [
     { category: "domains", marginCents: 30000, marginPercent: 0 },
-    { category: "hosting", marginCents: 300000, marginPercent: 0 },
+    { category: "hosting", marginCents: 50000, marginPercent: 0 },
     { category: "vps", marginCents: 1000000, marginPercent: 0 },
     { category: "ssl", marginCents: 100000, marginPercent: 0 },
     { category: "email", marginCents: 50000, marginPercent: 0 },
@@ -672,6 +722,84 @@ async function main() {
           },
         },
       });
+    }
+
+    // Demo customer-facing project (software / website tracking)
+    const demoCustomer = await prisma.user.findUnique({
+      where: { email: "demo@merncrest.lk" },
+    });
+    if (demoCustomer) {
+      const existingDemoProject = await prisma.erpProject.findUnique({
+        where: { projectCode: "PRJ-DEMO-WEB-001" },
+      });
+      if (!existingDemoProject) {
+        const inFourWeeks = new Date();
+        inFourWeeks.setDate(inFourWeeks.getDate() + 28);
+        const inEightWeeks = new Date();
+        inEightWeeks.setDate(inEightWeeks.getDate() + 56);
+        await prisma.erpProject.create({
+          data: {
+            projectCode: "PRJ-DEMO-WEB-001",
+            name: "Demo Company Website & Admin Panel",
+            description:
+              "Custom website + CMS admin for Demo Customer. Includes homepage, services pages, and contact forms.",
+            departmentId: tech?.id,
+            status: "ACTIVE",
+            startDate: new Date(),
+            endDate: inEightWeeks,
+            budgetCents: 0,
+            members: {
+              create: [
+                { userId: owner.id, role: "LEAD" },
+                { userId: demoCustomer.id, role: "VIEWER" },
+              ],
+            },
+            tasks: {
+              create: [
+                { title: "Discovery & wireframes", status: "DONE", assigneeId: owner.id },
+                { title: "UI design", status: "DONE", assigneeId: staffUser.id },
+                { title: "Frontend build", status: "IN_PROGRESS", assigneeId: staffUser.id },
+                { title: "CMS / admin panel", status: "TODO" },
+                { title: "UAT & launch", status: "TODO" },
+              ],
+            },
+            milestones: {
+              create: [
+                {
+                  title: "Design approved",
+                  status: "DONE",
+                  dueDate: new Date(),
+                },
+                {
+                  title: "MVP pages live (staging)",
+                  status: "PENDING",
+                  dueDate: inFourWeeks,
+                },
+                {
+                  title: "Production launch",
+                  status: "PENDING",
+                  dueDate: inEightWeeks,
+                },
+              ],
+            },
+          },
+        });
+      } else {
+        await prisma.projectMember.upsert({
+          where: {
+            projectId_userId: {
+              projectId: existingDemoProject.id,
+              userId: demoCustomer.id,
+            },
+          },
+          update: { role: "VIEWER" },
+          create: {
+            projectId: existingDemoProject.id,
+            userId: demoCustomer.id,
+            role: "VIEWER",
+          },
+        });
+      }
     }
 
     if ((await prisma.financeEntry.count()) === 0) {
@@ -963,10 +1091,274 @@ async function main() {
     });
   }
 
+  // —— System.merncrest.lk hierarchy (CEO → DEPT_HEAD → TEAM_LEAD → STAFF) ——
+  const salesDept = await prisma.department.findUnique({ where: { code: "SALES" } });
+  const headUser = await prisma.user.upsert({
+    where: { email: "head@merncrest.lk" },
+    update: {},
+    create: {
+      email: "head@merncrest.lk",
+      fullName: "Sales Department Head",
+      company: "MernCrest Solutions",
+      passwordHash,
+      role: "STAFF",
+      emailVerifiedAt: new Date(),
+    },
+  });
+  const leadUser = await prisma.user.upsert({
+    where: { email: "lead@merncrest.lk" },
+    update: {},
+    create: {
+      email: "lead@merncrest.lk",
+      fullName: "Sales Team Lead",
+      company: "MernCrest Solutions",
+      passwordHash,
+      role: "STAFF",
+      emailVerifiedAt: new Date(),
+    },
+  });
+
+  let ceoEmp = await prisma.employee.findFirst({ where: { userId: owner?.id } });
+  if (owner && !ceoEmp) {
+    ceoEmp = await prisma.employee.create({
+      data: {
+        employeeCode: "EMP-CEO-001",
+        userId: owner.id,
+        departmentId: salesDept?.id,
+        fullName: owner.fullName,
+        email: owner.email,
+        jobTitle: "Chief Executive Officer",
+        orgRole: "CEO",
+        designation: "CEO",
+        grade: "E1",
+        salaryCents: 0,
+        status: "ACTIVE",
+      },
+    });
+  } else if (ceoEmp) {
+    await prisma.employee.update({
+      where: { id: ceoEmp.id },
+      data: { orgRole: "CEO" },
+    });
+  }
+
+  let headEmp = await prisma.employee.findFirst({ where: { userId: headUser.id } });
+  if (!headEmp && salesDept) {
+    headEmp = await prisma.employee.create({
+      data: {
+        employeeCode: "EMP-DH-001",
+        userId: headUser.id,
+        departmentId: salesDept.id,
+        managerId: ceoEmp?.id,
+        fullName: headUser.fullName,
+        email: headUser.email,
+        jobTitle: "Head of Sales",
+        orgRole: "DEPT_HEAD",
+        designation: "Department Head",
+        grade: "M2",
+        salaryCents: 25000000,
+        status: "ACTIVE",
+      },
+    });
+  }
+
+  let leadEmp = await prisma.employee.findFirst({ where: { userId: leadUser.id } });
+  if (!leadEmp && salesDept) {
+    leadEmp = await prisma.employee.create({
+      data: {
+        employeeCode: "EMP-TL-001",
+        userId: leadUser.id,
+        departmentId: salesDept.id,
+        managerId: headEmp?.id,
+        fullName: leadUser.fullName,
+        email: leadUser.email,
+        jobTitle: "Sales Team Lead",
+        orgRole: "TEAM_LEAD",
+        designation: "Team Lead",
+        grade: "M1",
+        salaryCents: 18000000,
+        status: "ACTIVE",
+      },
+    });
+  }
+
+  if (staffEmp && leadEmp) {
+    await prisma.employee.update({
+      where: { id: staffEmp.id },
+      data: { managerId: leadEmp.id, orgRole: "STAFF", departmentId: salesDept?.id || staffEmp.departmentId },
+    });
+  }
+
+  const year = new Date().getFullYear();
+  for (const u of [staffUser, headUser, leadUser, owner].filter(Boolean)) {
+    if (!u) continue;
+    for (const lt of [
+      { leaveType: "ANNUAL", entitled: 14 },
+      { leaveType: "CASUAL", entitled: 7 },
+      { leaveType: "SICK", entitled: 7 },
+    ]) {
+      await prisma.leaveBalance.upsert({
+        where: {
+          userId_leaveType_year: { userId: u.id, leaveType: lt.leaveType, year },
+        },
+        update: {},
+        create: {
+          userId: u.id,
+          leaveType: lt.leaveType,
+          year,
+          entitled: lt.entitled,
+          used: 0,
+          pending: 0,
+        },
+      });
+    }
+  }
+
+  if ((await prisma.holidayCalendar.count()) === 0) {
+    await prisma.holidayCalendar.createMany({
+      data: [
+        { name: "Independence Day", date: new Date(`${year}-02-04`), region: "LK" },
+        { name: "Sinhala & Tamil New Year", date: new Date(`${year}-04-13`), region: "LK" },
+        { name: "Christmas", date: new Date(`${year}-12-25`), region: "LK" },
+      ],
+    });
+  }
+
+  if ((await prisma.routingRule.count()) === 0) {
+    await prisma.routingRule.createMany({
+      data: [
+        {
+          name: "WhatsApp → Support",
+          source: "WHATSAPP",
+          targetType: "TICKET",
+          department: "TECHNICAL",
+          priority: 10,
+          active: true,
+          createdById: owner?.id,
+        },
+        {
+          name: "Form → Sales",
+          source: "FORM",
+          targetType: "LEAD",
+          department: "SALES",
+          priority: 10,
+          active: true,
+          createdById: owner?.id,
+        },
+        {
+          name: "IVR → Support",
+          source: "IVR",
+          targetType: "TICKET",
+          department: "TECHNICAL",
+          priority: 10,
+          active: true,
+          createdById: owner?.id,
+        },
+      ],
+    });
+  }
+
+  for (const provider of ["WHATSAPP", "IVR", "SMS", "EMAIL"] as const) {
+    await prisma.systemGatewayConfig.upsert({
+      where: { provider },
+      update: {},
+      create: {
+        provider,
+        active: false,
+        configJson: JSON.stringify(
+          provider === "WHATSAPP"
+            ? { provider: "meta" }
+            : provider === "IVR"
+              ? {
+                  provider: "stub",
+                  holdMusicUrl: "https://merncrest.lk/audio/ivr-hold.mp3",
+                  agentNumbers: [],
+                }
+              : { provider: "stub" }
+        ),
+      },
+    });
+  }
+
+  // ---- Marketing CMS content (blog + knowledge base) ----
+  for (const post of blogs) {
+    const publishedAt = post.date ? new Date(post.date) : new Date();
+    await prisma.blogPost.upsert({
+      where: { slug: post.slug },
+      update: {
+        title: post.title,
+        excerpt: post.excerpt,
+        bodyHtml: post.content,
+        coverImageUrl: post.image,
+        author: post.author,
+        category: post.category,
+        readTime: parseReadTime(post.readTime),
+        status: "PUBLISHED",
+        publishedAt: isNaN(publishedAt.getTime()) ? new Date() : publishedAt,
+      },
+      create: {
+        slug: post.slug,
+        title: post.title,
+        excerpt: post.excerpt,
+        bodyHtml: post.content,
+        coverImageUrl: post.image,
+        author: post.author,
+        category: post.category,
+        readTime: parseReadTime(post.readTime),
+        status: "PUBLISHED",
+        publishedAt: isNaN(publishedAt.getTime()) ? new Date() : publishedAt,
+      },
+    });
+  }
+
+  for (const art of kbArticles) {
+    const body = [art.summary, ...art.body].filter(Boolean).join("\n\n");
+    await prisma.knowledgeArticle.upsert({
+      where: { slug: art.slug },
+      update: {
+        title: art.title,
+        body,
+        category: art.category,
+        status: "PUBLISHED",
+        publishedAt: new Date(),
+      },
+      create: {
+        slug: art.slug,
+        title: art.title,
+        body,
+        category: art.category,
+        status: "PUBLISHED",
+        publishedAt: new Date(),
+      },
+    });
+  }
+
+  // ---- Careers: real internship openings ----
+  for (const job of jobOpenings) {
+    const existing = await prisma.jobOpening.findFirst({ where: { title: job.title } });
+    if (existing) {
+      await prisma.jobOpening.update({ where: { id: existing.id }, data: { ...job, status: "OPEN" } });
+    } else {
+      await prisma.jobOpening.create({ data: { ...job, status: "OPEN" } });
+    }
+  }
+
+  console.log(
+    "  CMS:",
+    blogs.length,
+    "blog posts +",
+    kbArticles.length,
+    "KB articles +",
+    jobOpenings.length,
+    "job openings"
+  );
   console.log("Seeded users +", catalog.length, "products +", coupons.length, "coupons + CRM/ERP samples");
-  console.log("  OWNER: owner@merncrest.lk / ChangeMe123!");
+  console.log("  OWNER/CEO: owner@merncrest.lk / ChangeMe123!");
+  console.log("  DEPT_HEAD: head@merncrest.lk / ChangeMe123!  → /staff");
+  console.log("  TEAM_LEAD: lead@merncrest.lk / ChangeMe123!  → /staff");
   console.log("  STAFF: staff@merncrest.lk / ChangeMe123!  → /staff + /admin/erp");
   console.log("  CUSTOMER: demo@merncrest.lk / ChangeMe123!");
+  console.log("  System host: system.merncrest.lk (or ?system=1 locally)");
   console.log("  Coupons: WELCOME10 (10%), SAVE20 (Rs. 2,000 off)");
   console.log("  Org: MCS · Branch CMB-HO · COA seeded · sample salary slip");
 }

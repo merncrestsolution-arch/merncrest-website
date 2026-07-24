@@ -13,7 +13,7 @@ import {
 
 export function ProductsSection() {
   return (
-    <StitchSection className="border-t border-white/[0.05]">
+    <StitchSection className="border-t border-stitch-outline">
       <StitchHeader
         eyebrow="Marketplace"
         title="Buy domains, hosting, and software online"
@@ -25,13 +25,13 @@ export function ProductsSection() {
           <StitchReveal key={cat.slug} delay={i * 0.05}>
             <Link href={`/products/${cat.slug}`} className="block h-full group">
               <StitchCard className="h-full">
-                <h3 className="font-display text-xl font-semibold text-white group-hover:text-violet-200 transition-colors">
+                <h3 className="font-display text-xl font-semibold text-foreground group-hover:text-violet-200 transition-colors">
                   {cat.title}
                 </h3>
                 <p className="mt-2 text-sm text-muted leading-relaxed line-clamp-2">
                   {cat.description}
                 </p>
-                <span className="mt-4 inline-flex items-center gap-1 text-sm text-violet-300">
+                <span className="mt-4 inline-flex items-center gap-1 text-sm text-stitch-glow">
                   View <ArrowRight className="h-3.5 w-3.5" />
                 </span>
               </StitchCard>

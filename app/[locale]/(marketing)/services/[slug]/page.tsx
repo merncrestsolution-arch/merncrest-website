@@ -1,10 +1,9 @@
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { notFound } from "next/navigation";
-import { Link } from "@/i18n/routing";
-import { Button } from "@/components/ui/button";
+import { QuoteDialog } from "@/components/forms/quote-dialog";
 import { 
   Code2, Globe, Smartphone, Cloud, Shield, Brain, 
-  Megaphone, Briefcase, Server, CheckCircle2, ArrowRight
+  Megaphone, Briefcase, Server, CheckCircle2
 } from "lucide-react";
 
 const validServices = [
@@ -62,18 +61,18 @@ const serviceContent: Record<string, any> = {
       { title: "DevOps Automation", desc: "CI/CD pipelines for rapid, reliable deployments." },
       { title: "Serverless Computing", desc: "Auto-scaling architectures that reduce idle costs." }
     ],
-    benefits: ["99.99% Guaranteed Uptime", "Automated disaster recovery", "Optimized monthly billing"]
+    benefits: ["High-availability architectures", "Automated disaster recovery", "Optimized monthly billing"]
   },
   "cyber-security": {
     title: "Cyber Security Solutions",
     icon: Shield,
-    description: "Protect your digital assets, customer data, and brand reputation with our military-grade cybersecurity audits and implementations.",
+    description: "Protect your digital assets, customer data, and brand reputation with rigorous cybersecurity audits and implementations.",
     features: [
-      { title: "Penetration Testing", desc: "Identifying vulnerabilities before hackers do." },
-      { title: "Compliance Audits", desc: "Ensuring HIPAA, GDPR, and SOC2 compliance." },
-      { title: "Real-time Monitoring", desc: "24/7 threat detection and incident response." }
+      { title: "Penetration Testing", desc: "Identifying vulnerabilities before attackers do." },
+      { title: "Compliance Reviews", desc: "Helping you work toward GDPR and industry standards." },
+      { title: "Monitoring & Response", desc: "Threat detection and incident response processes." }
     ],
-    benefits: ["Ironclad data encryption", "Regulatory peace of mind", "Zero-trust architectures"]
+    benefits: ["Strong data encryption", "Reduced attack surface", "Zero-trust architectures"]
   },
   "ai-solutions": {
     title: "AI & Machine Learning",
@@ -149,11 +148,11 @@ export default async function ServiceSubPage({
   return (
     <div className="stitch-page">
       <div className="stitch-container pt-32 pb-10">
-        <div className="inline-flex items-center gap-2 rounded-full border border-violet-500/20 bg-violet-500/10 px-3 py-1 text-sm font-medium text-violet-300 mb-6">
+        <div className="inline-flex items-center gap-2 rounded-full border border-violet-500/20 bg-violet-500/10 px-3 py-1 text-sm font-medium text-stitch-glow mb-6">
           <Icon className="h-4 w-4" />
           <span>Core Service</span>
         </div>
-        <h1 className="font-display text-3xl sm:text-4xl lg:text-5xl font-bold text-white text-balance tracking-tight max-w-4xl">
+        <h1 className="font-display text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground text-balance tracking-tight max-w-4xl">
           {data.title}
         </h1>
         <p className="mt-4 text-lg text-muted leading-relaxed max-w-3xl">{data.description}</p>
@@ -162,11 +161,11 @@ export default async function ServiceSubPage({
       <div className="stitch-page-body !pt-0">
         <div className="grid lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2">
-            <h2 className="font-display text-2xl font-bold text-white mb-6">What We Deliver</h2>
+            <h2 className="font-display text-2xl font-bold text-foreground mb-6">What We Deliver</h2>
             <div className="grid sm:grid-cols-2 gap-5">
               {data.features.map((feature: { title: string; desc: string }, i: number) => (
                 <div key={i} className="stitch-card stitch-card-hover">
-                  <h3 className="font-display text-lg font-semibold text-white mb-2">{feature.title}</h3>
+                  <h3 className="font-display text-lg font-semibold text-foreground mb-2">{feature.title}</h3>
                   <p className="text-sm text-muted leading-relaxed">{feature.desc}</p>
                 </div>
               ))}
@@ -175,11 +174,11 @@ export default async function ServiceSubPage({
 
           <div className="space-y-5">
             <div className="stitch-card">
-              <h3 className="font-display text-lg font-semibold text-white mb-5">Key Benefits</h3>
+              <h3 className="font-display text-lg font-semibold text-foreground mb-5">Key Benefits</h3>
               <ul className="space-y-4">
                 {data.benefits.map((benefit: string, i: number) => (
                   <li key={i} className="flex items-start gap-3 text-sm text-muted">
-                    <CheckCircle2 className="h-5 w-5 text-violet-300 shrink-0" />
+                    <CheckCircle2 className="h-5 w-5 text-stitch-glow shrink-0" />
                     <span>{benefit}</span>
                   </li>
                 ))}
@@ -188,17 +187,20 @@ export default async function ServiceSubPage({
 
             <div className="stitch-card text-center relative overflow-hidden border-violet-500/20 bg-violet-500/[0.06]">
               <div className="pointer-events-none absolute inset-0 brand-mesh opacity-40" />
-              <h3 className="relative z-10 font-display text-xl font-bold text-white mb-3">
+              <h3 className="relative z-10 font-display text-xl font-bold text-foreground mb-3">
                 Ready to start?
               </h3>
               <p className="relative z-10 text-sm text-muted mb-5">
-                Let&apos;s discuss how our {data.title.toLowerCase()} can transform your business.
+                Let&apos;s discuss how our {data.title.toLowerCase()} can support your goals.
               </p>
-              <Button asChild className="relative z-10 w-full rounded-full h-11">
-                <Link href="/contact">
-                  Get a Free Quote <ArrowRight className="ml-2 h-4 w-4" />
-                </Link>
-              </Button>
+              <div className="relative z-10">
+                <QuoteDialog
+                  formType="service-detail"
+                  interest={data.title}
+                  label="Request a Quote"
+                  fullWidth
+                />
+              </div>
             </div>
           </div>
         </div>

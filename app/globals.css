@@ -3,46 +3,63 @@
 @tailwind utilities;
 
 @layer base {
+  /* ─── MernCrest Logo Theme — LIGHT (blue → purple → pink → red) ─── */
   :root {
-    /* Stitch “Luminous Enterprise” — light fallback */
-    --background: 240 6% 98%;
-    --foreground: 240 6% 10%;
+    --background: 240 40% 98%;
+    --foreground: 240 42% 12%;
     --card: 0 0% 100%;
-    --card-foreground: 240 6% 10%;
+    --card-foreground: 240 42% 12%;
     --popover: 0 0% 100%;
-    --popover-foreground: 240 6% 10%;
-    --primary: 263 83% 58%;
+    --popover-foreground: 240 42% 12%;
+    --primary: 252 68% 51%;
     --primary-foreground: 0 0% 100%;
-    --secondary: 240 6% 94%;
-    --secondary-foreground: 240 6% 12%;
-    --muted: 240 5% 46%;
-    --muted-foreground: 240 5% 40%;
-    --accent: 263 83% 58%;
+    --secondary: 244 32% 94%;
+    --secondary-foreground: 240 42% 14%;
+    --muted: 240 12% 33%;
+    --muted-foreground: 240 12% 35%;
+    --accent: 252 68% 51%;
     --accent-foreground: 0 0% 100%;
-    --destructive: 0 84% 60%;
+    --destructive: 350 80% 50%;
     --destructive-foreground: 0 0% 98%;
-    --border: 240 6% 88%;
-    --input: 240 6% 88%;
-    --ring: 263 83% 58%;
+    --border: 240 20% 84%;
+    --input: 240 20% 84%;
+    --ring: 252 68% 51%;
     --radius: 0.75rem;
-    --brand: 263 83% 58%;
+    --brand: 252 68% 51%;
     --brand-blue: 221 83% 53%;
-    --success: 142 71% 45%;
-    --stitch-bg: #0e0e12;
-    --stitch-surface: #131317;
-    --stitch-surface-low: #1b1b1f;
-    --stitch-surface-container: #1f1f23;
-    --stitch-surface-high: #2a292e;
-    --stitch-on: #e5e1e7;
-    --stitch-muted: #ccc3d8;
-    --stitch-primary: #7c3aed;
-    --stitch-primary-glow: #d2bbff;
-    --stitch-secondary: #3131c0;
-    --stitch-outline: #4a4455;
+    --brand-pink: 330 78% 53%;
+    --success: 142 71% 36%;
+
+    /* MernCrest logo palette — light surfaces */
+    --stitch-bg: #f6f7fc;
+    --stitch-surface: #ffffff;
+    --stitch-surface-low: #eef0f8;
+    --stitch-surface-container: #e6e9f4;
+    --stitch-surface-high: #dce0ee;
+    --stitch-on: #14142e;
+    --stitch-muted: #45465f;
+    --stitch-primary: #5a2fd6;
+    --stitch-primary-glow: #2563eb;
+    --stitch-primary-soft: #ebe5ff;
+    --stitch-secondary: #db2777;
+    --stitch-outline: #c5c8dd;
+    --stitch-outline-strong: #6a6b86;
+    --stitch-card-bg: #ffffff;
+    --stitch-card-border: #dcdfef;
+    --stitch-card-shadow: 0 4px 24px rgba(27, 24, 55, 0.08), 0 1px 3px rgba(27, 24, 55, 0.06);
+    --stitch-glow: rgba(90, 47, 214, 0.20);
+    --stitch-mesh-a: rgba(37, 99, 235, 0.10);
+    --stitch-mesh-b: rgba(219, 39, 119, 0.09);
+    --stitch-nav-banner: #eef0ff;
+    --stitch-nav-banner-text: #2a1a5e;
+    --stitch-nav-scrolled: rgba(255, 255, 255, 0.94);
+    --stitch-hairline: rgba(20, 20, 46, 0.12);
+    --stitch-glass: rgba(20, 20, 46, 0.05);
+    --stitch-selection: rgba(90, 47, 214, 0.20);
   }
 
+  /* ─── Stitch Luminous Enterprise — DARK (DESIGN.md) ─── */
   .dark {
-    /* Exact Stitch named colors */
     --background: 240 10% 6%;
     --foreground: 270 8% 90%;
     --card: 240 8% 12%;
@@ -65,6 +82,32 @@
     --brand: 263 83% 58%;
     --brand-blue: 217 91% 60%;
     --success: 142 71% 45%;
+
+    --stitch-bg: #0e0e12;
+    --stitch-surface: #131317;
+    --stitch-surface-low: #1b1b1f;
+    --stitch-surface-container: #1f1f23;
+    --stitch-surface-high: #2a292e;
+    --stitch-on: #e4e1e7;
+    --stitch-muted: #ccc3d8;
+    --stitch-primary: #7c3aed;
+    --stitch-primary-glow: #d2bbff;
+    --stitch-primary-soft: #ede0ff;
+    --stitch-secondary: #3131c0;
+    --stitch-outline: #4a4455;
+    --stitch-outline-strong: #958da1;
+    --stitch-card-bg: rgba(19, 19, 23, 0.6);
+    --stitch-card-border: #4a4455;
+    --stitch-card-shadow: none;
+    --stitch-glow: rgba(210, 187, 255, 0.12);
+    --stitch-mesh-a: rgba(124, 58, 237, 0.22);
+    --stitch-mesh-b: rgba(49, 49, 192, 0.12);
+    --stitch-nav-banner: #0f0a1a;
+    --stitch-nav-banner-text: #ede0ff;
+    --stitch-nav-scrolled: rgba(14, 14, 18, 0.92);
+    --stitch-hairline: rgba(255, 255, 255, 0.05);
+    --stitch-glass: rgba(255, 255, 255, 0.04);
+    --stitch-selection: rgba(124, 58, 237, 0.3);
   }
 }
 
@@ -80,11 +123,54 @@
   }
 
   body {
-    @apply bg-background text-foreground font-sans antialiased;
+    @apply font-sans antialiased;
     background-color: var(--stitch-bg);
     color: var(--stitch-on);
     max-width: 100%;
     overflow-x: hidden;
+  }
+
+  /* Light mode: force readable body/muted text (avoid washed violet greys) */
+  html:not(.dark) body {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  html:not(.dark) .text-muted,
+  html:not(.dark) .text-muted-foreground {
+    color: var(--stitch-muted) !important;
+  }
+
+  /* Nested dark scopes (portal / admin / staff) keep dark muted colors */
+  html:not(.dark) .dark .text-muted,
+  html:not(.dark) .dark .text-muted-foreground {
+    color: #ccc3d8 !important;
+  }
+
+  html:not(.dark) .opacity-60,
+  html:not(.dark) .opacity-70,
+  html:not(.dark) .opacity-80 {
+    opacity: 1;
+  }
+
+  html:not(.dark) .dark .opacity-60 {
+    opacity: 0.6;
+  }
+  html:not(.dark) .dark .opacity-70 {
+    opacity: 0.7;
+  }
+  html:not(.dark) .dark .opacity-80 {
+    opacity: 0.8;
+  }
+
+  html:not(.dark) .brand-mesh,
+  html:not(.dark) .ocean-mesh {
+    opacity: 0.45;
+  }
+
+  html:not(.dark) .dark .brand-mesh,
+  html:not(.dark) .dark .ocean-mesh {
+    opacity: 1;
   }
 
   ::-webkit-scrollbar {
@@ -97,17 +183,17 @@
 
   ::-webkit-scrollbar-thumb {
     @apply rounded-full border-2;
-    background: rgba(255, 255, 255, 0.1);
+    background: color-mix(in srgb, var(--stitch-outline-strong) 45%, transparent);
     border-color: var(--stitch-bg);
   }
 
   ::selection {
-    @apply bg-violet-500/30 text-white;
+    background: var(--stitch-selection);
+    color: var(--stitch-on);
   }
 }
 
 @layer components {
-  /* Stitch layout rhythm — 4px baseline, 1440 container, 48px margins */
   .stitch-container,
   .container-wide {
     @apply mx-auto w-full;
@@ -152,10 +238,12 @@
   .stitch-card,
   .glass-card,
   .glass-panel {
-    background: rgba(19, 19, 23, 0.6);
-    border: 1px solid #4a4455;
+    background: var(--stitch-card-bg);
+    border: 1px solid var(--stitch-card-border);
     border-radius: 1rem;
     backdrop-filter: blur(20px);
+    color: var(--stitch-on);
+    box-shadow: var(--stitch-card-shadow);
   }
 
   .stitch-card {
@@ -167,13 +255,13 @@
   }
 
   .stitch-card-hover:hover {
-    border-color: #7c3aed;
-    box-shadow: 0 0 20px rgba(210, 187, 255, 0.1);
+    border-color: var(--stitch-primary);
+    box-shadow: 0 8px 28px var(--stitch-glow), var(--stitch-card-shadow);
   }
 
   .luminous-border {
     position: relative;
-    background: #131317;
+    background: var(--stitch-surface);
     border: 1px solid transparent;
     background-clip: padding-box;
   }
@@ -182,7 +270,7 @@
     content: "";
     position: absolute;
     inset: -1px;
-    background: linear-gradient(45deg, #4a4455, #7c3aed);
+    background: linear-gradient(45deg, var(--stitch-outline), var(--stitch-primary));
     z-index: -1;
     border-radius: inherit;
   }
@@ -193,13 +281,22 @@
     z-index: -1;
     pointer-events: none;
     background:
-      radial-gradient(circle at 20% 30%, rgba(124, 58, 237, 0.1) 0%, transparent 40%),
-      radial-gradient(circle at 80% 70%, rgba(49, 49, 192, 0.1) 0%, transparent 40%);
+      radial-gradient(circle at 20% 30%, var(--stitch-mesh-a) 0%, transparent 40%),
+      radial-gradient(circle at 80% 70%, var(--stitch-mesh-b) 0%, transparent 40%);
     filter: blur(80px);
   }
 
   .gradient-text {
-    @apply bg-gradient-to-r from-violet-300 via-fuchsia-300 to-indigo-300 bg-clip-text text-transparent;
+    background-image: linear-gradient(
+      90deg,
+      #1e40af 0%,
+      #6d28d9 42%,
+      #db2777 74%,
+      #e11d48 100%
+    );
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
   }
 
   .btn-gradient {
@@ -210,23 +307,146 @@
   .ocean-mesh,
   .brand-mesh {
     background:
-      radial-gradient(ellipse 80% 60% at 30% 35%, rgba(124, 58, 237, 0.22), transparent),
-      radial-gradient(ellipse 70% 50% at 75% 20%, rgba(49, 49, 192, 0.12), transparent),
-      radial-gradient(ellipse 60% 40% at 50% 90%, rgba(14, 14, 18, 0.9), transparent);
+      radial-gradient(ellipse 80% 60% at 30% 35%, var(--stitch-mesh-a), transparent),
+      radial-gradient(ellipse 70% 50% at 75% 20%, var(--stitch-mesh-b), transparent),
+      radial-gradient(ellipse 60% 40% at 50% 90%, color-mix(in srgb, var(--stitch-bg) 90%, transparent), transparent);
   }
 
   .coming-online {
-    @apply flex flex-col items-center justify-center rounded-2xl border border-dashed border-white/15 bg-white/[0.02] px-8 py-16 text-center;
+    @apply flex flex-col items-center justify-center rounded-2xl border border-dashed px-8 py-16 text-center;
+    border-color: var(--stitch-outline);
+    background: var(--stitch-glass);
   }
 
-  /* Page shell under fixed banner + nav */
   .stitch-page {
     @apply min-h-screen;
     background: var(--stitch-bg);
+    color: var(--stitch-on);
   }
 
   .stitch-page-body {
     @apply stitch-container stitch-section pt-10;
+  }
+
+  /* Theme-safe text / surface helpers for Stitch pages */
+  .stitch-fg {
+    color: var(--stitch-on);
+  }
+
+  .stitch-muted-fg {
+    color: var(--stitch-muted);
+  }
+
+  .stitch-glow-fg {
+    color: var(--stitch-primary-glow);
+  }
+
+  .stitch-surface-bg {
+    background-color: var(--stitch-surface);
+  }
+
+  .stitch-surface-low-bg {
+    background-color: var(--stitch-surface-low);
+  }
+
+  .stitch-outline-border {
+    border-color: var(--stitch-outline);
+  }
+
+  /* Theme-aware form fields (login / register / auth) */
+  .auth-input {
+    @apply w-full h-11 rounded-lg px-3 text-sm outline-none transition-colors;
+    border: 1.5px solid var(--stitch-outline);
+    background: var(--stitch-surface);
+    color: var(--stitch-on);
+    box-shadow: 0 1px 2px rgba(18, 18, 24, 0.04);
+  }
+
+  .auth-input::placeholder {
+    color: var(--stitch-outline-strong);
+    opacity: 0.85;
+  }
+
+  .auth-input:hover {
+    border-color: var(--stitch-outline-strong);
+  }
+
+  .auth-input:focus {
+    border-color: var(--stitch-primary);
+    box-shadow: 0 0 0 3px var(--stitch-glow);
+  }
+
+  .stitch-textarea {
+    @apply w-full rounded-xl px-4 py-3 text-[15px] leading-relaxed outline-none transition-colors resize-y;
+    min-height: 7.5rem;
+    border: 1.5px solid var(--stitch-outline);
+    background: #ffffff;
+    color: var(--stitch-on);
+    box-shadow: 0 1px 2px rgba(18, 18, 24, 0.04);
+  }
+
+  .stitch-textarea::placeholder {
+    color: var(--stitch-outline-strong);
+    opacity: 0.75;
+  }
+
+  .stitch-textarea:hover {
+    border-color: var(--stitch-outline-strong);
+  }
+
+  .stitch-textarea:focus {
+    border-color: var(--stitch-primary);
+    box-shadow: 0 0 0 3px var(--stitch-glow);
+  }
+
+  .stitch-textarea:disabled {
+    opacity: 0.65;
+    cursor: not-allowed;
+    background: var(--stitch-surface-low);
+  }
+
+  .dark .auth-input {
+    background: var(--stitch-surface-low);
+    border-color: var(--stitch-outline);
+    box-shadow: none;
+    color-scheme: dark;
+  }
+
+  /* Native <select> dropdowns: keep readable option text on OS white menus */
+  .auth-select,
+  select.auth-input {
+    cursor: pointer;
+    color-scheme: dark;
+  }
+
+  .dark select,
+  .dark .auth-select,
+  .dark select.auth-input {
+    background: #1b1b1f;
+    color: #e4e1e7;
+    border-color: #4a4455;
+    color-scheme: dark;
+  }
+
+  .dark select option,
+  .dark .auth-select option,
+  .dark select.auth-input option {
+    background-color: #1b1b1f !important;
+    color: #e4e1e7 !important;
+  }
+
+  /* Light marketing selects stay dark-on-white */
+  html:not(.dark) select.auth-input,
+  html:not(.dark) .auth-select {
+    color-scheme: light;
+    background: #ffffff;
+    color: #121218;
+  }
+
+  html:not(.dark) select.auth-input option,
+  html:not(.dark) .auth-select option {
+    background-color: #ffffff;
+    color: #121218;
   }
 }
 
@@ -235,3 +455,128 @@
     text-wrap: balance;
   }
 }
+
+@keyframes mc-marquee {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+  to {
+    transform: translate3d(-50%, 0, 0);
+  }
+}
+
+.mc-marquee-track {
+  animation-name: mc-marquee;
+  animation-duration: var(--mc-marquee-duration, 16s);
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+  animation-fill-mode: none;
+  backface-visibility: hidden;
+}
+
+/* Keep marquees moving on reduced-motion (Windows often enables it); do not slow them further */
+@media (prefers-reduced-motion: reduce) {
+  .mc-marquee-track {
+    animation-duration: var(--mc-marquee-duration, 16s);
+  }
+}
+
+/* ---- Chat launcher waves (Stitch-style ripple rings) ---- */
+@keyframes mc-chat-wave {
+  0% {
+    transform: scale(1);
+    opacity: 0.55;
+  }
+  100% {
+    transform: scale(2.1);
+    opacity: 0;
+  }
+}
+
+.mc-chat-wave {
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  border-radius: 9999px;
+  border: 2px solid rgba(251, 113, 133, 0.55);
+  animation: mc-chat-wave 2.4s ease-out infinite;
+}
+
+.mc-chat-wave:nth-child(2) {
+  animation-delay: 0.8s;
+}
+
+.mc-chat-wave:nth-child(3) {
+  animation-delay: 1.6s;
+}
+
+/* Messenger-style typing bubble (3 dark dots) */
+.mc-chat-typing-bubble {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.65rem 0.85rem;
+  border-radius: 1.1rem;
+  border-bottom-left-radius: 0.25rem;
+  background: #ffffff;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+@keyframes mc-chat-typing {
+  0%,
+  60%,
+  100% {
+    transform: translateY(0);
+    opacity: 0.35;
+  }
+  30% {
+    transform: translateY(-4px);
+    opacity: 1;
+  }
+}
+
+.mc-chat-typing-dot {
+  display: block;
+  width: 0.4rem;
+  height: 0.4rem;
+  border-radius: 9999px;
+  background: #1a1a1a;
+  animation: mc-chat-typing 1.05s ease-in-out infinite;
+}
+
+.mc-chat-typing-dot:nth-child(2) {
+  animation-delay: 0.16s;
+}
+
+.mc-chat-typing-dot:nth-child(3) {
+  animation-delay: 0.32s;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mc-chat-typing-dot {
+    animation: none;
+    opacity: 0.55;
+  }
+}
+
+@keyframes mc-chat-tap-ripple {
+  0% {
+    transform: scale(0.35);
+    opacity: 0.45;
+  }
+  100% {
+    transform: scale(1.35);
+    opacity: 0;
+  }
+}
+
+.mc-chat-tap-ripple {
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.35);
+  animation: mc-chat-tap-ripple 0.5s ease-out forwards;
+}
+

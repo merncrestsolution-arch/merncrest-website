@@ -24,6 +24,7 @@ export async function GET() {
     activities,
     pendingPayments,
     quotations,
+    projects,
   ] = await Promise.all([
     prisma.user.findUnique({
       where: { id: userId },
@@ -92,6 +93,18 @@ export async function GET() {
       orderBy: { createdAt: "desc" },
       take: 5,
     }),
+    prisma.erpProject.findMany({
+      where: {
+        members: { some: { userId } },
+        status: { in: ["PLANNING", "ACTIVE", "ON_HOLD"] },
+      },
+      orderBy: { updatedAt: "desc" },
+      take: 8,
+      include: {
+        milestones: { select: { status: true } },
+        tasks: { select: { status: true } },
+      },
+    }),
   ]);
 
   const renewals = [
@@ -148,6 +161,7 @@ export async function GET() {
       software: subscriptions.filter((s) =>
         /software|erp|crm|growth|website/i.test(s.productSlug + s.productName)
       ).length,
+      projects: projects.length,
       openTickets: tickets.length,
       pendingInvoices: pendingInvoices.length,
       pendingPayments: pendingPayments.length,
@@ -161,6 +175,22 @@ export async function GET() {
       hosting: hosting.filter((h) => h.status === "ACTIVE").slice(0, 6),
       subscriptions: subscriptions.slice(0, 6),
     },
+    projects: projects.map((p) => ({
+      id: p.id,
+      projectCode: p.projectCode,
+      name: p.name,
+      status: p.status,
+      progressPct:
+        p.milestones.length > 0
+          ? Math.round(
+              (p.milestones.filter((m) => m.status === "DONE").length / p.milestones.length) * 100
+            )
+          : p.tasks.length > 0
+            ? Math.round((p.tasks.filter((t) => t.status === "DONE").length / p.tasks.length) * 100)
+            : p.status === "ACTIVE"
+              ? 25
+              : 5,
+    })),
     openTickets: tickets,
     announcements,
     notifications,

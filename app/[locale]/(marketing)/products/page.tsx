@@ -22,7 +22,7 @@ export default function ProductsPage() {
                 href={`/products/${cat.slug}`}
                 className="group block h-full stitch-card stitch-card-hover"
               >
-                <h2 className="font-display text-2xl font-semibold text-white group-hover:text-violet-200 transition-colors flex items-center gap-2">
+                <h2 className="font-display text-2xl font-semibold text-foreground group-hover:text-violet-200 transition-colors flex items-center gap-2">
                   {cat.title}
                   <ArrowRight className="h-5 w-5 opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all" />
                 </h2>
@@ -34,7 +34,7 @@ export default function ProductsPage() {
 
         <div>
           <Reveal>
-            <h2 className="font-display text-2xl font-bold mb-2 text-white">Buy online</h2>
+            <h2 className="font-display text-2xl font-bold mb-2 text-foreground">Buy online</h2>
             <p className="text-muted mb-6">Live catalog SKUs — add to cart after login.</p>
           </Reveal>
           <CatalogGrid />

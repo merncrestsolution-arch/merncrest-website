@@ -1,10 +1,10 @@
 import { PortalDownloadsPanel } from "@/components/portal/portal-downloads-panel";
+import { RlkPage } from "@/components/rlk/rlk-page";
 
 export default function PortalDownloadsPage() {
   return (
-    <div className="space-y-6">
-      <h1 className="font-display text-2xl font-bold">Downloads</h1>
+    <RlkPage title="Downloads" description="Invoices, receipts, licenses, and manuals.">
       <PortalDownloadsPanel />
-    </div>
+    </RlkPage>
   );
 }

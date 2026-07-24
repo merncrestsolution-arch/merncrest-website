@@ -99,7 +99,7 @@ export function ErpDashboard() {
           return (
             <Link
               key={m.id}
-              href={allowed ? m.href : "/admin/erp"}
+              href={allowed ? m.href : "/staff"}
               className={`rounded-xl border p-5 transition-colors ${
                 allowed
                   ? "border-white/10 hover:border-accent/40 hover:bg-accent/5"

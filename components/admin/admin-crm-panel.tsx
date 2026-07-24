@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { formatMoney } from "@/lib/commerce-format";
 import { CRM_KANBAN_STAGES, CRM_STAGE_LABELS, type CrmStage } from "@/lib/crm/stages";
+import { AiSuggestionsPanel } from "@/components/crm/ai-suggestions-panel";
 
 type Lead = {
   id: string;
@@ -61,6 +62,15 @@ export function AdminCrmPanel() {
     type: "CALL",
     dueAt: "",
   });
+  const [projectAccept, setProjectAccept] = useState({
+    description: "",
+    totalLkr: "",
+    chargeMode: "ADVANCE" as "ADVANCE" | "FULL" | "CUSTOM",
+    advancePercent: "50",
+    chargeLkr: "",
+    terms: "",
+  });
+  const [acceptMsg, setAcceptMsg] = useState("");
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -203,10 +213,70 @@ export function AdminCrmPanel() {
           ],
         }),
       });
-      if (!res.ok) throw new Error("Quote failed");
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Quote failed");
       await setStage(selectedLead.id, "QUOTATION");
+      if (data.quotation?.id) {
+        window.open(`/api/quotations/${data.quotation.id}/pdf`, "_blank");
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed");
+      setBusy(false);
+    }
+  }
+
+  async function acceptProjectToCart(e: React.FormEvent) {
+    e.preventDefault();
+    if (!selectedLead) return;
+    setBusy(true);
+    setError("");
+    setAcceptMsg("");
+    try {
+      const totalLkr = Number(projectAccept.totalLkr);
+      if (!Number.isFinite(totalLkr) || totalLkr < 1) {
+        throw new Error("Enter project total (LKR) decided by Sales");
+      }
+      const projectTotalCents = Math.round(totalLkr * 100);
+      const payload: Record<string, unknown> = {
+        leadId: selectedLead.id,
+        description:
+          projectAccept.description.trim() ||
+          selectedLead.interest ||
+          "Custom project services",
+        projectTotalCents,
+        chargeMode: projectAccept.chargeMode,
+        terms: projectAccept.terms.trim() || undefined,
+      };
+      if (projectAccept.chargeMode === "ADVANCE") {
+        payload.advancePercent = Number(projectAccept.advancePercent) || 50;
+      }
+      if (projectAccept.chargeMode === "CUSTOM") {
+        const chargeLkr = Number(projectAccept.chargeLkr);
+        if (!Number.isFinite(chargeLkr) || chargeLkr < 1) {
+          throw new Error("Enter custom charge amount (LKR)");
+        }
+        payload.chargeCents = Math.round(chargeLkr * 100);
+      }
+      const res = await fetch("/api/crm/project-accept", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Accept failed");
+      setAcceptMsg(data.message || "Sent to customer cart");
+      setProjectAccept({
+        description: "",
+        totalLkr: "",
+        chargeMode: "ADVANCE",
+        advancePercent: "50",
+        chargeLkr: "",
+        terms: "",
+      });
+      await load();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed");
+    } finally {
       setBusy(false);
     }
   }
@@ -400,6 +470,8 @@ export function AdminCrmPanel() {
               </div>
             </div>
 
+            <AiSuggestionsPanel leadId={selectedLead.id} />
+
             <div className="flex flex-wrap gap-1">
               {CRM_KANBAN_STAGES.map((s) => (
                 <button
@@ -463,9 +535,88 @@ export function AdminCrmPanel() {
 
             <div className="flex gap-2">
               <Button size="sm" variant="outline" disabled={busy} onClick={quickQuote}>
-                Generate quotation
+                Generate quotation PDF
+              </Button>
+              <Button size="sm" disabled={busy} asChild>
+                <a href="/staff/billing">Manual quotation</a>
               </Button>
             </div>
+
+            <form
+              onSubmit={acceptProjectToCart}
+              className="rounded-xl border border-violet-400/30 bg-violet-500/5 p-3 space-y-2"
+            >
+              <p className="text-xs font-semibold uppercase tracking-wide text-violet-200">
+                Accept project → customer cart
+              </p>
+              <p className="text-[11px] text-muted">
+                Sales decides total, advance, and charge. Item appears in the customer&apos;s portal
+                cart for checkout.
+              </p>
+              <input
+                className="w-full rounded-lg border border-white/10 bg-black/30 px-3 py-2 text-sm"
+                placeholder="Line description (website / app / software…)"
+                value={projectAccept.description}
+                onChange={(e) =>
+                  setProjectAccept({ ...projectAccept, description: e.target.value })
+                }
+              />
+              <div className="grid grid-cols-2 gap-2">
+                <input
+                  className="rounded-lg border border-white/10 bg-black/30 px-3 py-2 text-sm"
+                  placeholder="Project total (LKR)"
+                  value={projectAccept.totalLkr}
+                  onChange={(e) =>
+                    setProjectAccept({ ...projectAccept, totalLkr: e.target.value })
+                  }
+                  required
+                />
+                <select
+                  className="rounded-lg border border-white/10 bg-black/30 px-3 py-2 text-sm"
+                  value={projectAccept.chargeMode}
+                  onChange={(e) =>
+                    setProjectAccept({
+                      ...projectAccept,
+                      chargeMode: e.target.value as "ADVANCE" | "FULL" | "CUSTOM",
+                    })
+                  }
+                >
+                  <option value="ADVANCE">Advance %</option>
+                  <option value="FULL">Full amount</option>
+                  <option value="CUSTOM">Custom charge</option>
+                </select>
+              </div>
+              {projectAccept.chargeMode === "ADVANCE" && (
+                <input
+                  className="w-full rounded-lg border border-white/10 bg-black/30 px-3 py-2 text-sm"
+                  placeholder="Advance % (e.g. 50)"
+                  value={projectAccept.advancePercent}
+                  onChange={(e) =>
+                    setProjectAccept({ ...projectAccept, advancePercent: e.target.value })
+                  }
+                />
+              )}
+              {projectAccept.chargeMode === "CUSTOM" && (
+                <input
+                  className="w-full rounded-lg border border-white/10 bg-black/30 px-3 py-2 text-sm"
+                  placeholder="Charge now (LKR)"
+                  value={projectAccept.chargeLkr}
+                  onChange={(e) =>
+                    setProjectAccept({ ...projectAccept, chargeLkr: e.target.value })
+                  }
+                />
+              )}
+              <input
+                className="w-full rounded-lg border border-white/10 bg-black/30 px-3 py-2 text-sm"
+                placeholder="Terms (optional) — Sales wording"
+                value={projectAccept.terms}
+                onChange={(e) => setProjectAccept({ ...projectAccept, terms: e.target.value })}
+              />
+              {acceptMsg && <p className="text-xs text-emerald-400">{acceptMsg}</p>}
+              <Button type="submit" size="sm" disabled={busy} className="w-full">
+                Accept &amp; send to cart
+              </Button>
+            </form>
 
             {(selectedLead.followUps?.length || 0) > 0 && (
               <div>

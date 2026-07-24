@@ -4,6 +4,7 @@ import { formatMoney, nextNumber, requireUser } from "@/lib/commerce";
 import { sendOrderConfirmationEmail } from "@/lib/mail";
 import { onCustomerOrderCreated } from "@/lib/crm/customer-hooks";
 import { notifyUser } from "@/lib/support/notify";
+import { cartItemUnitPriceCents, cartSubtotalCents } from "@/lib/commerce/cart-price";
 import { z } from "zod";
 
 const TAX_RATE = 0;
@@ -71,10 +72,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Cart is empty" }, { status: 400 });
     }
 
-    const subtotalCents = cart.items.reduce(
-      (sum, i) => sum + i.product.priceCents * i.quantity,
-      0
-    );
+    const subtotalCents = cartSubtotalCents(cart.items);
 
     let discountCents = 0;
     let couponCode: string | null = null;
@@ -132,27 +130,31 @@ export async function POST(request: Request) {
           couponCode,
           registrantJson: JSON.stringify(registrant),
           items: {
-            create: cart.items.map((i) => ({
-              productId: i.productId,
-              productName: i.product.marketingTitle || i.product.name,
-              productSlug: i.product.slug,
-              quantity: i.quantity,
-              unitPriceCents: i.product.priceCents,
-              totalCents: i.product.priceCents * i.quantity,
-              providerCostCents: i.product.providerPriceCents ?? null,
-              providerCurrency: i.providerCurrency ?? i.product.currency ?? "LKR",
-              exchangeRate: i.exchangeRate ?? null,
-              exchangeRateLockedAt: i.exchangeRateLockedAt ?? null,
-              fxBufferPercent: i.fxBufferPercent ?? null,
-              billingPeriod: i.product.billingPeriod,
-              metaJson: i.metaJson,
-            })),
+            create: cart.items.map((i) => {
+              const unit = cartItemUnitPriceCents(i);
+              const name = i.lineLabel || i.product.marketingTitle || i.product.name;
+              return {
+                productId: i.productId,
+                productName: name,
+                productSlug: i.product.slug,
+                quantity: i.quantity,
+                unitPriceCents: unit,
+                totalCents: unit * i.quantity,
+                providerCostCents: i.product.providerPriceCents ?? null,
+                providerCurrency: i.providerCurrency ?? i.product.currency ?? "LKR",
+                exchangeRate: i.exchangeRate ?? null,
+                exchangeRateLockedAt: i.exchangeRateLockedAt ?? null,
+                fxBufferPercent: i.fxBufferPercent ?? null,
+                billingPeriod: i.product.billingPeriod,
+                metaJson: i.metaJson,
+              };
+            }),
           },
         },
         include: { items: true },
       });
 
-      await tx.invoice.create({
+      const invoice = await tx.invoice.create({
         data: {
           invoiceNumber: nextNumber("INV"),
           orderId: created.id,
@@ -165,6 +167,124 @@ export async function POST(request: Request) {
           dueAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
         },
       });
+
+      // Mark linked quotations as ACCEPTED + ensure delivery project after client confirms
+      for (const item of cart.items) {
+        if (!item.metaJson) continue;
+        try {
+          const meta = JSON.parse(item.metaJson) as {
+            salesProject?: boolean;
+            quotationId?: string;
+            leadId?: string;
+            projectName?: string;
+            advanceCents?: number;
+            balanceCents?: number;
+            balanceDueAt?: string;
+            erpProjectId?: string;
+          };
+          if (meta.salesProject && meta.quotationId) {
+            await tx.quotation.update({
+              where: { id: meta.quotationId },
+              data: { status: "ACCEPTED", orderId: created.id },
+            });
+          }
+          if (meta.salesProject && meta.leadId) {
+            await tx.crmLead.update({
+              where: { id: meta.leadId },
+              data: { stage: "NEGOTIATION" },
+            });
+            await tx.crmActivity.create({
+              data: {
+                leadId: meta.leadId,
+                userId: auth.user.id,
+                type: "STATUS",
+                body: `Customer checked out Sales project terms · Order ${created.orderNumber}`,
+              },
+            });
+          }
+
+          if (meta.salesProject) {
+            const lineTotal =
+              cartItemUnitPriceCents(item) * item.quantity;
+            let erpId = meta.erpProjectId;
+            if (!erpId) {
+              const prj = await tx.erpProject.create({
+                data: {
+                  projectCode: nextNumber("PRJ"),
+                  name: meta.projectName || item.lineLabel || item.product.name,
+                  status: "ACTIVE",
+                  customerId: auth.user.id,
+                  revenueCents: lineTotal,
+                  members: {
+                    create: { userId: auth.user.id, role: "VIEWER" },
+                  },
+                },
+              });
+              erpId = prj.id;
+            } else {
+              await tx.erpProject.update({
+                where: { id: erpId },
+                data: {
+                  customerId: auth.user.id,
+                  status: "ACTIVE",
+                  revenueCents: { increment: lineTotal },
+                },
+              });
+              await tx.projectMember.upsert({
+                where: {
+                  projectId_userId: { projectId: erpId, userId: auth.user.id },
+                },
+                create: { projectId: erpId, userId: auth.user.id, role: "VIEWER" },
+                update: {},
+              });
+            }
+
+            const advance = meta.advanceCents ?? lineTotal;
+            const balance = meta.balanceCents ?? 0;
+            await tx.projectPaymentSchedule.create({
+              data: {
+                projectId: erpId,
+                label: "Order confirmation / advance",
+                amountCents: advance,
+                dueDate: new Date(),
+                status: "INVOICED",
+                invoiceId: invoice.id,
+                notes: `From order ${created.orderNumber}`,
+              },
+            });
+            if (balance > 0) {
+              await tx.projectPaymentSchedule.create({
+                data: {
+                  projectId: erpId,
+                  label: "Balance payment",
+                  amountCents: balance,
+                  dueDate: meta.balanceDueAt
+                    ? new Date(meta.balanceDueAt)
+                    : new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+                  status: "PENDING",
+                  notes: `Balance for order ${created.orderNumber}`,
+                },
+              });
+            }
+            const nextBal = await tx.projectPaymentSchedule.findFirst({
+              where: {
+                projectId: erpId,
+                status: { in: ["PENDING", "INVOICED", "OVERDUE"] },
+              },
+              orderBy: { dueDate: "asc" },
+            });
+            await tx.erpProject.update({
+              where: { id: erpId },
+              data: {
+                nextPaymentAt: nextBal?.dueDate || null,
+                nextPaymentCents: nextBal?.amountCents || 0,
+              },
+            });
+          }
+        } catch {
+          /* ignore bad meta */
+        }
+      }
 
       if (couponCode) {
         await tx.coupon.update({
@@ -191,6 +311,15 @@ export async function POST(request: Request) {
         totalLabel: formatMoney(order.totalCents),
         items: order.items.map((i) => `${i.productName} ×${i.quantity}`),
       });
+      void import("@/lib/notify/client-email").then(({ notifyClient }) =>
+        notifyClient("ORDER_CONFIRMED", {
+          toEmail: auth.user.email,
+          vars: {
+            name: auth.user.fullName,
+            orderNumber: order.orderNumber,
+          },
+        })
+      );
     }
 
     void onCustomerOrderCreated({
@@ -204,16 +333,26 @@ export async function POST(request: Request) {
     });
     void notifyUser({
       userId: auth.user.id,
-      title: `Order ${order.orderNumber} created`,
-      body: `Total ${formatMoney(order.totalCents)}. Complete payment from Billing.`,
+      title: `Order ${order.orderNumber} confirmed`,
+      body: `Invoice ${order.invoice?.invoiceNumber || ""} · Total ${formatMoney(order.totalCents)}. Pay from Billing.`,
       category: "ORDER",
-      href: "/portal/invoices",
+      href: `/portal/orders/confirmed?order=${order.orderNumber}`,
+    });
+    const { notifyOrderWhatsApp } = await import("@/lib/crm/whatsapp-notify");
+    void notifyOrderWhatsApp({
+      userId: auth.user.id,
+      orderNumber: order.orderNumber,
+      trackingUrl: "/en/portal/orders",
     });
 
     return NextResponse.json(
       {
         order,
-        message: `Order ${order.orderNumber} created (${formatMoney(order.totalCents)})`,
+        invoice: order.invoice,
+        orderNumber: order.orderNumber,
+        invoiceNumber: order.invoice?.invoiceNumber,
+        message: `Order ${order.orderNumber} created with invoice ${order.invoice?.invoiceNumber}`,
+        redirectTo: `/portal/orders/confirmed?order=${encodeURIComponent(order.orderNumber)}`,
       },
       { status: 201 }
     );

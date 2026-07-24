@@ -1,0 +1,8 @@
+{
+  "projectId": "17402065891171962495",
+  "screenId": "c7f01edf85db4c7e9107c0ff17ad7a88",
+  "title": "Helpdesk — MernCrest Solutions Staff Portal",
+  "route": "/staff/tickets",
+  "component": "StaffTicketsPanel",
+  "designSystem": "assets/060de6acb3a74722a6e7f79ec90a20d0"
+}

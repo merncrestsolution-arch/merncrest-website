@@ -27,14 +27,14 @@ export default async function ProductCategoryPage({
         description={cat.description}
         align="left"
       >
-        <Link href="/products" className="text-sm text-violet-300 hover:text-violet-200">
+        <Link href="/products" className="text-sm text-stitch-glow hover:text-violet-200">
           ← All products
         </Link>
       </PageHero>
 
       <div className="stitch-page-body stitch-stack-lg">
         <Reveal>
-          <h2 className="font-display text-xl font-semibold text-white mb-4">
+          <h2 className="font-display text-xl font-semibold text-foreground mb-4">
             Included capabilities
           </h2>
           <ul className="grid sm:grid-cols-2 gap-3">

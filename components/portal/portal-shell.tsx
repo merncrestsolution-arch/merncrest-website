@@ -1,42 +1,36 @@
 "use client";
 
-import { Link } from "@/i18n/routing";
-import { useTranslations } from "next-intl";
-import { PortalSidebar } from "@/components/portal/portal-sidebar";
-import { CommandSearchProvider, SearchTrigger } from "@/components/layout/command-search";
+import { useEffect } from "react";
+import "@/app/styles/stitch-portal.css";
+import { Link, usePathname, useRouter } from "@/i18n/routing";
+import { CommandSearchProvider } from "@/components/layout/command-search";
 import type { SessionUser } from "@/lib/auth-types";
+import {
+  LayoutDashboard,
+  Server,
+  Globe,
+  Cloud,
+  FolderKanban,
+  CreditCard,
+  Headphones,
+  Settings,
+  ShoppingCart,
+  Bell,
+  Download,
+} from "lucide-react";
+import { cn } from "@/lib/utils";
 
-const mobileLinks = [
-  { href: "/portal", key: "overview" },
-  { href: "/portal/services", key: "services" },
-  { href: "/portal/cart", key: "cart" },
-  { href: "/portal/orders", key: "orders" },
-  { href: "/portal/domains", key: "domains" },
-  { href: "/portal/hosting", key: "hosting" },
-  { href: "/portal/invoices", key: "invoices" },
-  { href: "/portal/tickets", key: "tickets" },
-  { href: "/portal/notifications", key: "notifications" },
-  { href: "/portal/settings", key: "settings" },
-] as const;
-
-function PortalMobileNav() {
-  const t = useTranslations("portal");
-  return (
-    <div className="md:hidden border-b border-white/10 overflow-x-auto">
-      <div className="flex gap-1 px-3 py-2 min-w-max">
-        {mobileLinks.map((l) => (
-          <Link
-            key={l.href}
-            href={l.href}
-            className="text-xs px-3 py-1.5 rounded-full border border-white/10 text-muted hover:text-foreground hover:border-violet-400/40"
-          >
-            {t(l.key)}
-          </Link>
-        ))}
-      </div>
-    </div>
-  );
-}
+const nav = [
+  { href: "/portal", label: "Dashboard", icon: LayoutDashboard, exact: true },
+  { href: "/portal/services", label: "Services", icon: Server },
+  { href: "/portal/domains", label: "Domains", icon: Globe },
+  { href: "/portal/hosting", label: "Hosting", icon: Cloud },
+  { href: "/portal/projects", label: "Projects", icon: FolderKanban },
+  { href: "/portal/invoices", label: "Billing", icon: CreditCard },
+  { href: "/portal/tickets", label: "Support", icon: Headphones },
+  { href: "/portal/downloads", label: "Downloads", icon: Download },
+  { href: "/portal/settings", label: "Settings", icon: Settings },
+];
 
 export function PortalShell({
   children,
@@ -45,31 +39,61 @@ export function PortalShell({
   children: React.ReactNode;
   user: SessionUser;
 }) {
+  const pathname = usePathname();
+  const router = useRouter();
+  const firstName = user.fullName?.split(" ")[0] || "Customer";
+
+  useEffect(() => {
+    document.documentElement.classList.remove("dark");
+    document.documentElement.style.colorScheme = "light";
+  }, []);
+
+  async function handleLogout() {
+    await fetch("/api/auth/logout", { method: "POST" });
+    router.push("/login");
+    router.refresh();
+  }
+
   return (
     <CommandSearchProvider>
-      <div className="flex min-h-screen bg-[#050508]">
-        <div className="hidden md:block sticky top-0 h-screen">
-          <PortalSidebar userName={user.fullName} />
-        </div>
-        <div className="flex-1 flex flex-col min-w-0">
-          <header className="sticky top-0 z-40 border-b border-white/10 bg-[#050508]/90 backdrop-blur-xl px-4 py-3 flex items-center justify-between gap-3">
-            <div className="md:hidden">
-              <Link href="/" className="font-display font-bold gradient-text">
-                MernCrest Portal
+      <div className="stitch-app stitch-shell">
+        <aside className="stitch-sidebar">
+          <Link href="/portal" className="stitch-sidebar-brand">
+            <span>Portal</span>.merncrest
+          </Link>
+          <nav className="stitch-nav">
+            {nav.map((item) => {
+              const Icon = item.icon;
+              const active = item.exact
+                ? pathname === item.href
+                : pathname === item.href || pathname.startsWith(`${item.href}/`);
+              return (
+                <Link key={item.href} href={item.href} className={cn(active && "active")}>
+                  <Icon className="h-4 w-4" />
+                  {item.label}
+                </Link>
+              );
+            })}
+          </nav>
+          <button type="button" className="stitch-logout" onClick={handleLogout}>
+            Logout
+          </button>
+        </aside>
+
+        <div className="stitch-main">
+          <header className="stitch-topbar">
+            <h1>Hello, {firstName}</h1>
+            <div className="stitch-topbar-actions">
+              <Link href="/portal/notifications" className="text-violet-600 flex items-center gap-1">
+                <Bell className="h-4 w-4" /> Alerts
               </Link>
-            </div>
-            <div className="hidden md:block font-display text-sm font-semibold text-white/90">
-              Customer Portal
-            </div>
-            <div className="flex items-center gap-3 ml-auto">
-              <SearchTrigger />
-              <span className="text-xs text-muted truncate max-w-[8rem] sm:max-w-[12rem]">
-                {user.fullName}
-              </span>
+              <Link href="/portal/cart" className="text-violet-600 flex items-center gap-1">
+                <ShoppingCart className="h-4 w-4" /> Cart
+              </Link>
+              <span className="text-[#999] hidden sm:inline">{user.email}</span>
             </div>
           </header>
-          <PortalMobileNav />
-          <main className="flex-1 p-6 lg:p-10">{children}</main>
+          <main className="stitch-content">{children}</main>
         </div>
       </div>
     </CommandSearchProvider>

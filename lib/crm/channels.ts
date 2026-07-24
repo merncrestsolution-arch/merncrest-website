@@ -17,6 +17,8 @@ export async function ensureLeadFromChannel(opts: {
   activityBody: string;
   channelRef?: string;
   userId?: string | null;
+  /** When true, skip INQUIRY WA (caller sends its own auto-reply) */
+  skipWhatsAppAutoReply?: boolean;
 }) {
   const email = opts.email?.toLowerCase().trim() || null;
   const phone = opts.phone?.replace(/\D/g, "") || null;
@@ -79,6 +81,34 @@ export async function ensureLeadFromChannel(opts: {
       channelRef: opts.channelRef,
     },
   });
+
+  // Auto-link live chat sessions to existing customer accounts
+  if (opts.channelRef && opts.channel === "LIVE_CHAT" && (email || phone)) {
+    const { findCustomerUser } = await import("@/lib/chat/identify-customer");
+    const match = await findCustomerUser({ email, phone });
+    if (match) {
+      await prisma.chatSession.updateMany({
+        where: { id: opts.channelRef, userId: null },
+        data: { userId: match.userId },
+      });
+    }
+  }
+
+  // Customer inquiry → WhatsApp auto-response (when phone known)
+  if (
+    !opts.skipWhatsAppAutoReply &&
+    opts.phone &&
+    (opts.channel === "WHATSAPP" || opts.channel === "FORM" || opts.channel === "WEBSITE")
+  ) {
+    const { runWhatsAppAutomation } = await import("@/lib/crm/whatsapp-notify");
+    void runWhatsAppAutomation({
+      trigger: "INQUIRY",
+      phone: opts.phone,
+      customerName: opts.fullName,
+      vars: { name: opts.fullName || "there" },
+      bodyFallback: `Hi ${opts.fullName || "there"}, thanks for contacting MernCrest. A specialist will reply shortly.`,
+    });
+  }
 
   return lead;
 }

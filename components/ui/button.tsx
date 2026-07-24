@@ -12,10 +12,10 @@ const buttonVariants = cva(
           "bg-gradient-accent text-white shadow-glow hover:opacity-90 hover:shadow-glow-lg",
         destructive: "bg-destructive text-destructive-foreground hover:bg-destructive/90",
         outline:
-          "border border-white/20 bg-transparent hover:bg-white/5 hover:border-violet-400/50",
+          "border border-stitch-outline bg-transparent hover:bg-glass hover:border-stitch-primary/50",
         secondary: "bg-secondary text-secondary-foreground hover:bg-secondary/80",
-        ghost: "hover:bg-white/5 hover:text-foreground",
-        link: "text-violet-300 underline-offset-4 hover:underline",
+        ghost: "hover:bg-glass hover:text-foreground",
+        link: "text-stitch-glow underline-offset-4 hover:underline",
       },
       size: {
         default: "h-10 px-6 py-2.5",

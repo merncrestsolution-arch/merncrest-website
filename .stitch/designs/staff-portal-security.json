@@ -1,0 +1,8 @@
+{
+  "projectId": "17402065891171962495",
+  "screenId": "229e73255d164a6aab552fc530b48f2f",
+  "title": "Security — MernCrest Solutions Staff Portal",
+  "route": "/staff/security",
+  "component": "SystemSecurityPanel",
+  "designSystem": "assets/060de6acb3a74722a6e7f79ec90a20d0"
+}

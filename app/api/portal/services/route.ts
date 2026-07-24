@@ -16,6 +16,10 @@ export async function GET() {
       where: { members: { some: { userId } } },
       orderBy: { updatedAt: "desc" },
       take: 20,
+      include: {
+        milestones: { select: { id: true, title: true, status: true, dueDate: true } },
+        tasks: { select: { status: true } },
+      },
     }),
   ]);
 
@@ -23,7 +27,25 @@ export async function GET() {
     domains,
     hosting,
     subscriptions,
-    projects,
+    projects: projects.map((p) => ({
+      id: p.id,
+      projectCode: p.projectCode,
+      name: p.name,
+      description: p.description,
+      status: p.status,
+      progressPct:
+        p.milestones.length > 0
+          ? Math.round(
+              (p.milestones.filter((m) => m.status === "DONE").length / p.milestones.length) * 100
+            )
+          : p.tasks.length > 0
+            ? Math.round((p.tasks.filter((t) => t.status === "DONE").length / p.tasks.length) * 100)
+            : p.status === "COMPLETED"
+              ? 100
+              : 25,
+      milestonesDone: p.milestones.filter((m) => m.status === "DONE").length,
+      milestonesTotal: p.milestones.length,
+    })),
     software: subscriptions.filter((s) =>
       /software|erp|crm|growth|website|ai/i.test(s.productSlug + s.productName)
     ),

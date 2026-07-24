@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/routing";
 import { Globe, Mail, MapPin, UserRound } from "lucide-react";
@@ -23,7 +24,6 @@ const solutionLinks = [
 
 const companyLinks = [
   { key: "aboutUs", href: "/about" },
-  { key: "ourTeam", href: "/team" },
   { key: "careers", href: "/careers" },
   { key: "blog", href: "/blog" },
   { key: "contact", href: "/contact" },
@@ -56,19 +56,19 @@ export function Footer() {
     setMessage({ text: "", type: "" });
 
     try {
-      const response = await fetch("https://formsubmit.co/ajax/merncrestsolution@gmail.com", {
+      const response = await fetch("/api/leads", {
         method: "POST",
-        headers: { 
-          "Content-Type": "application/json",
-          "Accept": "application/json"
-        },
-        body: JSON.stringify({ 
-          email: email,
-          _subject: "New Newsletter Subscriber!"
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          fullName: "Newsletter subscriber",
+          email,
+          interest: "Newsletter subscription",
+          formType: "newsletter",
+          channel: "WEBSITE",
         }),
       });
 
-      const data = await response.json();
+      const data = await response.json().catch(() => ({}));
 
       if (response.ok) {
         setMessage({ text: "Subscribed successfully!", type: "success" });
@@ -84,16 +84,20 @@ export function Footer() {
   };
 
   return (
-    <footer className="relative overflow-hidden border-t border-white/[0.05] bg-[#0e0e12]">
+    <footer className="relative overflow-hidden border-t border-stitch-outline bg-stitch-bg">
       <div className="pointer-events-none absolute inset-0 brand-mesh opacity-30" aria-hidden />
       <div className="container-wide section-padding pb-8 relative z-10">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-10">
           {/* Brand Column */}
           <div className="lg:col-span-2 space-y-4">
             <Link href="/" className="inline-block">
-              <span className="font-display text-2xl font-bold gradient-text">
-                MernCrest
-              </span>
+              <Image
+                src="/logo-merncrest.png"
+                alt="MernCrest Solutions — Your Technology Partner"
+                width={220}
+                height={220}
+                className="h-16 w-auto object-contain"
+              />
             </Link>
             <p className="text-sm text-muted max-w-sm">{t("tagline")}</p>
             <p className="text-sm text-muted max-w-sm leading-relaxed">

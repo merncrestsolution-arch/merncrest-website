@@ -10,32 +10,22 @@ import {
   StitchGrid,
 } from "@/components/ui/stitch";
 
-const testimonials = [
-  {
-    quote:
-      "MERNcrest completely transformed our legacy ERP system. Their team's technical depth and agile approach helped us launch 2 months ahead of schedule.",
-    author: "Samantha Perera",
-    role: "CTO, Global Logistics Solutions",
-    rating: 5,
-  },
-  {
-    quote:
-      "The e-commerce app they built for us handles thousands of concurrent users flawlessly. A truly premium experience from start to finish.",
-    author: "Mohammed Rizwan",
-    role: "Founder, Trendz LK",
-    rating: 5,
-  },
-  {
-    quote:
-      "Their cybersecurity audit and subsequent implementations saved us from a major vulnerability. Highly professional and responsive team.",
-    author: "David Chen",
-    role: "Director of IT, SecureFin",
-    rating: 5,
-  },
-];
+/**
+ * Real customer testimonials only. Fabricated quotes were removed
+ * (no invented reviewers — "no fabricated content" rule). Populate with
+ * genuine, approved testimonials to re-enable this section.
+ */
+const testimonials: {
+  quote: string;
+  author: string;
+  role: string;
+  rating: number;
+}[] = [];
 
 export function TestimonialsSection() {
   const tSection = useTranslations("testimonialsSnippet");
+
+  if (testimonials.length === 0) return null;
 
   return (
     <StitchSection>
@@ -60,11 +50,11 @@ export function TestimonialsSection() {
                 “{testimonial.quote}”
               </p>
               <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-accent text-sm font-bold text-white">
+                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-accent text-sm font-bold text-foreground">
                   {testimonial.author.charAt(0)}
                 </div>
                 <div>
-                  <h4 className="text-sm font-semibold text-white">{testimonial.author}</h4>
+                  <h4 className="text-sm font-semibold text-foreground">{testimonial.author}</h4>
                   <p className="text-xs text-muted">{testimonial.role}</p>
                 </div>
               </div>

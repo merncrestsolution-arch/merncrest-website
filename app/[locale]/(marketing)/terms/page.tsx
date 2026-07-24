@@ -17,7 +17,7 @@ export default async function TermsPage({
     <div className="stitch-page">
       <div className="stitch-container stitch-section pt-32 max-w-4xl mx-auto">
       <div className="stitch-card !p-8 md:!p-12">
-        <div className="mb-12 border-b border-white/10 pb-8">
+        <div className="mb-12 border-b border-stitch-outline pb-8">
           <h1 className="text-4xl md:text-5xl font-bold font-display mb-4">Terms of Service</h1>
           <div className="text-muted space-y-2">
             <p><strong>Company:</strong> MERNcrest Solutions (Pvt) Ltd</p>
@@ -44,7 +44,7 @@ export default async function TermsPage({
           <section>
             <h2 className="text-2xl font-bold text-foreground mb-4">2. Company Information</h2>
             <p className="mb-4">MERNcrest Solutions (Pvt) Ltd is incorporated and registered as a private limited company under the Companies Act No. 07 of 2007 of the Democratic Socialist Republic of Sri Lanka. We provide software development, web development, mobile application development, cloud services, cybersecurity solutions, digital marketing, IT consulting, hosting, and domain services.</p>
-            <div className="bg-white/5 p-4 rounded-xl border border-white/10">
+            <div className="bg-white/5 p-4 rounded-xl border border-stitch-outline">
               <p><strong>Registered Address:</strong> Sri Lanka</p>
               <p><strong>Contact Email:</strong> merncrestsolution@gmail.com</p>
               <p><strong>Website:</strong> merncrest.lk</p>
@@ -269,12 +269,12 @@ export default async function TermsPage({
               <li>National Data Protection Policy of Sri Lanka — alignment with national cybersecurity framework</li>
             </ul>
 
-            <div className="bg-accent text-white p-6 rounded-xl mt-8">
+            <div className="bg-accent text-foreground p-6 rounded-xl mt-8">
               <p className="font-semibold text-lg mb-2">Acknowledgment</p>
               <p className="mb-4">By using our website or engaging our services, you acknowledge that you have read, understood, and agree to be bound by these Terms of Service and our Privacy Policy.</p>
               <div className="pt-4 border-t border-white/20">
                 <p className="font-bold">MERNcrest Solutions (Pvt) Ltd</p>
-                <p className="text-white/80">merncrest.lk | merncrestsolution@gmail.com | Sri Lanka</p>
+                <p className="text-foreground/80">merncrest.lk | merncrestsolution@gmail.com | Sri Lanka</p>
               </div>
             </div>
           </section>

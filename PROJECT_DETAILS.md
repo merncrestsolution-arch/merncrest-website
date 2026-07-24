@@ -246,7 +246,8 @@ Lazy loading · Image optimization · Server Components · Caching · Pagination
 | GET/PATCH | `/api/notifications` | In-portal notifications |
 | GET/POST/PATCH | `/api/crm` | CRM leads & pipeline |
 | GET/POST/PATCH | `/api/quotations` | Quotes → order |
-| GET/POST/PATCH | `/api/ivr` | IVR simulator |
+| GET/POST/PATCH | `/api/ivr` | IVR simulator, call log, queue, analytics |
+| POST | `/api/ivr/webhook` | Twilio / Vonage Voice webhook (TwiML / NCCO) |
 | GET | `/api/admin/customers` | Customer directory |
 | GET | `/api/admin/customers/[id]` | Customer 360 |
 
@@ -357,6 +358,10 @@ Channel auto-CRM: WhatsApp, Live Chat, Email inbound, IVR all call `ensureLeadFr
 
 1 Sales · 2 Technical · 3 Hosting · 4 Domains · 5 Billing · 6 Enterprise · 7 Existing Customers · 8 Customer Care · 9 Voicemail
 
+Secondary menus: Technical → severity 1–4 · Existing → order / payment / appointment / ticket · Care → attendance / ticket / survey.
+
+APIs: `GET/POST/PATCH /api/ivr` (simulator + queue + analytics) · `POST /api/ivr/webhook` (Twilio/Vonage). Agent UI: `/admin/ivr`. Miss → voicemail + ticket + callback + WhatsApp alert → CRM via `ensureLeadFromChannel`.
+
 ---
 
 ## Route map
@@ -373,7 +378,7 @@ All listed routes use the **Stitch marketing shell** (PageHero + stitch cards/gr
 
 ### Admin (`/(admin)/`)
 
-`/admin` · customers · orders · billing · **payments** · **providers** · **catalog** · crm · support · erp · reports · settings · `/staff`
+`/admin` · customers · orders · billing · **payments** · **providers** · **catalog** · crm · **ivr** · support · erp · reports · settings · `/staff`
 
 ---
 
@@ -465,6 +470,7 @@ Enterprise Resource Planning for MernCrest operations, designed multi-tenant rea
 | Approvals | `/admin/erp/approvals` |
 | Audit logs | `/admin/erp/audit` |
 | Staff ESS | `/staff` |
+| System host | `system.merncrest.lk` (env `SYSTEM_HOST`) → staff shell; local `?system=1` |
 
 ### New / deepened models
 
@@ -472,7 +478,31 @@ Enterprise Resource Planning for MernCrest operations, designed multi-tenant rea
 
 ### APIs
 
-`/api/erp` · `/api/erp/org` · `/api/erp/audit` · `/api/erp/approvals` · `/api/erp/finance/coa` · `/api/erp/hr/salary-slips` · existing HR/Finance/Procurement/Inventory/Projects/… modules
+`/api/erp` · `/api/erp/org` · `/api/erp/audit` · `/api/erp/approvals` · `/api/erp/finance/coa` · `/api/erp/hr/salary-slips` · `/api/erp/projects` (hierarchy, Kanban, Gantt, workload, Pomodoro) · `/api/staff/tasks` · existing HR/Finance/Procurement/Inventory/… modules
+
+### Task & project management (3.6)
+
+Hierarchy: project → milestone → task → subtask. Statuses: TODO · IN_PROGRESS · IN_REVIEW · DONE · BLOCKED. Priorities: CRITICAL → LOW. Dependencies + critical path · recurring tasks · comments/attachments · time entries (Pomodoro). UI: `/admin/erp/projects` · ESS `/staff/tasks`.
+
+### Project finance · payments · tickets · order confirm
+
+- **Project P&L:** expenses (`ProjectExpense`) · revenue · profit · payment schedule (`ProjectPaymentSchedule`) with next due date · Finance tab on `/admin/erp/projects`
+- **Client tab:** link customer · brief / next process / next steps · update log · copy-paste email templates (kickoff, status, waiting, milestone, payment, weekly, delivery)
+- **Client history:** `/portal/payments` · `GET /api/portal/history` (payments + project schedule)
+- **Portal sidebar (Register.lk):** My Services · My Domains · My Projects · Billing & Orders · Support
+- **Tickets (email-style):** customer opens · staff **Take ticket** / reply / **Close** · `/staff/tickets` · claim/close on `PATCH /api/tickets`
+- **Checkout confirm:** creates Order ID + Invoice · redirects `/portal/orders/confirmed` · sales projects get payment schedule linked to invoice
+
+### People ops extensions (3.7–3.12)
+
+| Area | Surfaces |
+|------|----------|
+| Performance & analytics | `/admin/erp/performance` · KPI/reports/heat map/alerts |
+| Notification center | `/staff/notifications` · prefs/DND/broadcast/analytics |
+| Documents & knowledge | `/admin/erp/documents` · search/OCR/e-sign/KB |
+| Calendar & meetings | `/staff/calendar` · rooms/availability/leave overlay |
+| Complaints & feedback | `/admin/erp/complaints` · RCA/CSAT/prevention |
+| Training & development | `/admin/erp/training` · `/staff/training` · skills/PIP/ROI |
 
 ### Integrations
 

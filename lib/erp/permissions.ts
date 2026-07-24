@@ -8,6 +8,7 @@ import {
   ROLE_DEFAULTS,
   type ErpPermission,
 } from "@/lib/erp/permission-matrix";
+import { getStaffScope, crmLeadScopeWhere, type StaffScope } from "@/lib/erp/staff-scope";
 
 export {
   ERP_PERMISSIONS,
@@ -15,6 +16,8 @@ export {
   ROLE_DEFAULTS,
   type ErpPermission,
 } from "@/lib/erp/permission-matrix";
+
+export { getStaffScope, crmLeadScopeWhere, type StaffScope } from "@/lib/erp/staff-scope";
 
 export async function getUserPermissions(user: SessionUser): Promise<Set<string>> {
   if (user.role === "OWNER" || user.role === "ADMIN") {
@@ -70,4 +73,12 @@ export async function requireErpStaff() {
 
 export async function requireStaffOrSelf() {
   return requireUser();
+}
+
+/** Permission + staff scope for department isolation */
+export async function requirePermissionWithScope(permission: ErpPermission | ErpPermission[]) {
+  const auth = await requirePermission(permission);
+  if (auth.error) return { ...auth, scope: null as StaffScope | null };
+  const scope = await getStaffScope(auth.user);
+  return { user: auth.user, error: undefined as undefined, scope };
 }

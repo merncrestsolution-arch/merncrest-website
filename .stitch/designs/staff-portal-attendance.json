@@ -1,0 +1,8 @@
+{
+  "projectId": "17402065891171962495",
+  "screenId": "497a14f53cb647a8b5d1c0531bcc0c54",
+  "title": "Attendance — MernCrest Solutions Staff Portal",
+  "route": "/staff/attendance",
+  "component": "StaffAttendancePanel",
+  "designSystem": "assets/060de6acb3a74722a6e7f79ec90a20d0"
+}

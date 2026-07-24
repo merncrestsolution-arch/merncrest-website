@@ -50,7 +50,7 @@ export function PortalDownloadsPanel() {
           {downloads.map((d) => (
             <li
               key={d.id}
-              className="rounded-xl border border-white/10 bg-white/[0.02] p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3"
+              className="rounded-xl border border-[#c4bdd4] bg-white p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-sm dark:border-white/10 dark:bg-white/[0.02] dark:shadow-none"
             >
               <div>
                 <p className="font-medium text-sm">{d.title}</p>

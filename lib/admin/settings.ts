@@ -195,6 +195,13 @@ export async function getSettingBool(key: string, fallback = false): Promise<boo
   return v === "true" || v === "1";
 }
 
+export async function getSettingNumber(key: string, fallback = 0): Promise<number> {
+  const v = await getSetting(key);
+  if (v == null) return fallback;
+  const n = Number(v);
+  return Number.isFinite(n) ? n : fallback;
+}
+
 export async function setSetting(
   key: string,
   value: string,

@@ -23,6 +23,41 @@ export async function POST(request: Request) {
   }
 
   const auth = await requireUser();
+  const isChatCsat = parsed.data.channel === "CHAT" && parsed.data.referenceId;
+
+  if (isChatCsat) {
+    const session = await prisma.chatSession.findFirst({
+      where: {
+        id: parsed.data.referenceId,
+        status: "CLOSED",
+        csatRequestedAt: { not: null },
+        csatRating: null,
+      },
+    });
+    if (!session) {
+      return NextResponse.json({ error: "CSAT not available for this chat" }, { status: 400 });
+    }
+
+    const record = await prisma.customerSatisfaction.create({
+      data: {
+        userId: session.userId,
+        channel: "CHAT",
+        referenceId: parsed.data.referenceId,
+        rating: parsed.data.rating,
+        npsScore: parsed.data.npsScore,
+        feedback: parsed.data.feedback,
+        suggestions: parsed.data.suggestions,
+      },
+    });
+
+    await prisma.chatSession.update({
+      where: { id: session.id },
+      data: { csatRating: parsed.data.rating },
+    });
+
+    return NextResponse.json({ satisfaction: record }, { status: 201 });
+  }
+
   if (auth.error && !parsed.data.userId) return auth.error;
 
   const record = await prisma.customerSatisfaction.create({
@@ -37,6 +72,13 @@ export async function POST(request: Request) {
       suggestions: parsed.data.suggestions,
     },
   });
+
+  if (parsed.data.channel === "CHAT" && parsed.data.referenceId) {
+    await prisma.chatSession.updateMany({
+      where: { id: parsed.data.referenceId },
+      data: { csatRating: parsed.data.rating },
+    });
+  }
 
   return NextResponse.json({ satisfaction: record }, { status: 201 });
 }

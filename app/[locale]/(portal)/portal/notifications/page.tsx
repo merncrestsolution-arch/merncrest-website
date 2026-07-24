@@ -1,13 +1,13 @@
 import { NotificationsPanel } from "@/components/support/notifications-panel";
+import { RlkPage } from "@/components/rlk/rlk-page";
 
-export default function NotificationsPage() {
+export default function PortalNotificationsPage() {
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="font-display text-2xl font-bold">Notifications</h1>
-        <p className="text-sm text-muted mt-1">Billing, support, orders, and security alerts.</p>
-      </div>
+    <RlkPage
+      title="Notifications"
+      description="Billing, support, orders, and security alerts."
+    >
       <NotificationsPanel />
-    </div>
+    </RlkPage>
   );
 }

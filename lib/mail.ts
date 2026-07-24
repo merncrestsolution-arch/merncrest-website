@@ -74,6 +74,51 @@ export async function sendProvisioningEmail(opts: {
   });
 }
 
+export async function sendMailRaw(opts: {
+  to: string;
+  subject: string;
+  text: string;
+  html: string;
+}) {
+  return sendMail(opts);
+}
+
+export async function sendMailWithAttachment(opts: {
+  to: string;
+  subject: string;
+  text: string;
+  html: string;
+  attachments?: {
+    filename: string;
+    content: Buffer;
+    contentType?: string;
+  }[];
+}) {
+  const from = process.env.CONTACT_EMAIL || "noreply@merncrest.lk";
+  const transport = getTransport();
+  if (!transport) {
+    console.info("[mail:dev]", opts.subject, {
+      to: opts.to,
+      text: opts.text,
+      attachments: opts.attachments?.map((a) => a.filename),
+    });
+    return { queued: false, logged: true };
+  }
+  await transport.sendMail({
+    from,
+    to: opts.to,
+    subject: opts.subject,
+    text: opts.text,
+    html: opts.html,
+    attachments: opts.attachments?.map((a) => ({
+      filename: a.filename,
+      content: a.content,
+      contentType: a.contentType || "application/octet-stream",
+    })),
+  });
+  return { queued: true, logged: false };
+}
+
 async function sendMail(opts: { to: string; subject: string; text: string; html: string }) {
   const from = process.env.CONTACT_EMAIL || "noreply@merncrest.lk";
   const transport = getTransport();

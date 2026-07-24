@@ -39,10 +39,10 @@ export function ServicesSection({ hideViewAll = false }: { hideViewAll?: boolean
         >
           <div className="flex flex-col lg:flex-row gap-10 w-full items-start">
             <div className="flex flex-wrap gap-3">
-              <Button asChild className="rounded-full bg-[#7c3aed]">
+              <Button asChild className="rounded-full bg-stitch-primary">
                 <Link href="/contact">Consult an Expert</Link>
               </Button>
-              <Button asChild variant="outline" className="rounded-full border-[#4a4455]">
+              <Button asChild variant="outline" className="rounded-full border-stitch-outline">
                 <Link href="/solutions">View Roadmap</Link>
               </Button>
             </div>
@@ -51,9 +51,9 @@ export function ServicesSection({ hideViewAll = false }: { hideViewAll?: boolean
                 const Icon = m.icon;
                 return (
                   <div key={m.label} className="stitch-card !py-4">
-                    <Icon className="h-4 w-4 text-[#d2bbff] mb-2" />
-                    <p className="font-display text-2xl font-bold text-white">{m.value}</p>
-                    <p className="font-mono text-[10px] uppercase tracking-wider text-[#958da1] mt-1">
+                    <Icon className="h-4 w-4 text-stitch-glow mb-2" />
+                    <p className="font-display text-2xl font-bold text-foreground">{m.value}</p>
+                    <p className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground mt-1">
                       {m.label}
                     </p>
                   </div>
@@ -77,10 +77,10 @@ export function ServicesSection({ hideViewAll = false }: { hideViewAll?: boolean
         {hideViewAll && (
           <div className="mb-10 flex flex-col sm:flex-row sm:items-end justify-between gap-4">
             <div>
-              <h2 className="font-display text-2xl sm:text-3xl font-bold text-white">
+              <h2 className="font-display text-2xl sm:text-3xl font-bold text-foreground">
                 Core Competencies
               </h2>
-              <p className="mt-2 text-sm text-[#ccc3d8]">
+              <p className="mt-2 text-sm text-muted">
                 Modular capabilities engineered for enterprise scale.
               </p>
             </div>
@@ -97,13 +97,13 @@ export function ServicesSection({ hideViewAll = false }: { hideViewAll?: boolean
                     <StitchIconBox className="mb-5 h-12 w-12">
                       <Icon className="h-6 w-6" />
                     </StitchIconBox>
-                    <h3 className="font-display text-lg font-semibold text-white mb-2">
+                    <h3 className="font-display text-lg font-semibold text-foreground mb-2">
                       {t(`${service}.title`)}
                     </h3>
-                    <p className="text-sm text-[#ccc3d8] leading-relaxed mb-4">
+                    <p className="text-sm text-muted leading-relaxed mb-4">
                       {t(`${service}.description`)}
                     </p>
-                    <span className="inline-flex items-center gap-1 text-sm text-[#d2bbff]">
+                    <span className="inline-flex items-center gap-1 text-sm text-stitch-glow">
                       Explore Capability <ArrowRight className="h-3.5 w-3.5" />
                     </span>
                   </StitchCard>
@@ -126,17 +126,17 @@ export function ServicesSection({ hideViewAll = false }: { hideViewAll?: boolean
         {hideViewAll && (
           <div className="mt-16 stitch-card text-center !py-14 relative overflow-hidden">
             <div className="pointer-events-none absolute inset-0 brand-mesh opacity-40" />
-            <h2 className="relative z-10 font-display text-2xl sm:text-3xl font-bold text-white mb-3">
+            <h2 className="relative z-10 font-display text-2xl sm:text-3xl font-bold text-foreground mb-3">
               Ready to scale your Intelligence?
             </h2>
-            <p className="relative z-10 text-[#ccc3d8] mb-8 max-w-xl mx-auto">
+            <p className="relative z-10 text-muted mb-8 max-w-xl mx-auto">
               Schedule a diagnostic session with our architectural consultants.
             </p>
             <div className="relative z-10 flex flex-wrap justify-center gap-3">
-              <Button asChild className="rounded-full bg-[#7c3aed]">
+              <Button asChild className="rounded-full bg-stitch-primary">
                 <Link href="/contact">Consult an Expert</Link>
               </Button>
-              <Button asChild variant="outline" className="rounded-full border-[#4a4455]">
+              <Button asChild variant="outline" className="rounded-full border-stitch-outline">
                 <Link href="/solutions">Enterprise Solutions</Link>
               </Button>
             </div>

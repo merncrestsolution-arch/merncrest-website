@@ -46,15 +46,15 @@ export function StitchHeader({
       )}
     >
       {eyebrow && (
-        <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-violet-300/90">
+        <p className="font-mono text-[11px] uppercase tracking-[0.22em] stitch-glow-fg">
           {eyebrow}
         </p>
       )}
-      <h2 className="font-display text-3xl sm:text-4xl font-bold tracking-tight text-white text-balance">
+      <h2 className="font-display text-3xl sm:text-4xl font-bold tracking-tight stitch-fg text-balance">
         {title}
       </h2>
       {description && (
-        <p className="text-base sm:text-lg text-muted leading-relaxed">{description}</p>
+        <p className="text-base sm:text-lg stitch-muted-fg leading-relaxed">{description}</p>
       )}
     </div>
   );
@@ -94,7 +94,7 @@ export function StitchIconBox({
   return (
     <div
       className={cn(
-        "flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-violet-500/15 text-violet-300",
+        "flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-violet-500/15 stitch-glow-fg",
         className
       )}
     >
@@ -113,7 +113,7 @@ export function StitchChip({
   return (
     <span
       className={cn(
-        "inline-flex items-center rounded-full border border-white/10 bg-white/[0.03] px-3 py-1 font-mono text-[11px] text-muted",
+        "inline-flex items-center rounded-full border border-stitch-outline bg-glass px-3 py-1 font-mono text-[11px] stitch-muted-fg",
         className
       )}
     >

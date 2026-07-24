@@ -1,9 +1,19 @@
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
-import { clearSessionCookie, destroySession, SESSION_COOKIE } from "@/lib/auth";
+import {
+  clearSessionCookie,
+  destroySession,
+  getSessionUser,
+  SESSION_COOKIE,
+} from "@/lib/auth";
+import { setAgentOfflineOnLogout } from "@/lib/chat/presence";
 
 export async function POST() {
   try {
+    const user = await getSessionUser();
+    if (user) {
+      await setAgentOfflineOnLogout(user.id).catch(() => undefined);
+    }
     const cookieStore = await cookies();
     const token = cookieStore.get(SESSION_COOKIE)?.value;
     if (token) {

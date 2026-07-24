@@ -1,10 +1,10 @@
 import { OrdersList } from "@/components/commerce/orders-list";
+import { RlkPage } from "@/components/rlk/rlk-page";
 
 export default function PortalOrdersPage() {
   return (
-    <div className="space-y-6">
-      <h1 className="font-display text-2xl font-bold">Orders</h1>
+    <RlkPage title="Orders" description="View order history and track fulfillment status.">
       <OrdersList />
-    </div>
+    </RlkPage>
   );
 }

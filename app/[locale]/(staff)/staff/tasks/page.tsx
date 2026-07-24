@@ -1,10 +1,5 @@
-import { StaffDashboard } from "@/components/staff/staff-dashboard";
+import { StaffTasksPanel } from "@/components/staff/staff-tasks-panel";
 
-export default function Page() {
-  return (
-    <div className="space-y-4">
-      <h1 className="font-display text-xl font-bold">Tasks</h1>
-      <StaffDashboard />
-    </div>
-  );
+export default function StaffTasksPage() {
+  return <StaffTasksPanel />;
 }

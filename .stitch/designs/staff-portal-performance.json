@@ -1,0 +1,8 @@
+{
+  "projectId": "17402065891171962495",
+  "screenId": "f6fda48ed165456099d1edb6ea3a5f25",
+  "title": "Performance — MernCrest Solutions Staff Portal",
+  "route": "/staff/performance",
+  "component": "StaffPerformancePanel",
+  "designSystem": "assets/060de6acb3a74722a6e7f79ec90a20d0"
+}

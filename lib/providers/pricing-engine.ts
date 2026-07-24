@@ -22,8 +22,8 @@ export type MarginConfig = {
  * Admins can switch to PERCENT in Admin → Pricing Margins without changing stored numbers.
  */
 const DEFAULT_MARGINS: MarginConfig[] = [
-  { category: "domains", marginCents: 30000, marginPercent: 15, marginMode: "FIXED", fxBufferPercent: 2 },
-  { category: "hosting", marginCents: 300000, marginPercent: 20, marginMode: "FIXED", fxBufferPercent: 2 },
+  { category: "domains", marginCents: 35000, marginPercent: 0, marginMode: "FIXED", fxBufferPercent: 2 },
+  { category: "hosting", marginCents: 50000, marginPercent: 0, marginMode: "FIXED", fxBufferPercent: 2 },
   { category: "vps", marginCents: 1000000, marginPercent: 20, marginMode: "FIXED", fxBufferPercent: 2 },
   { category: "ssl", marginCents: 100000, marginPercent: 25, marginMode: "FIXED", fxBufferPercent: 2 },
   { category: "email", marginCents: 50000, marginPercent: 20, marginMode: "FIXED", fxBufferPercent: 2 },
@@ -105,6 +105,23 @@ export async function getMarginsMap(): Promise<Map<MarginCategory, MarginConfig>
   for (const row of rows) {
     map.set(row.category as MarginCategory, rowToConfig(row));
   }
+  // Domain margin: provider cost + fixed LKR profit (default Rs 350).
+  const domainMarginLkr = Math.round(Number(process.env.DOMAIN_MARGIN_LKR || 350) * 100);
+  map.set("domains", {
+    category: "domains",
+    marginCents: domainMarginLkr,
+    marginPercent: 0,
+    marginMode: "FIXED",
+    fxBufferPercent: map.get("domains")?.fxBufferPercent ?? 2,
+  });
+  const hostingMarginLkr = Math.round(Number(process.env.HOSTING_MARGIN_LKR || 500) * 100);
+  map.set("hosting", {
+    category: "hosting",
+    marginCents: hostingMarginLkr,
+    marginPercent: 0,
+    marginMode: "FIXED",
+    fxBufferPercent: map.get("hosting")?.fxBufferPercent ?? 2,
+  });
   return map;
 }
 
@@ -159,14 +176,14 @@ export async function priceFromProvider(
     fxBufferPercent: 2,
   };
 
-  // New USD products default to percentage margin when category still FIXED with only flat LKR
+  // USD domains use the same fixed LKR margin unless admin sets PERCENT mode explicitly.
   let effectiveMargin = margin;
   if (
     providerCurrency.toUpperCase() === "USD" &&
     margin.marginMode === "FIXED" &&
-    margin.marginPercent > 0
+    margin.marginPercent > 0 &&
+    margin.marginCents <= 0
   ) {
-    // Prefer percent for USD quotes without mutating stored admin config
     effectiveMargin = { ...margin, marginMode: "PERCENT" };
   }
 

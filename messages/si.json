@@ -11,6 +11,7 @@
     "solutions": "Enterprise Solutions",
     "industries": "Industries",
     "pricing": "Pricing",
+    "priceBook": "Price Book",
     "portfolio": "Portfolio",
     "team": "Team",
     "technologies": "Technologies",
@@ -22,7 +23,7 @@
     "support": "Support Center",
     "resources": "Resources",
     "contact": "Contact Us",
-    "login": "Customer Login",
+    "login": "Client Login",
     "getStarted": "Get Started",
     "getConsultation": "Get Free Consultation",
     "viewAllServices": "View All Services",
@@ -143,6 +144,25 @@
     "title": "Featured Projects",
     "description": "Explore some of our recent digital transformations and software solutions."
   },
+  "industriesPage": {
+    "eyebrow": "Industries",
+    "title": "Industries We Serve",
+    "description": "Enterprise software and digital solutions for manufacturing, healthcare, education, hospitality, finance, logistics, government, NGOs, and businesses of every size.",
+    "ctaTitle": "Don't see your industry?",
+    "ctaBody": "We adapt our software engineering and enterprise solutions to your sector. Tell us about your business and we'll show you how we'd approach it."
+  },
+  "portfolioPage": {
+    "eyebrow": "Our Work",
+    "title": "Case studies & projects",
+    "description": "Detailed write-ups of our client work — software engineering, cloud, and AI delivery. New case studies are published here as projects complete.",
+    "comingSoonTitle": "Case studies coming soon",
+    "comingSoonBody": "We're preparing detailed write-ups of our client work. In the meantime,",
+    "talkToUs": "talk to us about your project",
+    "ctaTitle": "Have a project in mind?",
+    "ctaButton": "Let's Build It Together",
+    "viewCaseStudy": "View Case Study",
+    "noneInCategory": "No projects found for this category."
+  },
   "statsSnippet": {
     "badge": "Why Choose Us",
     "title": "Numbers That Speak For Themselves",
@@ -197,7 +217,7 @@
     "backHome": "Back to home"
   },
   "auth": {
-    "loginTitle": "Customer Login",
+    "loginTitle": "Client Login",
     "loginSubtitle": "Access your portal — domains, hosting, invoices, and tickets.",
     "registerTitle": "Create your account",
     "registerSubtitle": "One account for every MernCrest service.",
@@ -229,6 +249,7 @@
     "cart": "Cart",
     "orders": "Orders",
     "services": "My Services",
+    "projects": "My Projects",
     "domains": "My Domains",
     "hosting": "My Hosting",
     "invoices": "Billing",
@@ -254,6 +275,13 @@
     "erp": "ERP",
     "reports": "Reports",
     "settings": "Settings",
+    "domains": "Domains",
+    "hosting": "Hosting",
+    "invoices": "Invoices",
+    "quotations": "Quotations",
+    "users": "Users & RBAC",
+    "media": "File manager",
+    "calendar": "Calendar",
     "welcome": "Owner Dashboard",
     "welcomeBody": "Revenue, customers, tickets, reseller providers, and operations."
   }

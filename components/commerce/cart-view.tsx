@@ -8,6 +8,9 @@ import { formatMoney } from "@/lib/commerce-format";
 type CartItem = {
   id: string;
   quantity: number;
+  unitPriceCents?: number | null;
+  lineLabel?: string | null;
+  salesLocked?: boolean;
   metaJson?: string | null;
   product: {
     id: string;
@@ -138,7 +141,10 @@ export function CartView() {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Checkout failed");
-      router.push("/portal/invoices");
+      const dest =
+        data.redirectTo ||
+        `/portal/orders/confirmed?order=${encodeURIComponent(data.orderNumber || data.order?.orderNumber || "")}`;
+      router.push(dest);
       router.refresh();
     } catch (e) {
       setError(e instanceof Error ? e.message : "Checkout failed");
@@ -164,27 +170,70 @@ export function CartView() {
     <div className="space-y-8 max-w-2xl">
       <ul className="space-y-4">
         {items.map((item) => {
+          const unit =
+            item.unitPriceCents != null ? item.unitPriceCents : item.product.priceCents;
           let metaLabel = "";
+          let salesNote = "";
           try {
             const m = item.metaJson ? JSON.parse(item.metaJson) : null;
             if (m?.domainName) metaLabel = m.domainName;
-          } catch { /* ignore */ }
+            if (m?.salesProject) {
+              const total = m.projectTotalCents as number | undefined;
+              const bal = m.balanceCents as number | undefined;
+              const pct = m.advancePercent as number | undefined;
+              salesNote = [
+                "Sales-approved project",
+                pct != null ? `${pct}% due now` : null,
+                total != null ? `Project total ${formatMoney(total)}` : null,
+                bal != null && bal > 0 ? `Balance ${formatMoney(bal)} (Sales schedule)` : null,
+                m.terms ? String(m.terms) : null,
+              ]
+                .filter(Boolean)
+                .join(" · ");
+            }
+          } catch {
+            /* ignore */
+          }
+          const title = item.lineLabel || item.product.name;
           return (
-            <li key={item.id} className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-white/10 pb-4">
+            <li
+              key={item.id}
+              className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#e4dff0] pb-4"
+            >
               <div>
-                <p className="font-medium">{item.product.name}</p>
-                {metaLabel && <p className="text-xs font-mono text-accent">{metaLabel}</p>}
-                <p className="text-sm text-muted">
-                  {formatMoney(item.product.priceCents)}
-                  {item.product.billingPeriod !== "ONCE" ? ` / ${item.product.billingPeriod.toLowerCase()}` : ""}
+                <p className="font-medium text-[#121218]">{title}</p>
+                {metaLabel && <p className="text-xs font-mono text-[#6d28d9]">{metaLabel}</p>}
+                {salesNote && <p className="text-xs text-[#3d3849] mt-1 max-w-md">{salesNote}</p>}
+                <p className="text-sm text-[#3d3849]">
+                  {formatMoney(unit)}
+                  {!item.salesLocked && item.product.billingPeriod !== "ONCE"
+                    ? ` / ${item.product.billingPeriod.toLowerCase()}`
+                    : ""}
                 </p>
               </div>
               <div className="flex items-center gap-3">
-                <input type="number" min={0} max={99} disabled={busy} value={item.quantity}
-                  onChange={(e) => setQty(item.id, Number(e.target.value))}
-                  className="w-16 h-9 rounded-lg border border-white/10 bg-white/5 px-2 text-sm" />
-                <p className="text-sm font-medium w-28 text-right">
-                  {formatMoney(item.product.priceCents * item.quantity)}
+                {item.salesLocked ? (
+                  <button
+                    type="button"
+                    disabled={busy}
+                    onClick={() => setQty(item.id, 0)}
+                    className="text-xs text-red-600 underline"
+                  >
+                    Remove
+                  </button>
+                ) : (
+                  <input
+                    type="number"
+                    min={0}
+                    max={99}
+                    disabled={busy}
+                    value={item.quantity}
+                    onChange={(e) => setQty(item.id, Number(e.target.value))}
+                    className="w-16 h-9 rounded-lg border border-[#c4bdd4] bg-white px-2 text-sm"
+                  />
+                )}
+                <p className="text-sm font-medium w-28 text-right text-[#121218]">
+                  {formatMoney(unit * item.quantity)}
                 </p>
               </div>
             </li>

@@ -35,7 +35,7 @@ export function ForgotPasswordForm() {
         >
           <div>
             <label className="text-sm font-medium mb-1.5 block" htmlFor="email">{t("email")}</label>
-            <input id="email" name="email" type="email" required className="w-full h-11 rounded-lg border border-white/10 bg-white/5 px-3 text-sm outline-none focus:ring-2 focus:ring-accent/50" />
+            <input id="email" name="email" type="email" required className="auth-input" />
           </div>
           <Button type="submit" className="w-full" size="lg" disabled={loading}>
             {loading ? "Sending…" : t("resetCta")}

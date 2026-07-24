@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { Link, useRouter } from "@/i18n/routing";
 import { Button } from "@/components/ui/button";
+import { TurnstileWidget, isTurnstileConfigured } from "@/components/security/turnstile-widget";
 import { motion } from "framer-motion";
 
 export function RegisterForm() {
@@ -11,6 +12,7 @@ export function RegisterForm() {
   const router = useRouter();
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [captchaToken, setCaptchaToken] = useState("");
 
   return (
     <motion.div
@@ -28,6 +30,10 @@ export function RegisterForm() {
         onSubmit={async (e) => {
           e.preventDefault();
           setError("");
+          if (isTurnstileConfigured() && !captchaToken) {
+            setError("Please complete the security check.");
+            return;
+          }
           setLoading(true);
           const form = e.currentTarget;
           const firstName = (form.elements.namedItem("firstName") as HTMLInputElement).value;
@@ -49,6 +55,7 @@ export function RegisterForm() {
             country: (form.elements.namedItem("country") as HTMLInputElement).value,
             address: (form.elements.namedItem("address") as HTMLInputElement).value,
             nic: (form.elements.namedItem("nic") as HTMLInputElement).value,
+            turnstileToken: captchaToken,
           };
 
           try {
@@ -74,47 +81,47 @@ export function RegisterForm() {
         <div className="grid grid-cols-2 gap-3">
           <div>
             <label className="text-sm font-medium mb-1.5 block" htmlFor="firstName">{t("firstName")}</label>
-            <input id="firstName" name="firstName" required className="w-full h-11 rounded-lg border border-white/10 bg-white/5 px-3 text-sm outline-none focus:ring-2 focus:ring-accent/50" />
+            <input id="firstName" name="firstName" required className="auth-input" />
           </div>
           <div>
             <label className="text-sm font-medium mb-1.5 block" htmlFor="lastName">{t("lastName")}</label>
-            <input id="lastName" name="lastName" required className="w-full h-11 rounded-lg border border-white/10 bg-white/5 px-3 text-sm outline-none focus:ring-2 focus:ring-accent/50" />
+            <input id="lastName" name="lastName" required className="auth-input" />
           </div>
         </div>
         <div>
           <label className="text-sm font-medium mb-1.5 block" htmlFor="company">{t("company")}</label>
-          <input id="company" name="company" className="w-full h-11 rounded-lg border border-white/10 bg-white/5 px-3 text-sm outline-none focus:ring-2 focus:ring-accent/50" />
+          <input id="company" name="company" className="auth-input" />
         </div>
         <div>
           <label className="text-sm font-medium mb-1.5 block" htmlFor="email">{t("email")}</label>
-          <input id="email" name="email" type="email" required autoComplete="email" className="w-full h-11 rounded-lg border border-white/10 bg-white/5 px-3 text-sm outline-none focus:ring-2 focus:ring-accent/50" />
+          <input id="email" name="email" type="email" required autoComplete="email" className="auth-input" />
         </div>
         <div>
           <label className="text-sm font-medium mb-1.5 block" htmlFor="mobile">{t("mobile")}</label>
-          <input id="mobile" name="mobile" type="tel" className="w-full h-11 rounded-lg border border-white/10 bg-white/5 px-3 text-sm outline-none focus:ring-2 focus:ring-accent/50" />
+          <input id="mobile" name="mobile" type="tel" className="auth-input" />
         </div>
         <div>
           <label className="text-sm font-medium mb-1.5 block" htmlFor="country">{t("country")}</label>
-          <input id="country" name="country" defaultValue="Sri Lanka" className="w-full h-11 rounded-lg border border-white/10 bg-white/5 px-3 text-sm outline-none focus:ring-2 focus:ring-accent/50" />
+          <input id="country" name="country" defaultValue="Sri Lanka" className="auth-input" />
         </div>
         <div>
           <label className="text-sm font-medium mb-1.5 block" htmlFor="address">{t("address")}</label>
-          <input id="address" name="address" className="w-full h-11 rounded-lg border border-white/10 bg-white/5 px-3 text-sm outline-none focus:ring-2 focus:ring-accent/50" />
+          <input id="address" name="address" className="auth-input" />
         </div>
         <div>
           <label className="text-sm font-medium mb-1.5 block" htmlFor="nic">{t("nic")}</label>
-          <input id="nic" name="nic" className="w-full h-11 rounded-lg border border-white/10 bg-white/5 px-3 text-sm outline-none focus:ring-2 focus:ring-accent/50" />
+          <input id="nic" name="nic" className="auth-input" />
         </div>
         <div>
           <label className="text-sm font-medium mb-1.5 block" htmlFor="password">{t("password")}</label>
-          <input id="password" name="password" type="password" required minLength={8} autoComplete="new-password" className="w-full h-11 rounded-lg border border-white/10 bg-white/5 px-3 text-sm outline-none focus:ring-2 focus:ring-accent/50" />
+          <input id="password" name="password" type="password" required minLength={8} autoComplete="new-password" className="auth-input" />
         </div>
         <div>
           <label className="text-sm font-medium mb-1.5 block" htmlFor="confirm">{t("confirmPassword")}</label>
-          <input id="confirm" name="confirm" type="password" required minLength={8} autoComplete="new-password" className="w-full h-11 rounded-lg border border-white/10 bg-white/5 px-3 text-sm outline-none focus:ring-2 focus:ring-accent/50" />
+          <input id="confirm" name="confirm" type="password" required minLength={8} autoComplete="new-password" className="auth-input" />
         </div>
         <label className="flex items-start gap-2 text-sm text-muted">
-          <input id="terms" name="terms" type="checkbox" required className="mt-1 rounded border-white/20" />
+          <input id="terms" name="terms" type="checkbox" required className="mt-1 h-4 w-4 rounded border-stitch-outline accent-[var(--stitch-primary)]" />
           <span>
             {t("acceptTerms")}{" "}
             <Link href="/terms" className="text-accent hover:underline">Terms</Link>
@@ -122,6 +129,7 @@ export function RegisterForm() {
             <Link href="/privacy" className="text-accent hover:underline">Privacy</Link>
           </span>
         </label>
+        <TurnstileWidget onVerify={setCaptchaToken} />
         {error && <p className="text-sm text-red-400" role="alert">{error}</p>}
         <Button type="submit" className="w-full" size="lg" disabled={loading}>
           {loading ? "Creating..." : t("registerCta")}

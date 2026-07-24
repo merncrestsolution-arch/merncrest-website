@@ -1,7 +1,7 @@
 "use client";
 
 import { Link } from "@/i18n/routing";
-import { Code2, Brain, Cloud, Network, ArrowRight } from "lucide-react";
+import { Code2, Brain, Cloud, Sparkles, ArrowRight } from "lucide-react";
 import {
   StitchSection,
   StitchCard,
@@ -36,11 +36,11 @@ const pillars = [
     featured: false,
   },
   {
-    title: "ERP/CRM",
-    body: "Deploying unified resource planning systems that connect every department in real-time.",
+    title: "Digital Transformation",
+    body: "Modernizing core business architecture to thrive in a digital-first global economy.",
     href: "/solutions",
     cta: "Enterprise Suite",
-    icon: Network,
+    icon: Sparkles,
     featured: false,
   },
 ];
@@ -49,12 +49,12 @@ const pillars = [
 export function FeaturedServicesSection() {
   return (
     <StitchSection>
-      <div className="mb-12 text-center md:text-left max-w-xl md:max-w-none">
-        <h2 className="font-display text-3xl sm:text-4xl font-bold text-white mb-3">
-          Strategic Transformation Pillars
+      <div className="mx-auto mb-16 max-w-2xl text-center">
+        <h2 className="mb-3 font-display text-3xl font-bold text-foreground sm:text-4xl">
+          Strategic Service Pillars
         </h2>
-        <p className="text-[#ccc3d8] leading-relaxed max-w-xl">
-          Comprehensive service architecture designed to scale with your enterprise ambitions.
+        <p className="leading-relaxed text-muted">
+          Custom-built solutions engineered for performance, security, and global scale.
         </p>
       </div>
 
@@ -66,18 +66,18 @@ export function FeaturedServicesSection() {
               <StitchCard
                 className={`h-full flex flex-col ${
                   p.featured
-                    ? "border-[#7c3aed]/40 shadow-[0_0_15px_rgba(124,58,237,0.1)]"
+                    ? "border-stitch-primary/40 shadow-[0_0_15px_rgba(124,58,237,0.1)]"
                     : ""
                 }`}
               >
                 <StitchIconBox className="mb-6">
                   <Icon className="h-6 w-6" />
                 </StitchIconBox>
-                <h3 className="font-display text-xl font-semibold text-white mb-3">{p.title}</h3>
-                <p className="text-sm text-[#ccc3d8] leading-relaxed flex-grow">{p.body}</p>
+                <h3 className="font-display text-xl font-semibold text-foreground mb-3">{p.title}</h3>
+                <p className="text-sm text-muted leading-relaxed flex-grow">{p.body}</p>
                 <Link
                   href={p.href}
-                  className="mt-6 inline-flex items-center gap-2 text-sm font-mono text-[#d2bbff] hover:underline"
+                  className="mt-6 inline-flex items-center gap-2 text-sm font-mono text-stitch-glow hover:underline"
                 >
                   {p.cta} <ArrowRight className="h-3.5 w-3.5" />
                 </Link>

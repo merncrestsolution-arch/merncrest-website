@@ -144,7 +144,7 @@ function CommandSearchDialog() {
             ) : (
               groups.map(([category, items]) => (
                 <div key={category} className="mb-2">
-                  <p className="px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[0.16em] text-violet-300/70">
+                  <p className="px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[0.16em] text-stitch-glow/70">
                     {category}
                   </p>
                   <ul className="space-y-0.5">
@@ -222,7 +222,7 @@ export function SearchTrigger({ className }: { className?: string }) {
       )}
       aria-label="Open search"
     >
-      <Search className="h-3.5 w-3.5 text-violet-300/80" />
+      <Search className="h-3.5 w-3.5 text-stitch-glow/80" />
       <span className="hidden lg:inline min-w-[7.5rem] text-left">Search…</span>
       <kbd className="hidden md:inline-flex items-center gap-0.5 rounded-md border border-white/10 bg-black/30 px-1.5 py-0.5 text-[10px] font-medium text-white/45">
         <span className="text-[9px]">⌘</span>K

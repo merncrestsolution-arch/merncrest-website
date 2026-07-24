@@ -177,16 +177,28 @@ export function AdminSupportPanel() {
       )}
 
       {tab === "ivr" && (
-        <ul className="space-y-2">
-          {calls.length === 0 && <li className="text-sm text-muted">No call records. Use Support Center IVR simulator.</li>}
-          {calls.map((c) => (
-            <li key={c.id} className="rounded-xl border border-white/10 p-4 text-sm">
-              <p className="font-mono text-accent">{c.callNumber}</p>
-              <p className="mt-1">{c.phone} · {c.language} · {c.department} · {c.status}</p>
-              <p className="text-xs text-muted mt-1">{new Date(c.createdAt).toLocaleString()}</p>
-            </li>
-          ))}
-        </ul>
+        <div className="space-y-3">
+          <p className="text-sm text-muted">
+            Full agent queue &amp; analytics:{" "}
+            <a href="/admin/ivr" className="text-accent underline">
+              /admin/ivr
+            </a>
+          </p>
+          <ul className="space-y-2">
+            {calls.length === 0 && (
+              <li className="text-sm text-muted">No call records. Use Support Center IVR simulator.</li>
+            )}
+            {calls.map((c) => (
+              <li key={c.id} className="rounded-xl border border-white/10 p-4 text-sm">
+                <p className="font-mono text-accent">{c.callNumber}</p>
+                <p className="mt-1">
+                  {c.phone} · {c.language} · {c.department} · {c.status}
+                </p>
+                <p className="text-xs text-muted mt-1">{new Date(c.createdAt).toLocaleString()}</p>
+              </li>
+            ))}
+          </ul>
+        </div>
       )}
     </div>
   );

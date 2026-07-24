@@ -501,6 +501,13 @@ export async function activateOrderServices(
       data: { status: "COMPLETED", lastProvisionError: null },
     });
 
+    const { notifyDeliveryWhatsApp } = await import("@/lib/crm/whatsapp-notify");
+    void notifyDeliveryWhatsApp({
+      userId: order.userId,
+      orderNumber: order.orderNumber,
+      trackingUrl: "/en/portal/services",
+    });
+
     const summary: string[] = [];
     const domains = await db.domain.findMany({ where: { orderId: order.id } });
     const hosting = await db.hostingAccount.findMany({ where: { orderId: order.id } });
@@ -642,7 +649,11 @@ export async function markInvoicePaid(opts: {
 
     const updatedInvoice = await tx.invoice.update({
       where: { id: invoice.id },
-      data: { status: "PAID", paidAt: new Date() },
+      data: {
+        status: "PAID",
+        paidAt: new Date(),
+        paidCents: invoice.totalCents,
+      },
     });
 
     // Order → PAID triggers automated provisioning (outside txn for provider I/O)
@@ -664,6 +675,19 @@ export async function markInvoicePaid(opts: {
     await activateOrderServices(paid.orderId, undefined, {
       actorId: opts.verifiedById,
     });
+    const user = await prisma.user.findUnique({ where: { id: opts.userId } });
+    if (user?.email) {
+      const { notifyClient } = await import("@/lib/notify/client-email");
+      void notifyClient("PAYMENT_RECEIVED", {
+        toEmail: user.email,
+        vars: {
+          name: user.fullName,
+          amount: ((paid.invoice.totalCents || 0) / 100).toFixed(2),
+          invoiceNumber: paid.invoice.invoiceNumber,
+        },
+        recordedById: opts.verifiedById,
+      });
+    }
   }
 
   return paid;

@@ -21,7 +21,7 @@ const highlights = [
 
 export function HighlightsSection() {
   return (
-    <StitchSection className="!py-14 border-y border-white/[0.05]">
+    <StitchSection className="!py-14 border-y border-stitch-outline">
       <StitchHeader
         eyebrow="Company highlights"
         title="Numbers that power trust"

@@ -1,16 +1,43 @@
-import { LoginForm } from "@/components/auth/login-form";
-import { Link } from "@/i18n/routing";
+import { Suspense } from "react";
+import { PortalLoginView } from "@/components/auth/portal-login-view";
+import { SystemLoginView } from "@/components/auth/system-login-view";
+import { isSystemSurface } from "@/lib/system-surface";
 
-export default function LoginPage() {
+export default async function LoginPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ system?: string; reason?: string }>;
+}) {
+  const sp = await searchParams;
+  const system =
+    sp.system === "1" ||
+    sp.reason === "staff" ||
+    (await isSystemSurface());
+
+  if (system) {
+    return (
+      <Suspense
+        fallback={
+          <div className="rlk-app flex min-h-screen items-center justify-center text-sm text-[#666]">
+            Loading System login…
+          </div>
+        }
+      >
+        <SystemLoginView />
+      </Suspense>
+    );
+  }
+
   return (
-    <div className="relative min-h-[100svh] flex items-center justify-center pt-24 pb-16 px-4">
-      <div className="absolute inset-0 ocean-mesh opacity-50 pointer-events-none" />
-      <div className="relative z-10 w-full flex flex-col items-center">
-        <Link href="/" className="font-display text-xl font-bold gradient-text mb-10">
-          MernCrest
-        </Link>
-        <LoginForm />
-      </div>
-    </div>
+    <Suspense
+      fallback={
+        <div className="rlk-app flex min-h-screen items-center justify-center text-sm text-[#666]">
+          Loading Portal login…
+        </div>
+      }
+    >
+      <PortalLoginView />
+    </Suspense>
   );
 }
+

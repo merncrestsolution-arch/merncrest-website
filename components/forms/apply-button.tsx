@@ -3,12 +3,14 @@
 import { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
 import { Button } from "@/components/ui/button";
+import { TurnstileWidget, isTurnstileConfigured } from "@/components/security/turnstile-widget";
 import { CheckCircle2, Loader2, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
 
 interface ApplyButtonProps {
   jobTitle: string;
+  jobId: string;
 }
 
 const terms = [
@@ -44,13 +46,14 @@ const variants = {
   })
 };
 
-export function ApplyButton({ jobTitle }: ApplyButtonProps) {
+export function ApplyButton({ jobTitle, jobId }: ApplyButtonProps) {
   const [open, setOpen] = useState(false);
   const [step, setStep] = useState<"terms" | "form" | "success">("terms");
   const [direction, setDirection] = useState(1);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [mounted, setMounted] = useState(false);
+  const [captchaToken, setCaptchaToken] = useState("");
 
   useEffect(() => {
     setMounted(true);
@@ -78,53 +81,38 @@ export function ApplyButton({ jobTitle }: ApplyButtonProps) {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setLoading(true);
     setError("");
-
-    const formElement = e.currentTarget;
-    const formData = new FormData(formElement);
-    formData.append("position", jobTitle);
-    formData.append("agreeTerms", "true");
-
-    const file = formData.get("attachment") as File;
-    if (file && file.size > 0) {
-      if (file.size > 5 * 1024 * 1024) {
-        setError("File size must be less than 5MB.");
-        setLoading(false);
-        return;
-      }
-      const allowedTypes = [
-        'application/pdf', 
-        'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-        'application/msword',
-        'image/jpeg', 
-        'image/png', 
-        'image/jpg'
-      ];
-      if (!allowedTypes.includes(file.type) && !file.name.endsWith('.pdf') && !file.name.endsWith('.docx') && !file.name.endsWith('.doc')) {
-        setError("Only PDF, DOCX, and Image files are allowed.");
-        setLoading(false);
-        return;
-      }
+    if (isTurnstileConfigured() && !captchaToken) {
+      setError("Please complete the security check.");
+      return;
     }
+    setLoading(true);
+
+    const formData = new FormData(e.currentTarget);
+    const payload = {
+      jobOpeningId: jobId,
+      fullName: String(formData.get("name") || ""),
+      email: String(formData.get("email") || ""),
+      phone: String(formData.get("phone") || ""),
+      resumeUrl: String(formData.get("resumeUrl") || ""),
+      coverLetter: String(formData.get("coverLetter") || ""),
+      turnstileToken: captchaToken,
+    };
 
     try {
-      const response = await fetch("https://formsubmit.co/ajax/merncrestsolution@gmail.com", {
+      const response = await fetch("/api/careers/apply", {
         method: "POST",
-        headers: {
-            "Accept": "application/json"
-        },
-        body: formData,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
       });
-
-      const result = await response.json();
+      const result = await response.json().catch(() => ({}));
 
       if (response.ok) {
         changeStep("success", 1);
       } else {
         setError(result.error || "Failed to submit application.");
       }
-    } catch (err) {
+    } catch {
       setError("An unexpected error occurred. Please try again.");
     } finally {
       setLoading(false);
@@ -268,16 +256,29 @@ export function ApplyButton({ jobTitle }: ApplyButtonProps) {
                           </div>
 
                           <div className="space-y-2">
-                            <label htmlFor="attachment" className="text-sm font-medium text-muted-foreground">Resume / CV (PDF, DOCX, or Image, max 5MB)</label>
+                            <label htmlFor="resumeUrl" className="text-sm font-medium text-muted-foreground">Resume / CV link (LinkedIn, Google Drive, etc.)</label>
                             <input
-                              id="attachment"
-                              name="attachment"
-                              type="file"
-                              accept=".pdf,.docx,.doc,image/png,image/jpeg,image/jpg"
-                              className="w-full h-12 px-4 py-2.5 rounded-xl bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 focus:border-accent focus:ring-1 focus:ring-accent transition-colors outline-none text-foreground dark:text-white file:mr-4 file:py-1 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-accent/10 file:text-accent hover:file:bg-accent/20 cursor-pointer"
+                              id="resumeUrl"
+                              name="resumeUrl"
+                              type="url"
+                              placeholder="https://…"
+                              className="w-full h-12 px-4 rounded-xl bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 focus:border-accent focus:ring-1 focus:ring-accent transition-colors outline-none text-foreground dark:text-white placeholder:text-muted-foreground/50"
+                            />
+                          </div>
+
+                          <div className="space-y-2">
+                            <label htmlFor="coverLetter" className="text-sm font-medium text-muted-foreground">Message / Cover note</label>
+                            <textarea
+                              id="coverLetter"
+                              name="coverLetter"
+                              rows={3}
+                              placeholder="Tell us why you're a great fit…"
+                              className="w-full px-4 py-3 rounded-xl bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 focus:border-accent focus:ring-1 focus:ring-accent transition-colors outline-none text-foreground dark:text-white placeholder:text-muted-foreground/50 resize-none"
                             />
                           </div>
                         </div>
+
+                        <TurnstileWidget onVerify={setCaptchaToken} />
 
                         {error && (
                           <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="p-4 bg-red-500/10 border border-red-500/20 rounded-xl text-red-500 text-sm">

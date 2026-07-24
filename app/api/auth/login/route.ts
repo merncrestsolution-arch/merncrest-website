@@ -7,6 +7,8 @@ import {
   verifyPassword,
 } from "@/lib/auth";
 import { loginSchema } from "@/lib/validations/auth";
+import { verifyTurnstile } from "@/lib/security/turnstile";
+import { isAccountLocked } from "@/lib/security/auth-policy";
 
 export async function POST(request: Request) {
   try {
@@ -20,6 +22,22 @@ export async function POST(request: Request) {
     const email = parsed.data.email.toLowerCase().trim();
     const ua = request.headers.get("user-agent");
     const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || null;
+
+    const lock = await isAccountLocked(email);
+    if (lock.locked) {
+      return NextResponse.json(
+        { error: "Account temporarily locked due to failed login attempts. Try again in 15 minutes." },
+        { status: 429 }
+      );
+    }
+
+    const captcha = await verifyTurnstile(
+      (body as { turnstileToken?: string })?.turnstileToken,
+      ip
+    );
+    if (!captcha.ok) {
+      return NextResponse.json({ error: captcha.error }, { status: 400 });
+    }
 
     const user = await prisma.user.findUnique({ where: { email } });
 
@@ -48,7 +66,7 @@ export async function POST(request: Request) {
     });
 
     const { token, expiresAt } = await createSession(user.id, { userAgent: ua, ip });
-    await setSessionCookie(token, expiresAt);
+    await setSessionCookie(token, expiresAt, request);
 
     return NextResponse.json({ user: toSessionUser(user) });
   } catch (error) {

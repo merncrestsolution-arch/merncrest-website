@@ -17,6 +17,12 @@ type Plan = {
   reasons: string[];
 };
 
+const QUICK_PROMPTS = [
+  "Cheap cPanel hosting for a small WordPress site",
+  "Business site with email and SSL, ~10,000 visitors/month",
+  "E-commerce store needing more speed and storage",
+];
+
 export function HostingRecommendWidget() {
   const [description, setDescription] = useState("");
   const [loading, setLoading] = useState(false);
@@ -50,52 +56,93 @@ export function HostingRecommendWidget() {
   }
 
   return (
-    <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-6 space-y-4">
+    <div className="max-w-2xl mx-auto stitch-card shadow-glow border-violet-500/20 space-y-5">
       <div>
-        <h3 className="font-display text-lg font-bold">AI Hosting Recommendation</h3>
-        <p className="text-sm text-muted mt-1">
+        <h3 className="font-display text-xl font-bold stitch-fg">AI Hosting Recommendation</h3>
+        <p className="text-sm stitch-muted-fg mt-1 leading-relaxed">
           Describe your project and we&apos;ll recommend the best package from our reseller catalog.
         </p>
       </div>
-      <textarea
-        className="w-full rounded-xl border border-white/10 bg-black/30 px-4 py-3 text-sm min-h-[100px]"
-        placeholder="e.g. WordPress blog for a clinic, ~5,000 visitors/month, need email and SSL…"
-        value={description}
-        onChange={(e) => setDescription(e.target.value)}
-      />
-      <Button disabled={loading || description.trim().length < 3} onClick={recommend}>
+
+      <div className="space-y-3">
+        <label htmlFor="hosting-need" className="sr-only">
+          Describe your hosting needs
+        </label>
+        <textarea
+          id="hosting-need"
+          className="stitch-textarea"
+          placeholder="e.g. Cheap cPanel hosting for a WordPress clinic site, ~5,000 visitors/month, need email and SSL…"
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
+          disabled={loading}
+        />
+        <div className="flex flex-wrap gap-2">
+          {QUICK_PROMPTS.map((prompt) => (
+            <button
+              key={prompt}
+              type="button"
+              disabled={loading}
+              onClick={() => setDescription(prompt)}
+              className="rounded-full border border-stitch-outline bg-white px-3 py-1.5 text-xs text-stitch-muted transition hover:border-stitch-primary hover:text-stitch-primary disabled:opacity-50"
+            >
+              {prompt}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <Button
+        disabled={loading || description.trim().length < 3}
+        onClick={recommend}
+        className="rounded-full bg-gradient-accent px-8 text-white shadow-glow hover:opacity-90"
+      >
         {loading ? "Analyzing…" : "Recommend a plan"}
       </Button>
-      {error && <p className="text-sm text-red-400">{error}</p>}
-      {summary && <p className="text-sm text-foreground/90">{summary.replace(/\*\*/g, "")}</p>}
+
+      {error && <p className="text-sm text-red-600">{error}</p>}
+      {summary && (
+        <p className="text-sm stitch-muted-fg leading-relaxed border-t border-stitch-outline pt-4">
+          {summary.replace(/\*\*/g, "")}
+        </p>
+      )}
+
       {rec && (
-        <div className="rounded-xl border border-violet-500/30 bg-violet-500/10 p-4 space-y-2">
-          <p className="text-xs uppercase tracking-wide text-violet-300">Recommended</p>
-          <p className="font-semibold">{rec.name}</p>
-          <p className="text-sm text-muted">{rec.description}</p>
-          <p className="text-sm">
-            {formatMoney(rec.priceCents, rec.currency)} / {rec.billingPeriod.toLowerCase()}
+        <div className="rounded-xl border border-violet-200 bg-gradient-to-br from-violet-50 to-white p-5 space-y-3">
+          <p className="text-xs uppercase tracking-wide text-violet-700 font-semibold">
+            Recommended
           </p>
-          <ul className="text-xs text-muted list-disc pl-4">
+          <p className="font-display text-lg font-semibold stitch-fg">{rec.name}</p>
+          <p className="text-sm stitch-muted-fg">{rec.description}</p>
+          <p className="text-base font-semibold stitch-fg">
+            {formatMoney(rec.priceCents, rec.currency)}
+            <span className="text-sm font-normal stitch-muted-fg">
+              {" "}
+              / {rec.billingPeriod.toLowerCase()}
+            </span>
+          </p>
+          <ul className="text-sm stitch-muted-fg list-disc pl-4 space-y-1">
             {rec.reasons.map((r) => (
               <li key={r}>{r}</li>
             ))}
           </ul>
-          <Button asChild size="sm">
+          <Button asChild size="sm" className="rounded-full">
             <Link href="/hosting">View hosting plans</Link>
           </Button>
         </div>
       )}
+
       {alts.length > 0 && (
-        <div className="space-y-2">
-          <p className="text-xs text-muted uppercase tracking-wide">Alternatives</p>
+        <div className="space-y-2 border-t border-stitch-outline pt-4">
+          <p className="text-xs stitch-muted-fg uppercase tracking-wide font-medium">
+            Alternatives
+          </p>
           {alts.map((a) => (
-            <div key={a.id} className="rounded-lg border border-white/10 px-3 py-2 text-sm">
-              <span className="font-medium">{a.name}</span>
-              <span className="text-muted">
-                {" "}
-                — {formatMoney(a.priceCents, a.currency)}
-              </span>
+            <div
+              key={a.id}
+              className="rounded-lg border border-stitch-outline bg-white px-4 py-3 text-sm"
+            >
+              <span className="font-medium stitch-fg">{a.name}</span>
+              <span className="stitch-muted-fg"> — {formatMoney(a.priceCents, a.currency)}</span>
             </div>
           ))}
         </div>

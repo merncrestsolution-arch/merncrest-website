@@ -76,7 +76,7 @@ export default async function TechnologiesPage({
       />
 
       <div className="stitch-page-body stitch-stack-lg">
-        <div className="relative overflow-hidden rounded-xl border border-white/10">
+        <div className="relative overflow-hidden rounded-xl border border-stitch-outline">
           <div className="relative h-48 sm:h-56 md:h-64 w-full">
             <Image
               src="https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=1600&q=80"
@@ -86,7 +86,7 @@ export default async function TechnologiesPage({
               sizes="100vw"
               priority
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-[var(--stitch-bg)] via-[var(--stitch-bg)]/40 to-transparent" />
+            <div className="absolute inset-0 bg-gradient-to-t from-stitch-bg via-stitch-bg/40 to-transparent" />
             <div className="absolute inset-x-0 bottom-0 p-6 sm:p-8">
               <div className="flex flex-wrap items-center gap-4 mb-4">
                 <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-black/40 border border-white/15">
@@ -99,7 +99,7 @@ export default async function TechnologiesPage({
                   <BrandLogo slug="googlecloud" name="Google Cloud" color="4285F4" size={24} />
                 </div>
               </div>
-              <p className="font-display text-lg sm:text-xl font-semibold text-white max-w-xl">
+              <p className="font-display text-lg sm:text-xl font-semibold text-foreground max-w-xl">
                 Multi-cloud ready — AWS, Microsoft Azure, and Google Cloud architectures.
               </p>
             </div>
@@ -111,10 +111,10 @@ export default async function TechnologiesPage({
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5">
           {techCategories.map((category) => (
             <div key={category.title} className="stitch-card stitch-card-hover group">
-              <div className="mb-5 flex h-12 w-12 items-center justify-center rounded-xl bg-violet-500/15 text-violet-300">
+              <div className="mb-5 flex h-12 w-12 items-center justify-center rounded-xl bg-violet-500/15 text-stitch-glow">
                 <category.icon className="h-6 w-6" />
               </div>
-              <h3 className="font-display text-xl font-semibold text-white mb-2">
+              <h3 className="font-display text-xl font-semibold text-foreground mb-2">
                 {category.title}
               </h3>
               <p className="text-sm text-muted leading-relaxed mb-6">{category.description}</p>
@@ -122,7 +122,7 @@ export default async function TechnologiesPage({
                 {category.techs.map((tech) => (
                   <span
                     key={tech}
-                    className="rounded-full border border-white/10 bg-white/[0.03] px-3 py-1 font-mono text-[11px] text-muted"
+                    className="rounded-full border border-stitch-outline bg-white/[0.03] px-3 py-1 font-mono text-[11px] text-muted"
                   >
                     {tech}
                   </span>
@@ -135,7 +135,7 @@ export default async function TechnologiesPage({
         <div className="stitch-card text-center relative overflow-hidden !py-12">
           <div className="pointer-events-none absolute inset-0 brand-mesh opacity-50" aria-hidden />
           <div className="relative z-10 max-w-2xl mx-auto stitch-stack-md">
-            <h2 className="font-display text-2xl sm:text-3xl font-bold text-white">
+            <h2 className="font-display text-2xl sm:text-3xl font-bold text-foreground">
               Need a custom stack?
             </h2>
             <p className="text-muted">

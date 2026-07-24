@@ -1,10 +1,6 @@
-import { StaffDashboard } from "@/components/staff/staff-dashboard";
+import { StaffChatPanel } from "@/components/staff/staff-chat-panel";
 
-export default function Page() {
-  return (
-    <div className="space-y-4">
-      <h1 className="font-display text-xl font-bold">Internal chat</h1>
-      <StaffDashboard />
-    </div>
-  );
+/** Internal staff DMs / general channel */
+export default function StaffChatPage() {
+  return <StaffChatPanel />;
 }

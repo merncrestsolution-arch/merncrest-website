@@ -21,9 +21,28 @@ const jetbrains = JetBrains_Mono({
   display: "swap",
 });
 
+const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL || "https://merncrest.lk").replace(/\/$/, "");
+
 export const metadata: Metadata = {
-  title: "MernCrest Solutions",
-  description: "AI-Powered Enterprise Digital Platform",
+  metadataBase: new URL(SITE_URL),
+  title: "MernCrest — Enterprise Software, AI & Cloud Solutions",
+  description:
+    "MernCrest builds enterprise software, AI, and cloud solutions, and runs a domain & hosting marketplace powered by trusted providers.",
+  applicationName: "MernCrest",
+  openGraph: {
+    type: "website",
+    siteName: "MernCrest",
+    url: SITE_URL,
+    title: "MernCrest — Enterprise Software, AI & Cloud Solutions",
+    description:
+      "Enterprise software, AI, and cloud solutions, plus a domain & hosting marketplace powered by trusted providers.",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "MernCrest — Enterprise Software, AI & Cloud Solutions",
+    description:
+      "Enterprise software, AI, and cloud solutions, plus a domain & hosting marketplace.",
+  },
 };
 
 /**

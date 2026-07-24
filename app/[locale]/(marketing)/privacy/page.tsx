@@ -17,7 +17,7 @@ export default async function PrivacyPage({
     <div className="stitch-page">
       <div className="stitch-container stitch-section pt-32 max-w-4xl mx-auto">
       <div className="stitch-card !p-8 md:!p-12">
-        <div className="mb-12 border-b border-white/10 pb-8">
+        <div className="mb-12 border-b border-stitch-outline pb-8">
           <h1 className="text-4xl md:text-5xl font-bold font-display mb-4">Privacy Policy</h1>
           <div className="text-muted space-y-2">
             <p><strong>Company:</strong> MERNcrest Solutions (Pvt) Ltd</p>
@@ -260,7 +260,7 @@ export default async function PrivacyPage({
           <section>
             <h2 className="text-2xl font-bold text-foreground mb-4">14. Contact Information and Data Protection Officer</h2>
             <p className="mb-4">For any questions, concerns, or requests regarding this Privacy Policy or your personal data, please contact:</p>
-            <div className="bg-white/5 p-6 rounded-xl border border-white/10">
+            <div className="bg-white/5 p-6 rounded-xl border border-stitch-outline">
               <p className="font-bold text-lg mb-2">MERNcrest Solutions (Pvt) Ltd</p>
               <p>Attn: Data Protection Officer</p>
               <p>Email: <a href="mailto:merncrestsolution@gmail.com" className="text-accent hover:underline">merncrestsolution@gmail.com</a></p>

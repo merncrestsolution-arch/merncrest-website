@@ -11,21 +11,21 @@ const config: Config = {
     extend: {
       colors: {
         primary: {
-          DEFAULT: "#7C3AED",
+          DEFAULT: "var(--stitch-primary)",
           foreground: "#FFFFFF",
         },
         surface: {
-          DEFAULT: "#1F1F23",
-          foreground: "#E5E1E7",
-          low: "#1B1B1F",
-          high: "#2A292E",
-          lowest: "#0E0E12",
+          DEFAULT: "var(--stitch-surface-container)",
+          foreground: "var(--stitch-on)",
+          low: "var(--stitch-surface-low)",
+          high: "var(--stitch-surface-high)",
+          lowest: "var(--stitch-bg)",
         },
         accent: {
-          DEFAULT: "#8B5CF6",
-          alt: "#3131C0",
+          DEFAULT: "var(--stitch-primary)",
+          alt: "var(--stitch-secondary)",
           blue: "#3B82F6",
-          glow: "#D2BBFF",
+          glow: "var(--stitch-primary-glow)",
           foreground: "#FFFFFF",
         },
         success: {
@@ -33,11 +33,11 @@ const config: Config = {
           foreground: "#FFFFFF",
         },
         muted: {
-          DEFAULT: "#CCC3D8",
-          foreground: "#958DA1",
+          DEFAULT: "var(--stitch-muted)",
+          foreground: "var(--stitch-outline-strong)",
         },
-        border: "rgba(255,255,255,0.05)",
-        glass: "rgba(255,255,255,0.03)",
+        border: "hsl(var(--border))",
+        glass: "var(--stitch-glass)",
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
         card: {
@@ -58,6 +58,16 @@ const config: Config = {
         },
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",
+        stitch: {
+          bg: "var(--stitch-bg)",
+          surface: "var(--stitch-surface)",
+          low: "var(--stitch-surface-low)",
+          on: "var(--stitch-on)",
+          muted: "var(--stitch-muted)",
+          primary: "var(--stitch-primary)",
+          glow: "var(--stitch-primary-glow)",
+          outline: "var(--stitch-outline)",
+        },
       },
       fontFamily: {
         display: ["var(--font-jakarta)", "system-ui", "sans-serif"],
@@ -82,12 +92,14 @@ const config: Config = {
       },
       backgroundImage: {
         "gradient-radial": "radial-gradient(var(--tw-gradient-stops))",
-        "gradient-accent": "linear-gradient(135deg, #7C3AED 0%, #A855F7 55%, #3131C0 100%)",
-        "gradient-text": "linear-gradient(90deg, #D2BBFF 0%, #C084FC 50%, #A0A0FF 100%)",
+        "gradient-accent":
+          "linear-gradient(135deg, #2563eb 0%, #6d28d9 50%, #db2777 100%)",
+        "gradient-text":
+          "linear-gradient(90deg, #1e40af 0%, #6d28d9 45%, #db2777 78%, #e11d48 100%)",
       },
       boxShadow: {
-        glow: "0 0 30px rgba(124, 58, 237, 0.35)",
-        "glow-lg": "0 0 50px rgba(124, 58, 237, 0.45)",
+        glow: "0 0 30px var(--stitch-glow)",
+        "glow-lg": "0 0 50px var(--stitch-glow)",
       },
       borderRadius: {
         lg: "var(--radius)",

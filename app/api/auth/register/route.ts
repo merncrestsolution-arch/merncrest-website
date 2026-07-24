@@ -12,6 +12,7 @@ import { registerSchema } from "@/lib/validations/auth";
 import { onCustomerRegistered } from "@/lib/crm/customer-hooks";
 import { notifyUser } from "@/lib/support/notify";
 import { encryptPii } from "@/lib/security/pii";
+import { verifyTurnstile } from "@/lib/security/turnstile";
 
 export async function POST(request: Request) {
   try {
@@ -23,6 +24,15 @@ export async function POST(request: Request) {
         { error: "Invalid input", details: parsed.error.flatten() },
         { status: 400 }
       );
+    }
+
+    const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || null;
+    const captcha = await verifyTurnstile(
+      (body as { turnstileToken?: string })?.turnstileToken,
+      ip
+    );
+    if (!captcha.ok) {
+      return NextResponse.json({ error: captcha.error }, { status: 400 });
     }
 
     const { fullName, email, company, password } = parsed.data;
@@ -77,9 +87,8 @@ export async function POST(request: Request) {
     await sendVerificationEmail(user.email, verifyUrl);
 
     const ua = request.headers.get("user-agent");
-    const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || null;
     const { token, expiresAt } = await createSession(user.id, { userAgent: ua, ip });
-    await setSessionCookie(token, expiresAt);
+    await setSessionCookie(token, expiresAt, request);
 
     void onCustomerRegistered({
       userId: user.id,

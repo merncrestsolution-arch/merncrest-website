@@ -1,13 +1,13 @@
 import { HostingDashboard } from "@/components/hosting/hosting-dashboard";
+import { RlkPage } from "@/components/rlk/rlk-page";
 
 export default function PortalHostingPage() {
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="font-display text-2xl font-bold">My Hosting</h1>
-        <p className="text-sm text-muted mt-1">Resource usage, SSL, backups, renewals, and control panel access.</p>
-      </div>
+    <RlkPage
+      title="My Hosting"
+      description="Resource usage, SSL, backups, renewals, and control panel access."
+    >
       <HostingDashboard />
-    </div>
+    </RlkPage>
   );
 }

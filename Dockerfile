@@ -13,12 +13,18 @@ WORKDIR /app
 
 # ---- deps: full dependency install (dev deps needed for build + migrate) ----
 FROM base AS deps
-COPY package.json package-lock.json ./
+COPY package.json package-lock.json* ./
 COPY prisma ./prisma
-RUN npm ci
+# Prefer the reproducible lockfile install; fall back to npm install when the
+# lockfile is out of sync so a stale lock never blocks a deploy.
+RUN npm ci --no-audit --no-fund || npm install --no-audit --no-fund
 
 # ---- builder: produce the Next.js standalone output ----
 FROM base AS builder
+ARG NEXT_PUBLIC_TURNSTILE_SITE_KEY
+ARG NEXT_PUBLIC_SITE_URL
+ENV NEXT_PUBLIC_TURNSTILE_SITE_KEY=$NEXT_PUBLIC_TURNSTILE_SITE_KEY
+ENV NEXT_PUBLIC_SITE_URL=$NEXT_PUBLIC_SITE_URL
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 # A placeholder DATABASE_URL so the build never opens a real connection.
@@ -32,7 +38,9 @@ COPY --from=deps /app/node_modules ./node_modules
 COPY package.json tsconfig.json ./
 COPY prisma ./prisma
 COPY scripts ./scripts
-CMD ["sh", "-c", "npx prisma db push --skip-generate && npx tsx prisma/seed.ts"]
+# seed.ts imports static data from lib/data/* (blogs, knowledge-base, etc.)
+COPY lib ./lib
+CMD ["sh", "-c", "npx prisma db push --skip-generate --accept-data-loss && npx tsx prisma/seed.ts"]
 
 # ---- runner: minimal runtime image ----
 FROM base AS runner

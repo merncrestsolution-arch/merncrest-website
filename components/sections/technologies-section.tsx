@@ -39,7 +39,7 @@ export function TechnologiesSection() {
               transition={{ duration: 0.5, delay: index * 0.1 }}
               className="glass-card p-6 rounded-2xl hover:border-accent/30 dark:hover:border-accent/30 transition-colors"
             >
-              <h3 className="text-lg font-semibold mb-4 text-foreground dark:text-white">
+              <h3 className="text-lg font-semibold mb-4 text-foreground dark:text-foreground">
                 {techGroup.category}
               </h3>
               <ul className="space-y-3">

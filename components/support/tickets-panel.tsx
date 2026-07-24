@@ -21,9 +21,36 @@ type Ticket = {
   status: string;
   channel: string;
   createdAt: string;
+  assigneeId?: string | null;
+  assigneeName?: string | null;
   csatRating?: number | null;
+  responseDueAt?: string | null;
+  resolveDueAt?: string | null;
+  escalatedAt?: string | null;
+  user?: { fullName: string; email: string } | null;
   messages: Message[];
 };
+
+function slaBadge(dueAt: string | null | undefined, label: string) {
+  if (!dueAt) return null;
+  const due = new Date(dueAt);
+  const now = Date.now();
+  const breached = due.getTime() < now;
+  const soon = !breached && due.getTime() - now < 2 * 3600_000;
+  return (
+    <span
+      className={`inline-flex items-center rounded px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide ${
+        breached
+          ? "bg-red-500/15 text-red-400"
+          : soon
+            ? "bg-amber-500/15 text-amber-400"
+            : "bg-emerald-500/15 text-emerald-400"
+      }`}
+    >
+      {label}: {breached ? "breached" : due.toLocaleString()}
+    </span>
+  );
+}
 
 export function TicketsPanel({ staffMode = false }: { staffMode?: boolean }) {
   const [tickets, setTickets] = useState<Ticket[]>([]);
@@ -108,22 +135,24 @@ export function TicketsPanel({ staffMode = false }: { staffMode?: boolean }) {
     <div className="grid lg:grid-cols-[280px_1fr] gap-6">
       <div className="space-y-3">
         {!staffMode && (
-          <form onSubmit={createTicket} className="rounded-xl border border-white/10 p-4 space-y-3">
-            <h2 className="font-display font-semibold text-sm">New ticket</h2>
+          <form onSubmit={createTicket} className="rounded-xl border border-[#c4bdd4] bg-white p-4 space-y-3 shadow-sm dark:border-[#4a4455] dark:bg-[#131317] dark:shadow-none">
+            <h2 className="font-display font-semibold text-sm text-[#121218] dark:text-white">New ticket</h2>
             <input
               value={subject}
               onChange={(e) => setSubject(e.target.value)}
               placeholder="Subject"
               required
-              className="w-full h-9 rounded-lg border border-white/10 bg-white/5 px-3 text-sm"
+              className="auth-input"
             />
             <select
               value={department}
               onChange={(e) => setDepartment(e.target.value)}
-              className="w-full h-9 rounded-lg border border-white/10 bg-white/5 px-3 text-sm"
+              className="auth-input auth-select"
             >
               {["GENERAL", "BILLING", "TECHNICAL", "DOMAIN", "HOSTING", "SALES"].map((d) => (
-                <option key={d} value={d}>{d}</option>
+                <option key={d} value={d} className="bg-[#1b1b1f] text-[#e4e1e7]">
+                  {d}
+                </option>
               ))}
             </select>
             <textarea
@@ -132,9 +161,11 @@ export function TicketsPanel({ staffMode = false }: { staffMode?: boolean }) {
               placeholder="Describe your issue…"
               required
               rows={3}
-              className="w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm"
+              className="auth-input min-h-[5rem] h-auto py-2"
             />
-            <Button type="submit" size="sm" disabled={busy}>Open ticket</Button>
+            <Button type="submit" size="sm" disabled={busy}>
+              Open ticket
+            </Button>
           </form>
         )}
         <ul className="space-y-2 max-h-[480px] overflow-y-auto">
@@ -145,7 +176,9 @@ export function TicketsPanel({ staffMode = false }: { staffMode?: boolean }) {
                 type="button"
                 onClick={() => setSelected(t.id)}
                 className={`w-full text-left rounded-lg border px-3 py-2 text-sm transition-colors ${
-                  selected === t.id ? "border-accent/50 bg-accent/10" : "border-white/10 hover:bg-white/5"
+                  selected === t.id
+                    ? "border-accent/50 bg-accent/10"
+                    : "border-[#c4bdd4] bg-white hover:bg-[#f4f1fa] dark:border-white/10 dark:bg-transparent dark:hover:bg-white/5"
                 }`}
               >
                 <p className="font-mono text-xs text-accent">{t.ticketNumber}</p>
@@ -157,18 +190,127 @@ export function TicketsPanel({ staffMode = false }: { staffMode?: boolean }) {
         </ul>
       </div>
 
-      <div className="rounded-xl border border-white/10 min-h-[360px] flex flex-col">
-        {error && <p className="text-sm text-red-400 p-4">{error}</p>}
+      <div className="rounded-xl border border-[#c4bdd4] bg-white min-h-[360px] flex flex-col shadow-sm dark:border-white/10 dark:bg-transparent dark:shadow-none">
+        {error && <p className="text-sm text-red-600 dark:text-red-400 p-4">{error}</p>}
         {!active ? (
           <p className="text-sm text-muted p-6">Select a ticket</p>
         ) : (
           <>
-            <div className="border-b border-white/10 p-4">
+            <div className="border-b border-[#e4dff0] dark:border-white/10 p-4">
               <p className="font-mono text-xs text-accent">{active.ticketNumber}</p>
               <h2 className="font-display font-semibold mt-1">{active.subject}</h2>
               <p className="text-xs text-muted mt-1">
                 {active.status} · {active.priority} · {active.channel} · {active.department}
+                {active.assigneeName ? ` · Lead: ${active.assigneeName}` : " · Unassigned"}
+                {active.user ? ` · ${active.user.fullName}` : ""}
+                {active.escalatedAt ? " · Escalated" : ""}
               </p>
+              {(active.responseDueAt || active.resolveDueAt) && (
+                <div className="flex flex-wrap gap-1.5 mt-2">
+                  {slaBadge(active.responseDueAt, "Response SLA")}
+                  {slaBadge(active.resolveDueAt, "Resolve SLA")}
+                </div>
+              )}
+              {staffMode && (
+                <div className="flex flex-wrap gap-2 mt-3">
+                  {!active.assigneeId && active.status !== "CLOSED" && (
+                    <Button
+                      size="sm"
+                      disabled={busy}
+                      onClick={async () => {
+                        setBusy(true);
+                        try {
+                          const res = await fetch("/api/tickets", {
+                            method: "PATCH",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify({ ticketId: active.id, action: "claim" }),
+                          });
+                          if (res.ok) await load();
+                        } finally {
+                          setBusy(false);
+                        }
+                      }}
+                    >
+                      Take ticket
+                    </Button>
+                  )}
+                  {active.status !== "CLOSED" && (
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      disabled={busy}
+                      onClick={async () => {
+                        setBusy(true);
+                        try {
+                          const note = reply.trim() || undefined;
+                          const res = await fetch("/api/tickets", {
+                            method: "PATCH",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify({
+                              ticketId: active.id,
+                              action: "close",
+                              body: note,
+                            }),
+                          });
+                          if (res.ok) {
+                            setReply("");
+                            await load();
+                          }
+                        } finally {
+                          setBusy(false);
+                        }
+                      }}
+                    >
+                      Close ticket
+                    </Button>
+                  )}
+                  {active.status !== "CLOSED" && active.status !== "RESOLVED" && (
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      disabled={busy}
+                      onClick={async () => {
+                        setBusy(true);
+                        try {
+                          await fetch("/api/tickets", {
+                            method: "PUT",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify({ ticketId: active.id, status: "RESOLVED" }),
+                          });
+                          await load();
+                        } finally {
+                          setBusy(false);
+                        }
+                      }}
+                    >
+                      Mark resolved
+                    </Button>
+                  )}
+                  {active.status !== "CLOSED" && !active.escalatedAt && (
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      disabled={busy}
+                      className="border-amber-500/40 text-amber-400 hover:bg-amber-500/10"
+                      onClick={async () => {
+                        setBusy(true);
+                        try {
+                          const res = await fetch("/api/tickets", {
+                            method: "PATCH",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify({ ticketId: active.id, action: "escalate" }),
+                          });
+                          if (res.ok) await load();
+                        } finally {
+                          setBusy(false);
+                        }
+                      }}
+                    >
+                      Escalate
+                    </Button>
+                  )}
+                </div>
+              )}
             </div>
             <div className="flex-1 overflow-y-auto p-4 space-y-3 max-h-[400px]">
               {active.messages
@@ -179,7 +321,7 @@ export function TicketsPanel({ staffMode = false }: { staffMode?: boolean }) {
                     className={`rounded-lg p-3 text-sm ${
                       m.authorRole === "STAFF" || m.authorRole === "AI"
                         ? "bg-accent/10 border border-accent/20"
-                        : "bg-white/5 border border-white/10"
+                        : "bg-[#f4f1fa] border border-[#c4bdd4] dark:bg-white/5 dark:border-white/10"
                     }`}
                   >
                     <p className="text-xs text-muted mb-1">
@@ -189,17 +331,17 @@ export function TicketsPanel({ staffMode = false }: { staffMode?: boolean }) {
                   </div>
                 ))}
             </div>
-            <form onSubmit={sendReply} className="border-t border-white/10 p-4 flex gap-2">
+            <form onSubmit={sendReply} className="border-t border-[#e4dff0] dark:border-white/10 p-4 flex gap-2">
               <input
                 value={reply}
                 onChange={(e) => setReply(e.target.value)}
                 placeholder="Write a reply…"
-                className="flex-1 h-10 rounded-lg border border-white/10 bg-white/5 px-3 text-sm"
+                className="auth-input flex-1"
               />
               <Button type="submit" disabled={busy || !reply.trim()}>Send</Button>
             </form>
             {!staffMode && ["RESOLVED", "CLOSED"].includes(active.status) && (
-              <div className="border-t border-white/10 p-4 space-y-2">
+              <div className="border-t border-[#e4dff0] dark:border-white/10 p-4 space-y-2">
                 <p className="text-sm text-muted">Rate this support experience</p>
                 <div className="flex gap-2">
                   {[1, 2, 3, 4, 5].map((n) => (
@@ -238,27 +380,8 @@ export function TicketsPanel({ staffMode = false }: { staffMode?: boolean }) {
               </div>
             )}
             {staffMode && active.status !== "CLOSED" && (
-              <div className="border-t border-white/10 p-3 flex gap-2">
-                <Button
-                  size="sm"
-                  variant="outline"
-                  disabled={busy}
-                  onClick={async () => {
-                    setBusy(true);
-                    try {
-                      await fetch("/api/tickets", {
-                        method: "PUT",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({ ticketId: active.id, status: "RESOLVED" }),
-                      });
-                      await load();
-                    } finally {
-                      setBusy(false);
-                    }
-                  }}
-                >
-                  Mark resolved
-                </Button>
+              <div className="border-t border-[#e4dff0] dark:border-white/10 p-3 text-xs text-muted">
+                Reply like email — customer is notified. Close when the issue is finished.
               </div>
             )}
           </>

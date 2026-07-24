@@ -29,10 +29,11 @@ sudo apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plug
 echo "==> Allowing current user to run docker without sudo"
 sudo usermod -aG docker "$USER" || true
 
-echo "==> Configuring UFW firewall (SSH + HTTP)"
+echo "==> Configuring UFW firewall (SSH + HTTP + HTTPS)"
 sudo ufw allow OpenSSH
 sudo ufw allow 80/tcp
-# HTTPS is terminated at Cloudflare; open 443 only if you add on-server TLS.
+sudo ufw allow 443/tcp
+# Also open TCP 443 in Lightsail console: Instance → Networking → Firewall → Add rule (HTTPS).
 sudo ufw --force enable
 
 echo ""

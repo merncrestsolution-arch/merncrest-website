@@ -1,0 +1,16 @@
+{
+  "name": "System.merncrest.lk",
+  "short_name": "MernCrest System",
+  "description": "Enterprise Staff Management & CRM",
+  "start_url": "/en/staff",
+  "display": "standalone",
+  "background_color": "#f4f1fa",
+  "theme_color": "#4c1d95",
+  "icons": [
+    {
+      "src": "/favicon.ico",
+      "sizes": "48x48",
+      "type": "image/x-icon"
+    }
+  ]
+}

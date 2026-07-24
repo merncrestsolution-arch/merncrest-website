@@ -1,0 +1,8 @@
+{
+  "projectId": "17402065891171962495",
+  "screenId": "0cd2c3b0fe7c4e35a50e4256790857a3",
+  "title": "Profile — MernCrest Solutions Staff Portal",
+  "route": "/staff/profile",
+  "component": "StaffProfilePanel",
+  "designSystem": "assets/060de6acb3a74722a6e7f79ec90a20d0"
+}

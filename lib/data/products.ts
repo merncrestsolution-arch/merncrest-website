@@ -28,7 +28,7 @@ export const productCategories: ProductCategory[] = [
     slug: "digital-services",
     title: "Digital Services",
     description: "UI/UX, branding, SEO, and digital marketing to launch and grow your brand.",
-    items: ["UI/UX Design", "Logo Design", "Branding", "SEO", "Digital Marketing"],
+    items: ["UI/UX Design", "Logo Design", "Branding", "Presentation Design", "SEO", "Digital Marketing"],
   },
   {
     slug: "cloud",

@@ -32,7 +32,7 @@ export function CTASection() {
                 asChild
                 size="lg"
                 variant="outline"
-                className="h-14 px-10 rounded-xl border-white/30 text-white hover:bg-white/10"
+                className="h-14 px-10 rounded-xl border-white/30 text-foreground hover:bg-white/10"
               >
                 <Link href="/contact">Speak to an Expert</Link>
               </Button>

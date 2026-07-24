@@ -38,7 +38,7 @@ export async function searchDomainAvailabilityAsync(query: string) {
 
   const { provider, adapter } = await getDomainSearchAdapter(tldHint);
   const raw = await adapter.searchDomains(query);
-  if (raw.error) {
+  if (raw.error && (!raw.results || raw.results.length === 0)) {
     return {
       error: raw.error,
       results: [] as Awaited<ReturnType<typeof enrichResult>>[],
@@ -74,6 +74,7 @@ export async function searchDomainAvailabilityAsync(query: string) {
     suggestions,
     provider: provider?.code ?? "mock-a",
     providerId: provider?.id ?? null,
+    warning: raw.error,
   };
 }
 
@@ -102,6 +103,8 @@ async function enrichResult(r: {
     priceCents: register.sellingPriceCents,
     renewPriceCents: renew.sellingPriceCents,
     transferPriceCents: transfer.sellingPriceCents,
+    providerCostLkrCents: register.providerPriceLkrCents,
+    marginLkrCents: register.marginCents,
     providerPriceCents: r.providerPriceCents,
     providerCurrency: cur,
     exchangeRate: register.exchangeRate,

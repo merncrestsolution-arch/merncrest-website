@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { Button } from "@/components/ui/button";
+import { Link } from "@/i18n/routing";
 
 type Customer = {
   id: string;
@@ -11,7 +11,10 @@ type Customer = {
   company?: string | null;
   phone?: string | null;
   whatsapp?: string | null;
-  language?: string | null;
+  customerRating?: string | null;
+  tagsJson?: string | null;
+  parent?: { id: string; code?: string | null; name?: string } | null;
+  children?: { id: string; code?: string | null; name?: string; email?: string }[];
   counts: {
     orders: number;
     invoices: number;
@@ -36,6 +39,7 @@ type Customer360 = {
     tickets: { ticketNumber: string; subject: string; status: string; csatRating?: number | null }[];
     calls: { callNumber: string; status: string; department: string }[];
   };
+  timeline?: { at: string; channel: string; title: string; body?: string }[];
 };
 
 export function AdminCustomersPanel() {
@@ -44,11 +48,20 @@ export function AdminCustomersPanel() {
   const [detail, setDetail] = useState<Customer360 | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [q, setQ] = useState("");
+  const [tag, setTag] = useState("");
+  const [rating, setRating] = useState("");
+  const [sort, setSort] = useState("newest");
 
   const load = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await fetch("/api/admin/customers");
+      const params = new URLSearchParams();
+      if (q) params.set("q", q);
+      if (tag) params.set("tag", tag);
+      if (rating) params.set("rating", rating);
+      if (sort) params.set("sort", sort);
+      const res = await fetch(`/api/admin/customers?${params}`);
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Failed");
       setCustomers(data.customers ?? []);
@@ -58,10 +71,11 @@ export function AdminCustomersPanel() {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [q, tag, rating, sort]);
 
   useEffect(() => {
-    load();
+    const t = setTimeout(load, 200);
+    return () => clearTimeout(t);
   }, [load]);
 
   useEffect(() => {
@@ -72,81 +86,122 @@ export function AdminCustomersPanel() {
       .catch(() => setDetail(null));
   }, [selected]);
 
-  if (loading) return <p className="text-sm text-muted">Loading customers…</p>;
-
   return (
-    <div className="grid lg:grid-cols-[300px_1fr] gap-6">
-      {error && <p className="text-sm text-red-400 lg:col-span-2">{error}</p>}
-      <ul className="space-y-2 max-h-[560px] overflow-y-auto">
-        {customers.map((c) => (
-          <li key={c.id}>
-            <button
-              type="button"
-              onClick={() => setSelected(c.id)}
-              className={`w-full text-left rounded-lg border px-3 py-2 text-sm ${
-                selected === c.id ? "border-accent/50 bg-accent/10" : "border-white/10"
-              }`}
-            >
-              <p className="font-medium truncate">{c.fullName}</p>
-              <p className="text-xs font-mono text-accent">{c.customerCode || "—"}</p>
-              <p className="text-xs text-muted mt-1">
-                {c.counts.domains}d · {c.counts.hostingAccounts}h · {c.counts.tickets}t
-              </p>
-            </button>
-          </li>
-        ))}
-      </ul>
+    <div>
+      <h1 className="rlk-welcome">Customers</h1>
+      <p className="rlk-empty !mb-4">Database · hierarchy · 360 dashboard</p>
+      {error ? <p className="rlk-login-error !mb-3">{error}</p> : null}
 
-      {detail ? (
-        <div className="space-y-4 rounded-xl border border-white/10 p-5">
-          <div>
-            <p className="font-mono text-xs text-accent">{detail.customerCode}</p>
-            <h2 className="font-display text-xl font-bold">{detail.fullName}</h2>
-            <p className="text-sm text-muted">
-              {detail.email}
-              {detail.company ? ` · ${detail.company}` : ""}
-            </p>
-          </div>
-          <div className="grid sm:grid-cols-3 gap-3 text-sm">
-            <div className="border border-white/10 rounded-lg p-3">
-              <p className="text-xs text-muted">Domains</p>
-              <p className="font-display text-xl font-bold">{detail.services.domains.length}</p>
-            </div>
-            <div className="border border-white/10 rounded-lg p-3">
-              <p className="text-xs text-muted">Hosting</p>
-              <p className="font-display text-xl font-bold">{detail.services.hosting.length}</p>
-            </div>
-            <div className="border border-white/10 rounded-lg p-3">
-              <p className="text-xs text-muted">Open invoices</p>
-              <p className="font-display text-xl font-bold">{detail.financial.openInvoices.length}</p>
-            </div>
-          </div>
-          <div>
-            <h3 className="font-semibold text-sm mb-2">Support history</h3>
-            <ul className="text-sm space-y-1">
-              {detail.support.tickets.slice(0, 5).map((t) => (
-                <li key={t.ticketNumber} className="text-muted">
-                  {t.ticketNumber} · {t.status}
-                  {t.csatRating ? ` · ★${t.csatRating}` : ""} — {t.subject}
-                </li>
-              ))}
-              {detail.support.tickets.length === 0 && <li className="text-muted">No tickets</li>}
-            </ul>
-          </div>
-          <div>
-            <h3 className="font-semibold text-sm mb-2">Call records</h3>
-            <ul className="text-sm space-y-1">
-              {detail.support.calls.slice(0, 5).map((c) => (
-                <li key={c.callNumber} className="text-muted">
-                  {c.callNumber} · {c.department} · {c.status}
-                </li>
-              ))}
-              {detail.support.calls.length === 0 && <li className="text-muted">No calls</li>}
-            </ul>
-          </div>
-        </div>
+      <div className="flex flex-wrap gap-2 mb-4">
+        <input
+          className="rlk-input !w-auto min-w-[180px]"
+          placeholder="Search name, email, code…"
+          value={q}
+          onChange={(e) => setQ(e.target.value)}
+        />
+        <input
+          className="rlk-input !w-auto"
+          placeholder="Tag"
+          value={tag}
+          onChange={(e) => setTag(e.target.value)}
+        />
+        <select className="rlk-input !w-auto" value={rating} onChange={(e) => setRating(e.target.value)}>
+          <option value="">All ratings</option>
+          {["VIP", "GOOD", "AVERAGE", "AT_RISK"].map((r) => (
+            <option key={r} value={r}>
+              {r}
+            </option>
+          ))}
+        </select>
+        <select className="rlk-input !w-auto" value={sort} onChange={(e) => setSort(e.target.value)}>
+          <option value="newest">Newest</option>
+          <option value="oldest">Oldest</option>
+          <option value="name">Name A–Z</option>
+        </select>
+      </div>
+
+      {loading ? (
+        <p className="rlk-empty">Loading…</p>
       ) : (
-        <p className="text-sm text-muted">Select a customer for 360° profile</p>
+        <div className="grid lg:grid-cols-[300px_1fr] gap-4">
+          <section className="rlk-section rlk-section-accent-teal !mb-0">
+            <div className="rlk-section-head">
+              <h2>Customer list</h2>
+              <span className="rlk-badge rlk-badge-hold">{customers.length}</span>
+            </div>
+            <div className="rlk-section-body !py-2 max-h-[560px] overflow-y-auto">
+              {customers.map((c) => (
+                <button
+                  key={c.id}
+                  type="button"
+                  className={`rlk-shortcut w-full text-left !flex-col !items-start ${
+                    selected === c.id ? "!text-[#17a2b8]" : ""
+                  }`}
+                  onClick={() => setSelected(c.id)}
+                >
+                  <span className="font-medium">{c.fullName}</span>
+                  <span className="text-[11px]" style={{ color: "var(--rlk-text-muted)" }}>
+                    {c.customerCode || c.email} · {c.counts.orders} orders
+                  </span>
+                  {c.parent ? (
+                    <span className="text-[10px]" style={{ color: "var(--rlk-teal)" }}>
+                      Child of {c.parent.name || c.parent.code}
+                    </span>
+                  ) : null}
+                </button>
+              ))}
+            </div>
+          </section>
+
+          <section className="rlk-section rlk-section-accent-green !mb-0">
+            <div className="rlk-section-head">
+              <h2>Customer dashboard</h2>
+              <Link href="/admin/crm" className="rlk-link">
+                Open CRM
+              </Link>
+            </div>
+            <div className="rlk-section-body">
+              {!detail ? (
+                <p className="rlk-empty">Select a customer</p>
+              ) : (
+                <>
+                  <p className="rlk-mono">{detail.customerCode}</p>
+                  <p className="font-medium text-[16px]">{detail.fullName}</p>
+                  <p className="rlk-empty">
+                    {detail.email} · {detail.company || "—"}
+                  </p>
+                  <div className="rlk-stats !my-4" style={{ gridTemplateColumns: "repeat(3, 1fr)" }}>
+                    <div className="rlk-stat">
+                      <div className="rlk-stat-num">{detail.services?.domains?.length ?? 0}</div>
+                      <div className="rlk-stat-label">Domains</div>
+                    </div>
+                    <div className="rlk-stat">
+                      <div className="rlk-stat-num">{detail.financial?.openInvoices?.length ?? 0}</div>
+                      <div className="rlk-stat-label">Open invoices</div>
+                    </div>
+                    <div className="rlk-stat">
+                      <div className="rlk-stat-num">{detail.support?.tickets?.length ?? 0}</div>
+                      <div className="rlk-stat-label">Tickets</div>
+                    </div>
+                  </div>
+                  <h3 className="text-[13px] font-semibold mb-2">Recent activity</h3>
+                  {(detail.timeline || []).slice(0, 12).map((t, i) => (
+                    <div key={i} className="rlk-row !flex-col !items-start">
+                      <span className="rlk-badge rlk-badge-hold">{t.channel}</span>
+                      <span>
+                        {t.title}
+                        {t.body ? ` — ${t.body}` : ""}
+                      </span>
+                    </div>
+                  ))}
+                  {!detail.timeline?.length ? (
+                    <p className="rlk-empty">No timeline events in 360 payload.</p>
+                  ) : null}
+                </>
+              )}
+            </div>
+          </section>
+        </div>
       )}
     </div>
   );

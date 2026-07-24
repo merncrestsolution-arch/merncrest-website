@@ -88,7 +88,7 @@ export function SolutionsSection() {
                       <Icon className="h-5 w-5" />
                     </StitchIconBox>
                     <div className="min-w-0">
-                      <h4 className="font-semibold text-white mb-1">{t(`${solution}.title`)}</h4>
+                      <h4 className="font-semibold text-foreground mb-1">{t(`${solution}.title`)}</h4>
                       <p className="text-sm text-muted line-clamp-2">
                         {t(`${solution}.description`)}
                       </p>

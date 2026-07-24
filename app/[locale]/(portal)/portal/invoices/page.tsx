@@ -1,10 +1,10 @@
 import { InvoicesList } from "@/components/commerce/invoices-list";
+import { RlkPage } from "@/components/rlk/rlk-page";
 
 export default function PortalInvoicesPage() {
   return (
-    <div className="space-y-6">
-      <h1 className="font-display text-2xl font-bold">Invoices</h1>
+    <RlkPage title="Invoices" description="View and pay invoices for your services.">
       <InvoicesList />
-    </div>
+    </RlkPage>
   );
 }

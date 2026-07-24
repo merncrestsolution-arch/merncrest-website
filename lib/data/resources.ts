@@ -15,56 +15,80 @@ export const downloads: DownloadItem[] = [
   { slug: "case-studies-pack", title: "Case Studies Pack", category: "Case Studies", description: "Selected customer success stories.", fileType: "PDF" },
 ];
 
-export const partners = [
+export type Partner = {
+  name: string;
+  slug: string;
+  color: string;
+  role: string;
+  category: "Cloud" | "Productivity" | "Security" | "Hosting" | "SSL";
+  blurb: string;
+  image?: string;
+};
+
+export const partners: Partner[] = [
   {
     name: "AWS",
     slug: "amazonaws",
     color: "FF9900",
-    role: "Cloud Partner",
-    blurb: "Deployment, migration, and managed AWS workloads.",
-    image:
-      "https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=1200&q=80",
+    role: "Cloud infrastructure we build on",
+    category: "Cloud",
+    blurb: "We deploy, migrate, and operate production workloads on Amazon Web Services.",
   },
   {
-    name: "Google Workspace",
-    slug: "google",
+    name: "Google Cloud",
+    slug: "googlecloud",
     color: "4285F4",
-    role: "Productivity",
-    blurb: "Business email and collaboration for teams.",
-    image:
-      "https://images.unsplash.com/photo-1573164713714-d95e436ab8d6?auto=format&fit=crop&w=1200&q=80",
+    role: "Cloud infrastructure we build on",
+    category: "Cloud",
+    blurb: "Scalable infrastructure, AI APIs, and managed Kubernetes for modern apps.",
   },
   {
     name: "Microsoft 365",
     slug: "microsoft",
     color: "00A4EF",
-    role: "Productivity",
-    blurb: "Enterprise productivity and identity.",
-    image:
-      "https://images.unsplash.com/photo-1633419461186-7d40a38105ec?auto=format&fit=crop&w=1200&q=80",
+    role: "Productivity tools we integrate",
+    category: "Productivity",
+    blurb: "Enterprise identity, collaboration, and productivity for hybrid teams.",
+  },
+  {
+    name: "Google Workspace",
+    slug: "google",
+    color: "4285F4",
+    role: "Business email we resell",
+    category: "Productivity",
+    blurb: "Business email and collaboration suites provisioned through provider APIs.",
   },
   {
     name: "Cloudflare",
     slug: "cloudflare",
     color: "F38020",
-    role: "Edge & Security",
-    blurb: "CDN, DNS, and edge security.",
-    image:
-      "https://images.unsplash.com/photo-1558494949-ef010cbdcc31?auto=format&fit=crop&w=1200&q=80",
+    role: "Edge & security we use",
+    category: "Security",
+    blurb: "Global CDN, DNS, WAF, and edge security for high-availability delivery.",
   },
   {
     name: "Let's Encrypt",
     slug: "letsencrypt",
     color: "003A70",
-    role: "SSL",
-    blurb: "Automated certificate issuance.",
+    role: "SSL certificates we provision",
+    category: "SSL",
+    blurb: "Automated certificate issuance for secure HTTPS across customer domains.",
   },
   {
     name: "cPanel",
     slug: "cpanel",
     color: "FF6C2C",
-    role: "Hosting",
-    blurb: "Industry-standard hosting control panels.",
+    role: "Hosting control panel we resell",
+    category: "Hosting",
+    blurb: "Industry-standard hosting panels powering reseller provisioning flows.",
+  },
+  {
+    name: "Docker",
+    slug: "docker",
+    color: "2496ED",
+    role: "DevOps tooling we use",
+    category: "Cloud",
+    blurb: "Containerized delivery pipelines for consistent cloud and VPS deployments.",
   },
 ];
 

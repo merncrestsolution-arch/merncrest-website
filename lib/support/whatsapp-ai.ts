@@ -1,14 +1,24 @@
+/**
+ * NLU-first WhatsApp business assistant (EN/TA/SI).
+ * Intent classification + entities → CRM / commerce / support handlers.
+ */
 import { prisma } from "@/lib/db";
 import { searchDomainAvailability } from "@/lib/domains/registry";
 import { formatMoney } from "@/lib/commerce-format";
 import { nextNumber } from "@/lib/commerce";
 import { aiReply } from "@/lib/support/ai-replies";
 import { notifyUser } from "@/lib/support/notify";
+import { classifyIntent, type NluIntent } from "@/lib/support/nlu";
+import {
+  MERNcrest_WA_DISPLAY,
+  normalizeWhatsAppPhone,
+  phoneMatchVariants,
+} from "@/lib/support/whatsapp-phone";
+import { PAGE_LINKS, siteUrl } from "@/lib/support/chat-knowledge";
 
 export function detectLanguage(text: string): "en" | "ta" | "si" {
   if (/[\u0B80-\u0BFF]/.test(text)) return "ta";
   if (/[\u0D80-\u0DFF]/.test(text)) return "si";
-  // Tanglish / Singlish hints
   const lower = text.toLowerCase();
   if (/\b(vanakkam|epdi|enna|iruku|pannunga)\b/.test(lower)) return "ta";
   if (/\b(ayubowan|kohomada|karanna|onna)\b/.test(lower)) return "si";
@@ -16,12 +26,12 @@ export function detectLanguage(text: string): "en" | "ta" | "si" {
 }
 
 function normalizePhone(phone: string) {
-  return phone.replace(/\D/g, "").replace(/^0/, "94");
+  return normalizeWhatsAppPhone(phone);
 }
 
 export async function findCustomerByWhatsApp(phone: string) {
   const digits = normalizePhone(phone);
-  const variants = [phone, digits, `+${digits}`, `0${digits.slice(2)}`];
+  const variants = phoneMatchVariants(phone);
 
   const profile = await prisma.customerProfile.findFirst({
     where: {
@@ -36,7 +46,11 @@ export async function findCustomerByWhatsApp(phone: string) {
           domains: true,
           hostingAccounts: true,
           tickets: { where: { status: { in: ["OPEN", "IN_PROGRESS", "WAITING"] } } },
-          invoices: { where: { status: { in: ["SENT", "OVERDUE"] } }, take: 5, orderBy: { createdAt: "desc" } },
+          invoices: {
+            where: { status: { in: ["SENT", "OVERDUE"] } },
+            take: 5,
+            orderBy: { createdAt: "desc" },
+          },
           orders: { take: 5, orderBy: { createdAt: "desc" } },
         },
       },
@@ -47,25 +61,32 @@ export async function findCustomerByWhatsApp(phone: string) {
   return { ...profile.user, profile };
 }
 
-const MENU = `MernCrest WhatsApp Menu
-1. Search Domain
-2. Hosting Plans
-3. VPS / AWS
-4. Business Email
-5. Website / ERP / CRM
-6. Request Quotation
-7. View Orders
-8. View Invoices
-9. Support / Ticket
-0. Speak to Human Agent
+const MENU = `MernCrest WhatsApp (${MERNcrest_WA_DISPLAY})
 
-Reply with a number or type naturally (EN / TA / SI).`;
+1. Domains — search & register
+2. Hosting plans
+3. VPS / Cloud / AWS
+4. Business email
+5. Website / Mobile app
+6. ERP / CRM / Enterprise software
+7. AI & automation
+8. Request quotation
+9. My orders
+10. Invoices & payments
+11. Support / ticket
+0. Speak to human agent
+
+Reply with a number or type naturally (EN / TA / SI).
+Services: ${siteUrl(PAGE_LINKS.services)}
+Contact: ${siteUrl(PAGE_LINKS.contact)}`;
 
 export type WhatsAppHandleResult = {
   reply: string;
   ticketNumber?: string | null;
   leadId?: string | null;
   locale: string;
+  intent?: NluIntent;
+  confidence?: number;
 };
 
 export async function handleWhatsAppMessage(
@@ -73,16 +94,17 @@ export async function handleWhatsAppMessage(
   text: string,
   localeHint?: string
 ): Promise<WhatsAppHandleResult> {
-  const locale = localeHint || detectLanguage(text);
+  const nlu = classifyIntent(text);
+  const locale = localeHint || nlu.locale || detectLanguage(text);
   const q = text.trim();
-  const lower = q.toLowerCase();
   const user = await findCustomerByWhatsApp(phone);
+  const intent = nlu.intent;
 
-  // Menu
-  if (/^(menu|hi|hello|hey|start|0)$/i.test(q) || lower === "help") {
+  if (intent === "GREETING" || intent === "MENU") {
     if (user) {
       const code = user.profile?.customerCode || user.id.slice(0, 8);
-      const welcome = `Welcome back, ${user.fullName}.
+      return {
+        reply: `Welcome back, ${user.fullName}.
 
 Customer ID: ${code}
 You currently have:
@@ -90,24 +112,37 @@ You currently have:
 • ${user.hostingAccounts.length} Hosting / VPS
 • ${user.tickets.length} Open Support Ticket(s)
 
-${MENU}`;
-      return { reply: welcome, locale };
+${MENU}`,
+        locale,
+        intent,
+        confidence: nlu.confidence,
+      };
     }
-    return { reply: `Welcome to MernCrest Solutions.\n\n${MENU}`, locale };
+    return {
+      reply: `Welcome to MernCrest Solutions.\n\n${MENU}`,
+      locale,
+      intent,
+      confidence: nlu.confidence,
+    };
   }
 
-  // Domain search
-  const domainMatch =
-    lower.match(/(?:search\s+domain|domain)\s+([a-z0-9.-]+\.[a-z.]{2,})/i) ||
-    lower.match(/^1\s+([a-z0-9.-]+\.[a-z.]{2,})/i) ||
-    (lower.startsWith("search ") ? lower.match(/search\s+([a-z0-9.-]+\.[a-z.]{2,})/i) : null);
-
-  if (domainMatch || lower === "1" || lower.includes("search domain")) {
+  if (intent === "DOMAIN_SEARCH") {
+    const domainEntity = nlu.entities.find((e) => e.type === "domain");
+    const domainMatch =
+      domainEntity?.value ||
+      q.match(/\b([a-z0-9][a-z0-9-]{0,61}\.[a-z.]{2,})\b/i)?.[1];
     if (!domainMatch) {
-      return { reply: "Send: Search domain example.lk", locale };
+      return {
+        reply: "Send: Search domain example.lk",
+        locale,
+        intent,
+        confidence: nlu.confidence,
+      };
     }
-    const result = searchDomainAvailability(domainMatch[1]);
-    if (result.error) return { reply: result.error, locale };
+    const result = searchDomainAvailability(domainMatch);
+    if (result.error) {
+      return { reply: result.error, locale, intent, confidence: nlu.confidence };
+    }
     const lines = result.results.slice(0, 6).map((r) => {
       if (!r.available) return `❌ ${r.domain} — Unavailable`;
       return `✅ ${r.domain} — ${formatMoney(r.priceCents)}/yr — Register at merncrest.lk/domains`;
@@ -115,11 +150,12 @@ ${MENU}`;
     return {
       reply: `Domain search for "${result.sld}":\n\n${lines.join("\n")}\n\nReply Buy ${result.sld}.lk to continue on the website cart.`,
       locale,
+      intent,
+      confidence: nlu.confidence,
     };
   }
 
-  // Hosting
-  if (lower === "2" || /hosting|i need hosting|web hosting/.test(lower)) {
+  if (intent === "HOSTING") {
     return {
       reply: `Hosting is resold via our provider partners (not MernCrest-owned servers).
 
@@ -131,10 +167,12 @@ Popular plans (LKR/mo selling price):
 
 Describe your project (site type, visitors, storage, budget) at merncrest.lk/hosting for an AI recommendation, or reply here.`,
       locale,
+      intent,
+      confidence: nlu.confidence,
     };
   }
 
-  if (lower === "3" || /\bvps\b|aws|dedicated/.test(lower)) {
+  if (intent === "VPS") {
     return {
       reply: `VPS / Cloud:
 • Linux VPS Basic — 2 vCPU / 4GB
@@ -143,14 +181,12 @@ Describe your project (site type, visitors, storage, budget) at merncrest.lk/hos
 
 Reply with OS preference + RAM need, or open merncrest.lk/hosting`,
       locale,
+      intent,
+      confidence: nlu.confidence,
     };
   }
 
-  // Website / software → lead
-  if (
-    lower === "5" ||
-    /business website|need a website|erp|software development|i need crm/.test(lower)
-  ) {
+  if (intent === "SOFTWARE") {
     const lead = await prisma.crmLead.create({
       data: {
         fullName: user?.fullName || `WhatsApp ${phone}`,
@@ -179,11 +215,12 @@ Please share:
 Our sales team will follow up.`,
       leadId: lead.id,
       locale,
+      intent,
+      confidence: nlu.confidence,
     };
   }
 
-  // Quotation request
-  if (lower === "6" || /quotation|quote|proposal/.test(lower)) {
+  if (intent === "QUOTATION") {
     const lead = await prisma.crmLead.create({
       data: {
         fullName: user?.fullName || `WhatsApp ${phone}`,
@@ -196,33 +233,53 @@ Our sales team will follow up.`,
       },
     });
     return {
-      reply: `Quotation request logged. Sales will prepare a quote.\nLead ref: ${lead.id.slice(-6).toUpperCase()}`,
+      reply: `Quotation request logged. Sales will prepare a PDF proposal.\nLead ref: ${lead.id.slice(-6).toUpperCase()}`,
       leadId: lead.id,
       locale,
+      intent,
+      confidence: nlu.confidence,
     };
   }
 
-  // Orders
-  if (lower === "7" || /where is my order|my orders|order status|track order/.test(lower)) {
+  if (intent === "ORDERS") {
     if (!user) {
-      return { reply: "Link your WhatsApp number in Portal → Settings to see orders here.", locale };
+      return {
+        reply: "Link your WhatsApp number in Portal → Settings to see orders here.",
+        locale,
+        intent,
+        confidence: nlu.confidence,
+      };
     }
     if (user.orders.length === 0) {
-      return { reply: "No recent orders found.", locale };
+      return { reply: "No recent orders found.", locale, intent, confidence: nlu.confidence };
     }
     const lines = user.orders.map(
       (o) => `• ${o.orderNumber} — ${o.status} — ${formatMoney(o.totalCents)}`
     );
-    return { reply: `Your recent orders:\n${lines.join("\n")}`, locale };
+    return {
+      reply: `Your recent orders:\n${lines.join("\n")}`,
+      locale,
+      intent,
+      confidence: nlu.confidence,
+    };
   }
 
-  // Invoices
-  if (lower === "8" || /show my invoices|my invoices|pay invoice|invoice/.test(lower)) {
+  if (intent === "INVOICES" || intent === "PAYMENT") {
     if (!user) {
-      return { reply: "Link your WhatsApp in Portal → Settings to view invoices.", locale };
+      return {
+        reply: "Link your WhatsApp in Portal → Settings to view invoices.",
+        locale,
+        intent,
+        confidence: nlu.confidence,
+      };
     }
     if (user.invoices.length === 0) {
-      return { reply: "No open invoices. View history at merncrest.lk/portal/invoices", locale };
+      return {
+        reply: "No open invoices. View history at merncrest.lk/portal/invoices",
+        locale,
+        intent,
+        confidence: nlu.confidence,
+      };
     }
     const lines = user.invoices.map(
       (inv) =>
@@ -232,15 +289,13 @@ Our sales team will follow up.`,
     return {
       reply: `Open invoices:\n${lines.join("\n")}\n\nPay online: merncrest.lk/portal/invoices`,
       locale,
+      intent,
+      confidence: nlu.confidence,
     };
   }
 
-  // Support ticket
-  if (
-    lower === "9" ||
-    /website is down|my site is down|create ticket|support ticket|need help/.test(lower) ||
-    (/down|not working|urgent/.test(lower) && /site|website|hosting|server/.test(lower))
-  ) {
+  if (intent === "SUPPORT") {
+    const lower = q.toLowerCase();
     const ticket = await prisma.ticket.create({
       data: {
         ticketNumber: nextNumber("TKT"),
@@ -275,11 +330,12 @@ Our sales team will follow up.`,
       reply: `Support ticket created: ${ticket.ticketNumber}\nPriority: ${ticket.priority}\nWe'll update you here and in the portal.`,
       ticketNumber: ticket.ticketNumber,
       locale,
+      intent,
+      confidence: nlu.confidence,
     };
   }
 
-  // Human agent
-  if (lower === "0" || /speak to (human|agent)|talk to (human|agent)|operator/.test(lower)) {
+  if (intent === "HUMAN_AGENT") {
     const ticket = await prisma.ticket.create({
       data: {
         ticketNumber: nextNumber("TKT"),
@@ -304,13 +360,32 @@ Our sales team will follow up.`,
       reply: `Connecting you to a human agent.\nTicket: ${ticket.ticketNumber}\nAn agent can see your profile, services, and this chat summary.`,
       ticketNumber: ticket.ticketNumber,
       locale,
+      intent,
+      confidence: nlu.confidence,
     };
   }
 
-  // Fallback KB AI
+  // Business email menu digit / soft
+  if (/^4$/.test(q) || /business email|microsoft 365|google workspace/.test(q.toLowerCase())) {
+    return {
+      reply: `Business Email (reseller):
+• Microsoft 365
+• Google Workspace
+• Custom domain email
+
+Open merncrest.lk/email or reply with seats + domain.`,
+      locale,
+      intent: "UNKNOWN",
+      confidence: nlu.confidence,
+    };
+  }
+
   let reply = aiReply(q, locale);
   if (user?.profile?.customerCode) {
     reply = `[${user.profile.customerCode}] ${reply}`;
   }
-  return { reply, locale };
+  if (nlu.confidence > 0.15 && intent !== "UNKNOWN") {
+    reply = `${reply}\n\n_(Understood as ${intent}, ${(nlu.confidence * 100).toFixed(0)}% — reply MENU for options)_`;
+  }
+  return { reply, locale, intent, confidence: nlu.confidence };
 }

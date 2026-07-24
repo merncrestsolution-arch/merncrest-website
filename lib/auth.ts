@@ -1,14 +1,15 @@
 import { createHash, randomBytes } from "crypto";
 import bcrypt from "bcryptjs";
 import { cookies } from "next/headers";
+import { isSecureRequest } from "@/lib/cookie-secure";
 import { prisma } from "@/lib/db";
+import { getSessionDays } from "@/lib/security/auth-policy";
 import type { User } from "@prisma/client";
 import type { Role, SessionUser } from "@/lib/auth-types";
 
 export type { Role, SessionUser } from "@/lib/auth-types";
 
 export const SESSION_COOKIE = "mc_session";
-const SESSION_DAYS = 14;
 
 export function hashToken(token: string) {
   return createHash("sha256").update(token).digest("hex");
@@ -42,7 +43,8 @@ export async function createSession(
   meta?: { userAgent?: string | null; ip?: string | null }
 ) {
   const token = generateToken();
-  const expiresAt = new Date(Date.now() + SESSION_DAYS * 24 * 60 * 60 * 1000);
+  const sessionDays = await getSessionDays();
+  const expiresAt = new Date(Date.now() + sessionDays * 24 * 60 * 60 * 1000);
 
   await prisma.session.create({
     data: {
@@ -57,11 +59,15 @@ export async function createSession(
   return { token, expiresAt };
 }
 
-export async function setSessionCookie(token: string, expiresAt: Date) {
+export async function setSessionCookie(
+  token: string,
+  expiresAt: Date,
+  request?: Request
+) {
   const cookieStore = await cookies();
   cookieStore.set(SESSION_COOKIE, token, {
     httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
+    secure: isSecureRequest(request),
     sameSite: "lax",
     path: "/",
     expires: expiresAt,

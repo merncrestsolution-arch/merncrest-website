@@ -3,6 +3,7 @@ import { prisma } from "@/lib/db";
 import { getSessionUser } from "@/lib/auth";
 import { requireStaff } from "@/lib/commerce";
 import { notifyUser } from "@/lib/support/notify";
+import { ensureLeadFromChannel } from "@/lib/crm/channels";
 import { z } from "zod";
 
 const createSchema = z.object({
@@ -47,23 +48,20 @@ export async function POST(request: Request) {
       });
     }
 
-    // Mirror into CRM as a lead activity source
-    await prisma.crmLead.create({
-      data: {
-        fullName: parsed.data.fullName,
-        email: parsed.data.email || user?.email || `${parsed.data.phone}@callback.local`,
-        phone: parsed.data.phone,
-        interest: `Callback · ${parsed.data.reason ?? "SUPPORT"}`,
-        source: "IVR_CALLBACK",
-        stage: "NEW",
-        notes: parsed.data.notes,
-        activities: {
-          create: {
-            type: "CALL",
-            body: `Callback requested${parsed.data.preferredAt ? ` at ${parsed.data.preferredAt}` : ""}`,
-          },
-        },
-      },
+    // Mirror into CRM via de-dupe helper so repeat callers update one lead
+    await ensureLeadFromChannel({
+      channel: "PHONE",
+      fullName: parsed.data.fullName,
+      email: parsed.data.email || user?.email || null,
+      phone: parsed.data.phone,
+      interest: `Callback · ${parsed.data.reason ?? "SUPPORT"}`,
+      activityType: "CALL",
+      activityBody: `Callback requested${
+        parsed.data.preferredAt ? ` at ${parsed.data.preferredAt}` : ""
+      }${parsed.data.notes ? `\n${parsed.data.notes}` : ""}`,
+      channelRef: "web:callback",
+      userId: user?.id ?? null,
+      skipWhatsAppAutoReply: true,
     });
 
     return NextResponse.json(

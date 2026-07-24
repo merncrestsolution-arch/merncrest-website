@@ -26,6 +26,7 @@ import {
   PROVIDER_TLD_COST,
   normalizeDomainInput,
 } from "@/lib/providers/mock-adapter";
+import { isDomainAvailableDns } from "@/lib/domains/dns-availability";
 
 const LK_TLDS = [
   "lk",
@@ -45,6 +46,10 @@ const RESERVED = new Set([
   "apple",
   "amazon",
   "merncrest",
+  "register",
+  "domain",
+  "domains",
+  "nic",
   "gov",
   "localhost",
   "example",
@@ -82,6 +87,24 @@ function mockAvailable(sld: string) {
   );
 }
 
+/** DNS + reserved list when DomainLK API is not configured. */
+async function resolveLkAvailability(sld: string, tld: string): Promise<boolean> {
+  if (!mockAvailable(sld)) return false;
+  const fqdn = `${sld}.${tld}`;
+  const dnsAvail = await isDomainAvailableDns(fqdn);
+  if (dnsAvail === false) return false;
+  if (dnsAvail === true) return true;
+  // Unknown DNS — do not claim available
+  return false;
+}
+
+async function buildResultsWithDns(sld: string, tlds: string[]) {
+  const rows = await Promise.all(
+    tlds.map(async (t) => buildResult(sld, t, await resolveLkAvailability(sld, t)))
+  );
+  return rows;
+}
+
 export class DomainLkAdapter implements ResellerProviderAdapter {
   readonly code: string;
 
@@ -105,11 +128,17 @@ export class DomainLkAdapter implements ResellerProviderAdapter {
     const tlds = [preferred, ...LK_TLDS.filter((t) => t !== preferred)];
 
     if (!isConfigured(this.creds)) {
-      const results = tlds.map((t) => buildResult(sld, t, mockAvailable(sld)));
-      const suggestions = ["online", "lk", "app", "tech"]
+      const results = await buildResultsWithDns(sld, tlds);
+      const suggestionSlds = ["online", "lk", "app", "tech"]
         .filter((sfx) => sfx !== sld)
-        .slice(0, 4)
-        .map((sfx) => buildResult(`${sld}${sfx}`, "lk", true));
+        .slice(0, 4);
+      const suggestions = (
+        await Promise.all(
+          suggestionSlds.map(async (sfx) =>
+            buildResult(`${sld}${sfx}`, "lk", await resolveLkAvailability(`${sld}${sfx}`, "lk"))
+          )
+        )
+      ).filter((r) => r.available);
       return { fqdn, sld, results, suggestions };
     }
 
@@ -130,7 +159,9 @@ export class DomainLkAdapter implements ResellerProviderAdapter {
           }
         );
         if (!res.ok) {
-          results.push(buildResult(sld, t, mockAvailable(sld)));
+          results.push(
+            await buildResult(sld, t, await resolveLkAvailability(sld, t))
+          );
           continue;
         }
         const data = (await res.json()) as {
@@ -150,14 +181,19 @@ export class DomainLkAdapter implements ResellerProviderAdapter {
         results.push(row);
       } catch (error) {
         console.error("[domainlk:check]", domain, error);
-        results.push(buildResult(sld, t, mockAvailable(sld)));
+        results.push(await buildResult(sld, t, await resolveLkAvailability(sld, t)));
       }
     }
 
     const primaryUnavailable = results[0] && !results[0].available;
-    const suggestions = ["online", "pro", "hq", "app"]
-      .slice(0, primaryUnavailable ? 6 : 4)
-      .map((sfx) => buildResult(`${sld}${sfx}`, "lk", true));
+    const suggestionSlds = ["online", "pro", "hq", "app"].slice(0, primaryUnavailable ? 6 : 4);
+    const suggestions = (
+      await Promise.all(
+        suggestionSlds.map(async (sfx) =>
+          buildResult(`${sld}${sfx}`, "lk", await resolveLkAvailability(`${sld}${sfx}`, "lk"))
+        )
+      )
+    ).filter((r) => r.available);
 
     return { fqdn, sld, results, suggestions };
   }

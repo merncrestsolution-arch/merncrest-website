@@ -67,11 +67,31 @@ export async function recommendHosting(need: HostingNeed): Promise<{
       ? parseInt(need.storageGb, 10) || 0
       : need.storageGb || 0;
 
+  const budgetMatch = text.match(
+    /(?:rs\.?|lkr|budget|under|below|max)\s*([\d,]+)|([\d,]+)\s*(?:\/\s*mo|per month|monthly)/i
+  );
+  const parsedBudgetLkr = budgetMatch
+    ? parseInt((budgetMatch[1] || budgetMatch[2] || "").replace(/,/g, ""), 10)
+    : 0;
+  const budgetCents =
+    need.budgetCents ||
+    (parsedBudgetLkr > 0 ? parsedBudgetLkr * 100 : 0);
+  const wantsCheap = /cheap|affordable|budget|low cost|economy|starter|basic/.test(text);
+  const wantsCpanel = /cpanel|c-panel|control panel/.test(text);
+
   const scored: ScoredPlan[] = products.map((p) => {
     let score = 10;
     const reasons: string[] = [];
     const blob = `${p.name} ${p.description} ${p.slug}`.toLowerCase();
 
+    if (wantsCpanel && /cpanel/.test(blob)) {
+      score += 45;
+      reasons.push("Includes full cPanel control panel");
+    }
+    if (wantsCheap && p.priceCents <= 150000) {
+      score += 30;
+      reasons.push("Affordable entry-level pricing");
+    }
     if (/wordpress|blog|cms/.test(text) && /wordpress|wp/.test(blob)) {
       score += 40;
       reasons.push("Optimized for WordPress / CMS workloads");
@@ -95,10 +115,10 @@ export async function recommendHosting(need: HostingNeed): Promise<{
       score += 15;
       reasons.push("More disk capacity for larger sites");
     }
-    if (need.budgetCents && p.priceCents <= need.budgetCents) {
+    if (budgetCents && p.priceCents <= budgetCents) {
       score += 15;
       reasons.push("Within your stated budget");
-    } else if (need.budgetCents && p.priceCents > need.budgetCents * 1.5) {
+    } else if (budgetCents && p.priceCents > budgetCents * 1.5) {
       score -= 20;
     }
     if (/shared|starter/.test(blob) && !/enterprise|vps/.test(text)) {

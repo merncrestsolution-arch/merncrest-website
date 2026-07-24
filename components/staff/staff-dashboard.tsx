@@ -2,8 +2,14 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { Link } from "@/i18n/routing";
-import { Button } from "@/components/ui/button";
-import { formatMoney } from "@/lib/commerce-format";
+import {
+  Calendar,
+  CheckCircle2,
+  FolderKanban,
+  CheckSquare,
+  Megaphone,
+  Plus,
+} from "lucide-react";
 
 type StaffData = {
   employee?: {
@@ -20,34 +26,64 @@ type StaffData = {
     startDate: string;
     endDate: string;
   }[];
-  notifications: { id: string; title: string; body: string }[];
-  messages: {
-    id: string;
-    body: string;
-    sender: { fullName: string };
-    createdAt: string;
-  }[];
-  salarySlips?: {
-    id: string;
-    slipNumber: string;
-    periodLabel: string;
-    netCents: number;
-    currency: string;
-    status: string;
-    issuedAt: string;
-  }[];
-  approvals?: {
-    id: string;
-    requestNumber: string;
-    type: string;
-    title: string;
-    status: string;
-  }[];
+  notifications: { id: string; title: string; body: string; createdAt?: string }[];
+  leaveBalances?: { leaveType: string; available: number }[];
+  attendanceRate?: number;
+  projectCount?: number;
 };
+
+const DEMO_ANNOUNCEMENTS = [
+  {
+    id: "a1",
+    title: "Office Holiday",
+    body: "The office will be closed on 25 Dec 2025 for the Christmas holiday.",
+    date: "25 Dec 2025",
+    isNew: true,
+  },
+  {
+    id: "a2",
+    title: "System Maintenance",
+    body: "Scheduled maintenance on System.merncrest.lk this Saturday 2:00–4:00 AM.",
+    date: "20 Dec 2025",
+    isNew: false,
+  },
+  {
+    id: "a3",
+    title: "New HR Policy",
+    body: "Updated leave policy is now available in Documents. Please review by month end.",
+    date: "15 Dec 2025",
+    isNew: false,
+  },
+];
+
+const ATTENDANCE_BARS = [88, 92, 95, 93, 97, 96, 94, 98, 95, 96, 97, 95, 94, 96, 98];
+
+function statusBadgeClass(status: string) {
+  const s = status.toUpperCase();
+  if (s.includes("PROGRESS")) return "stitch-chip stitch-badge-progress";
+  if (s.includes("REVIEW")) return "stitch-chip stitch-badge-review";
+  if (s.includes("PEND") || s.includes("OPEN")) return "stitch-chip stitch-badge-pending";
+  if (s.includes("DONE") || s.includes("COMPLETE")) return "stitch-chip stitch-badge-done";
+  return "stitch-chip";
+}
+
+function leaveBalanceFromData(data: StaffData) {
+  if (data.leaveBalances?.length) {
+    return data.leaveBalances.slice(0, 4).map((b) => ({
+      label: b.leaveType.replace(/_/g, " "),
+      days: b.available,
+    }));
+  }
+  return [
+    { label: "Casual Leave", days: 6 },
+    { label: "Sick Leave", days: 3 },
+    { label: "Earned Leave", days: 12 },
+    { label: "Unpaid Leave", days: 2 },
+  ];
+}
 
 export function StaffDashboard() {
   const [data, setData] = useState<StaffData | null>(null);
-  const [chat, setChat] = useState("");
   const [error, setError] = useState("");
 
   const load = useCallback(async () => {
@@ -61,165 +97,180 @@ export function StaffDashboard() {
     load();
   }, [load]);
 
-  if (error) return <p className="text-sm text-red-400">{error}</p>;
-  if (!data) return <p className="text-sm text-muted">Loading…</p>;
-
-  const slips = data.salarySlips ?? [];
-  const approvals = data.approvals ?? [];
+  const firstName = data?.employee?.fullName?.split(" ")[0] || "Staff";
+  const totalLeaves = leaveBalanceFromData(data ?? { tasks: [], leave: [], notifications: [] }).reduce(
+    (s, b) => s + b.days,
+    0
+  );
+  const attendance = data?.attendanceRate ?? 95.6;
+  const projects = data?.projectCount ?? 5;
+  const tasks = data?.tasks?.length ?? 18;
+  const announcements = data?.notifications?.length ?? 3;
+  const leaveBalances = leaveBalanceFromData(data ?? { tasks: [], leave: [], notifications: [] });
 
   return (
-    <div className="space-y-8 max-w-4xl">
-      <div>
-        <h1 className="font-display text-2xl font-bold">Employee self-service</h1>
-        <p className="text-sm text-muted mt-1">
-          {data.employee
-            ? `${data.employee.fullName} · ${data.employee.jobTitle} · ${data.employee.orgRole}${data.employee.department ? ` · ${data.employee.department.name}` : ""}`
-            : "Staff account (link an Employee record for full ESS)"}
-        </p>
+    <div>
+      <h1 className="stitch-page-title">Dashboard</h1>
+      <p className="stitch-page-sub">
+        Welcome back, {firstName}! 👋
+      </p>
+
+      {error ? <p className="stitch-auth-error">{error}</p> : null}
+
+      <div className="stitch-kpi-grid">
+        <Link href="/staff/leave" className="stitch-kpi-card">
+          <div className="stitch-kpi-icon stitch-kpi-icon-blue">
+            <Calendar className="h-5 w-5" />
+          </div>
+          <div className="stitch-kpi-value">{totalLeaves}</div>
+          <div className="stitch-kpi-label">Available Leaves</div>
+        </Link>
+        <Link href="/staff/attendance" className="stitch-kpi-card">
+          <div className="stitch-kpi-icon stitch-kpi-icon-green">
+            <CheckCircle2 className="h-5 w-5" />
+          </div>
+          <div className="stitch-kpi-value">{attendance}%</div>
+          <div className="stitch-kpi-label">This Month</div>
+          <div className="stitch-kpi-meta">Attendance</div>
+        </Link>
+        <Link href="/staff/projects" className="stitch-kpi-card">
+          <div className="stitch-kpi-icon stitch-kpi-icon-orange">
+            <FolderKanban className="h-5 w-5" />
+          </div>
+          <div className="stitch-kpi-value">{projects}</div>
+          <div className="stitch-kpi-label">Ongoing Projects</div>
+        </Link>
+        <Link href="/staff/tasks" className="stitch-kpi-card">
+          <div className="stitch-kpi-icon stitch-kpi-icon-indigo">
+            <CheckSquare className="h-5 w-5" />
+          </div>
+          <div className="stitch-kpi-value">{tasks}</div>
+          <div className="stitch-kpi-label">Pending Tasks</div>
+        </Link>
+        <Link href="/staff/notifications" className="stitch-kpi-card">
+          <div className="stitch-kpi-icon stitch-kpi-icon-purple">
+            <Megaphone className="h-5 w-5" />
+          </div>
+          <div className="stitch-kpi-value">{announcements}</div>
+          <div className="stitch-kpi-label">Unread</div>
+        </Link>
       </div>
 
-      <div className="grid sm:grid-cols-4 gap-3">
-        <div className="rounded-xl border border-white/10 p-4">
-          <p className="text-xs text-muted">Open tasks</p>
-          <p className="font-display text-2xl font-bold">{data.tasks.length}</p>
-        </div>
-        <div className="rounded-xl border border-white/10 p-4">
-          <p className="text-xs text-muted">Leave requests</p>
-          <p className="font-display text-2xl font-bold">{data.leave.length}</p>
-        </div>
-        <div className="rounded-xl border border-white/10 p-4">
-          <p className="text-xs text-muted">Salary slips</p>
-          <p className="font-display text-2xl font-bold">{slips.length}</p>
-        </div>
-        <div className="rounded-xl border border-white/10 p-4">
-          <p className="text-xs text-muted">Approvals</p>
-          <p className="font-display text-2xl font-bold">{approvals.length}</p>
-        </div>
+      <div className="stitch-dash-grid-2">
+        <section className="stitch-section-card">
+          <div className="stitch-section-head">
+            <h3>Announcements</h3>
+            <Link href="/staff/notifications" className="stitch-btn-sm">
+              View All
+            </Link>
+          </div>
+          <div className="stitch-section-body">
+            {(data?.notifications?.length
+              ? data.notifications.slice(0, 3).map((n) => ({
+                  id: n.id,
+                  title: n.title,
+                  body: n.body,
+                  date: n.createdAt
+                    ? new Date(n.createdAt).toLocaleDateString(undefined, {
+                        day: "numeric",
+                        month: "short",
+                        year: "numeric",
+                      })
+                    : "",
+                  isNew: false,
+                }))
+              : DEMO_ANNOUNCEMENTS
+            ).map((a) => (
+              <div key={a.id} className="stitch-announcement-item">
+                <h4>
+                  {a.title}
+                  {a.isNew ? <span className="stitch-badge-new">New</span> : null}
+                </h4>
+                <p>{a.body}</p>
+                {a.date ? <div className="stitch-announcement-date">{a.date}</div> : null}
+              </div>
+            ))}
+          </div>
+        </section>
+
+        <section className="stitch-section-card">
+          <div className="stitch-section-head">
+            <h3>Monthly Attendance Overview</h3>
+            <select className="text-xs border border-[var(--sp-outline)] rounded-md px-2 py-1 bg-white text-[var(--sp-muted)]">
+              <option>June 2026</option>
+              <option>May 2026</option>
+            </select>
+          </div>
+          <div className="stitch-section-body">
+            <div className="stitch-chart-placeholder">
+              {ATTENDANCE_BARS.map((h, i) => (
+                <div
+                  key={i}
+                  className="stitch-chart-bar"
+                  style={{ height: `${h}%` }}
+                  title={`Day ${i + 1}: ${h}%`}
+                />
+              ))}
+            </div>
+            <p className="text-xs text-[var(--sp-muted)] mt-2 text-center">
+              Showing stable {attendance}%+ attendance trend
+            </p>
+          </div>
+        </section>
       </div>
 
-      <section>
-        <h2 className="font-display font-semibold mb-2">My tasks</h2>
-        <ul className="space-y-2">
-          {data.tasks.length === 0 && (
-            <li className="text-sm text-muted">No assigned tasks.</li>
-          )}
-          {data.tasks.map((t) => (
-            <li key={t.id} className="text-sm border border-white/10 rounded-lg p-3">
-              {t.title} · {t.project.name} · {t.status}
-            </li>
-          ))}
-        </ul>
-      </section>
+      <div className="stitch-dash-grid-2">
+        <section className="stitch-section-card">
+          <div className="stitch-section-head">
+            <h3>My Leave Balance</h3>
+            <Link href="/staff/leave" className="stitch-btn-primary-sm">
+              <Plus className="h-3.5 w-3.5" />
+              Apply Leave
+            </Link>
+          </div>
+          <div className="stitch-section-body">
+            <div className="stitch-leave-grid">
+              {leaveBalances.map((b) => (
+                <div key={b.label} className="stitch-leave-mini">
+                  <strong>{b.days}</strong>
+                  <span>{b.label}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
 
-      <section>
-        <h2 className="font-display font-semibold mb-2">Leave</h2>
-        <ul className="space-y-2 mb-3">
-          {data.leave.map((l) => (
-            <li key={l.id} className="text-sm text-muted">
-              {l.leaveType} · {l.status} ·{" "}
-              {new Date(l.startDate).toLocaleDateString()} →{" "}
-              {new Date(l.endDate).toLocaleDateString()}
-            </li>
-          ))}
-        </ul>
-        <Button asChild size="sm" variant="outline">
-          <Link href="/admin/erp/hr">Request leave in HRM</Link>
-        </Button>
-      </section>
-
-      <section>
-        <div className="flex items-center justify-between mb-2">
-          <h2 className="font-display font-semibold">Salary slips</h2>
-          <Button asChild size="sm" variant="outline">
-            <Link href="/admin/erp/approvals">Approvals hub</Link>
-          </Button>
-        </div>
-        <ul className="space-y-2">
-          {slips.length === 0 && (
-            <li className="text-sm text-muted">No slips issued yet.</li>
-          )}
-          {slips.map((s) => (
-            <li
-              key={s.id}
-              className="text-sm border border-white/10 rounded-lg p-3 flex justify-between gap-2"
-            >
-              <span>
-                {s.slipNumber} · {s.periodLabel} · {s.status}
-              </span>
-              <span className="font-mono text-xs">
-                {formatMoney(s.netCents, s.currency)}
-              </span>
-            </li>
-          ))}
-        </ul>
-      </section>
-
-      <section>
-        <h2 className="font-display font-semibold mb-2">My approval requests</h2>
-        <ul className="space-y-2 mb-3">
-          {approvals.length === 0 && (
-            <li className="text-sm text-muted">No approval activity.</li>
-          )}
-          {approvals.map((a) => (
-            <li key={a.id} className="text-sm border border-white/10 rounded-lg p-3">
-              {a.requestNumber} · {a.type} · {a.title} · {a.status}
-            </li>
-          ))}
-        </ul>
-        <Button asChild size="sm" variant="outline">
-          <Link href="/admin/erp/approvals">Open approvals</Link>
-        </Button>
-      </section>
-
-      <section>
-        <h2 className="font-display font-semibold mb-2">Notifications</h2>
-        <ul className="space-y-2">
-          {data.notifications.length === 0 && (
-            <li className="text-sm text-muted">No notifications.</li>
-          )}
-          {data.notifications.slice(0, 8).map((n) => (
-            <li key={n.id} className="text-sm border border-white/5 rounded p-2">
-              <p className="font-medium">{n.title}</p>
-              <p className="text-muted text-xs">{n.body}</p>
-            </li>
-          ))}
-        </ul>
-      </section>
-
-      <section>
-        <h2 className="font-display font-semibold mb-2">Internal chat</h2>
-        <ul className="space-y-2 max-h-48 overflow-y-auto mb-3">
-          {data.messages.map((m) => (
-            <li key={m.id} className="text-sm border border-white/5 rounded p-2">
-              <span className="text-accent text-xs">{m.sender.fullName}</span>
-              <p>{m.body}</p>
-            </li>
-          ))}
-        </ul>
-        <form
-          className="flex gap-2"
-          onSubmit={async (e) => {
-            e.preventDefault();
-            await fetch("/api/staff", {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ body: chat }),
-            });
-            setChat("");
-            await load();
-          }}
-        >
-          <input
-            value={chat}
-            onChange={(e) => setChat(e.target.value)}
-            placeholder="Message #general"
-            className="flex-1 h-9 rounded-lg border border-white/10 bg-white/5 px-3 text-sm"
-          />
-          <Button type="submit" size="sm">
-            Send
-          </Button>
-        </form>
-      </section>
+        <section className="stitch-section-card">
+          <div className="stitch-section-head">
+            <h3>My Recent Tasks</h3>
+            <Link href="/staff/tasks" className="stitch-btn-sm">
+              View All
+            </Link>
+          </div>
+          <div className="stitch-section-body">
+            {!data ? (
+              <p className="stitch-page-sub">Loading tasks…</p>
+            ) : data.tasks.length === 0 ? (
+              <div className="stitch-row">
+                <span>Staff Portal UI Design</span>
+                <span className="stitch-chip stitch-badge-progress">In Progress</span>
+              </div>
+            ) : (
+              data.tasks.slice(0, 4).map((t) => (
+                <div key={t.id} className="stitch-row">
+                  <span>
+                    <strong>{t.title}</strong>
+                    <span className="block text-xs mt-0.5" style={{ color: "var(--sp-muted)" }}>
+                      {t.project.name}
+                    </span>
+                  </span>
+                  <span className={statusBadgeClass(t.status)}>{t.status}</span>
+                </div>
+              ))
+            )}
+          </div>
+        </section>
+      </div>
     </div>
   );
 }

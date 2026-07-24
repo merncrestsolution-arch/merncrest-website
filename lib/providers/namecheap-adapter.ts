@@ -65,7 +65,9 @@ function wholesaleUsdCents(tld: string, kind: "register" | "renew" | "transfer")
 }
 
 function isConfigured(creds: ProviderCredentials) {
-  return Boolean(creds.apiKey && (creds.apiSecret || process.env.NAMECHEAP_API_USER));
+  const apiKey = creds.apiKey || process.env.NAMECHEAP_API_KEY;
+  const apiUser = creds.apiSecret || process.env.NAMECHEAP_API_USER;
+  return Boolean(apiKey && apiUser);
 }
 
 function apiBase(creds: ProviderCredentials) {
@@ -140,24 +142,111 @@ function parseCheckResults(xml: string): Map<string, { available: boolean; premi
   return map;
 }
 
+type NcTldPrices = { register: number; renew: number; transfer: number };
+
+let pricingCache: { at: number; map: Map<string, NcTldPrices> } | null = null;
+const PRICING_CACHE_MS = 60 * 60 * 1000;
+
+function parseYearlyUsdCents(productXml: string): number | null {
+  const priceRe =
+    /<Price\b[^>]*Duration="1"[^>]*DurationType="YEAR"[^>]*YourPrice="([^"]+)"[^>]*\/?>/gi;
+  let m = priceRe.exec(productXml);
+  if (!m) {
+    m =
+      /<Price\b[^>]*YourPrice="([^"]+)"[^>]*Duration="1"[^>]*\/?>/i.exec(productXml) ||
+      /<Price\b[^>]*Price="([^"]+)"[^>]*Duration="1"[^>]*\/?>/i.exec(productXml);
+  }
+  if (!m) return null;
+  const usd = parseFloat(m[1]);
+  return Number.isFinite(usd) ? Math.round(usd * 100) : null;
+}
+
+function parseNamecheapPricing(xml: string): Map<string, NcTldPrices> {
+  const map = new Map<string, NcTldPrices>();
+  const categories: { name: string; key: keyof NcTldPrices }[] = [
+    { name: "REGISTER", key: "register" },
+    { name: "RENEW", key: "renew" },
+    { name: "TRANSFER", key: "transfer" },
+  ];
+
+  for (const cat of categories) {
+    const blockRe = new RegExp(
+      `<ProductCategory\\s+Name="${cat.name}"[^>]*>([\\s\\S]*?)</ProductCategory>`,
+      "i"
+    );
+    const block = xml.match(blockRe)?.[1];
+    if (!block) continue;
+
+    const productRe = /<Product\s+Name="([^"]+)"[^>]*>([\s\S]*?)<\/Product>/gi;
+    let pm: RegExpExecArray | null;
+    while ((pm = productRe.exec(block))) {
+      const tld = pm[1].toLowerCase();
+      const cents = parseYearlyUsdCents(pm[2]);
+      if (!cents) continue;
+      const row = map.get(tld) ?? { register: 0, renew: 0, transfer: 0 };
+      row[cat.key] = cents;
+      map.set(tld, row);
+    }
+  }
+  return map;
+}
+
+async function fetchNamecheapPricing(
+  creds: ProviderCredentials
+): Promise<Map<string, NcTldPrices>> {
+  if (pricingCache && Date.now() - pricingCache.at < PRICING_CACHE_MS) {
+    return pricingCache.map;
+  }
+  const xml = await namecheapGet(creds, "namecheap.users.getPricing", {
+    ProductType: "DOMAIN",
+  });
+  const map = parseNamecheapPricing(xml);
+  if (map.size === 0) {
+    throw new Error("Namecheap pricing response was empty");
+  }
+  pricingCache = { at: Date.now(), map };
+  return map;
+}
+
 function buildResult(
   sld: string,
   tld: string,
   available: boolean,
-  premium = false
+  premium = false,
+  pricing?: Map<string, NcTldPrices>
 ): ProviderDomainResult {
-  // Namecheap wholesale is USD — Pricing Engine locks FX + applies margin in LKR
+  const row = pricing?.get(tld);
   return {
     domain: `${sld}.${tld}`,
     sld,
     tld,
     available,
     premium,
-    providerPriceCents: wholesaleUsdCents(tld, "register"),
-    renewProviderCents: wholesaleUsdCents(tld, "renew"),
-    transferProviderCents: wholesaleUsdCents(tld, "transfer"),
+    providerPriceCents: row?.register || wholesaleUsdCents(tld, "register"),
+    renewProviderCents: row?.renew || wholesaleUsdCents(tld, "renew"),
+    transferProviderCents: row?.transfer || wholesaleUsdCents(tld, "transfer"),
     currency: "USD",
   };
+}
+
+function buildFallbackResults(sld: string, tlds: string[], _preferred: string) {
+  const results = tlds.map((t) => buildResult(sld, t, false));
+  return {
+    results,
+    suggestions: [] as ProviderDomainResult[],
+    error: "Could not verify availability with Namecheap",
+  };
+}
+
+async function checkNamecheapDomains(
+  creds: ProviderCredentials,
+  domains: string[]
+): Promise<Map<string, { available: boolean; premium: boolean }>> {
+  if (!domains.length) return new Map();
+  const xml = await namecheapGet(creds, "namecheap.domains.check", {
+    DomainList: domains.join(","),
+  });
+  return parseCheckResults(xml);
 }
 
 export class NamecheapAdapter implements ResellerProviderAdapter {
@@ -195,30 +284,50 @@ export class NamecheapAdapter implements ResellerProviderAdapter {
     }
 
     try {
-      const xml = await namecheapGet(this.creds, "namecheap.domains.check", {
-        DomainList: domainList,
-      });
-      const checked = parseCheckResults(xml);
+      const [pricing, checkXml] = await Promise.all([
+        fetchNamecheapPricing(this.creds),
+        namecheapGet(this.creds, "namecheap.domains.check", { DomainList: domainList }),
+      ]);
+      const checked = parseCheckResults(checkXml);
+      if (checked.size === 0) {
+        throw new Error("Namecheap returned no domain check results");
+      }
       const results = tlds.map((t) => {
         const domain = `${sld}.${t}`;
         const hit = checked.get(domain);
-        return buildResult(sld, t, hit?.available ?? false, hit?.premium);
+        return buildResult(sld, t, hit?.available ?? false, hit?.premium, pricing);
       });
 
       const primaryUnavailable = results[0] && !results[0].available;
-      const suggestions = SUGGESTION_SUFFIXES.filter((sfx) => sfx !== sld)
-        .slice(0, primaryUnavailable ? 6 : 4)
-        .map((sfx) => buildResult(`${sld}${sfx}`, preferred, true));
+      const suggestionSuffixes = SUGGESTION_SUFFIXES.filter((sfx) => sfx !== sld).slice(
+        0,
+        primaryUnavailable ? 6 : 4
+      );
+      const suggestionDomains = suggestionSuffixes.map((sfx) => `${sld}${sfx}.${preferred}`);
+      const sugChecked = await checkNamecheapDomains(this.creds, suggestionDomains);
+      const suggestions = suggestionSuffixes
+        .map((sfx) => {
+          const domain = `${sld}${sfx}.${preferred}`;
+          const hit = sugChecked.get(domain);
+          return buildResult(
+            `${sld}${sfx}`,
+            preferred,
+            hit?.available ?? false,
+            hit?.premium,
+            pricing
+          );
+        })
+        .filter((r) => r.available);
 
       return { fqdn, sld, results, suggestions };
     } catch (error) {
       console.error("[namecheap:search]", error);
-      const mock = await this.fallback.searchDomains(query);
-      return {
-        ...mock,
-        results: (mock.results || []).filter((r) => !r.tld.includes("lk")),
-        error: undefined,
-      };
+      const { results, suggestions, error: fallbackError } = buildFallbackResults(
+        sld,
+        tlds,
+        preferred
+      );
+      return { fqdn, sld, results, suggestions, error: fallbackError };
     }
   }
 

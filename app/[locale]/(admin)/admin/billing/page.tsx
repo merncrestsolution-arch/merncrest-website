@@ -1,10 +1,10 @@
-import { AdminCommercePanel } from "@/components/admin/admin-commerce-panel";
+import { Suspense } from "react";
+import { SystemBillingPanel } from "@/components/admin/system-billing-panel";
 
 export default function Page() {
   return (
-    <div className="space-y-6">
-      <h1 className="font-display text-2xl font-bold">Billing</h1>
-      <AdminCommercePanel view="billing" />
-    </div>
+    <Suspense fallback={<p className="stitch-page-sub">Loading billing…</p>}>
+      <SystemBillingPanel />
+    </Suspense>
   );
 }

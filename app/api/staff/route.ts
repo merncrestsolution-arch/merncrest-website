@@ -12,7 +12,11 @@ export async function GET() {
   const permissions = await getUserPermissions(auth.user);
   const employee = await prisma.employee.findFirst({
     where: { userId: auth.user.id },
-    include: { department: true },
+    include: {
+      department: true,
+      branch: { select: { name: true, city: true } },
+      manager: { select: { fullName: true } },
+    },
   });
 
   const [tasks, leave, notifications, messages, slips, approvals] = await Promise.all([

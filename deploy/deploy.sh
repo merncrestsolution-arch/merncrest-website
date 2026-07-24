@@ -8,7 +8,7 @@
 # ---------------------------------------------------------------------------
 set -euo pipefail
 
-COMPOSE="docker compose -f docker-compose.prod.yml"
+COMPOSE="docker compose --env-file .env.production -f docker-compose.prod.yml"
 
 if [ ! -f .env.production ]; then
   echo "ERROR: .env.production not found."

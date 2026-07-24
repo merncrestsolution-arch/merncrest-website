@@ -1,0 +1,8 @@
+{
+  "projectId": "17402065891171962495",
+  "screenId": "c3bf813507e14e9086d730d55a9c9ba3",
+  "title": "Training & Development — MernCrest Solutions Staff Portal",
+  "route": "/staff/training",
+  "component": "StaffTrainingPanel",
+  "designSystem": "assets/060de6acb3a74722a6e7f79ec90a20d0"
+}

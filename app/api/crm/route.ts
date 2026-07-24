@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { nextNumber, requireStaff } from "@/lib/commerce";
 import { CRM_STAGES, computeLeadScore } from "@/lib/crm/stages";
+import { getStaffScope, crmLeadScopeWhere } from "@/lib/erp/staff-scope";
 import { z } from "zod";
 
 const stageEnum = z.enum(CRM_STAGES);
@@ -11,12 +12,17 @@ export async function GET() {
   if (auth.error) return auth.error;
 
   try {
+    const scope = await getStaffScope(auth.user);
+    const leadWhere = crmLeadScopeWhere(scope) as object | undefined;
     const now = new Date();
     const [leads, activities, stats, overdueFollowUps, upcomingMeetings] =
       await Promise.all([
         prisma.crmLead.findMany({
+          where: leadWhere,
           include: {
             owner: { select: { id: true, fullName: true, email: true } },
+            department: { select: { id: true, name: true, code: true } },
+            teamLead: { select: { id: true, fullName: true } },
             activities: { orderBy: { createdAt: "desc" }, take: 5 },
             followUps: {
               where: { status: { in: ["PENDING", "OVERDUE"] } },
@@ -34,25 +40,32 @@ export async function GET() {
           take: 200,
         }),
         prisma.crmActivity.findMany({
+          where: leadWhere ? { lead: leadWhere } : undefined,
           include: { lead: { select: { fullName: true, company: true, leadNumber: true } } },
           orderBy: { createdAt: "desc" },
           take: 40,
         }),
         prisma.crmLead.groupBy({
           by: ["stage"],
+          where: leadWhere,
           _count: { _all: true },
         }),
         prisma.crmFollowUp.findMany({
           where: {
             status: "PENDING",
             dueAt: { lt: now },
+            ...(leadWhere ? { lead: leadWhere } : {}),
           },
           include: { lead: { select: { fullName: true, leadNumber: true } } },
           orderBy: { dueAt: "asc" },
           take: 20,
         }),
         prisma.crmMeeting.findMany({
-          where: { status: "SCHEDULED", scheduledAt: { gte: now } },
+          where: {
+            status: "SCHEDULED",
+            scheduledAt: { gte: now },
+            ...(leadWhere ? { lead: leadWhere } : {}),
+          },
           include: { lead: { select: { fullName: true, leadNumber: true } } },
           orderBy: { scheduledAt: "asc" },
           take: 15,
@@ -265,6 +278,10 @@ const patchSchema = z.object({
   interest: z.string().optional(),
   followUpAt: z.string().optional(),
   ownerId: z.string().optional().nullable(),
+  tags: z.array(z.string()).optional(),
+  customFields: z.record(z.string()).optional(),
+  wonReason: z.string().optional(),
+  lostReason: z.string().optional(),
   activity: z
     .object({
       type: z.enum(["NOTE", "CALL", "EMAIL", "WHATSAPP", "MEETING", "STATUS", "CHAT", "IVR", "FORM"]),
@@ -330,6 +347,16 @@ export async function PATCH(request: Request) {
           followUpAt: parsed.data.followUpAt
             ? new Date(parsed.data.followUpAt)
             : undefined,
+          tagsJson: parsed.data.tags ? JSON.stringify(parsed.data.tags) : undefined,
+          customFieldsJson: parsed.data.customFields
+            ? JSON.stringify(parsed.data.customFields)
+            : undefined,
+          wonReason: parsed.data.wonReason,
+          lostReason: parsed.data.lostReason,
+          closedAt:
+            parsed.data.stage === "WON" || parsed.data.stage === "LOST"
+              ? new Date()
+              : undefined,
         },
         include: {
           activities: { orderBy: { createdAt: "desc" }, take: 10 },

@@ -1,11 +1,10 @@
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { notFound } from "next/navigation";
-import { Link } from "@/i18n/routing";
-import { Button } from "@/components/ui/button";
+import { QuoteDialog } from "@/components/forms/quote-dialog";
 import { 
   ShoppingCart, Activity, GraduationCap, Landmark, 
   Building, Truck, Database, Users, Store, Calendar, 
-  Cloud, Wifi, Brain, Lock, CheckCircle2, ArrowRight
+  Cloud, Wifi, Brain, Lock, CheckCircle2
 } from "lucide-react";
 
 const validSolutions = [
@@ -29,13 +28,13 @@ const solutionContent: Record<string, any> = {
   "healthcare": {
     title: "Healthcare Tech",
     icon: Activity,
-    description: "Secure, HIPAA-compliant telehealth applications, patient portals, and hospital management systems designed to improve patient outcomes.",
+    description: "Secure, privacy-focused telehealth applications, patient portals, and hospital management systems designed to improve patient outcomes.",
     features: [
       { title: "Telemedicine Video", desc: "High-definition, secure patient consultations." },
       { title: "EHR Integration", desc: "Seamless syncing with electronic health records." },
       { title: "Appointment Scheduling", desc: "Automated booking and SMS reminders." }
     ],
-    benefits: ["HIPAA / GDPR Compliance", "Reduced no-show rates", "Streamlined clinic operations"]
+    benefits: ["Privacy & data protection focus", "Reduced no-show rates", "Streamlined clinic operations"]
   },
   "education": {
     title: "EdTech Platforms",
@@ -51,13 +50,13 @@ const solutionContent: Record<string, any> = {
   "fintech": {
     title: "Financial Technology",
     icon: Landmark,
-    description: "Bank-grade security and blazing-fast performance for digital wallets, trading platforms, and custom payment processors.",
+    description: "Strong security and high performance for digital wallets, trading platforms, and custom payment processors.",
     features: [
       { title: "Payment Gateways", desc: "Custom API integrations for seamless transfers." },
       { title: "Fraud Detection", desc: "AI-driven real-time transaction monitoring." },
       { title: "Open Banking", desc: "Secure Plaid/Stripe API connections." }
     ],
-    benefits: ["Bank-grade encryption", "Real-time ledger updates", "Regulatory compliance"]
+    benefits: ["Strong encryption", "Real-time ledger updates", "Compliance-aware design"]
   },
   "realestate": {
     title: "Real Estate Portals",
@@ -150,7 +149,7 @@ const solutionContent: Record<string, any> = {
   "aiml": {
     title: "AI & Machine Learning",
     icon: Brain,
-    description: "Integrate LLMs, computer vision, and predictive analytics into your proprietary software to gain an unfair market advantage.",
+    description: "Integrate LLMs, computer vision, and predictive analytics into your proprietary software to gain a competitive edge.",
     features: [
       { title: "Custom AI Chatbots", desc: "Support agents trained purely on your company data." },
       { title: "Computer Vision", desc: "Automated image processing and object detection." },
@@ -199,11 +198,11 @@ export default async function SolutionSubPage({
   return (
     <div className="stitch-page">
       <div className="stitch-container pt-32 pb-10">
-        <div className="inline-flex items-center gap-2 rounded-full border border-violet-500/20 bg-violet-500/10 px-3 py-1 text-sm font-medium text-violet-300 mb-6">
+        <div className="inline-flex items-center gap-2 rounded-full border border-violet-500/20 bg-violet-500/10 px-3 py-1 text-sm font-medium text-stitch-glow mb-6">
           <Icon className="h-4 w-4" />
           <span>Industry Solution</span>
         </div>
-        <h1 className="font-display text-3xl sm:text-4xl lg:text-5xl font-bold text-white text-balance tracking-tight max-w-4xl">
+        <h1 className="font-display text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground text-balance tracking-tight max-w-4xl">
           {data.title}
         </h1>
         <p className="mt-4 text-lg text-muted leading-relaxed max-w-3xl">{data.description}</p>
@@ -212,11 +211,11 @@ export default async function SolutionSubPage({
       <div className="stitch-page-body !pt-0">
         <div className="grid lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2">
-            <h2 className="font-display text-2xl font-bold text-white mb-6">What We Deliver</h2>
+            <h2 className="font-display text-2xl font-bold text-foreground mb-6">What We Deliver</h2>
             <div className="grid sm:grid-cols-2 gap-5">
               {data.features.map((feature: { title: string; desc: string }, i: number) => (
                 <div key={i} className="stitch-card stitch-card-hover">
-                  <h3 className="font-display text-lg font-semibold text-white mb-2">{feature.title}</h3>
+                  <h3 className="font-display text-lg font-semibold text-foreground mb-2">{feature.title}</h3>
                   <p className="text-sm text-muted leading-relaxed">{feature.desc}</p>
                 </div>
               ))}
@@ -225,11 +224,11 @@ export default async function SolutionSubPage({
 
           <div className="space-y-5">
             <div className="stitch-card">
-              <h3 className="font-display text-lg font-semibold text-white mb-5">Key Benefits</h3>
+              <h3 className="font-display text-lg font-semibold text-foreground mb-5">Key Benefits</h3>
               <ul className="space-y-4">
                 {data.benefits.map((benefit: string, i: number) => (
                   <li key={i} className="flex items-start gap-3 text-sm text-muted">
-                    <CheckCircle2 className="h-5 w-5 text-violet-300 shrink-0" />
+                    <CheckCircle2 className="h-5 w-5 text-stitch-glow shrink-0" />
                     <span>{benefit}</span>
                   </li>
                 ))}
@@ -238,17 +237,20 @@ export default async function SolutionSubPage({
 
             <div className="stitch-card text-center relative overflow-hidden border-violet-500/20 bg-violet-500/[0.06]">
               <div className="pointer-events-none absolute inset-0 brand-mesh opacity-40" />
-              <h3 className="relative z-10 font-display text-xl font-bold text-white mb-3">
+              <h3 className="relative z-10 font-display text-xl font-bold text-foreground mb-3">
                 Transform Your Business
               </h3>
               <p className="relative z-10 text-sm text-muted mb-5">
-                Let&apos;s discuss how our {data.title.toLowerCase()} software can drive your growth.
+                Let&apos;s discuss how our {data.title.toLowerCase()} software can support your growth.
               </p>
-              <Button asChild className="relative z-10 w-full rounded-full h-11">
-                <Link href="/contact">
-                  Get a Free Consultation <ArrowRight className="ml-2 h-4 w-4" />
-                </Link>
-              </Button>
+              <div className="relative z-10">
+                <QuoteDialog
+                  formType="solution-detail"
+                  interest={data.title}
+                  label="Request a Demo"
+                  fullWidth
+                />
+              </div>
             </div>
           </div>
         </div>

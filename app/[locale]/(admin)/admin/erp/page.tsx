@@ -1,15 +1,11 @@
-import { ErpDashboard } from "@/components/erp/erp-dashboard";
+import { redirect } from "next/navigation";
 
-export default function Page() {
-  return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="font-display text-2xl font-bold">ERP · Enterprise Platform</h1>
-        <p className="text-sm text-muted mt-1">
-          Part 05 — 50+ capability areas across 20 module groups (HRM → Executive Dashboards)
-        </p>
-      </div>
-      <ErpDashboard />
-    </div>
-  );
+/** Legacy ERP module grid removed — land on staff command center instead. */
+export default async function Page({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}) {
+  const { locale } = await params;
+  redirect(`/${locale}/staff`);
 }

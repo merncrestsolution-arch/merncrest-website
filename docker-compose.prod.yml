@@ -1,5 +1,6 @@
 # Production stack for a single AWS Lightsail (Ubuntu) instance.
-# Cloudflare terminates HTTPS and proxies to Nginx on port 80 (origin).
+# Direct TLS: Let's Encrypt on :443 (run deploy/ssl-init.sh).
+# Or Cloudflare proxy: HTTPS at edge → origin :80 (use default-http-only.conf).
 #
 #   docker compose -f docker-compose.prod.yml up -d --build
 #
@@ -52,6 +53,9 @@ services:
     build:
       context: .
       target: runner
+      args:
+        NEXT_PUBLIC_TURNSTILE_SITE_KEY: ${NEXT_PUBLIC_TURNSTILE_SITE_KEY:-}
+        NEXT_PUBLIC_SITE_URL: ${NEXT_PUBLIC_SITE_URL:-https://merncrest.lk}
     image: merncrest-app:latest
     container_name: merncrest-app
     restart: unless-stopped
@@ -71,8 +75,12 @@ services:
     restart: unless-stopped
     ports:
       - "80:80"
+      - "443:443"
     volumes:
-      - ./deploy/nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+      # active.conf is copied by deploy/ssl-init.sh; defaults to HTTP-only until certs exist.
+      - ./deploy/nginx/active.conf:/etc/nginx/conf.d/default.conf:ro
+      - /etc/letsencrypt:/etc/letsencrypt:ro
+      - /var/www/certbot:/var/www/certbot:ro
     depends_on:
       - app
     networks: [merncrest]
