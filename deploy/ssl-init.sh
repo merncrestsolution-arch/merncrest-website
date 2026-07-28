@@ -13,7 +13,7 @@ set -euo pipefail
 
 COMPOSE="docker compose --env-file .env.production -f docker-compose.prod.yml"
 DOMAINS=(-d merncrest.lk -d www.merncrest.lk -d system.merncrest.lk)
-EMAIL="${SSL_EMAIL:-merncrestsolution@gmail.com}"
+EMAIL="${SSL_EMAIL:-contact@merncrest.lk}"
 CERT_DIR="/etc/letsencrypt/live/merncrest.lk"
 
 echo "==> Installing certbot (if needed)"

@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
-import { requireStaff } from "@/lib/commerce";
 import { getSessionUser, isStaffRole } from "@/lib/auth";
-import { buildReceiptPdf } from "@/lib/crm/receipt-pdf";
+import { buildReceiptPdfHtml } from "@/lib/billing/receipt-pdf-html";
+import { resolveReceiptNumber } from "@/lib/commerce/org-numbers";
 
 export async function GET(
   _request: Request,
@@ -18,8 +18,14 @@ export async function GET(
       ...(isStaffRole(user.role) ? {} : { userId: user.id }),
     },
     include: {
-      user: { select: { fullName: true, email: true } },
-      invoice: { select: { invoiceNumber: true } },
+      user: { select: { fullName: true, email: true, company: true } },
+      invoice: {
+        select: {
+          invoiceNumber: true,
+          totalCents: true,
+          paidCents: true,
+        },
+      },
       order: { select: { orderNumber: true } },
     },
   });
@@ -29,25 +35,33 @@ export async function GET(
     return NextResponse.json({ error: "Receipt only for confirmed payments" }, { status: 400 });
   }
 
-  const receiptNumber = `RCP-${payment.id.slice(-8).toUpperCase()}`;
-  const bytes = await buildReceiptPdf({
+  const receiptNumber = await resolveReceiptNumber(payment);
+  const invoiceBalance =
+    payment.invoice != null
+      ? Math.max(0, payment.invoice.totalCents - payment.invoice.paidCents)
+      : null;
+
+  const html = buildReceiptPdfHtml({
     receiptNumber,
     paidAt: payment.paidAt || payment.createdAt,
     customerName: payment.user.fullName,
     customerEmail: payment.user.email,
+    customerCompany: payment.user.company,
     invoiceNumber: payment.invoice?.invoiceNumber,
-    orderNumber: payment.order.orderNumber,
+    orderNumber: payment.order?.orderNumber,
     amountCents: payment.amountCents,
     currency: payment.currency,
     method: payment.method,
     referenceNumber: payment.referenceNumber,
+    invoiceTotalCents: payment.invoice?.totalCents,
+    invoicePaidCents: payment.invoice?.paidCents,
+    invoiceBalanceCents: invoiceBalance,
   });
 
-  return new NextResponse(Buffer.from(bytes), {
+  return new NextResponse(html, {
     status: 200,
     headers: {
-      "Content-Type": "application/pdf",
-      "Content-Disposition": `attachment; filename="${receiptNumber}.pdf"`,
+      "Content-Type": "text/html; charset=utf-8",
       "Cache-Control": "no-store",
     },
   });

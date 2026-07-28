@@ -133,11 +133,41 @@ model CustomerProfile {
   childProfiles      CustomerProfile[] @relation("ContactHierarchy")
   creditBalanceCents Int      @default(0)
   notes              String?
+  /// Extended company profile fields
+  companyWebsite     String?
+  industry           String?
   createdAt          DateTime @default(now())
   updatedAt          DateTime @updatedAt
+  createdBy          String?
+  updatedBy          String?
+  deletedAt          DateTime?
+
+  contacts           ClientContact[]
+  documents          Document[]        @relation("ClientDocuments")
 
   @@index([parentProfileId])
   @@index([customerRating])
+  @@index([deletedAt])
+}
+
+/// Additional contacts for a client account (beyond primary User)
+model ClientContact {
+  id        String          @id @default(cuid())
+  profileId String
+  profile   CustomerProfile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  name      String
+  role      String?
+  email     String?
+  phone     String?
+  isPrimary Boolean         @default(false)
+  createdAt DateTime        @default(now())
+  updatedAt DateTime        @updatedAt
+  createdBy String?
+  updatedBy String?
+  deletedAt DateTime?
+
+  @@index([profileId])
+  @@index([deletedAt])
 }
 
 /// Portal / CRM-linked customer activity trail
@@ -158,22 +188,41 @@ model CustomerActivity {
   @@index([category])
 }
 
-/// Platform announcements shown on customer portal dashboard
+/// Platform announcements — customer portal + internal staff feed
 model Announcement {
-  id        String    @id @default(cuid())
-  title     String
-  body      String
+  id           String    @id @default(cuid())
+  title        String
+  body         String
+  /// Optional HTML rich text (falls back to body)
+  bodyHtml     String?
   /// INFO | WARNING | SUCCESS | PROMO
-  tone      String    @default("INFO")
-  href      String?
-  active    Boolean   @default(true)
-  startsAt  DateTime  @default(now())
-  endsAt    DateTime?
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
+  tone         String    @default("INFO")
+  href         String?
+  /// PORTAL | STAFF | BOTH
+  surface      String    @default("PORTAL")
+  /// DRAFT | SCHEDULED | PUBLISHED | EXPIRED
+  status       String    @default("PUBLISHED")
+  /// ALL_STAFF | ROLE | TEAM
+  audience     String    @default("ALL_STAFF")
+  /// JSON: roles[] or orgRoles[] depending on audience
+  audienceJson String?
+  scheduledFor DateTime?
+  publishedAt  DateTime?
+  active       Boolean   @default(true)
+  startsAt     DateTime  @default(now())
+  endsAt       DateTime?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  createdBy    String?
+  updatedBy    String?
+  deletedAt    DateTime?
 
   @@index([active])
   @@index([startsAt])
+  @@index([surface])
+  @@index([status])
+  @@index([scheduledFor])
+  @@index([deletedAt])
 }
 
 /// Customer downloadable assets (invoices PDF links, licenses, manuals)
@@ -406,31 +455,47 @@ model OrderItem {
 }
 
 model Invoice {
-  id            String    @id @default(cuid())
-  invoiceNumber String    @unique
-  orderId       String    @unique
-  order         Order     @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  userId        String
-  user          User      @relation(fields: [userId], references: [id])
+  id                String          @id @default(cuid())
+  invoiceNumber     String          @unique
+  orderId           String          @unique
+  order             Order           @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  userId            String
+  user              User            @relation(fields: [userId], references: [id])
+  /// Optional links for multi-project / service billing
+  projectId         String?
+  project           ErpProject?     @relation(fields: [projectId], references: [id], onDelete: SetNull)
+  domainId          String?
+  domain            Domain?         @relation(fields: [domainId], references: [id], onDelete: SetNull)
+  hostingAccountId  String?
+  hostingAccount    HostingAccount? @relation(fields: [hostingAccountId], references: [id], onDelete: SetNull)
   /// DRAFT | SENT | PAID | PARTIALLY_PAID | OVERDUE | CANCELLED | VOID
-  status        String    @default("SENT")
-  subtotalCents Int
-  taxCents      Int       @default(0)
-  totalCents    Int
+  status            String          @default("SENT")
+  subtotalCents     Int
+  taxCents          Int             @default(0)
+  totalCents        Int
   /// Running sum of SUCCEEDED payments (cents)
-  paidCents     Int       @default(0)
-  currency      String    @default("LKR")
-  /// JSON line items: [{ description, qty, unitCents, discountCents }]
-  lineItemsJson String?
-  dueAt         DateTime?
-  paidAt        DateTime?
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  paidCents         Int             @default(0)
+  currency          String          @default("LKR")
+  /// JSON line items: { lines: [...], discountCents, vatRatePercent, notes, advanceCents? }
+  lineItemsJson     String?
+  dueAt             DateTime?
+  paidAt            DateTime?
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
+  createdBy         String?
+  updatedBy         String?
+  deletedAt         DateTime?
 
-  payments Payment[]
+  payments          Payment[]
+  paymentSchedules  ProjectPaymentSchedule[]
 
   @@index([userId])
   @@index([status])
+  @@index([projectId])
+  @@index([domainId])
+  @@index([hostingAccountId])
+  @@index([dueAt])
+  @@index([deletedAt])
 }
 
 model Payment {
@@ -441,6 +506,8 @@ model Payment {
   order        Order     @relation(fields: [orderId], references: [id], onDelete: Cascade)
   invoiceId    String?
   invoice      Invoice?  @relation(fields: [invoiceId], references: [id], onDelete: SetNull)
+  /// RCP-ERP-45872 — assigned when payment is recorded
+  receiptNumber String?  @unique
   amountCents  Int
   currency     String    @default("LKR")
   /// MANUAL | BANK_TRANSFER | DEMO | PAYHERE | STRIPE
@@ -449,6 +516,8 @@ model Payment {
   status       String    @default("PENDING")
   /// Allow amount that creates client credit beyond invoice total
   isCredit     Boolean   @default(false)
+  /// Advance / deposit payment (vs balance installment)
+  isAdvance    Boolean   @default(false)
   recordedById String?
   paidAt       DateTime?
   providerRef  String?
@@ -462,43 +531,62 @@ model Payment {
   verifiedById String?
   verifiedAt   DateTime?
   createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @default(now()) @updatedAt
+  createdBy    String?
+  updatedBy    String?
+  deletedAt    DateTime?
 
   @@index([userId])
   @@index([orderId])
+  @@index([invoiceId])
   @@index([status])
   @@index([createdAt])
+  @@index([deletedAt])
 }
 
 model Domain {
-  id           String    @id @default(cuid())
-  userId       String
-  user         User      @relation(fields: [userId], references: [id])
-  orderId      String?
-  order        Order?    @relation(fields: [orderId], references: [id], onDelete: SetNull)
-  providerId   String?
-  provider     Provider? @relation(fields: [providerId], references: [id], onDelete: SetNull)
+  id                   String    @id @default(cuid())
+  userId               String
+  user                 User      @relation(fields: [userId], references: [id])
+  orderId              String?
+  order                Order?    @relation(fields: [orderId], references: [id], onDelete: SetNull)
+  providerId           String?
+  provider             Provider? @relation(fields: [providerId], references: [id], onDelete: SetNull)
   /// External registration id at the provider
-  providerRef  String?
-  name         String
-  tld          String
-  /// PENDING | ACTIVE | EXPIRED | TRANSFERRING | LOCKED
-  status       String    @default("PENDING")
-  autoRenew    Boolean   @default(true)
-  locked       Boolean   @default(false)
-  registeredAt DateTime?
-  expiresAt    DateTime?
-  /// Reseller nameservers (provider-managed; not MernCrest-owned infra)
-  nameservers  String    @default("ns1.provider.example,ns2.provider.example")
-  createdAt    DateTime  @default(now())
-  updatedAt    DateTime  @updatedAt
+  providerRef          String?
+  /// Display registrar when provider relation is absent
+  registrar            String?
+  name                 String
+  tld                  String
+  /// PENDING | ACTIVE | EXPIRED | TRANSFERRING | LOCKED | CANCELLED
+  status               String    @default("PENDING")
+  autoRenew            Boolean   @default(true)
+  locked               Boolean   @default(false)
+  registeredAt         DateTime?
+  expiresAt            DateTime?
+  registrationCostCents Int      @default(0)
+  isFreeProvided       Boolean   @default(false)
+  freeDurationLabel    String?
+  renewalPeriodMonths  Int?
+  renewalCostCents     Int       @default(0)
+  /// Reseller nameservers (comma-separated)
+  nameservers          String    @default("ns1.provider.example,ns2.provider.example")
+  createdAt            DateTime  @default(now())
+  updatedAt            DateTime  @updatedAt
+  createdBy            String?
+  updatedBy            String?
+  deletedAt            DateTime?
 
   dnsRecords DnsRecord[]
+  invoices   Invoice[]
+  projectResources ProjectResource[]
 
   @@unique([name, tld])
   @@index([userId])
   @@index([status])
   @@index([expiresAt])
   @@index([providerId])
+  @@index([deletedAt])
 }
 
 model DnsRecord {
@@ -513,44 +601,73 @@ model DnsRecord {
   priority  Int?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  createdBy String?
+  updatedBy String?
+  deletedAt DateTime?
 
   @@index([domainId])
+  @@index([deletedAt])
 }
 
 model HostingAccount {
-  id              String    @id @default(cuid())
-  userId          String
-  user            User      @relation(fields: [userId], references: [id])
-  orderId         String?
-  order           Order?    @relation(fields: [orderId], references: [id], onDelete: SetNull)
-  providerId      String?
-  provider        Provider? @relation(fields: [providerId], references: [id], onDelete: SetNull)
+  id                      String    @id @default(cuid())
+  userId                  String
+  user                    User      @relation(fields: [userId], references: [id])
+  orderId                 String?
+  order                   Order?    @relation(fields: [orderId], references: [id], onDelete: SetNull)
+  providerId              String?
+  provider                Provider? @relation(fields: [providerId], references: [id], onDelete: SetNull)
   /// External account id at the provider
-  providerRef     String?
-  label           String
-  planCode        String
+  providerRef             String?
+  /// Human-readable provider account identifier
+  accountId               String?
+  label                   String
+  planCode                String
   /// PENDING | PROVISIONING | ACTIVE | SUSPENDED | CANCELLED
-  status          String    @default("PENDING")
-  primaryDomain   String?
-  diskMb          Int       @default(10240)
-  diskUsedMb      Int       @default(0)
-  bandwidthGb     Int       @default(100)
-  bandwidthUsedGb Int       @default(0)
-  cpuPercent      Int       @default(5)
-  ramMb           Int       @default(512)
-  ramUsedMb       Int       @default(128)
-  sslStatus       String    @default("PENDING")
-  backupStatus    String    @default("OK")
-  /// Provider control panel URL (not MernCrest-owned servers)
-  panelUrl        String?
-  activatedAt     DateTime?
-  renewsAt        DateTime?
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @updatedAt
+  status                  String    @default("PENDING")
+  primaryDomain           String?
+  /// JSON array of linked domain FQDNs
+  linkedDomainsJson       String?
+  diskMb                  Int       @default(10240)
+  diskUsedMb              Int       @default(0)
+  bandwidthGb             Int       @default(100)
+  bandwidthUsedGb         Int       @default(0)
+  cpuPercent              Int       @default(5)
+  ramMb                   Int       @default(512)
+  ramUsedMb               Int       @default(128)
+  /// ACTIVE | EXPIRING_SOON | EXPIRED | NOT_CONFIGURED | PENDING | FAILED
+  sslStatus               String    @default("PENDING")
+  sslExpiresAt            DateTime?
+  backupStatus            String    @default("OK")
+  /// Provider control panel URL
+  panelUrl                String?
+  panelUsernameEncrypted  String?
+  panelPasswordEncrypted  String?
+  databaseName            String?
+  databaseUsernameEncrypted String?
+  databasePasswordEncrypted String?
+  serverIp                String?
+  /// JSON or free-text server specs
+  serverSpecs             String?
+  serverLocation          String?
+  renewalPeriodMonths     Int?
+  renewalCostCents        Int       @default(0)
+  activatedAt             DateTime?
+  renewsAt                DateTime?
+  createdAt               DateTime  @default(now())
+  updatedAt               DateTime  @updatedAt
+  createdBy               String?
+  updatedBy               String?
+  deletedAt               DateTime?
+
+  invoices                Invoice[]
+  projectResources        ProjectResource[]
 
   @@index([userId])
   @@index([status])
   @@index([providerId])
+  @@index([sslExpiresAt])
+  @@index([deletedAt])
 }
 
 model Subscription {
@@ -1303,6 +1420,10 @@ model ErpProject {
   nextSteps    String?
   /// Process stage label e.g. "Discovery → Design approval → Build"
   nextProcess  String?
+  /// Internal-only development notes (not client-visible)
+  developmentNotes     String?
+  /// When set, overrides auto-computed task/milestone progress
+  progressOverridePct  Int?
   createdAt    DateTime    @default(now())
   updatedAt    DateTime    @updatedAt
 
@@ -1312,6 +1433,9 @@ model ErpProject {
   expenses   ProjectExpense[]
   payments   ProjectPaymentSchedule[]
   clientUpdates ProjectClientUpdate[]
+  invoices   Invoice[]
+  resource   ProjectResource?
+  backlogItems ProjectFutureImprovement[]
 
   @@index([status])
   @@index([departmentId])
@@ -1333,6 +1457,56 @@ model ProjectClientUpdate {
 
   @@index([projectId])
   @@index([createdAt])
+}
+
+/// Technical resources and credentials for a delivery project (Phase 9)
+model ProjectResource {
+  id                  String          @id @default(cuid())
+  projectId           String          @unique
+  project             ErpProject      @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  gitRepoUrl          String?
+  sourceCodeNotes     String?
+  docsUrl             String?
+  apiDocsUrl          String?
+  deploymentMethod    String?
+  lastDeployedAt      DateTime?
+  lastDeployedVersion String?
+  hostingAccountId    String?
+  hostingAccount      HostingAccount? @relation(fields: [hostingAccountId], references: [id], onDelete: SetNull)
+  domainId            String?
+  domain              Domain?         @relation(fields: [domainId], references: [id], onDelete: SetNull)
+  /// Encrypted JSON object of environment variables
+  envVarsEncrypted    String?
+  /// Encrypted JSON array of credential entries
+  credentialsEncrypted String?
+  createdAt           DateTime        @default(now())
+  updatedAt           DateTime        @updatedAt
+  createdBy           String?
+  updatedBy           String?
+  deletedAt           DateTime?
+
+  @@index([hostingAccountId])
+  @@index([domainId])
+  @@index([deletedAt])
+}
+
+/// Backlog / future improvements not yet scheduled (Phase 11)
+model ProjectFutureImprovement {
+  id          String     @id @default(cuid())
+  projectId   String
+  project     ErpProject @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  title       String
+  description String?
+  /// BACKLOG | SCHEDULED | DONE | DROPPED
+  status      String     @default("BACKLOG")
+  createdById String?
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  deletedAt   DateTime?
+
+  @@index([projectId])
+  @@index([status])
+  @@index([deletedAt])
 }
 
 /// Project cost / expense lines (drives spentCents + profit)
@@ -1363,6 +1537,7 @@ model ProjectPaymentSchedule {
   /// PENDING | INVOICED | PAID | OVERDUE | WAIVED
   status      String     @default("PENDING")
   invoiceId   String?
+  invoice     Invoice?   @relation(fields: [invoiceId], references: [id], onDelete: SetNull)
   paidAt      DateTime?
   notes       String?
   sortOrder   Int        @default(0)
@@ -1375,15 +1550,24 @@ model ProjectPaymentSchedule {
 }
 
 model ProjectMember {
-  id        String     @id @default(cuid())
-  projectId String
-  project   ErpProject @relation(fields: [projectId], references: [id], onDelete: Cascade)
-  userId    String
-  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
-  /// LEAD | MEMBER | VIEWER
-  role      String     @default("MEMBER")
+  id           String     @id @default(cuid())
+  projectId    String
+  project      ErpProject @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  userId       String
+  user         User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  /// LEAD | MEMBER | VIEWER (legacy display role)
+  role         String     @default("MEMBER")
+  /// view | edit | admin — enforced at API layer
+  accessLevel  String     @default("edit")
+  assignedById String?
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+  deletedAt    DateTime?
 
   @@unique([projectId, userId])
+  @@index([projectId])
+  @@index([userId])
+  @@index([deletedAt])
 }
 
 model ProjectTask {
@@ -1899,16 +2083,19 @@ model Document {
   expiresAt   DateTime?
   signedAt    DateTime?
   signedById  String?
-  uploaderId  String?
-  uploader    User?    @relation("DocUploader", fields: [uploaderId], references: [id], onDelete: SetNull)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  versions    DocumentVersion[]
+  uploaderId        String?
+  uploader          User?            @relation("DocUploader", fields: [uploaderId], references: [id], onDelete: SetNull)
+  customerProfileId String?
+  customerProfile   CustomerProfile? @relation("ClientDocuments", fields: [customerProfileId], references: [id], onDelete: SetNull)
+  createdAt         DateTime         @default(now())
+  updatedAt         DateTime         @updatedAt
+  versions          DocumentVersion[]
 
   @@index([category])
   @@index([folder])
   @@index([status])
   @@index([expiresAt])
+  @@index([customerProfileId])
 }
 
 model DocumentVersion {
@@ -2929,7 +3116,7 @@ model OrgNumberSequence {
   id             String @id @default(cuid())
   organizationId String
   organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-  /// ORDER | INVOICE
+  /// ORDER | INVOICE | RECEIPT
   kind           String
   prefix         String
   nextValue      Int    @default(1)

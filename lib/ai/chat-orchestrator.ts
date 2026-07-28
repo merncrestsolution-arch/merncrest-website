@@ -11,7 +11,8 @@ import { requestHandoff } from "@/lib/chat/conversations";
 import { publishChatEvent } from "@/lib/chat/events";
 import { ensureLeadFromChannel } from "@/lib/crm/channels";
 import { aiReply } from "@/lib/support/ai-replies";
-import { defaultChatFallback, resolveAiraSystemPrompt } from "@/lib/support/chat-knowledge";
+import { defaultChatFallback, buildAiraSystemPrompt, airaSalesGuardrails } from "@/lib/support/chat-knowledge";
+import { sanitizeChatReply } from "@/lib/support/sanitize-chat-reply";
 import { rateLimit } from "@/lib/chat/rate-limit";
 import type { ChatMessage } from "@/lib/ai/provider.interface";
 
@@ -29,8 +30,9 @@ export async function handleAiTurn(opts: {
     windowMs: 60 * 60 * 1000,
   });
   if (!rl.ok) {
-    const body =
-      "You're sending messages quickly — please wait a moment, or ask to speak with a human agent.";
+    const body = sanitizeChatReply(
+      "You're sending messages quickly — please wait a moment, or ask to speak with a human agent."
+    );
     return prisma.chatMessage.create({
       data: { sessionId: opts.sessionId, role: "AI", body },
     });
@@ -52,7 +54,8 @@ export async function handleAiTurn(opts: {
 
   const catalog = await retrieveCatalogContext(opts.userMessage);
   const systemPrompt = [
-    resolveAiraSystemPrompt(assistant?.systemPrompt, { pageContext: opts.pageContext }),
+    airaSalesGuardrails(),
+    buildAiraSystemPrompt({ pageContext: opts.pageContext }),
     "Never invent pricing or services not present in the catalog context below. If uncertain, offer a human handoff or capture contact details.",
     "Use tools to capture lead info and request handoff when appropriate.",
     `Catalog context (official LKR price book + marketplace):\n${catalog}`,
@@ -142,6 +145,8 @@ export async function handleAiTurn(opts: {
       assistant?.fallbackMessage ||
       defaultChatFallback(opts.locale || session.locale);
   }
+
+  replyText = sanitizeChatReply(replyText);
 
   if (usedProvider) {
     await prisma.chatSession.update({

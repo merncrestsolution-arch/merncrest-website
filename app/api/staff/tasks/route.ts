@@ -4,6 +4,7 @@ import { prisma } from "@/lib/db";
 import { requireStaff } from "@/lib/commerce";
 import { TASK_STATUSES, POMODORO_MINUTES } from "@/lib/erp/projects/constants";
 import { writeAuditLog } from "@/lib/erp/audit";
+import { canMutateProject } from "@/lib/projects/access";
 
 /** Staff ESS — assigned / project-member tasks + Pomodoro */
 export async function GET() {
@@ -73,16 +74,18 @@ export async function PATCH(request: Request) {
     return NextResponse.json({ error: "Invalid payload" }, { status: 400 });
   }
 
-  const task = await prisma.projectTask.findFirst({
-    where: {
-      id: parsed.data.taskId,
-      OR: [
-        { assigneeId: auth.user.id },
-        { project: { members: { some: { userId: auth.user.id } } } },
-      ],
-    },
+  const task = await prisma.projectTask.findUnique({
+    where: { id: parsed.data.taskId },
+    select: { id: true, projectId: true, assigneeId: true, title: true, status: true },
   });
   if (!task) return NextResponse.json({ error: "Task not found" }, { status: 404 });
+
+  const isAssignee = task.assigneeId === auth.user.id;
+  const canEdit =
+    isAssignee || (await canMutateProject(auth.user, task.projectId));
+  if (!canEdit) {
+    return NextResponse.json({ error: "Requires edit access on this project" }, { status: 403 });
+  }
 
   const action = parsed.data.action || "status";
 

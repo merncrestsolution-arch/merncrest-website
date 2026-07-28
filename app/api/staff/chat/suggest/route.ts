@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { requireStaff } from "@/lib/commerce";
 import { suggestAgentReplies } from "@/lib/ai/suggestion-engine";
 import { buildChatSupportContext } from "@/lib/chat/support-context";
+import { sanitizeChatReply } from "@/lib/support/sanitize-chat-reply";
 
 export async function GET(request: Request) {
   const auth = await requireStaff();
@@ -18,7 +19,7 @@ export async function GET(request: Request) {
   ]);
 
   return NextResponse.json({
-    replies,
+    replies: replies.map((r) => sanitizeChatReply(r)),
     source,
     diagnostics: ctx?.diagnostics || [],
     detectedCategories: ctx?.detectedCategories || [],

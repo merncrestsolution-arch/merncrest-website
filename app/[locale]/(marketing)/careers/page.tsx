@@ -5,6 +5,7 @@ import { MapPin, Clock, Briefcase } from "lucide-react";
 import { ShareButton } from "@/components/ui/share-button";
 import { ApplyButton } from "@/components/forms/apply-button";
 import { getOpenJobs } from "@/lib/cms";
+import { COMPANY_EMAILS, mailto } from "@/lib/company/emails";
 
 export async function generateMetadata({
   params,
@@ -80,8 +81,8 @@ export default async function CareersPage({
             {all.length === 0 && (
               <div className="stitch-card text-muted">
                 No open positions right now. Send your CV to{" "}
-                <a href="mailto:careers@merncrest.lk" className="text-accent hover:underline">
-                  careers@merncrest.lk
+                <a href={mailto("careers")} className="text-accent hover:underline">
+                  {COMPANY_EMAILS.careers}
                 </a>{" "}
                 and we&apos;ll reach out when a role opens.
               </div>

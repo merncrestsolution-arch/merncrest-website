@@ -19,6 +19,34 @@ export {
 
 export { getStaffScope, crmLeadScopeWhere, type StaffScope } from "@/lib/erp/staff-scope";
 
+import { isAdminRole } from "@/lib/auth";
+import type { Role } from "@/lib/auth-types";
+
+/** OWNER and ADMIN — full platform access including staff/role management */
+export function isSuperAdmin(role: Role) {
+  return isAdminRole(role);
+}
+
+/** Destructive deletes (records, users, system config) — super admin only */
+export function canPerformDestructiveAction(role: Role) {
+  return isAdminRole(role);
+}
+
+export async function requireSuperAdmin() {
+  const auth = await requireStaff();
+  if (auth.error) return auth;
+  if (!isSuperAdmin(auth.user.role)) {
+    return {
+      user: auth.user,
+      error: NextResponse.json(
+        { error: "Owner or Admin only — staff management and deletions are restricted." },
+        { status: 403 }
+      ),
+    };
+  }
+  return { user: auth.user, error: undefined as undefined };
+}
+
 export async function getUserPermissions(user: SessionUser): Promise<Set<string>> {
   if (user.role === "OWNER" || user.role === "ADMIN") {
     return new Set(ERP_PERMISSIONS);

@@ -489,7 +489,7 @@ Hierarchy: project → milestone → task → subtask. Statuses: TODO · IN_PROG
 - **Project P&L:** expenses (`ProjectExpense`) · revenue · profit · payment schedule (`ProjectPaymentSchedule`) with next due date · Finance tab on `/admin/erp/projects`
 - **Client tab:** link customer · brief / next process / next steps · update log · copy-paste email templates (kickoff, status, waiting, milestone, payment, weekly, delivery)
 - **Client history:** `/portal/payments` · `GET /api/portal/history` (payments + project schedule)
-- **Portal sidebar (Register.lk):** My Services · My Domains · My Projects · Billing & Orders · Support
+- **Portal sidebar:** My Services · My Domains · My Projects · Billing & Orders · Support (Stitch portal shell)
 - **Tickets (email-style):** customer opens · staff **Take ticket** / reply / **Close** · `/staff/tickets` · claim/close on `PATCH /api/tickets`
 - **Checkout confirm:** creates Order ID + Invoice · redirects `/portal/orders/confirmed` · sales projects get payment schedule linked to invoice
 
@@ -513,6 +513,10 @@ Leave create → `ApprovalRequest` + audit · approval decide → notifications 
 Organization · HRM · Finance · COA · Approvals · Procurement · Inventory · SCM · Manufacturing · Assets · ESM · FSM · Projects · CSM · IoT · Maintenance · AI · BI · DMS · Audit · Staff · Permissions · Dashboards
 
 See `.cursor/rules/merncrest-part-05.mdc`.
+
+### Part 06 — Enterprise Staff Portal
+
+Master spec: `docs/staff-portal-master-prompt.md` · Rule: `.cursor/rules/merncrest-part-06-staff-portal.mdc` · Design: Stitch + Figma (`/.cursor/skills/staff-portal-design/SKILL.md`) · Host: `system.merncrest.lk`
 
 ---
 

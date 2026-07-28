@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { Link } from "@/i18n/routing";
 import { formatMoney } from "@/lib/commerce-format";
+import { calcBillingTotals } from "@/lib/billing/calc-totals";
 import { Loader2, Mail, Plus, Save, Trash2 } from "lucide-react";
 
 type QuoteItem = {
@@ -76,6 +77,7 @@ function buildPayload(
     notes: string;
     discountLkr: string;
     taxLkr: string;
+    vatPercent: string;
     validDays: string;
     items: EditableItem[];
   }
@@ -88,6 +90,18 @@ function buildPayload(
       unitPriceCents: lkrInputToCents(i.unitPriceLkr),
     }));
   if (!items.length) throw new Error("Add at least one line item");
+  for (const item of items) {
+    if (item.unitPriceCents <= 0) {
+      throw new Error(`Enter a unit price (LKR) for "${item.description}"`);
+    }
+  }
+  const lineSubtotal = items.reduce((s, i) => s + i.quantity * i.unitPriceCents, 0);
+  const totals = calcBillingTotals({
+    lineSubtotalCents: lineSubtotal,
+    discountCents: lkrInputToCents(fields.discountLkr),
+    taxCents: fields.taxLkr.trim() ? lkrInputToCents(fields.taxLkr) : undefined,
+    vatRatePercent: Number(fields.vatPercent) || 18,
+  });
   return {
     quotationId: selected.id,
     customerName: fields.customerName,
@@ -95,8 +109,9 @@ function buildPayload(
     company: fields.company || null,
     terms: fields.terms || null,
     notes: fields.notes || null,
-    discountCents: lkrInputToCents(fields.discountLkr),
-    taxCents: lkrInputToCents(fields.taxLkr),
+    discountCents: totals.discountCents,
+    taxCents: totals.taxCents,
+    vatRatePercent: totals.vatRatePercent,
     validDays: Number(fields.validDays) || 14,
     items,
   };
@@ -120,7 +135,8 @@ export function SystemQuotationsPanel({
   const [terms, setTerms] = useState("");
   const [notes, setNotes] = useState("");
   const [discountLkr, setDiscountLkr] = useState("0");
-  const [taxLkr, setTaxLkr] = useState("0");
+  const [taxLkr, setTaxLkr] = useState("");
+  const [vatPercent, setVatPercent] = useState("18");
   const [validDays, setValidDays] = useState("14");
   const [items, setItems] = useState<EditableItem[]>([emptyItem()]);
 
@@ -154,6 +170,11 @@ export function SystemQuotationsPanel({
     setNotes(selected.notes || "");
     setDiscountLkr(centsToLkrInput(selected.discountCents));
     setTaxLkr(centsToLkrInput(selected.taxCents));
+    const derivedVat =
+      selected.subtotalCents - selected.discountCents > 0
+        ? Math.round((selected.taxCents / (selected.subtotalCents - selected.discountCents)) * 100)
+        : 18;
+    setVatPercent(String(derivedVat));
     setItems(
       selected.items.length
         ? selected.items.map((i) => ({
@@ -168,16 +189,18 @@ export function SystemQuotationsPanel({
   }, [selected]);
 
   const previewTotals = useMemo(() => {
-    const lineItems = items.map((i) => ({
-      quantity: i.quantity,
-      unitPriceCents: lkrInputToCents(i.unitPriceLkr),
-    }));
-    const subtotal = lineItems.reduce((s, i) => s + i.quantity * i.unitPriceCents, 0);
-    const discount = lkrInputToCents(discountLkr);
-    const tax = lkrInputToCents(taxLkr);
-    const total = Math.max(0, subtotal - discount + tax);
-    return { subtotal, discount, tax, total };
-  }, [items, discountLkr, taxLkr]);
+    const lineSubtotal = items
+      .filter((i) => i.description.trim())
+      .reduce((s, i) => s + i.quantity * lkrInputToCents(i.unitPriceLkr), 0);
+    const manualTax = taxLkr.trim() ? lkrInputToCents(taxLkr) : undefined;
+    const vatRate = Number(vatPercent);
+    return calcBillingTotals({
+      lineSubtotalCents: lineSubtotal,
+      discountCents: lkrInputToCents(discountLkr),
+      taxCents: manualTax,
+      vatRatePercent: Number.isFinite(vatRate) ? vatRate : 18,
+    });
+  }, [items, discountLkr, taxLkr, vatPercent]);
 
   const canEdit = selected && !["SENT", "ACCEPTED"].includes(selected.status);
 
@@ -191,6 +214,7 @@ export function SystemQuotationsPanel({
       notes,
       discountLkr,
       taxLkr,
+      vatPercent,
       validDays,
       items,
     });
@@ -309,6 +333,7 @@ export function SystemQuotationsPanel({
                 <tr>
                   <th>Quote #</th>
                   <th>Customer</th>
+                  <th>Total</th>
                   <th>Status</th>
                 </tr>
               </thead>
@@ -322,9 +347,12 @@ export function SystemQuotationsPanel({
                     <td className="font-mono text-xs">{q.quoteNumber}</td>
                     <td>
                       <span className="block text-sm">{q.customerName}</span>
-                      <span className="text-xs" style={{ color: "var(--sp-muted)" }}>
-                        {formatMoney(q.totalCents, q.currency)}
-                      </span>
+                      <span className="text-xs text-[var(--sp-muted)]">{q.customerEmail}</span>
+                    </td>
+                    <td className="font-medium whitespace-nowrap">
+                      {q.totalCents > 0 ? formatMoney(q.totalCents, q.currency) : (
+                        <span className="text-amber-600 text-xs">Set pricing</span>
+                      )}
                     </td>
                     <td>
                       <span
@@ -473,13 +501,29 @@ export function SystemQuotationsPanel({
                   ))}
                 </div>
 
-                <div className="grid sm:grid-cols-3 gap-3">
+                <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-3">
                   <label className="text-xs text-muted">
                     Discount (LKR)
                     <input
                       className={`${INPUT} mt-1`}
+                      type="number"
+                      min={0}
+                      step={0.01}
                       value={discountLkr}
                       onChange={(e) => setDiscountLkr(e.target.value)}
+                      disabled={!canEdit || busy}
+                    />
+                  </label>
+                  <label className="text-xs text-muted">
+                    VAT %
+                    <input
+                      className={`${INPUT} mt-1`}
+                      type="number"
+                      min={0}
+                      max={100}
+                      step={0.01}
+                      value={vatPercent}
+                      onChange={(e) => setVatPercent(e.target.value)}
                       disabled={!canEdit || busy}
                     />
                   </label>
@@ -487,6 +531,10 @@ export function SystemQuotationsPanel({
                     Tax (LKR)
                     <input
                       className={`${INPUT} mt-1`}
+                      type="number"
+                      min={0}
+                      step={0.01}
+                      placeholder="Auto from VAT %"
                       value={taxLkr}
                       onChange={(e) => setTaxLkr(e.target.value)}
                       disabled={!canEdit || busy}
@@ -524,23 +572,21 @@ export function SystemQuotationsPanel({
                 <div className="rounded-xl border border-[var(--sp-outline)] bg-[var(--stitch-surface-low)] p-4 text-sm space-y-1">
                   <div className="flex justify-between">
                     <span className="text-muted">Subtotal</span>
-                    <span>{formatMoney(previewTotals.subtotal)}</span>
+                    <span>{formatMoney(previewTotals.subtotalCents)}</span>
                   </div>
-                  {previewTotals.discount > 0 ? (
+                  {previewTotals.discountCents > 0 ? (
                     <div className="flex justify-between">
                       <span className="text-muted">Discount</span>
-                      <span>-{formatMoney(previewTotals.discount)}</span>
+                      <span>-{formatMoney(previewTotals.discountCents)}</span>
                     </div>
                   ) : null}
-                  {previewTotals.tax > 0 ? (
-                    <div className="flex justify-between">
-                      <span className="text-muted">Tax</span>
-                      <span>{formatMoney(previewTotals.tax)}</span>
-                    </div>
-                  ) : null}
+                  <div className="flex justify-between">
+                    <span className="text-muted">VAT ({previewTotals.vatRatePercent}%)</span>
+                    <span>{formatMoney(previewTotals.taxCents)}</span>
+                  </div>
                   <div className="flex justify-between font-semibold text-base pt-2 border-t border-[var(--sp-outline)]">
                     <span>Total</span>
-                    <span>{formatMoney(previewTotals.total)}</span>
+                    <span>{formatMoney(previewTotals.totalCents)}</span>
                   </div>
                 </div>
 

@@ -78,7 +78,7 @@ export function StaffReceiptsPanel() {
       <div className="stitch-page-head">
         <div>
           <h1 className="stitch-page-title">Payment Receipts</h1>
-          <p className="stitch-page-sub">Verified payments and downloadable receipt PDFs.</p>
+          <p className="stitch-page-sub">Verified payments and printable receipts.</p>
         </div>
         <Link href="/staff/billing" className="stitch-btn-sm">
           Billing hub
@@ -213,7 +213,7 @@ export function StaffReceiptsPanel() {
                   className="stitch-btn-primary-sm w-full justify-center mt-4"
                 >
                   <Download className="h-4 w-4" />
-                  Download PDF
+                  View / print receipt
                 </a>
               </div>
             </>

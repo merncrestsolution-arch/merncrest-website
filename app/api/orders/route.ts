@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { formatMoney, nextNumber, requireUser } from "@/lib/commerce";
+import { nextOrgNumber } from "@/lib/commerce/org-numbers";
 import { sendOrderConfirmationEmail } from "@/lib/mail";
 import { onCustomerOrderCreated } from "@/lib/crm/customer-hooks";
 import { notifyUser } from "@/lib/support/notify";
@@ -116,10 +117,15 @@ export async function POST(request: Request) {
           country: "Sri Lanka",
         };
 
+    const [orderNumber, invoiceNumber] = await Promise.all([
+      nextOrgNumber("ORDER"),
+      nextOrgNumber("INVOICE"),
+    ]);
+
     const order = await prisma.$transaction(async (tx) => {
       const created = await tx.order.create({
         data: {
-          orderNumber: nextNumber("ORD"),
+          orderNumber,
           userId: auth.user.id,
           status: "PENDING",
           subtotalCents,
@@ -156,7 +162,7 @@ export async function POST(request: Request) {
 
       const invoice = await tx.invoice.create({
         data: {
-          invoiceNumber: nextNumber("INV"),
+          invoiceNumber,
           orderId: created.id,
           userId: auth.user.id,
           status: "SENT",

@@ -6,7 +6,6 @@ import { SmartSupportContextPanel } from "@/components/staff/smart-support-conte
 import { MessageList } from "@/components/chatbot/message-list";
 import { useChatSse } from "@/hooks/use-chat-sse";
 import {
-  IconAgent,
   IconBack,
   IconBot,
   IconSend,
@@ -62,7 +61,7 @@ const BUILTIN_QUICK: QuickChip[] = [
   { id: "thanks", label: "Thanks", body: "Thank you! We'll follow up shortly. Feel free to message here anytime." },
 ];
 
-/** Staff inbox — same side-panel look as the website visitor chatbot */
+/** Staff live chat — Google Stitch full-width inbox */
 export function StaffVisitorChatPanel() {
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -208,14 +207,14 @@ export function StaffVisitorChatPanel() {
     loadSuggestions(selectedId, true).catch(() => undefined);
   }, [messages, selectedId, loadSuggestions]);
 
-  async function sendText(text: string) {
-    if (!selectedId || !text.trim() || busy) return;
+  async function sendText(raw: string) {
+    if (!selectedId || !raw.trim() || busy) return;
     setBusy(true);
     try {
       const res = await fetch(`/api/chat/conversations/${selectedId}/messages`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: text.trim(), asAgent: true }),
+        body: JSON.stringify({ message: raw.trim(), asAgent: true }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Send failed");
@@ -416,13 +415,11 @@ export function StaffVisitorChatPanel() {
         <div className="side-chat-main">
           {!selectedId ? (
             <div className="side-chat-empty">
-              <div className="side-chat-empty-widget" aria-hidden>
-                <div className="side-chat-empty-widget-head" />
-                <div className="side-chat-empty-widget-body">
-                  Select a visitor to open the side chat panel
-                </div>
+              <div className="side-chat-empty-icon" aria-hidden>
+                <IconBot size={32} />
               </div>
-              <p className="text-sm">Reply in the same widget visitors see on merncrest.lk</p>
+              <h2>Pick a conversation</h2>
+              <p>Select a visitor from the inbox to view messages and reply in real time.</p>
             </div>
           ) : (
             <div className="side-chat-widget">
@@ -435,15 +432,68 @@ export function StaffVisitorChatPanel() {
                 >
                   <IconBack size={20} />
                 </button>
-                <div className="side-chat-widget-avatar">
-                  {isAiHandler ? <IconBot size={20} /> : <IconAgent size={20} />}
+                <div
+                  className={`side-chat-widget-avatar ${isAiHandler ? "ai" : "agent"}`}
+                  aria-hidden
+                >
+                  {visitorLabel.slice(0, 2).toUpperCase()}
                 </div>
                 <div className="side-chat-widget-header-text">
                   <h2>{visitorLabel}</h2>
                   <p>
                     <IconStatusDot online={!isAiHandler} size={7} />
                     {statusLabel}
+                    {selected?.isKnownCustomer && selected.customerCode ? (
+                      <span className="side-chat-header-badge">{selected.customerCode}</span>
+                    ) : null}
                   </p>
+                </div>
+                <div className="side-chat-header-actions">
+                  <button
+                    type="button"
+                    className="side-chat-icon-btn"
+                    disabled={busy}
+                    onClick={() => chatAction("to_ticket")}
+                    title="Create ticket"
+                  >
+                    <Ticket className="h-4 w-4" />
+                  </button>
+                  <button
+                    type="button"
+                    className="side-chat-icon-btn"
+                    disabled={busy}
+                    onClick={() => chatAction("to_lead")}
+                    title="Create lead"
+                  >
+                    <UserPlus className="h-4 w-4" />
+                  </button>
+                  <button
+                    type="button"
+                    className={`side-chat-icon-btn ${showTransfer ? "active" : ""}`}
+                    disabled={busy}
+                    onClick={() => setShowTransfer((s) => !s)}
+                    title="Transfer chat"
+                  >
+                    <ArrowRightLeft className="h-4 w-4" />
+                  </button>
+                  <button
+                    type="button"
+                    className="side-chat-icon-btn"
+                    disabled={busy || suggestLoading}
+                    onClick={() => loadSuggestions(selectedId, true)}
+                    title="Generate AI draft"
+                  >
+                    <Sparkles className="h-4 w-4" />
+                  </button>
+                  <button
+                    type="button"
+                    className="side-chat-icon-btn danger"
+                    disabled={busy}
+                    onClick={() => chatAction("close")}
+                    title="Close chat"
+                  >
+                    <XCircle className="h-4 w-4" />
+                  </button>
                 </div>
               </header>
 
@@ -451,53 +501,9 @@ export function StaffVisitorChatPanel() {
                 <div className={`side-chat-toast ${toast.type}`}>{toast.text}</div>
               ) : null}
 
-              <div className="side-chat-actions">
-                <button
-                  type="button"
-                  className="side-chat-action-btn"
-                  disabled={busy}
-                  onClick={() => chatAction("to_ticket")}
-                >
-                  <Ticket className="h-3 w-3" /> Ticket
-                </button>
-                <button
-                  type="button"
-                  className="side-chat-action-btn"
-                  disabled={busy}
-                  onClick={() => chatAction("to_lead")}
-                >
-                  <UserPlus className="h-3 w-3" /> Lead
-                </button>
-                <button
-                  type="button"
-                  className="side-chat-action-btn"
-                  disabled={busy}
-                  onClick={() => setShowTransfer((s) => !s)}
-                >
-                  <ArrowRightLeft className="h-3 w-3" /> Transfer
-                </button>
-                <button
-                  type="button"
-                  className="side-chat-action-btn"
-                  disabled={busy || suggestLoading}
-                  onClick={() => loadSuggestions(selectedId, true)}
-                >
-                  <Sparkles className="h-3 w-3" />
-                  {suggestLoading ? "…" : "AI draft"}
-                </button>
-                <button
-                  type="button"
-                  className="side-chat-action-btn danger"
-                  disabled={busy}
-                  onClick={() => chatAction("close")}
-                >
-                  <XCircle className="h-3 w-3" /> Close
-                </button>
-              </div>
-
               {showTransfer && (
                 <div className="side-chat-transfer-bar">
-                  <span>Transfer to:</span>
+                  <span className="side-chat-transfer-label">Transfer to</span>
                   {agents
                     .filter((a) => a.id !== selected?.agent?.id)
                     .map((a) => (
@@ -513,7 +519,7 @@ export function StaffVisitorChatPanel() {
                     ))}
                   <button
                     type="button"
-                    className="text-[#105691] underline"
+                    className="side-chat-transfer-cancel"
                     onClick={() => setShowTransfer(false)}
                   >
                     Cancel
@@ -522,62 +528,78 @@ export function StaffVisitorChatPanel() {
               )}
 
               <div className="side-chat-messages">
-                <MessageList messages={messages} />
+                <MessageList messages={messages} variant="stitch-staff" />
               </div>
 
-              <div className="side-chat-quick-row">
-                {quickChips.map((chip) => (
-                  <button
-                    key={chip.id}
-                    type="button"
-                    disabled={busy}
-                    onClick={() => quickSend(chip.body)}
-                    className="side-chat-quick-chip"
-                    title={chip.body}
-                  >
-                    {chip.label}
-                  </button>
-                ))}
-              </div>
+              <div className="side-chat-footer">
+                {suggestions.length > 0 ? (
+                  <div className="side-chat-footer-section">
+                    <span className="side-chat-footer-label">
+                      <Sparkles className="h-3 w-3" />
+                      AI suggestions
+                    </span>
+                    <div className="side-chat-quick-row">
+                      {suggestions.map((s, i) => (
+                        <button
+                          key={`ai-${i}`}
+                          type="button"
+                          disabled={busy}
+                          onClick={() => {
+                            setDraft(s);
+                            autoDraftRef.current = s;
+                            draftEditedRef.current = false;
+                            inputRef.current?.focus();
+                          }}
+                          className={`side-chat-quick-chip ai ${draft === s ? "selected" : ""}`}
+                          title={s}
+                        >
+                          {s.slice(0, 72)}
+                          {s.length > 72 ? "…" : ""}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                ) : null}
 
-              {suggestions.length > 0 && (
-                <div className="side-chat-quick-row !pt-0">
-                  {suggestions.map((s, i) => (
-                    <button
-                      key={`ai-${i}`}
-                      type="button"
-                      disabled={busy}
-                      onClick={() => quickSend(s)}
-                      className="side-chat-quick-chip ai"
-                      title="Tap to send AI suggestion"
-                    >
-                      AI{i + 1}: {s.slice(0, 48)}
-                      {s.length > 48 ? "…" : ""}
-                    </button>
-                  ))}
+                <div className="side-chat-footer-section">
+                  <span className="side-chat-footer-label">Quick replies</span>
+                  <div className="side-chat-quick-row">
+                    {quickChips.map((chip) => (
+                      <button
+                        key={chip.id}
+                        type="button"
+                        disabled={busy}
+                        onClick={() => quickSend(chip.body)}
+                        className="side-chat-quick-chip"
+                        title={chip.body}
+                      >
+                        {chip.label}
+                      </button>
+                    ))}
+                  </div>
                 </div>
-              )}
 
-              <form className="side-chat-composer" onSubmit={onSubmit}>
-                <input
-                  ref={inputRef}
-                  value={draft}
-                  onChange={(e) => {
-                    setDraft(e.target.value);
-                    draftEditedRef.current = e.target.value !== autoDraftRef.current;
-                  }}
-                  placeholder="Type a reply…"
-                  disabled={busy}
-                />
-                <button
-                  type="submit"
-                  className="side-chat-send"
-                  disabled={busy || !draft.trim()}
-                  aria-label="Send"
-                >
-                  <IconSend size={18} />
-                </button>
-              </form>
+                <form className="side-chat-composer" onSubmit={onSubmit}>
+                  <input
+                    ref={inputRef}
+                    value={draft}
+                    onChange={(e) => {
+                      setDraft(e.target.value);
+                      draftEditedRef.current = e.target.value !== autoDraftRef.current;
+                    }}
+                    placeholder="Type your reply…"
+                    disabled={busy}
+                  />
+                  <button
+                    type="submit"
+                    className="side-chat-send"
+                    disabled={busy || !draft.trim()}
+                    aria-label="Send"
+                  >
+                    <IconSend size={18} />
+                  </button>
+                </form>
+              </div>
             </div>
           )}
         </div>

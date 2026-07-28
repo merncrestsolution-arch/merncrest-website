@@ -4,7 +4,6 @@ import { ensureLeadFromChannel } from "@/lib/crm/channels";
 import { writeAuditLog } from "@/lib/erp/audit";
 import { appendSystemMessage } from "@/lib/chat/conversations";
 import { publishChatEvent } from "@/lib/chat/events";
-import { publishChatEvent } from "@/lib/chat/events";
 
 export async function convertChatToTicket(params: {
   sessionId: string;

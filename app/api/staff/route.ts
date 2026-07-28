@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { requireStaff } from "@/lib/commerce";
 import { getUserPermissions } from "@/lib/erp/permissions";
+import { getStaffDashboardStats } from "@/lib/staff/dashboard-stats";
 import { z } from "zod";
 
 /** Internal staff portal home data */
@@ -19,7 +20,7 @@ export async function GET() {
     },
   });
 
-  const [tasks, leave, notifications, messages, slips, approvals] = await Promise.all([
+  const [tasks, leave, notifications, messages, slips, approvals, dashboard] = await Promise.all([
     prisma.projectTask.findMany({
       where: { assigneeId: auth.user.id, status: { not: "DONE" } },
       include: { project: { select: { name: true, projectCode: true } } },
@@ -54,6 +55,7 @@ export async function GET() {
       orderBy: { createdAt: "desc" },
       take: 10,
     }),
+    getStaffDashboardStats(auth.user, employee?.id),
   ]);
 
   return NextResponse.json({
@@ -66,6 +68,13 @@ export async function GET() {
     messages,
     salarySlips: slips,
     approvals,
+    leaveBalances: dashboard.leaveBalances,
+    attendanceRate: dashboard.attendanceRate,
+    attendanceTrend: dashboard.attendanceTrend,
+    projectCount: dashboard.projectCount,
+    pendingTaskCount: dashboard.pendingTaskCount,
+    unreadNotifications: dashboard.unreadNotifications,
+    ops: dashboard.ops,
   });
 }
 

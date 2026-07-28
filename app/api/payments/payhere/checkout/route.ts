@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { isAutomaticGatewayEnabled } from "@/lib/payments/config";
 import { prisma } from "@/lib/db";
 import { requireUser } from "@/lib/commerce";
+import { nextOrgNumber } from "@/lib/commerce/org-numbers";
 import {
   buildPayHereHash,
   formatPayHereAmount,
@@ -72,11 +73,14 @@ export async function POST(request: Request) {
       merchantSecret: config.merchantSecret,
     });
 
+    const receiptNumber = await nextOrgNumber("RECEIPT");
+
     await prisma.payment.create({
       data: {
         userId: auth.user.id,
         orderId: invoice.orderId,
         invoiceId: invoice.id,
+        receiptNumber,
         amountCents: invoice.totalCents,
         currency,
         method: "PAYHERE",

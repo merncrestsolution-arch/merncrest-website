@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { ERP_PERMISSIONS, requirePermission } from "@/lib/erp/permissions";
+import { writeAuditLog } from "@/lib/erp/audit";
 import { z } from "zod";
 
 export async function GET() {
@@ -45,6 +46,11 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Unknown permission" }, { status: 400 });
   }
 
+  const target = await prisma.user.findUnique({
+    where: { id: parsed.data.userId },
+    select: { email: true, fullName: true },
+  });
+
   if (parsed.data.action === "grant") {
     await prisma.staffPermission.upsert({
       where: {
@@ -67,6 +73,21 @@ export async function POST(request: Request) {
       },
     });
   }
+
+  void writeAuditLog({
+    actorId: auth.user.id,
+    actorEmail: auth.user.email,
+    action: parsed.data.action === "grant" ? "permission.grant" : "permission.revoke",
+    module: "permissions",
+    entityType: "StaffPermission",
+    entityId: parsed.data.userId,
+    summary: `${parsed.data.action === "grant" ? "Granted" : "Revoked"} ${parsed.data.permission} for ${target?.fullName ?? parsed.data.userId}`,
+    meta: {
+      userId: parsed.data.userId,
+      permission: parsed.data.permission,
+      action: parsed.data.action,
+    },
+  });
 
   return NextResponse.json({ ok: true });
 }

@@ -16,7 +16,7 @@ export default async function MarketingLayout({
 }: {
   children: React.ReactNode;
 }) {
-  // System.merncrest.lk uses Register.lk chrome — no marketing navbar/footer
+  // System.merncrest.lk uses Stitch portal chrome — no marketing navbar/footer
   if (await isSystemSurface()) {
     return <>{children}</>;
   }

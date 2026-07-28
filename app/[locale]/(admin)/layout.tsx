@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
-import { getSessionUser, isStaffRole } from "@/lib/auth";
+import { getSessionUser, isAdminRole, isStaffRole } from "@/lib/auth";
 import { AdminShell } from "@/components/admin/admin-shell";
 import { StaffShell } from "@/components/staff/staff-shell";
 import { IdleLogout } from "@/components/staff/idle-logout";
@@ -38,7 +38,13 @@ export default async function AdminLayout({
     return (
       <>
         <IdleLogout minutes={30} />
-        <StaffShell userName={user.fullName}>{children}</StaffShell>
+        <StaffShell
+          userName={user.fullName}
+          userRole={user.role}
+          isSuperAdmin={isAdminRole(user.role)}
+        >
+          {children}
+        </StaffShell>
       </>
     );
   }

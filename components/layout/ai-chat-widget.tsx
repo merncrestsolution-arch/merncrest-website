@@ -25,6 +25,8 @@ import {
   defaultChatFallback,
   matchChatKnowledge,
 } from "@/lib/support/chat-knowledge";
+import { sanitizeChatReply } from "@/lib/support/sanitize-chat-reply";
+import { sanitizeChatMessageBody } from "@/lib/chat/message-sanitize";
 
 type Msg = {
   id: string;
@@ -490,9 +492,9 @@ export function AiChatWidget() {
           {
             id: `local-${Date.now()}`,
             role: "AI",
-            body:
-              matchChatKnowledge(text) ||
-              defaultChatFallback(locale),
+            body: sanitizeChatReply(
+              matchChatKnowledge(text) || defaultChatFallback(locale)
+            ),
             createdAt: new Date().toISOString(),
           },
         ]);
@@ -879,7 +881,7 @@ async function onPickFile(e: React.ChangeEvent<HTMLInputElement>) {
                                 transition={{ duration: 0.22, ease: "easeOut" }}
                                 className="mx-auto max-w-[92%] rounded-xl border border-amber-300/50 bg-amber-50 px-3 py-2 text-center text-xs font-medium text-amber-700"
                               >
-                                {m.body}
+                                {sanitizeChatMessageBody(m.role, m.body)}
                               </motion.div>
                             );
                           }
@@ -904,7 +906,7 @@ async function onPickFile(e: React.ChangeEvent<HTMLInputElement>) {
                                       : "rounded-2xl rounded-bl-none border border-stitch-outline bg-stitch-surface text-foreground"
                                   }`}
                                 >
-                                  {m.body}
+                                  {sanitizeChatMessageBody(m.role, m.body)}
                                 </div>
                                 {isUser ? (
                                   <span className="flex items-center gap-0.5 pr-1 text-[10px] text-stitch-muted">

@@ -30,92 +30,45 @@ export const ERP_PERMISSIONS = [
   "erp.ai.manage",
   "erp.permissions.manage",
   "erp.analytics.view",
+  "erp.cloud.view",
+  "erp.cloud.manage",
+  "erp.monitoring.view",
+  "erp.monitoring.manage",
 ] as const;
 
 export type ErpPermission = (typeof ERP_PERMISSIONS)[number];
 
-/** Org-role presets (Employee.orgRole) mapped onto permissions */
+/** Only OWNER / ADMIN (super admin) — staff & role management */
+export const SUPER_ADMIN_ONLY_PERMISSIONS: ErpPermission[] = ["erp.permissions.manage"];
+
+/** All modules staff need day-to-day — billing, CRM, projects, finance, etc. */
+export const OPERATIONAL_PERMISSIONS: ErpPermission[] = ERP_PERMISSIONS.filter(
+  (p) => !SUPER_ADMIN_ONLY_PERMISSIONS.includes(p)
+);
+
+/** Org-role presets (Employee.orgRole). CEO tier = full; everyone else = operational. */
 export const ORG_ROLE_PRESETS: Record<string, ErpPermission[] | "*"> = {
   CEO: "*",
   DIRECTOR: "*",
   GENERAL_MANAGER: "*",
-  DEPT_HEAD: [
-    "erp.hr.view",
-    "erp.hr.manage",
-    "erp.projects.view",
-    "erp.projects.manage",
-    "erp.dms.view",
-    "erp.dms.manage",
-    "erp.analytics.view",
-    "erp.ai.view",
-    "erp.esm.view",
-    "erp.fsm.view",
-  ],
-  TEAM_LEAD: [
-    "erp.hr.view",
-    "erp.projects.view",
-    "erp.projects.manage",
-    "erp.dms.view",
-    "erp.analytics.view",
-    "erp.ai.view",
-    "erp.esm.view",
-  ],
-  PROJECT_MANAGER: [
-    "erp.projects.view",
-    "erp.projects.manage",
-    "erp.dms.view",
-    "erp.analytics.view",
-    "erp.ai.view",
-  ],
-  ACCOUNTANT: [
-    "erp.finance.view",
-    "erp.finance.manage",
-    "erp.procurement.view",
-    "erp.analytics.view",
-    "erp.dms.view",
-  ],
-  HR: ["erp.hr.view", "erp.hr.manage", "erp.dms.view", "erp.analytics.view"],
-  FINANCE: [
-    "erp.finance.view",
-    "erp.finance.manage",
-    "erp.procurement.view",
-    "erp.analytics.view",
-    "erp.dms.view",
-  ],
-  SALES: ["erp.projects.view", "erp.analytics.view", "erp.dms.view", "erp.ai.view"],
-  MARKETING: ["erp.analytics.view", "erp.dms.view", "erp.ai.view"],
-  SUPPORT: ["erp.esm.view", "erp.esm.manage", "erp.fsm.view", "erp.fsm.manage", "erp.analytics.view"],
-  DEVELOPER: ["erp.projects.view", "erp.projects.manage", "erp.dms.view", "erp.ai.view"],
-  ENGINEER: [
-    "erp.assets.view",
-    "erp.assets.manage",
-    "erp.fsm.view",
-    "erp.fsm.manage",
-    "erp.iot.view",
-    "erp.mfg.view",
-    "erp.inventory.view",
-  ],
-  AUDITOR: [
-    "erp.finance.view",
-    "erp.hr.view",
-    "erp.procurement.view",
-    "erp.dms.view",
-    "erp.analytics.view",
-  ],
-  STAFF: [
-    "erp.hr.view",
-    "erp.projects.view",
-    "erp.assets.view",
-    "erp.inventory.view",
-    "erp.fsm.view",
-    "erp.analytics.view",
-    "erp.dms.view",
-  ],
+  DEPT_HEAD: OPERATIONAL_PERMISSIONS,
+  TEAM_LEAD: OPERATIONAL_PERMISSIONS,
+  PROJECT_MANAGER: OPERATIONAL_PERMISSIONS,
+  ACCOUNTANT: OPERATIONAL_PERMISSIONS,
+  HR: OPERATIONAL_PERMISSIONS,
+  FINANCE: OPERATIONAL_PERMISSIONS,
+  SALES: OPERATIONAL_PERMISSIONS,
+  MARKETING: OPERATIONAL_PERMISSIONS,
+  SUPPORT: OPERATIONAL_PERMISSIONS,
+  DEVELOPER: OPERATIONAL_PERMISSIONS,
+  ENGINEER: OPERATIONAL_PERMISSIONS,
+  AUDITOR: OPERATIONAL_PERMISSIONS,
+  STAFF: OPERATIONAL_PERMISSIONS,
 };
 
 export const ROLE_DEFAULTS: Record<Role, ErpPermission[] | "*"> = {
   OWNER: "*",
   ADMIN: "*",
-  STAFF: ORG_ROLE_PRESETS.STAFF as ErpPermission[],
+  STAFF: OPERATIONAL_PERMISSIONS,
   CUSTOMER: [],
 };

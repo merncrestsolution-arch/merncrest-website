@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/db";
+import { COMPANY_EMAILS } from "@/lib/company/emails";
 
 export const DEFAULT_SETTINGS: {
   key: string;
@@ -17,10 +18,31 @@ export const DEFAULT_SETTINGS: {
   },
   {
     key: "company.email",
-    value: "hello@merncrest.lk",
+    value: COMPANY_EMAILS.info,
     valueType: "STRING",
     group: "company",
     label: "Public email",
+  },
+  {
+    key: "company.email.support",
+    value: COMPANY_EMAILS.support,
+    valueType: "STRING",
+    group: "company",
+    label: "Support email",
+  },
+  {
+    key: "company.email.contact",
+    value: COMPANY_EMAILS.contact,
+    valueType: "STRING",
+    group: "company",
+    label: "Contact / sales email",
+  },
+  {
+    key: "company.email.careers",
+    value: COMPANY_EMAILS.careers,
+    valueType: "STRING",
+    group: "company",
+    label: "Careers email",
   },
   {
     key: "company.phone",
@@ -108,14 +130,14 @@ export const DEFAULT_SETTINGS: {
   },
   {
     key: "email.fromAddress",
-    value: "noreply@merncrest.lk",
+    value: COMPANY_EMAILS.noreply,
     valueType: "STRING",
     group: "email",
     label: "From address",
   },
   {
     key: "email.replyTo",
-    value: "hello@merncrest.lk",
+    value: COMPANY_EMAILS.contact,
     valueType: "STRING",
     group: "email",
     label: "Reply-to",

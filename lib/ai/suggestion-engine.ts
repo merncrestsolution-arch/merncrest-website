@@ -1,6 +1,8 @@
 import { prisma } from "@/lib/db";
 import { routeAiChat } from "@/lib/ai/ai-router";
 import { retrieveCatalogContext } from "@/lib/ai/catalog-retrieval";
+import { airaSalesGuardrails } from "@/lib/support/chat-knowledge";
+import { sanitizeChatReply } from "@/lib/support/sanitize-chat-reply";
 import { getPrimaryOrganizationId } from "@/lib/chat/org";
 
 export type Suggestion = {
@@ -112,9 +114,11 @@ export async function suggestAgentReplies(opts: {
       organizationId,
       sessionId: opts.sessionId,
       systemPrompt: [
+        airaSalesGuardrails(),
         "You help MernCrest staff draft short live-chat replies to website visitors.",
         "Return ONLY a JSON array of 3 strings (ready-to-send reply drafts).",
-        "Tone: warm, professional, concise (1–3 sentences each).",
+        "Tone: senior sales consultant — warm, confident, concise (1–3 sentences each).",
+        "ALWAYS use https://merncrest.lk links — never localhost, 127.0.0.1, or IP addresses.",
         "Never invent pricing or products not in the catalog.",
         "Offer a clear next step when useful.",
         `Catalog:\n${catalog}`,
@@ -164,7 +168,7 @@ export async function suggestAgentReplies(opts: {
     },
   });
 
-  return { replies, source };
+  return { replies: replies.map((r) => sanitizeChatReply(r)), source };
 }
 
 export async function logSuggestionAction(opts: {

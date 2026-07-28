@@ -23,7 +23,7 @@ const PHONE_RE = /(?:\+94|0)?7[0-9]{8}\b|\+?\d{10,14}\b/g;
 const DOMAIN_RE =
   /\b([a-z0-9][a-z0-9-]{0,61}\.(?:lk|com|net|org|edu|gov|info|biz|co\.uk|io|dev))\b/gi;
 const CUSTOMER_CODE_RE = /\bMC-[A-Z0-9]{4,12}\b/gi;
-const INVOICE_RE = /\bINV-\d{4}-\d{4,}\b/gi;
+const INVOICE_RE = /\bINV-(?:[A-Z]+-\d+|\d{6,}|\d{4}-\d{4,})\b/gi;
 
 const SKIP_EMAILS = new Set(["guest@channel.merncrest.lk", "noreply@merncrest.lk"]);
 

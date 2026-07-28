@@ -1,4 +1,5 @@
 import { setRequestLocale } from "next-intl/server";
+import { COMPANY_EMAILS } from "@/lib/company/emails";
 
 export const metadata = {
   title: "Privacy Policy | MERNcrest Solutions",
@@ -24,7 +25,7 @@ export default async function PrivacyPage({
             <p><strong>Website:</strong> merncrest.lk</p>
             <p><strong>Effective Date:</strong> June 20, 2025</p>
             <p><strong>Last Updated:</strong> June 20, 2025</p>
-            <p><strong>Contact:</strong> merncrestsolution@gmail.com</p>
+            <p><strong>Contact:</strong> {COMPANY_EMAILS.contact}</p>
           </div>
         </div>
 
@@ -193,7 +194,7 @@ export default async function PrivacyPage({
               <li><strong>Right to Withdraw Consent:</strong> Where processing is based on consent, you may withdraw it at any time.</li>
               <li><strong>Right Not to be Subject to Automated Decision-Making (Article 22, GDPR):</strong> You may request human review of automated decisions that significantly affect you.</li>
             </ul>
-            <p className="mb-4">To exercise any of these rights, submit a written request to: <a href="mailto:merncrestsolution@gmail.com" className="text-accent hover:underline">merncrestsolution@gmail.com</a></p>
+            <p className="mb-4">To exercise any of these rights, submit a written request to: <a href={`mailto:${COMPANY_EMAILS.contact}`} className="text-accent hover:underline">{COMPANY_EMAILS.contact}</a></p>
             <p className="mb-4">We will respond within 30 days as required by the PDPA and within the 30-day period under the GDPR. If we require additional time (up to 60 additional days under GDPR), we will notify you with reasons.</p>
             <div className="bg-accent/10 border border-accent/20 p-4 rounded-lg text-sm text-accent">
               <span className="font-bold">⚠ Note:</span> Sri Lankan residents may also lodge complaints with the Data Protection Authority of Sri Lanka established under the Personal Data Protection Act No. 09 of 2022. EU residents may lodge complaints with their local Data Protection Authority.
@@ -243,7 +244,7 @@ export default async function PrivacyPage({
 
           <section>
             <h2 className="text-2xl font-bold text-foreground mb-4">12. Children's Privacy</h2>
-            <p>Our services are not directed to individuals under the age of 18. We do not knowingly collect personal data from minors. If we become aware that we have inadvertently collected data from a child under 18, we will delete such data immediately. Parents or guardians who believe their child has provided us with personal information should contact us at <a href="mailto:merncrestsolution@gmail.com" className="text-accent hover:underline">merncrestsolution@gmail.com</a>.</p>
+            <p>Our services are not directed to individuals under the age of 18. We do not knowingly collect personal data from minors. If we become aware that we have inadvertently collected data from a child under 18, we will delete such data immediately. Parents or guardians who believe their child has provided us with personal information should contact us at <a href={`mailto:${COMPANY_EMAILS.contact}`} className="text-accent hover:underline">{COMPANY_EMAILS.contact}</a>.</p>
           </section>
 
           <section>
@@ -263,7 +264,7 @@ export default async function PrivacyPage({
             <div className="bg-white/5 p-6 rounded-xl border border-stitch-outline">
               <p className="font-bold text-lg mb-2">MERNcrest Solutions (Pvt) Ltd</p>
               <p>Attn: Data Protection Officer</p>
-              <p>Email: <a href="mailto:merncrestsolution@gmail.com" className="text-accent hover:underline">merncrestsolution@gmail.com</a></p>
+              <p>Email: <a href={`mailto:${COMPANY_EMAILS.contact}`} className="text-accent hover:underline">{COMPANY_EMAILS.contact}</a></p>
               <p>Website: <a href="https://merncrest.lk" className="text-accent hover:underline">merncrest.lk</a></p>
               <p>Country: Sri Lanka</p>
             </div>

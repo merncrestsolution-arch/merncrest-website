@@ -21,6 +21,15 @@ import {
   syncProjectSpent,
   buildProjectClientEmails,
 } from "@/lib/erp/projects";
+import type { SessionUser } from "@/lib/auth-types";
+import { canMutateProject } from "@/lib/projects/access";
+
+async function projectEditGuard(user: SessionUser, projectId: string) {
+  if (!(await canMutateProject(user, projectId))) {
+    return NextResponse.json({ error: "Requires edit access on this project" }, { status: 403 });
+  }
+  return null;
+}
 
 const taskInclude = {
   assignee: { select: { id: true, fullName: true, email: true } },
@@ -280,6 +289,11 @@ export async function POST(request: Request) {
   if (auth.error) return auth.error;
 
   const body = await request.json();
+
+  if (body.projectId && body.action !== "create_project") {
+    const denied = await projectEditGuard(auth.user, body.projectId);
+    if (denied) return denied;
+  }
 
   if (body.action === "create_expense") {
     const schema = z.object({
@@ -610,6 +624,8 @@ export async function PATCH(request: Request) {
 
   // Legacy: create task via PATCH (keep compatibility with older UI)
   if (body.title && body.projectId && !body.taskId && !body.action) {
+    const denied = await projectEditGuard(auth.user, body.projectId);
+    if (denied) return denied;
     const parsedTask = taskSchema.safeParse({ ...body, action: "create_task" });
     if (!parsedTask.success) {
       return NextResponse.json({ error: "Invalid task" }, { status: 400 });
@@ -644,6 +660,34 @@ export async function PATCH(request: Request) {
     return NextResponse.json({ error: "Invalid update" }, { status: 400 });
   }
   const d = parsed.data;
+
+  let accessProjectId = d.projectId ?? null;
+  if (!accessProjectId && d.taskId) {
+    const t = await prisma.projectTask.findUnique({
+      where: { id: d.taskId },
+      select: { projectId: true },
+    });
+    accessProjectId = t?.projectId ?? null;
+  }
+  if (!accessProjectId && d.milestoneId) {
+    const m = await prisma.projectMilestone.findUnique({
+      where: { id: d.milestoneId },
+      select: { projectId: true },
+    });
+    accessProjectId = m?.projectId ?? null;
+  }
+  if (!accessProjectId && d.paymentId) {
+    const p = await prisma.projectPaymentSchedule.findUnique({
+      where: { id: d.paymentId },
+      select: { projectId: true },
+    });
+    accessProjectId = p?.projectId ?? null;
+  }
+  if (accessProjectId) {
+    const denied = await projectEditGuard(auth.user, accessProjectId);
+    if (denied) return denied;
+  }
+
   const action = d.action || (d.taskId ? "update_task" : "update_project");
 
   if (action === "mark_payment_paid" && d.paymentId) {

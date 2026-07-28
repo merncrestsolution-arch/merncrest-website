@@ -9,6 +9,7 @@ import {
   getDomainAdapterForTld,
   getPrimaryDomainProvider,
 } from "@/lib/providers/registry";
+import { nextOrgNumber } from "@/lib/commerce/org-numbers";
 
 type Tx = Prisma.TransactionClient;
 
@@ -622,6 +623,9 @@ export async function markInvoicePaid(opts: {
       orderBy: { createdAt: "desc" },
     });
 
+    const receiptNumber =
+      existingPayment?.receiptNumber ?? (await nextOrgNumber("RECEIPT"));
+
     const payment = existingPayment
       ? await tx.payment.update({
           where: { id: existingPayment.id },
@@ -630,6 +634,8 @@ export async function markInvoicePaid(opts: {
             providerRef: opts.providerRef,
             verifiedById: opts.verifiedById,
             verifiedAt: opts.verifiedById ? new Date() : existingPayment.verifiedAt,
+            receiptNumber: existingPayment.receiptNumber ?? receiptNumber,
+            paidAt: new Date(),
           },
         })
       : await tx.payment.create({
@@ -637,6 +643,7 @@ export async function markInvoicePaid(opts: {
             userId: opts.userId,
             orderId: invoice.orderId,
             invoiceId: invoice.id,
+            receiptNumber,
             amountCents: invoice.totalCents,
             currency: invoice.currency,
             method: opts.method,
@@ -644,6 +651,7 @@ export async function markInvoicePaid(opts: {
             providerRef: opts.providerRef,
             verifiedById: opts.verifiedById,
             verifiedAt: opts.verifiedById ? new Date() : null,
+            paidAt: new Date(),
           },
         });
 

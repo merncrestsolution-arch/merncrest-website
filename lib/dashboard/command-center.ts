@@ -275,6 +275,8 @@ export async function getCommandCenterData(userId: string): Promise<CommandCente
       { label: "Verify payments", href: "/admin/payments", icon: "payments" },
       { label: "CRM pipeline", href: "/admin/crm", icon: "crm" },
       { label: "Live chat", href: "/staff/live-chat", icon: "chat" },
+      { label: "AWS cloud", href: "/staff/cloud", icon: "cloud" },
+      { label: "Monitoring", href: "/staff/monitoring", icon: "monitor" },
       { label: "Support queue", href: "/staff/tickets", icon: "tickets" },
       { label: "Projects", href: "/admin/erp/projects", icon: "erp" },
     ],

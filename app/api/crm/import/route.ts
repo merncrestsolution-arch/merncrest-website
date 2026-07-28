@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/lib/db";
 import { requireStaff } from "@/lib/commerce";
+import { isAdminRole } from "@/lib/auth";
 import { writeAuditLog } from "@/lib/erp/audit";
 import { parseLeadsSpreadsheet } from "@/lib/crm/spreadsheet-import";
 import { importLeadRows } from "@/lib/crm/import-leads";
@@ -93,6 +94,9 @@ export async function POST(request: Request) {
   }
 
   if (body.action === "MERGE") {
+    if (!isAdminRole(auth.user.role)) {
+      return NextResponse.json({ error: "Owner or Admin only — lead merge deletes a record." }, { status: 403 });
+    }
     const schema = z.object({
       keepId: z.string(),
       mergeId: z.string(),

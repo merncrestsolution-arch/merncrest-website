@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { requireUser } from "@/lib/commerce";
+import { nextOrgNumber } from "@/lib/commerce/org-numbers";
 import {
   BANK_TRANSFER_INSTRUCTIONS,
   getBankAccounts,
@@ -94,11 +95,14 @@ export async function POST(request: Request) {
       data: { status: "WAITING_PAYMENT" },
     });
 
+    const receiptNumber = await nextOrgNumber("RECEIPT");
+
     const payment = await prisma.payment.create({
       data: {
         userId: auth.user.id,
         orderId: invoice.orderId,
         invoiceId: invoice.id,
+        receiptNumber,
         amountCents: invoice.totalCents,
         currency: invoice.currency,
         method: parsed.data.method,

@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link } from "@/i18n/routing";
 import { formatMoney } from "@/lib/commerce-format";
+import { parseInvoiceDocument } from "@/lib/billing/invoice-pdf-html";
 import {
   Download,
   FileText,
@@ -21,12 +22,24 @@ type InvoiceRow = {
   taxCents: number;
   totalCents: number;
   paidCents: number;
+  advancePaymentsCents?: number;
+  remainingBalanceCents?: number;
+  dueAmountCents?: number;
+  balanceCents?: number;
   currency: string;
   dueAt?: string | null;
   createdAt: string;
   lineItemsJson?: string | null;
   user?: { fullName: string; email: string };
-  payments?: { id: string; amountCents: number; method: string; createdAt: string; referenceNumber?: string | null }[];
+  project?: { id: string; name: string; projectCode: string } | null;
+  payments?: {
+    id: string;
+    amountCents: number;
+    method: string;
+    isAdvance?: boolean;
+    createdAt: string;
+    referenceNumber?: string | null;
+  }[];
 };
 
 type StatusTab = "ALL" | "PAID" | "PENDING" | "OVERDUE" | "CANCELLED";
@@ -40,13 +53,7 @@ function statusBadge(status: string) {
 }
 
 function parseLines(json?: string | null) {
-  if (!json) return [];
-  try {
-    const arr = JSON.parse(json) as { description: string; qty: number; unitCents: number }[];
-    return Array.isArray(arr) ? arr : [];
-  } catch {
-    return [];
-  }
+  return parseInvoiceDocument(json, []).lines;
 }
 
 export function StaffInvoicesPanel() {
@@ -57,14 +64,19 @@ export function StaffInvoicesPanel() {
   const [selected, setSelected] = useState<InvoiceRow | null>(null);
   const [error, setError] = useState("");
 
+  const [payAmount, setPayAmount] = useState("");
+  const [payMethod, setPayMethod] = useState("BANK_TRANSFER");
+  const [payAdvance, setPayAdvance] = useState(false);
+  const [payBusy, setPayBusy] = useState(false);
+
   const load = useCallback(() => {
-    fetch("/api/admin/invoices")
+    fetch("/api/staff/invoices")
       .then(async (r) => {
         const d = await r.json();
-        if (!r.ok) throw new Error(d.error || "Failed");
-        setInvoices(d.invoices ?? []);
-        if (d.vatRatePercent) setVatRate(d.vatRatePercent);
-        setSelected((prev) => prev ?? d.invoices?.[0] ?? null);
+        if (!d.success) throw new Error(d.error?.message ?? "Failed");
+        setInvoices(d.data ?? []);
+        if (d.meta?.vatRatePercent) setVatRate(d.meta.vatRatePercent);
+        setSelected((prev) => prev ?? d.data?.[0] ?? null);
       })
       .catch((e) => setError(e instanceof Error ? e.message : "Failed"));
   }, []);
@@ -108,7 +120,36 @@ export function StaffInvoicesPanel() {
   }, [invoices]);
 
   const lines = selected ? parseLines(selected.lineItemsJson) : [];
-  const lastPayment = selected?.payments?.[0];
+  const balance = selected?.remainingBalanceCents ?? selected?.balanceCents ?? 0;
+
+  async function recordPayment(e: React.FormEvent) {
+    e.preventDefault();
+    if (!selected) return;
+    const cents = Math.round(Number(payAmount.replace(/,/g, "")) * 100);
+    if (!cents || cents <= 0) return;
+    setPayBusy(true);
+    setError("");
+    try {
+      const res = await fetch(`/api/staff/invoices/${selected.id}/payments`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          amountCents: cents,
+          method: payMethod,
+          isAdvance: payAdvance,
+        }),
+      });
+      const d = await res.json();
+      if (!d.success) throw new Error(d.error?.message ?? "Payment failed");
+      setPayAmount("");
+      setSelected(d.data.invoice);
+      load();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Payment failed");
+    } finally {
+      setPayBusy(false);
+    }
+  }
 
   return (
     <div>
@@ -216,6 +257,7 @@ export function StaffInvoicesPanel() {
                     <th>Issue Date</th>
                     <th>Due Date</th>
                     <th>Amount</th>
+                    <th>Balance</th>
                     <th>Status</th>
                   </tr>
                 </thead>
@@ -233,6 +275,7 @@ export function StaffInvoicesPanel() {
                       <td>{new Date(inv.createdAt).toLocaleDateString()}</td>
                       <td>{inv.dueAt ? new Date(inv.dueAt).toLocaleDateString() : "—"}</td>
                       <td>{formatMoney(inv.totalCents, inv.currency)}</td>
+                      <td>{formatMoney(inv.remainingBalanceCents ?? inv.balanceCents ?? 0, inv.currency)}</td>
                       <td>
                         <span className={statusBadge(inv.status)}>{inv.status}</span>
                       </td>
@@ -319,23 +362,74 @@ export function StaffInvoicesPanel() {
                     <span>Total</span>
                     <span>{formatMoney(selected.totalCents, selected.currency)}</span>
                   </div>
+                  {selected.paidCents > 0 ? (
+                    <>
+                      <div>
+                        <span>Advance</span>
+                        <span>{formatMoney(selected.advancePaymentsCents ?? 0, selected.currency)}</span>
+                      </div>
+                      <div>
+                        <span>Paid</span>
+                        <span>{formatMoney(selected.paidCents, selected.currency)}</span>
+                      </div>
+                      <div className="total">
+                        <span>Balance due</span>
+                        <span>{formatMoney(balance, selected.currency)}</span>
+                      </div>
+                    </>
+                  ) : null}
                 </div>
               </div>
-              {lastPayment ? (
+              {balance > 0 ? (
                 <div className="stitch-detail-section">
-                  <h4>Payment Information</h4>
-                  <div className="stitch-row text-sm">
-                    <span className="text-[var(--sp-muted)]">Method</span>
-                    <span>{lastPayment.method}</span>
-                  </div>
-                  <div className="stitch-row text-sm">
-                    <span className="text-[var(--sp-muted)]">Date</span>
-                    <span>{new Date(lastPayment.createdAt).toLocaleDateString()}</span>
-                  </div>
-                  <div className="stitch-row text-sm">
-                    <span className="text-[var(--sp-muted)]">Amount Paid</span>
-                    <span>{formatMoney(lastPayment.amountCents, selected.currency)}</span>
-                  </div>
+                  <h4>Record payment</h4>
+                  <form onSubmit={recordPayment} className="space-y-2">
+                    <input
+                      className="stitch-input"
+                      type="number"
+                      step="0.01"
+                      min="0"
+                      placeholder="Amount (LKR)"
+                      value={payAmount}
+                      onChange={(e) => setPayAmount(e.target.value)}
+                      required
+                    />
+                    <select
+                      className="stitch-input"
+                      value={payMethod}
+                      onChange={(e) => setPayMethod(e.target.value)}
+                    >
+                      <option value="BANK_TRANSFER">Bank transfer</option>
+                      <option value="MANUAL">Manual / cash</option>
+                      <option value="PAYHERE">PayHere</option>
+                    </select>
+                    <label className="flex items-center gap-2 text-sm">
+                      <input type="checkbox" checked={payAdvance} onChange={(e) => setPayAdvance(e.target.checked)} />
+                      Advance payment
+                    </label>
+                    <button type="submit" className="stitch-btn-primary-sm w-full" disabled={payBusy}>
+                      Record payment
+                    </button>
+                  </form>
+                </div>
+              ) : null}
+              {selected.payments && selected.payments.length > 0 ? (
+                <div className="stitch-detail-section">
+                  <h4>Payment history</h4>
+                  <ul className="space-y-2 text-sm">
+                    {selected.payments.map((p) => (
+                      <li key={p.id} className="flex justify-between gap-2">
+                        <span>
+                          {formatMoney(p.amountCents, selected.currency)}
+                          {p.isAdvance ? " · Advance" : ""}
+                          <span className="text-[var(--sp-muted)]"> · {p.method}</span>
+                        </span>
+                        <span className="text-[var(--sp-muted)]">
+                          {new Date(p.createdAt).toLocaleDateString()}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
                 </div>
               ) : null}
             </>

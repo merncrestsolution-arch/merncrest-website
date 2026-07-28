@@ -3,6 +3,7 @@ import { z } from "zod";
 import { prisma } from "@/lib/db";
 import { requireStaff } from "@/lib/commerce";
 import { createCustomerAccount } from "@/lib/commerce/create-customer";
+import { getCustomerBillingSummaries } from "@/lib/billing/customer-summary";
 export async function GET(request: Request) {
   const auth = await requireStaff();
   if (auth.error) return auth.error;
@@ -100,6 +101,20 @@ export async function GET(request: Request) {
       })),
       counts: c._count,
       createdAt: c.createdAt,
+    }));
+
+    const billingMap = await getCustomerBillingSummaries(
+      prisma,
+      rows.map((r) => r.id)
+    );
+    rows = rows.map((r) => ({
+      ...r,
+      billing: billingMap.get(r.id) ?? {
+        invoicedCents: 0,
+        paidCents: 0,
+        balanceCents: 0,
+        invoiceCount: 0,
+      },
     }));
 
     if (tag) {

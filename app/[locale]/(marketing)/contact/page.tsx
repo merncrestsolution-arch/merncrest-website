@@ -12,6 +12,7 @@ import {
   Briefcase,
 } from "lucide-react";
 import { Link } from "@/i18n/routing";
+import { COMPANY_EMAILS, mailto } from "@/lib/company/emails";
 
 export async function generateMetadata({
   params,
@@ -45,8 +46,8 @@ export default async function ContactPage({
     {
       icon: Mail,
       label: "Email",
-      value: "merncrestsolution@gmail.com",
-      href: "mailto:merncrestsolution@gmail.com",
+      value: COMPANY_EMAILS.contact,
+      href: mailto("contact"),
     },
     {
       icon: Phone,
@@ -73,19 +74,22 @@ export default async function ContactPage({
       icon: Briefcase,
       title: "Sales",
       body: "Software, AI, cloud, and transformation projects.",
-      action: { label: "merncrestsolution@gmail.com", href: "mailto:merncrestsolution@gmail.com" },
+      action: { label: COMPANY_EMAILS.info, href: mailto("info") },
     },
     {
       icon: LifeBuoy,
       title: "Support",
       body: "Billing, tickets, and emergency technical help.",
-      action: { label: "+94 713 838 638", href: "tel:+94713838638" },
+      action: { label: COMPANY_EMAILS.support, href: mailto("support") },
     },
     {
       icon: Handshake,
       title: "Partnerships",
       body: "Reseller, agency, and technology alliances.",
-      action: { label: "Contact partnerships", href: "mailto:merncrestsolution@gmail.com?subject=Partnership" },
+      action: {
+        label: "Contact partnerships",
+        href: mailto("contact", { subject: "Partnership inquiry" }),
+      },
     },
   ] as const;
 

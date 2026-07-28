@@ -119,6 +119,9 @@ export async function getNotificationAnalytics(days = 30) {
 }
 
 export async function dispatchDueScheduled() {
+  const { publishDueAnnouncements } = await import("@/lib/announcements/publish");
+  const announcementResult = await publishDueAnnouncements();
+
   const due = await prisma.scheduledNotification.findMany({
     where: { status: "PENDING", sendAt: { lte: new Date() } },
     take: 50,
@@ -154,5 +157,5 @@ export async function dispatchDueScheduled() {
     });
     sent += 1;
   }
-  return { sent };
+  return { sent, announcementsPublished: announcementResult.published };
 }

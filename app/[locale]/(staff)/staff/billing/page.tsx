@@ -1,10 +1,10 @@
 import { Suspense } from "react";
-import { StaffInvoicesPanel } from "@/components/staff/staff-invoices-panel";
+import { SystemBillingPanel } from "@/components/admin/system-billing-panel";
 
 export default function Page() {
   return (
     <Suspense fallback={<p className="stitch-page-sub">Loading billing…</p>}>
-      <StaffInvoicesPanel />
+      <SystemBillingPanel />
     </Suspense>
   );
 }

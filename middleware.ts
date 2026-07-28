@@ -56,7 +56,7 @@ export function middleware(request: NextRequest) {
       ? pathname.slice(locale.length + 1) || "/"
       : pathname;
 
-    // Local /staff + /admin always use System (Register.lk) unless ?system=0
+    // Local /staff + /admin always use System (Stitch shell) unless ?system=0
     const localSystemApp =
       isLocal &&
       systemParam !== "0" &&
@@ -79,7 +79,7 @@ export function middleware(request: NextRequest) {
       return res;
     }
 
-    // system.* root → System login (Register.lk UI)
+    // system.* root → System login (Stitch UI)
     if (system) {
       const staffPaths =
         rest === "/" ||
@@ -110,7 +110,7 @@ export function middleware(request: NextRequest) {
       }
 
       // Block portal/marketing on system surface → System login
-      // (keep /admin + /staff on Register.lk shell)
+      // (keep /admin + /staff on Stitch System shell)
       if (
         !rest.startsWith("/staff") &&
         !rest.startsWith("/admin") &&

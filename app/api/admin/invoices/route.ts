@@ -5,20 +5,8 @@ import { requireStaff, formatMoney } from "@/lib/commerce";
 import { nextOrgNumber } from "@/lib/commerce/org-numbers";
 import { recordInvoicePayment } from "@/lib/commerce/invoice-payments";
 import { notifyClient } from "@/lib/notify/client-email";
-import { getPrimaryOrganizationId } from "@/lib/chat/org";
-
-async function vatRatePercent(): Promise<number> {
-  const orgId = await getPrimaryOrganizationId();
-  const setting = await prisma.systemSetting.findUnique({
-    where: { key: "vat_rate_percent" },
-  }).catch(() => null);
-  if (setting?.value) {
-    const n = Number(setting.value);
-    if (!Number.isNaN(n)) return n;
-  }
-  void orgId;
-  return Number(process.env.VAT_RATE_PERCENT || 18);
-}
+import { calcBillingTotals } from "@/lib/billing/calc-totals";
+import { vatRatePercent } from "@/lib/billing/vat";
 
 export async function GET(request: Request) {
   const auth = await requireStaff();
@@ -34,13 +22,17 @@ export async function GET(request: Request) {
     orderBy: { createdAt: "desc" },
     take: 50,
   });
-  return NextResponse.json({ invoices, vatRatePercent: await vatRatePercent() });
+  const invoiceRows = invoices.map((inv) => ({
+    ...inv,
+    balanceCents: Math.max(0, inv.totalCents - inv.paidCents),
+  }));
+  return NextResponse.json({ invoices: invoiceRows, vatRatePercent: await vatRatePercent() });
 }
 
 const lineSchema = z.object({
   description: z.string().min(1),
   qty: z.number().positive(),
-  unitCents: z.number().int().nonnegative(),
+  unitCents: z.number().int().positive("Each line item must have a unit price greater than zero"),
   discountCents: z.number().int().nonnegative().optional(),
 });
 
@@ -50,6 +42,10 @@ const createSchema = z.object({
   lineItems: z.array(lineSchema).min(1),
   dueDays: z.number().int().min(0).max(120).optional(),
   status: z.enum(["DRAFT", "SENT"]).optional(),
+  discountCents: z.number().int().nonnegative().optional(),
+  taxCents: z.number().int().nonnegative().optional(),
+  vatRatePercent: z.number().min(0).max(100).optional(),
+  notes: z.string().max(2000).optional(),
 });
 
 export async function POST(request: Request) {
@@ -64,6 +60,7 @@ export async function POST(request: Request) {
       amountCents: z.number().int().positive(),
       method: z.string(),
       isCredit: z.boolean().optional(),
+      isAdvance: z.boolean().optional(),
       referenceNumber: z.string().optional(),
     });
     const parsed = paySchema.safeParse(body);
@@ -80,6 +77,7 @@ export async function POST(request: Request) {
         amountCents: parsed.data.amountCents,
         method: parsed.data.method,
         isCredit: parsed.data.isCredit,
+        isAdvance: parsed.data.isAdvance,
         referenceNumber: parsed.data.referenceNumber,
         recordedById: auth.user.id,
       });
@@ -94,18 +92,37 @@ export async function POST(request: Request) {
 
   const parsed = createSchema.safeParse(body);
   if (!parsed.success) {
-    return NextResponse.json({ error: "Invalid invoice" }, { status: 400 });
+    const message =
+      parsed.error.issues[0]?.message ||
+      parsed.error.issues[0]?.path.join(".") ||
+      "Invalid invoice";
+    return NextResponse.json({ error: message }, { status: 400 });
   }
 
   const user = await prisma.user.findUnique({ where: { id: parsed.data.userId } });
   if (!user) return NextResponse.json({ error: "Customer not found" }, { status: 404 });
 
-  const vatPct = await vatRatePercent();
-  const subtotal = parsed.data.lineItems.reduce((s, l) => {
+  const defaultVat = await vatRatePercent();
+  const lineSubtotal = parsed.data.lineItems.reduce((s, l) => {
     return s + l.qty * l.unitCents - (l.discountCents || 0);
   }, 0);
-  const taxCents = Math.round(subtotal * (vatPct / 100));
-  const totalCents = subtotal + taxCents;
+
+  const totals = calcBillingTotals({
+    lineSubtotalCents: lineSubtotal,
+    discountCents: parsed.data.discountCents,
+    taxCents: parsed.data.taxCents,
+    vatRatePercent: parsed.data.vatRatePercent,
+    defaultVatRatePercent: defaultVat,
+  });
+
+  if (totals.totalCents <= 0) {
+    return NextResponse.json(
+      { error: "Invoice total must be greater than zero — check line items, discount, and tax" },
+      { status: 400 }
+    );
+  }
+
+  const { subtotalCents, discountCents, taxCents, totalCents } = totals;
 
   let orderId = parsed.data.orderId;
   if (!orderId) {
@@ -115,8 +132,9 @@ export async function POST(request: Request) {
         orderNumber,
         userId: user.id,
         status: "WAITING_PAYMENT",
-        subtotalCents: subtotal,
+        subtotalCents,
         taxCents,
+        discountCents,
         totalCents,
         currency: "LKR",
         items: {
@@ -144,12 +162,17 @@ export async function POST(request: Request) {
       orderId,
       userId: user.id,
       status: parsed.data.status || "DRAFT",
-      subtotalCents: subtotal,
+      subtotalCents,
       taxCents,
       totalCents,
       paidCents: 0,
       currency: "LKR",
-      lineItemsJson: JSON.stringify(parsed.data.lineItems),
+      lineItemsJson: JSON.stringify({
+        lines: parsed.data.lineItems,
+        discountCents,
+        vatRatePercent: totals.vatRatePercent,
+        notes: parsed.data.notes || null,
+      }),
       dueAt,
     },
   });

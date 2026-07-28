@@ -1,0 +1,120 @@
+---
+description: Enterprise Staff Portal (system.merncrest.lk) — master spec, module map, Stitch/Figma design
+globs:
+  - components/staff/**
+  - components/auth/system-login-view.tsx
+  - components/erp/**
+  - components/admin/system-*.tsx
+  - components/crm/system-*.tsx
+  - app/[locale]/(staff)/**
+  - app/[locale]/(admin)/**
+  - app/styles/stitch-portal.css
+  - lib/system-surface.ts
+  - lib/erp/**
+  - docs/staff-portal-master-prompt.md
+---
+
+# MernCrest Part 06 — Enterprise Staff Portal
+
+Continue Parts 01–05. **Do not remove or rebuild** existing ERP, CRM, portal, chat, or commerce modules.
+
+## Product
+
+**MernCrest Solutions – Enterprise Staff Portal** on `system.merncrest.lk` (local: `?system=1`).
+
+Single integrated platform for staff: CRM, projects, tickets, domains/hosting, finance, HR/ESS, live chat, AI, analytics.
+
+**Target roles:** Admin/Manager · Support · Sales · Developer · Finance (map to existing RBAC + `lib/erp/permission-matrix.ts`).
+
+## Actual stack (use this — not a greenfield monorepo)
+
+| Layer | Current |
+|-------|---------|
+| App | Next.js 14 App Router (`app/`) — upgrade path Next.js 15 |
+| API | Route handlers under `app/api/*` + `lib/*` domain logic |
+| DB | PostgreSQL + Prisma (`prisma/schema.prisma`) |
+| Auth | Session RBAC (`lib/auth`, `requirePermission`) |
+| Real-time | SSE (`lib/chat/events.ts`, `hooks/use-chat-sse.ts`) — extend before Socket.IO |
+| Cache/queue | Redis in prod compose — deepen as needed |
+| UI shell | `StaffShell` + `app/styles/stitch-portal.css` |
+| Design source | **Google Stitch** (`.stitch/DESIGN.md`, project `17402065891171962495`) + **Figma** |
+
+Do **not** introduce a separate NestJS app unless explicitly requested. Deepen modules in place.
+
+## Design (mandatory)
+
+1. Read skill **`.cursor/skills/staff-portal-design/SKILL.md`** before any staff/system UI work.
+2. **Google Stitch** = layout, tokens, screen comps (Luminous Enterprise / portal-system variant).
+3. **Figma** = component specs, spacing, states, handoff — must match Stitch tokens.
+4. Shell: `components/staff/staff-shell.tsx` · login: `components/auth/system-login-view.tsx`.
+5. Panels: `stitch-*` classes in `stitch-portal.css` — migrate off legacy `rlk-*` when touching a file.
+6. Marketing site (`merncrest.lk`) keeps purple Stitch marketing theme — **do not** mix into system shell.
+
+## Surfaces
+
+| Surface | Path | Shell |
+|---------|------|-------|
+| Staff ESS | `/staff/*` | `StaffShell` |
+| ERP/Admin on system | `/admin/*` on `system.*` or `?system=1` | `StaffShell` (not dark `AdminShell`) |
+| System login | `/login?system=1` | `SystemLoginView` |
+
+Routing: `middleware.ts` · `lib/system-surface.ts` · cookie `mc_system`.
+
+## Module map (master spec → codebase)
+
+| # | Module | Status | Primary paths |
+|---|--------|--------|----------------|
+| 1 | Dashboard & KPIs | Built | `/staff`, `/staff/command-center`, real stats API |
+| 2 | Auth & security | Partial | `/login?system=1`, `/staff/security`, `/staff/roles`, audit |
+| 3 | Live chat | Built | `/staff/live-chat`, `/api/staff/chat/*`, smart context panel |
+| 4 | CRM / clients | Partial | `/staff/clients`, `/admin/crm`, `lib/crm/*` |
+| 5 | Leads | Built | `/admin/crm` kanban, `lib/crm/leads/*` |
+| 6 | Projects | Partial | `/staff/projects`, `/admin/erp/projects` |
+| 7 | Tickets | Partial | `/staff/tickets`, `/api/tickets` |
+| 8 | Domains | Partial | `/admin/domains`, commerce reseller |
+| 9 | Hosting | Partial | portal hosting + admin domains |
+| 10 | AWS cloud | Built | `/staff/cloud`, `lib/cloud/aws-dashboard.ts` |
+| 11 | Website monitoring | Built | `/staff/monitoring`, live HTTP probes |
+| 12 | Server monitoring | Built | `/staff/monitoring`, `/admin/monitoring` |
+| 13 | Finance | Partial | `/staff/billing`, invoices, receipts, quotations |
+| 14 | Staff / HR | Partial | attendance, leave, payslip, performance, training |
+| 15 | Calendar | Partial | `/staff/calendar` |
+| 16 | File manager | Partial | `/admin/erp/documents` |
+| 17 | Notifications | Partial | `/staff/notifications` |
+| 18 | AI assistant | Partial | chat orchestrator, staff suggest, command center |
+| 19 | Reports | Partial | `/admin/reports`, ERP BI |
+| 20 | Knowledge base | Partial | ERP documents / KB |
+| 21 | Integrations | Partial | WhatsApp, email, IVR — `lib/crm/channels` |
+| 22 | Settings | Partial | `/admin/settings` |
+| 23 | Super admin | Partial | users, roles, permissions, audit |
+| 24 | Schema | In Prisma | extend — no parallel schemas |
+| 25 | Enterprise | Partial | org/branch, i18n, PWA manifest `/system-manifest.json` |
+
+Full feature lists: `docs/staff-portal-master-prompt.md`.
+
+## Integration rules (every new staff feature)
+
+Must wire: **CRM** · **Notifications** · **Reports/Analytics** · **Audit** (`writeAuditLog`) · **Permissions** (`requirePermission`).
+
+Reuse: `lib/erp/*`, `lib/crm/*`, `lib/chat/*`, `lib/billing/*`, approval hub — never duplicate domain logic.
+
+## API conventions
+
+- REST under `app/api/staff/*`, `app/api/erp/*`, `app/api/crm/*`
+- Zod validation · paginated list shapes · audit on writes
+- Chat links in customer-facing text: `https://merncrest.lk` only (`lib/support/public-site-url.ts`)
+
+## Phasing (deepen in place)
+
+1. **Foundation** — RBAC, shell, dashboard KPIs, Stitch screens per route
+2. **Core** — CRM, leads, projects, tickets, finance panels polish
+3. **Advanced** — live chat enhancements, domain/hosting ops, monitoring
+4. **Enterprise** — AWS, multi-branch, KB, AI modules, PWA offline
+5. **Launch** — perf, security audit, deploy via `deploy/deploy.sh`
+
+## Anti-patterns
+
+- Separate NestJS monorepo or `/apps/web` split without approval
+- Register.lk / light-teal legacy UI (removed — Stitch only)
+- Inventing parallel `clients`/`leads` tables — use existing Prisma models
+- Removing smart live chat, SSE, CSAT, or renewal actions

@@ -32,8 +32,9 @@ export function SystemRolesPanel() {
         <div>
           <h1 className="stitch-page-title">Roles &amp; Permissions</h1>
           <p className="stitch-page-sub">
-            System.merncrest.lk hierarchy — Super Admin → Dept Head → Team Lead → Staff · Guest uses
-            Customer Portal.
+            Owner &amp; Admin have full access. All staff roles can use billing, CRM, projects, and
+            operations — only staff/role management and destructive deletes are reserved for super
+            admins.
           </p>
         </div>
         <Link href="/admin/erp/permissions" className="stitch-btn-primary-sm">

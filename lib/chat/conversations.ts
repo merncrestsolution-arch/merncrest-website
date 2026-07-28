@@ -4,6 +4,10 @@ import { routeNewConversation, tryAssignAgent } from "@/lib/chat/agent-router";
 import { ensureLeadFromChannel } from "@/lib/crm/channels";
 import { autoLinkSessionCustomer, extractIdentifiersFromText } from "@/lib/chat/identify-customer";
 import { publishChatEvent } from "@/lib/chat/events";
+import {
+  sanitizeChatMessageBody,
+  sanitizeChatMessages,
+} from "@/lib/chat/message-sanitize";
 
 export async function createConversation(opts: {
   visitorId: string;
@@ -29,10 +33,12 @@ export async function createConversation(opts: {
     },
   });
 
-  const greeting =
+  const greeting = sanitizeChatMessageBody(
+    route.handlerType === "AGENT" ? "AGENT" : "AI",
     route.handlerType === "AGENT"
-      ? `Hi! You're connected with ${route.agent.displayName}. How can we help?`
-      : `Hi! I'm ${route.assistantName}. Ask about our services, pricing, or say “talk to a person” anytime.`;
+      ? `Hi! You're connected with ${route.agent.displayName}. How can we help you today?`
+      : `Hello! I'm Aira, your senior technology consultant at MernCrest. What business challenge can I help you solve today — software, ERP, AI, cloud, or hosting?`
+  );
 
   await prisma.chatMessage.create({
     data: {
@@ -81,11 +87,12 @@ export async function getOrCreateOpenSession(opts: {
 }
 
 export async function listMessages(sessionId: string, take = 100) {
-  return prisma.chatMessage.findMany({
+  const rows = await prisma.chatMessage.findMany({
     where: { sessionId },
     orderBy: { createdAt: "asc" },
     take,
   });
+  return sanitizeChatMessages(rows);
 }
 
 export async function appendUserMessage(opts: {
@@ -147,8 +154,9 @@ export async function appendUserMessage(opts: {
 }
 
 export async function appendSystemMessage(sessionId: string, body: string) {
+  const safeBody = sanitizeChatMessageBody("SYSTEM", body);
   const msg = await prisma.chatMessage.create({
-    data: { sessionId, role: "SYSTEM", body },
+    data: { sessionId, role: "SYSTEM", body: safeBody },
   });
   publishChatEvent({ type: "message", sessionId, messageId: msg.id });
   publishChatEvent({ type: "inbox_updated" });
@@ -170,7 +178,7 @@ export async function appendAgentMessage(opts: {
     data: {
       sessionId: opts.sessionId,
       role: "AGENT",
-      body: opts.body,
+      body: sanitizeChatMessageBody("AGENT", opts.body),
       clientMessageId: opts.clientMessageId || null,
     },
   }).then((msg) => {
@@ -188,15 +196,16 @@ export async function requestHandoff(sessionId: string, reason?: string) {
       `Connecting you with ${result.agent.displayName}…${reason ? ` (${reason})` : ""}`
     );
   } else {
-    // No live agent — Aira continues in her own voice (not a silent SYSTEM note)
     const name = result.assistantName || "Aira";
-    await prisma.chatMessage.create({
-      data: {
-        sessionId,
-        role: "AI",
-        body: `No live agent is online right now — I'm ${name}, and I'll keep helping. Ask about services, pricing, billing, or support, or leave your email/phone and a teammate will follow up as soon as someone is available.`,
-      },
+    const body = sanitizeChatMessageBody(
+      "AI",
+      `No live agent is online right now — I'm ${name}, and I'll keep helping. Ask about services, pricing, billing, or support, or leave your email/phone and a teammate will follow up as soon as someone is available.`
+    );
+    const msg = await prisma.chatMessage.create({
+      data: { sessionId, role: "AI", body },
     });
+    publishChatEvent({ type: "message", sessionId, messageId: msg.id });
+    publishChatEvent({ type: "inbox_updated" });
   }
   return result;
 }

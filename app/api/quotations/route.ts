@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { nextNumber, requireStaff, requireUser } from "@/lib/commerce";
+import { nextOrgNumber } from "@/lib/commerce/org-numbers";
 import { sendQuotationEmail } from "@/lib/crm/send-quotation-email";
 import { notifyUser } from "@/lib/support/notify";
 import { z } from "zod";
@@ -54,7 +55,7 @@ export async function GET(request: Request) {
 const itemSchema = z.object({
   description: z.string().min(1),
   quantity: z.number().int().min(1).default(1),
-  unitPriceCents: z.number().int().min(0),
+  unitPriceCents: z.number().int().positive("Each line item must have a unit price greater than zero"),
 });
 
 const createSchema = z.object({
@@ -336,10 +337,14 @@ export async function PATCH(request: Request) {
       }
 
       const userId = quote.userId || auth.user.id;
+      const [orderNumber, invoiceNumber] = await Promise.all([
+        nextOrgNumber("ORDER"),
+        nextOrgNumber("INVOICE"),
+      ]);
       const result = await prisma.$transaction(async (tx) => {
         const order = await tx.order.create({
           data: {
-            orderNumber: nextNumber("ORD"),
+            orderNumber,
             userId,
             status: "PENDING",
             subtotalCents: quote.subtotalCents,
@@ -363,7 +368,7 @@ export async function PATCH(request: Request) {
 
         await tx.invoice.create({
           data: {
-            invoiceNumber: nextNumber("INV"),
+            invoiceNumber,
             orderId: order.id,
             userId,
             status: "SENT",

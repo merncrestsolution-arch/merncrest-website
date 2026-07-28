@@ -702,11 +702,11 @@ export function ErpProjectsPanel() {
             onClick={() => setTab(t)}
           >
             {t === "board"
-              ? "Hierarchy"
+              ? "Work plan"
               : t === "kanban"
-                ? "Kanban"
+                ? "Progress board"
                 : t === "gantt"
-                  ? "Gantt"
+                  ? "Schedule"
                   : t === "workload"
                     ? "Workload"
                     : t === "finance"
@@ -1325,12 +1325,12 @@ export function ErpProjectsPanel() {
               {tab === "gantt" && (
                 <section className="rlk-section rlk-section-accent-gray !mb-0">
                   <div className="rlk-section-head">
-                    <h2>Gantt timeline</h2>
+                    <h2>Project schedule</h2>
                   </div>
                   <div className="rlk-section-body space-y-2">
                     {gantt.length === 0 ? (
                       <p className="rlk-empty">
-                        Add start/due dates on tasks to see the Gantt chart.
+                        Add start and due dates on tasks to see the schedule.
                       </p>
                     ) : (
                       gantt.map((b) => (
@@ -1370,7 +1370,7 @@ export function ErpProjectsPanel() {
               {tab === "board" && (
                 <section className="rlk-section rlk-section-accent-teal !mb-0">
                   <div className="rlk-section-head">
-                    <h2>Hierarchy · milestones → tasks → subtasks</h2>
+                    <h2>Work plan · milestones → tasks → subtasks</h2>
                   </div>
                   <div className="rlk-section-body">
                     {active.milestones.map((m) => (

@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { getSessionUser } from "@/lib/auth";
 import { resolveVisitor } from "@/lib/chat/visitor";
+import { sanitizeChatMessages } from "@/lib/chat/message-sanitize";
 import {
   appendUserMessage,
   getOrCreateOpenSession,
@@ -64,7 +65,7 @@ export async function GET(request: Request) {
           online: session.agent.status === "ONLINE",
         }
       : null,
-    messages: session?.messages ?? [],
+    messages: sanitizeChatMessages(session?.messages ?? []),
   });
   visitor.setCookies.forEach((c) => res.headers.append("Set-Cookie", c));
   return res;

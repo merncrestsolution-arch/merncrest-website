@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
-import { getSessionUser, isStaffRole } from "@/lib/auth";
+import { getSessionUser, isAdminRole, isStaffRole } from "@/lib/auth";
 import { StaffShell } from "@/components/staff/staff-shell";
 import { IdleLogout } from "@/components/staff/idle-logout";
 
@@ -21,7 +21,13 @@ export default async function StaffLayout({
       <link rel="manifest" href="/system-manifest.json" />
       <meta name="theme-color" content="#0b1a33" />
       <IdleLogout minutes={30} />
-      <StaffShell userName={user.fullName} userRole={user.role}>{children}</StaffShell>
+      <StaffShell
+        userName={user.fullName}
+        userRole={user.role}
+        isSuperAdmin={isAdminRole(user.role)}
+      >
+        {children}
+      </StaffShell>
     </>
   );
 }

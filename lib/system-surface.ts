@@ -17,7 +17,7 @@ export async function isSystemSurface() {
   return false;
 }
 
-/** Localhost OR system surface — use Register.lk StaffShell for /admin + /staff. */
+/** Localhost OR system surface — use Stitch StaffShell for /admin + /staff. */
 export async function useSystemShell() {
   if (await isSystemSurface()) return true;
   const host = await hostName();

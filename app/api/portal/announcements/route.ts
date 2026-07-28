@@ -10,6 +10,8 @@ export async function GET() {
   const announcements = await prisma.announcement.findMany({
     where: {
       active: true,
+      surface: { in: ["PORTAL", "BOTH"] },
+      status: "PUBLISHED",
       startsAt: { lte: now },
       OR: [{ endsAt: null }, { endsAt: { gte: now } }],
     },

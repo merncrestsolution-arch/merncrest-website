@@ -2,6 +2,8 @@ import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcryptjs";
 import { blogs } from "../lib/data/blogs";
 import { kbArticles } from "../lib/data/knowledge-base";
+import { seedDissanayakeDistributionErp } from "../lib/erp/seed-dissanayake-project";
+import { ensureOrgNumberSequences } from "../lib/commerce/org-numbers";
 
 const prisma = new PrismaClient();
 
@@ -1053,6 +1055,8 @@ async function main() {
     },
   });
 
+  await ensureOrgNumberSequences(org.id);
+
   const coaDefaults = [
     { code: "1000", name: "Cash & Bank", type: "ASSET" },
     { code: "1100", name: "Accounts Receivable", type: "ASSET" },
@@ -1352,6 +1356,10 @@ async function main() {
     jobOpenings.length,
     "job openings"
   );
+
+  await seedDissanayakeDistributionErp(prisma);
+  console.log("  Project: Distribution ERP — Dissanayake Enterprise (ERP/458/06/2026)");
+
   console.log("Seeded users +", catalog.length, "products +", coupons.length, "coupons + CRM/ERP samples");
   console.log("  OWNER/CEO: owner@merncrest.lk / ChangeMe123!");
   console.log("  DEPT_HEAD: head@merncrest.lk / ChangeMe123!  → /staff");

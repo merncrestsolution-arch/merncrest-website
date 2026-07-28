@@ -300,7 +300,7 @@ export function AdminCrmPanel() {
               variant={view === v ? "default" : "outline"}
               onClick={() => setView(v)}
             >
-              {v === "kanban" ? "Kanban" : v === "list" ? "List" : "Comm Hub"}
+              {v === "kanban" ? "Board" : v === "list" ? "List" : "Comm Hub"}
             </Button>
           ))}
         </div>

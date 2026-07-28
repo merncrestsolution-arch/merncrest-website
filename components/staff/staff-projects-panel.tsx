@@ -1,7 +1,8 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Link } from "@/i18n/routing";
+import { Link, useRouter } from "@/i18n/routing";
+import { formatMoney } from "@/lib/commerce-format";
 import {
   CheckCircle2,
   Clock,
@@ -23,6 +24,9 @@ type ProjectRow = {
   dueDate?: string | null;
   clientName?: string | null;
   manager?: { fullName: string } | null;
+  revenueCents?: number;
+  nextPaymentCents?: number;
+  balanceCents?: number;
 };
 
 type StatusTab = "ALL" | "IN_PROGRESS" | "COMPLETED" | "ON_HOLD" | "CANCELLED";
@@ -44,6 +48,7 @@ function priorityBadge(priority?: string | null) {
 }
 
 export function StaffProjectsPanel() {
+  const router = useRouter();
   const [projects, setProjects] = useState<ProjectRow[]>([]);
   const [statusTab, setStatusTab] = useState<StatusTab>("ALL");
   const [search, setSearch] = useState("");
@@ -62,8 +67,11 @@ export function StaffProjectsPanel() {
             status: string;
             progressPct?: number;
             endDate?: string | null;
-            customer?: { fullName: string } | null;
-            members?: { user: { fullName: string } }[];
+            revenueCents?: number;
+            nextPaymentCents?: number;
+            finance?: { revenueCents?: number; nextPaymentCents?: number; overdueCents?: number };
+            customer?: { fullName: string; company?: string | null } | null;
+            members?: { user: { fullName: string }; role: string }[];
             tasks?: { priority?: string }[];
           }) => ({
             id: p.id,
@@ -73,8 +81,14 @@ export function StaffProjectsPanel() {
             priority: p.tasks?.find((t) => t.priority)?.priority ?? "MEDIUM",
             progressPct: p.progressPct ?? 0,
             dueDate: p.endDate,
-            clientName: p.customer?.fullName ?? null,
-            manager: p.members?.[0]?.user ? { fullName: p.members[0].user.fullName } : null,
+            clientName: p.customer?.company || p.customer?.fullName || null,
+            revenueCents: p.finance?.revenueCents ?? p.revenueCents ?? 0,
+            nextPaymentCents: p.finance?.nextPaymentCents ?? p.nextPaymentCents ?? 0,
+            balanceCents: p.finance?.overdueCents ?? 0,
+            manager: (() => {
+              const lead = p.members?.find((m) => m.role === "LEAD") ?? p.members?.[0];
+              return lead?.user ? { fullName: lead.user.fullName } : null;
+            })(),
           })
         );
         setProjects(list);
@@ -108,12 +122,16 @@ export function StaffProjectsPanel() {
     const completed = projects.filter((p) => p.status.toUpperCase().includes("COMPLETE") || p.status.toUpperCase() === "DONE");
     const onHold = projects.filter((p) => p.status.toUpperCase().includes("HOLD"));
     const cancelled = projects.filter((p) => p.status.toUpperCase().includes("CANCEL"));
+    const contractValue = projects.reduce((s, p) => s + (p.revenueCents ?? 0), 0);
+    const pendingPayments = projects.reduce((s, p) => s + (p.nextPaymentCents ?? 0), 0);
     return {
       total: projects.length,
       inProgress: inProgress.length,
       completed: completed.length,
       onHold: onHold.length,
       cancelled: cancelled.length,
+      contractValue,
+      pendingPayments,
     };
   }, [projects]);
 
@@ -149,7 +167,7 @@ export function StaffProjectsPanel() {
 
       {error ? <p className="stitch-auth-error mb-4">{error}</p> : null}
 
-      <div className="stitch-kpi-grid !grid-cols-2 lg:!grid-cols-5 mb-6">
+      <div className="stitch-kpi-grid !grid-cols-2 lg:!grid-cols-6 mb-6">
         <div className="stitch-kpi-card">
           <div className="stitch-kpi-icon stitch-kpi-icon-indigo">
             <FolderKanban className="h-5 w-5" />
@@ -182,8 +200,15 @@ export function StaffProjectsPanel() {
           <div className="stitch-kpi-icon stitch-kpi-icon-purple">
             <XCircle className="h-5 w-5" />
           </div>
-          <div className="stitch-kpi-value">{stats.cancelled}</div>
-          <div className="stitch-kpi-label">Cancelled</div>
+          <div className="stitch-kpi-value text-lg">{formatMoney(stats.contractValue)}</div>
+          <div className="stitch-kpi-label">Contract Value</div>
+        </div>
+        <div className="stitch-kpi-card">
+          <div className="stitch-kpi-icon stitch-kpi-icon-orange">
+            <Clock className="h-5 w-5" />
+          </div>
+          <div className="stitch-kpi-value text-lg">{formatMoney(stats.pendingPayments)}</div>
+          <div className="stitch-kpi-label">Pending Payments</div>
         </div>
       </div>
 
@@ -228,21 +253,25 @@ export function StaffProjectsPanel() {
 
           <section className="stitch-section-card">
             <div className="stitch-section-body overflow-x-auto !p-0">
-              <table className="stitch-table">
+              <table className="stitch-table stitch-table-clickable">
                 <thead>
                   <tr>
                     <th>Project</th>
                     <th>Client</th>
-                    <th>Manager</th>
+                    <th>Contract</th>
+                    <th>Next payment</th>
                     <th>Status</th>
                     <th>Progress</th>
                     <th>Due Date</th>
-                    <th>Priority</th>
                   </tr>
                 </thead>
                 <tbody>
                   {filtered.map((p) => (
-                    <tr key={p.id}>
+                    <tr
+                      key={p.id}
+                      className="cursor-pointer"
+                      onClick={() => router.push(`/staff/projects/${p.id}`)}
+                    >
                       <td>
                         <div className="flex items-center gap-2">
                           <span className="stitch-avatar-sm !rounded-md">
@@ -257,7 +286,16 @@ export function StaffProjectsPanel() {
                         </div>
                       </td>
                       <td>{p.clientName || "—"}</td>
-                      <td>{p.manager?.fullName || "—"}</td>
+                      <td className="font-medium whitespace-nowrap">
+                        {(p.revenueCents ?? 0) > 0 ? formatMoney(p.revenueCents!) : "—"}
+                      </td>
+                      <td className="whitespace-nowrap">
+                        {(p.nextPaymentCents ?? 0) > 0 ? (
+                          <span className="text-amber-600 font-medium">{formatMoney(p.nextPaymentCents!)}</span>
+                        ) : (
+                          "—"
+                        )}
+                      </td>
                       <td>
                         <span className={statusBadge(p.status)}>{p.status}</span>
                       </td>
@@ -270,9 +308,6 @@ export function StaffProjectsPanel() {
                         </div>
                       </td>
                       <td>{p.dueDate ? new Date(p.dueDate).toLocaleDateString() : "—"}</td>
-                      <td>
-                        <span className={priorityBadge(p.priority)}>{p.priority || "Medium"}</span>
-                      </td>
                     </tr>
                   ))}
                 </tbody>
@@ -328,7 +363,12 @@ export function StaffProjectsPanel() {
             <div className="stitch-section-body space-y-3">
               {upcoming.length ? (
                 upcoming.map((p) => (
-                  <div key={p.id} className="stitch-deadline-item">
+                  <button
+                    key={p.id}
+                    type="button"
+                    className="stitch-deadline-item w-full text-left"
+                    onClick={() => router.push(`/staff/projects/${p.id}`)}
+                  >
                     <div className="stitch-deadline-date">
                       {p.dueDate
                         ? new Date(p.dueDate).toLocaleDateString(undefined, { day: "2-digit", month: "short" }).toUpperCase()
@@ -338,7 +378,7 @@ export function StaffProjectsPanel() {
                       <strong className="text-sm block">{p.name}</strong>
                       <span className={priorityBadge(p.priority)}>{p.priority || "Medium"}</span>
                     </div>
-                  </div>
+                  </button>
                 ))
               ) : (
                 <p className="text-sm text-[var(--sp-muted)]">No upcoming deadlines.</p>

@@ -1,4 +1,5 @@
 import nodemailer from "nodemailer";
+import { DEFAULT_FROM_EMAIL, DEFAULT_REPLY_TO } from "@/lib/company/emails";
 
 function getTransport() {
   const host = process.env.BREVO_SMTP_HOST || process.env.SMTP_HOST;
@@ -94,7 +95,9 @@ export async function sendMailWithAttachment(opts: {
     contentType?: string;
   }[];
 }) {
-  const from = process.env.CONTACT_EMAIL || "noreply@merncrest.lk";
+  const fromName = process.env.MAIL_FROM_NAME || "MernCrest";
+  const from = `${fromName} <${DEFAULT_FROM_EMAIL}>`;
+  const replyTo = process.env.MAIL_REPLY_TO || DEFAULT_REPLY_TO;
   const transport = getTransport();
   if (!transport) {
     console.info("[mail:dev]", opts.subject, {
@@ -106,6 +109,7 @@ export async function sendMailWithAttachment(opts: {
   }
   await transport.sendMail({
     from,
+    replyTo,
     to: opts.to,
     subject: opts.subject,
     text: opts.text,
@@ -120,12 +124,21 @@ export async function sendMailWithAttachment(opts: {
 }
 
 async function sendMail(opts: { to: string; subject: string; text: string; html: string }) {
-  const from = process.env.CONTACT_EMAIL || "noreply@merncrest.lk";
+  const fromName = process.env.MAIL_FROM_NAME || "MernCrest";
+  const from = `${fromName} <${DEFAULT_FROM_EMAIL}>`;
+  const replyTo = process.env.MAIL_REPLY_TO || DEFAULT_REPLY_TO;
   const transport = getTransport();
   if (!transport) {
     console.info("[mail:dev]", opts.subject, { to: opts.to, text: opts.text });
     return { queued: false, logged: true };
   }
-  await transport.sendMail({ from, to: opts.to, subject: opts.subject, text: opts.text, html: opts.html });
+  await transport.sendMail({
+    from,
+    replyTo,
+    to: opts.to,
+    subject: opts.subject,
+    text: opts.text,
+    html: opts.html,
+  });
   return { queued: true, logged: false };
 }

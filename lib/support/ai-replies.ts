@@ -3,11 +3,12 @@ import {
   defaultChatFallback,
   matchChatKnowledge,
 } from "@/lib/support/chat-knowledge";
+import { sanitizeChatReply } from "@/lib/support/sanitize-chat-reply";
 
 export function aiReply(message: string, locale = "en"): string {
   const matched = matchChatKnowledge(message);
   if (matched) {
-    return localizeHint(matched, locale);
+    return sanitizeChatReply(localizeHint(matched, locale));
   }
 
   const q = message.toLowerCase();
@@ -17,10 +18,12 @@ export function aiReply(message: string, locale = "en"): string {
       a.title.toLowerCase().split(" ").some((w) => w.length > 4 && q.includes(w))
   );
   if (kb) {
-    return localizeHint(`${kb.title}: ${kb.summary} — read more in Knowledge Base.`, locale);
+    return sanitizeChatReply(
+      localizeHint(`${kb.title}: ${kb.summary} — read more in Knowledge Base.`, locale)
+    );
   }
 
-  return localizeHint(defaultChatFallback(locale), locale);
+  return sanitizeChatReply(localizeHint(defaultChatFallback(locale), locale));
 }
 
 function localizeHint(en: string, locale: string) {

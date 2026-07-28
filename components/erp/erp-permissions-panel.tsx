@@ -56,7 +56,10 @@ export function ErpPermissionsPanel() {
     <div className="space-y-6">
       {error && <p className="text-sm text-red-400">{error}</p>}
       <p className="text-sm text-muted">
-        OWNER/ADMIN have all ERP permissions. Org roles (CEO→Auditor) apply via Employee.orgRole; extras grant/revoke below.
+        <strong>Owner / Admin (Super Admin)</strong> — all permissions including staff &amp; role
+        management. <strong>All other staff</strong> — full operational access (billing, CRM,
+        projects, finance, HR view, documents) except <code>erp.permissions.manage</code> and
+        destructive deletes.
       </p>
       <div className="rounded-xl border border-white/10 p-4">
         <h3 className="font-semibold text-sm mb-2">Org role presets (5.19)</h3>

@@ -71,6 +71,13 @@ export async function POST(request: Request) {
     return NextResponse.json({ user: toSessionUser(user) });
   } catch (error) {
     console.error("[login]", error);
-    return NextResponse.json({ error: "Login failed" }, { status: 500 });
+    const msg =
+      error instanceof Error &&
+      (error.message.includes("Can't reach database") ||
+        error.message.includes("ECONNREFUSED") ||
+        error.name === "PrismaClientInitializationError")
+        ? "Database is offline. Start Docker Desktop, then run: npm run db:up"
+        : "Login failed";
+    return NextResponse.json({ error: msg }, { status: 500 });
   }
 }

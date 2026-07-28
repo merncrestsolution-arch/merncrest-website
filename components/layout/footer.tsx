@@ -7,6 +7,7 @@ import { Link } from "@/i18n/routing";
 import { Globe, Mail, MapPin, UserRound } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
+import { COMPANY_EMAILS, mailto } from "@/lib/company/emails";
 
 const serviceLinks = [
   { href: "/products/domains", label: "Domains" },
@@ -122,11 +123,11 @@ export function Footer() {
             </div>
             <div className="space-y-2 pt-2 text-sm text-muted">
               <a
-                href="mailto:merncrestsolution@gmail.com"
+                href={mailto("info")}
                 className="flex items-center gap-2 hover:text-foreground transition-colors"
               >
                 <Mail className="h-4 w-4" />
-                merncrestsolution@gmail.com
+                {COMPANY_EMAILS.info}
               </a>
               <p className="flex items-center gap-2">
                 <MapPin className="h-4 w-4 shrink-0" />

@@ -24,8 +24,18 @@ fi
 echo "==> Starting datastores (postgres, redis)"
 $COMPOSE up -d postgres redis
 
-echo "==> Building images"
-$COMPOSE build app migrator
+# Small Lightsail instances OOM during Next.js Docker builds — ensure swap.
+if [ "$(swapon --show | wc -l)" -lt 1 ]; then
+  echo "==> Enabling 2G swap (prevents build OOM on small instances)"
+  sudo fallocate -l 2G /swapfile 2>/dev/null || sudo dd if=/dev/zero of=/swapfile bs=1M count=2048
+  sudo chmod 600 /swapfile
+  sudo mkswap /swapfile >/dev/null
+  sudo swapon /swapfile
+  grep -q '^/swapfile' /etc/fstab 2>/dev/null || echo '/swapfile none swap sw 0 0' | sudo tee -a /etc/fstab >/dev/null
+fi
+
+echo "==> Building images (this takes 10–15 min on Lightsail)"
+DOCKER_BUILDKIT=1 COMPOSE_DOCKER_CLI_BUILD=1 $COMPOSE build --progress=plain app migrator
 
 echo "==> Applying database schema + seed (one-off migrator)"
 $COMPOSE run --rm migrator

@@ -93,7 +93,14 @@ export async function POST(request: Request) {
   const body = await request.json();
   const parsed = actionSchema.safeParse(body);
   if (!parsed.success) {
-    return NextResponse.json({ error: "Invalid action" }, { status: 400 });
+    const issue = parsed.error.issues[0];
+    const message =
+      issue?.path[0] === "amountCents"
+        ? "Payment amount must be greater than zero"
+        : issue?.path[0] === "invoiceId"
+          ? "Select an invoice"
+          : issue?.message || "Invalid payment request";
+    return NextResponse.json({ error: message }, { status: 400 });
   }
 
   try {

@@ -1,4 +1,5 @@
 import { setRequestLocale } from "next-intl/server";
+import { COMPANY_EMAILS } from "@/lib/company/emails";
 
 export const metadata = {
   title: "Terms of Service | MERNcrest Solutions",
@@ -46,7 +47,7 @@ export default async function TermsPage({
             <p className="mb-4">MERNcrest Solutions (Pvt) Ltd is incorporated and registered as a private limited company under the Companies Act No. 07 of 2007 of the Democratic Socialist Republic of Sri Lanka. We provide software development, web development, mobile application development, cloud services, cybersecurity solutions, digital marketing, IT consulting, hosting, and domain services.</p>
             <div className="bg-white/5 p-4 rounded-xl border border-stitch-outline">
               <p><strong>Registered Address:</strong> Sri Lanka</p>
-              <p><strong>Contact Email:</strong> merncrestsolution@gmail.com</p>
+              <p><strong>Contact Email:</strong> {COMPANY_EMAILS.contact}</p>
               <p><strong>Website:</strong> merncrest.lk</p>
             </div>
           </section>
@@ -251,7 +252,7 @@ export default async function TermsPage({
             <p>You may not assign or transfer your rights or obligations under these Terms without our prior written consent. MERNcrest may assign these Terms or any rights hereunder in connection with a merger, acquisition, or sale of assets, with notice to you.</p>
 
             <h3 className="text-xl font-semibold mb-2 mt-6 text-accent">15.5 Notices</h3>
-            <p>All formal notices under these Terms shall be in writing and delivered by email with confirmation of receipt or by registered post to the addresses provided by the parties. Notices to MERNcrest should be sent to: merncrestsolution@gmail.com</p>
+            <p>All formal notices under these Terms shall be in writing and delivered by email with confirmation of receipt or by registered post to the addresses provided by the parties. Notices to MERNcrest should be sent to: {COMPANY_EMAILS.contact}</p>
 
             <h3 className="text-xl font-semibold mb-2 mt-6 text-accent">15.6 Amendments</h3>
             <p>MERNcrest reserves the right to amend these Terms at any time. Material amendments will be notified to existing clients by email with at least 30 days' notice. Continued use of our Services after the effective date of amendments constitutes acceptance.</p>
@@ -274,7 +275,7 @@ export default async function TermsPage({
               <p className="mb-4">By using our website or engaging our services, you acknowledge that you have read, understood, and agree to be bound by these Terms of Service and our Privacy Policy.</p>
               <div className="pt-4 border-t border-white/20">
                 <p className="font-bold">MERNcrest Solutions (Pvt) Ltd</p>
-                <p className="text-foreground/80">merncrest.lk | merncrestsolution@gmail.com | Sri Lanka</p>
+                <p className="text-foreground/80">merncrest.lk | {COMPANY_EMAILS.contact} | Sri Lanka</p>
               </div>
             </div>
           </section>

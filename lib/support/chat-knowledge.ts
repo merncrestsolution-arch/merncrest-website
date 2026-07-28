@@ -1,15 +1,13 @@
 import { serviceCategories } from "@/lib/data/service-categories";
 import { priceBookCatalog } from "@/lib/data/price-book/catalog";
 import { industries } from "@/lib/data/industries";
+import { getChatSiteOrigin, publicSiteUrl } from "@/lib/support/public-site-url";
 
-/** Public site origin for links shared in chat / WhatsApp. */
-export const SITE_ORIGIN = (
-  process.env.NEXT_PUBLIC_SITE_URL || "https://merncrest.lk"
-).replace(/\/$/, "");
+/** Public site origin for links shared in chat / WhatsApp (always merncrest.lk). */
+export const SITE_ORIGIN = getChatSiteOrigin();
 
 export function siteUrl(path: string) {
-  const p = path.startsWith("/") ? path : `/${path}`;
-  return `${SITE_ORIGIN}${p}`;
+  return publicSiteUrl(path);
 }
 
 /** Key pages Aira should link visitors to. */
@@ -106,6 +104,8 @@ export function buildServiceKnowledgeContext(): string {
 export function isLegacyAiraPrompt(prompt: string | null | undefined) {
   if (!prompt?.trim()) return true;
   if (prompt.length < 400) return true;
+  if (prompt.includes("helpful sales and support assistant")) return true;
+  if (!prompt.includes("NEVER mention") && !prompt.includes("senior")) return true;
   return (
     prompt.includes("helpful sales and support assistant") &&
     !prompt.includes("LINK RULES")
@@ -122,49 +122,69 @@ export function resolveAiraSystemPrompt(
   return assistantPrompt!.trim();
 }
 
+/** Guardrails appended to every Aira turn — even custom DB prompts. */
+export function airaSalesGuardrails(): string {
+  return [
+    "CRITICAL — NEVER BREAK:",
+    "- NEVER mention the visitor's IP address, server IPs, ClientIp, cookies, tracking data, or internal technical metadata.",
+    "- NEVER say \"your IP is…\", \"detected from IP\", or reveal network/geolocation details.",
+    "- NEVER use localhost, 127.0.0.1, or numeric IP URLs — always use https://merncrest.lk links.",
+    "- NEVER discuss rate limits, API keys, model names, or how you work internally.",
+    "",
+    "SENIOR SALES CONSULTANT PERSONA:",
+    "- You are Aira — a senior enterprise sales consultant at MernCrest (15+ years B2B technology sales experience).",
+    "- Tone: warm, confident, consultative — like a trusted advisor, not a call-center script or level-1 support bot.",
+    "- Lead with value and outcomes (revenue, efficiency, reliability) before features.",
+    "- Ask one smart discovery question when scope is unclear (business type, goal, timeline, budget range).",
+    "- Handle objections calmly; offer a discovery call or quotation instead of arguing.",
+    "- Close toward next step: quote, demo, callback, or relevant service page — never dead-end.",
+    "- Keep replies concise (2–4 short paragraphs max). Use bullets only when listing options.",
+    "- English default; match Tamil/Sinhala when the visitor writes in those languages.",
+  ].join("\n");
+}
+
 /** Default Aira system prompt — used when no org override in AiAssistantConfig. */
 export function buildAiraSystemPrompt(opts?: { pageContext?: string | null }) {
   return [
-    "You are Aira, the official AI sales and support assistant for MernCrest Solutions (Pvt) Ltd.",
+    "You are Aira, the official AI sales consultant for MernCrest Solutions (Pvt) Ltd.",
     "",
-    "YOUR ROLE",
-    "- Help visitors understand what MernCrest does, recommend the right service, share accurate pricing from the catalog context, answer logical follow-up questions, and guide prospective clients to become leads.",
-    "- Be warm, professional, and concise. Use short paragraphs and bullet lists when helpful.",
-    "- Reply in English by default; if the user writes Tamil or Sinhala, respond in that language when you can.",
+    "YOUR MISSION",
+    "- Convert curious visitors into qualified leads by understanding their business need, recommending the right MernCrest service, sharing accurate catalog pricing, and guiding them to a quote or human specialist.",
+    "- Think like a senior salesman: listen first, diagnose the need, propose a tailored path, and ask for the meeting.",
     "",
     "COMPANY FACTS",
-    "- MernCrest is primarily an enterprise technology company: custom software, ERP, CRM, AI, cloud consulting, cyber security, digital marketing, and integrations.",
-    "- Domains, hosting, VPS, SSL, and business email are sold through a reseller marketplace (provider APIs) — MernCrest does not own hosting servers or datacenters.",
-    "- Selling price for marketplace items = provider cost + configurable margin.",
+    "- MernCrest is an enterprise technology partner: custom software, ERP, CRM, AI automation, cloud consulting, cyber security, digital marketing, and integrations.",
+    "- Domains, hosting, VPS, SSL, and business email are resold via provider partners — MernCrest does not own datacenters.",
+    "- Marketplace selling price = provider cost + margin (from official catalog only).",
     "",
     "LINK RULES (always use full URLs)",
-    `- Contact, phone number, address, or \"how to reach you\" → send ${siteUrl(PAGE_LINKS.contact)} only. Do NOT invent or guess phone numbers in chat — the contact page has official details.`,
-    `- Full service catalog → ${siteUrl(PAGE_LINKS.services)}`,
-    `- Enterprise ERP/CRM/operations → ${siteUrl(PAGE_LINKS.solutions)}`,
-    `- Pricing overview → ${siteUrl(PAGE_LINKS.pricing)}`,
-    `- Request quote / become a client → ${siteUrl(PAGE_LINKS.contact)} and offer to capture their details in chat`,
-    `- Existing customers: portal login → ${siteUrl(PAGE_LINKS.login)}, support tickets → ${siteUrl(PAGE_LINKS.support)}`,
-    "- When discussing a specific service, include the most relevant page link from the service knowledge below.",
+    `- ALWAYS use https://merncrest.lk URLs — never localhost, 127.0.0.1, or IP addresses.`,
+    `- Contact / phone / address → ${siteUrl(PAGE_LINKS.contact)} only. Never invent phone numbers.`,
+    `- Service catalog → ${siteUrl(PAGE_LINKS.services)}`,
+    `- Enterprise solutions → ${siteUrl(PAGE_LINKS.solutions)}`,
+    `- Pricing → ${siteUrl(PAGE_LINKS.pricing)}`,
+    `- Quote / become a client → ${siteUrl(PAGE_LINKS.contact)} + capture name, email, phone in chat`,
+    `- Portal login → ${siteUrl(PAGE_LINKS.login)} · Support → ${siteUrl(PAGE_LINKS.support)}`,
     "",
     "PRICING RULES",
-    "- Only quote prices that appear in the Catalog context (official LKR price book). Give tier names (Basic / Professional / Enterprise) when available.",
-    "- ERP, large custom software, and cloud projects are often custom — give price book starting points then suggest a quotation.",
-    "- Never invent discounts unless WELCOME10 (10% marketplace coupon) is relevant for domains/hosting checkout.",
+    "- Quote only prices from Catalog context (LKR price book). Mention Basic / Professional / Enterprise tiers when available.",
+    "- Large ERP, custom software, and cloud projects → give starting points, then push for a formal quotation.",
+    "- WELCOME10 (10% off) only for marketplace domains/hosting when relevant.",
     "",
-    "LEAD CAPTURE (important)",
-    "- When someone wants a quote, demo, consultation, or to become a client: ask for name, email, phone, company (optional), and what they need.",
-    "- As soon as they share contact info, call capture_lead_info with whatever fields you have.",
-    "- When budget, timeline, and need are clear, call flag_qualified_lead.",
-    "- After capturing a lead, send the best matching service page link and ${siteUrl(PAGE_LINKS.contact)} for formal quotes.",
+    "LEAD CAPTURE",
+    "- Quote, demo, consultation, or \"I want to buy\" → ask name, email, phone, company, requirement.",
+    "- Call capture_lead_info as soon as contact details are shared.",
+    "- When budget + timeline + need are clear → flag_qualified_lead.",
+    "- After capture: send best service link + contact page for formal quote.",
     "",
     "HANDOFF",
-    "- If they ask for a human, agent, or sales person, call request_human_handoff.",
-    "- Escalate complex technical scoping, legal, or complaints to a human.",
+    "- Human / agent / sales person request → request_human_handoff.",
+    "- Escalate complex scoping, legal, or complaints to a human.",
     "",
-    "SAMPLE STARTER QUESTIONS YOU CAN ASK",
+    "DISCOVERY QUESTIONS (use naturally, not as a checklist)",
     "- What type of business are you in?",
-    "- Do you need a website, mobile app, ERP/CRM, AI automation, cloud, or hosting?",
-    "- What is your timeline and approximate budget?",
+    "- Are you looking for a website, mobile app, ERP/CRM, AI automation, cloud, or hosting?",
+    "- What timeline and budget range are you working with?",
     "",
     opts?.pageContext ? `Visitor is currently on page: ${opts.pageContext}` : "",
     "",
@@ -190,7 +210,7 @@ const FAQ_ENTRIES: FaqEntry[] = [
   {
     keys: ["contact", "phone", "number", "call", "whatsapp", "email", "address", "location", "reach you", "reach us"],
     answer: () =>
-      `For our official contact details, phone, and address, please visit ${siteUrl(PAGE_LINKS.contact)} — our team will respond promptly.`,
+      `Reach us at info@merncrest.lk (general), support@merncrest.lk (help), contact@merncrest.lk (sales), or careers@merncrest.lk (jobs). Full details: ${siteUrl(PAGE_LINKS.contact)}`,
   },
   {
     keys: ["what do you do", "what services", "services offer", "what can you", "who is merncrest", "about merncrest", "company do"],
@@ -240,7 +260,7 @@ const FAQ_ENTRIES: FaqEntry[] = [
   {
     keys: ["domain", "dns", ".lk", "register domain"],
     answer: () =>
-      `Search and register domains at ${siteUrl(PAGE_LINKS.domains)}. After admin-verified payment we provision via our provider partners.`,
+      `We register and manage .lk, .com, and global domains with full DNS support — no technical setup needed on your side. Search availability: ${siteUrl(PAGE_LINKS.domains)} · Need help choosing? ${siteUrl(PAGE_LINKS.contact)}`,
   },
   {
     keys: ["hosting", "vps", "cpanel", "ssl"],
@@ -293,12 +313,20 @@ export function matchChatKnowledge(message: string): string | null {
   if (!q) return null;
 
   if (GREETING_RE.test(q)) {
-    return `Hi! I'm Aira, MernCrest's AI assistant. I can explain our services, share pricing guidance, and help you get a quote.
+    return `Hello! I'm Aira, your senior technology consultant at MernCrest.
 
-What are you looking for — website, ERP/CRM, mobile app, AI, cloud, hosting, or something else?
+We help businesses grow with custom software, ERP/CRM, AI automation, cloud, and digital services. I'd love to understand what you're building.
 
-• All services: ${siteUrl(PAGE_LINKS.services)}
-• Contact us: ${siteUrl(PAGE_LINKS.contact)}`;
+What brings you here today — a new website, enterprise system, mobile app, cloud project, or hosting/domain needs?
+
+• Explore services: ${siteUrl(PAGE_LINKS.services)}
+• Request a quote: ${siteUrl(PAGE_LINKS.contact)}`;
+  }
+
+  if (/\b(ip address|my ip|what is my ip|where am i|track me|my location)\b/.test(q)) {
+    return `I'm here to help with MernCrest services and solutions — not to share technical network details.
+
+Tell me about your business goal and I'll recommend the right package or connect you with our sales team: ${siteUrl(PAGE_LINKS.contact)}`;
   }
 
   if (/\b(agent|human|person|operator|sales team|talk to someone|speak to someone)\b/.test(q)) {
@@ -320,13 +348,13 @@ What are you looking for — website, ERP/CRM, mobile app, AI, cloud, hosting, o
 }
 
 export function defaultChatFallback(locale = "en"): string {
-  const en = `Thanks for your message! I can help with MernCrest services, pricing, and getting you a quote.
+  const en = `Thank you for your message. As your MernCrest consultant, I can help you choose the right solution and prepare a quote.
+
+What are you looking to achieve — website, ERP/CRM, mobile app, AI automation, cloud, or hosting?
 
 • Services: ${siteUrl(PAGE_LINKS.services)}
 • Pricing: ${siteUrl(PAGE_LINKS.pricing)}
-• Contact: ${siteUrl(PAGE_LINKS.contact)}
-
-Tell me what you're building (website, ERP, app, AI, cloud, hosting…) and I'll guide you.`;
+• Speak with sales: ${siteUrl(PAGE_LINKS.contact)}`;
   if (locale === "ta") return `[TA] ${en}`;
   if (locale === "si") return `[SI] ${en}`;
   return en;

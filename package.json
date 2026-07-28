@@ -11,6 +11,7 @@
     "db:down": "docker compose down",
     "db:push": "prisma db push",
     "db:seed": "tsx prisma/seed.ts",
+    "seed:dissanayake": "tsx scripts/seed-dissanayake-project.ts",
     "db:setup": "prisma generate && prisma db push && tsx prisma/seed.ts",
     "migrate:crm-contacted": "tsx scripts/migrate-crm-contacted.ts",
     "smoke:p0": "tsx scripts/smoke-p0.ts",
