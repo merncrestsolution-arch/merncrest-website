@@ -8,11 +8,15 @@ import {
   Download,
   FileText,
   Mail,
+  Pencil,
   Plus,
   Receipt,
   Search,
   SlidersHorizontal,
+  Trash2,
 } from "lucide-react";
+import { InvoiceEditModal } from "@/components/staff/invoice-edit-modal";
+import type { Role } from "@/lib/auth-types";
 
 type InvoiceRow = {
   id: string;
@@ -68,6 +72,9 @@ export function StaffInvoicesPanel() {
   const [payMethod, setPayMethod] = useState("BANK_TRANSFER");
   const [payAdvance, setPayAdvance] = useState(false);
   const [payBusy, setPayBusy] = useState(false);
+  const [canAdminBilling, setCanAdminBilling] = useState(false);
+  const [showEdit, setShowEdit] = useState(false);
+  const [deleteBusy, setDeleteBusy] = useState(false);
 
   const load = useCallback(() => {
     fetch("/api/staff/invoices")
@@ -84,6 +91,17 @@ export function StaffInvoicesPanel() {
   useEffect(() => {
     load();
   }, [load]);
+
+  useEffect(() => {
+    fetch("/api/auth/me")
+      .then(async (r) => {
+        if (!r.ok) return;
+        const d = await r.json();
+        const role = d.user?.role as Role | undefined;
+        setCanAdminBilling(role === "OWNER" || role === "ADMIN");
+      })
+      .catch(() => setCanAdminBilling(false));
+  }, []);
 
   const filtered = useMemo(() => {
     return invoices.filter((inv) => {
@@ -152,6 +170,28 @@ export function StaffInvoicesPanel() {
       setError(err instanceof Error ? err.message : "Payment failed");
     } finally {
       setPayBusy(false);
+    }
+  }
+
+  async function deleteInvoice() {
+    if (!selected || !canAdminBilling) return;
+    const ok = window.confirm(
+      `Delete invoice ${selected.invoiceNumber}? This cannot be undone. Invoices with payments must be voided instead.`
+    );
+    if (!ok) return;
+    setDeleteBusy(true);
+    setError("");
+    try {
+      const res = await fetch(`/api/staff/invoices/${selected.id}`, { method: "DELETE" });
+      const d = await res.json();
+      if (!d.success) throw new Error(d.error?.message ?? "Delete failed");
+      setSelected(null);
+      setShowEdit(false);
+      load();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Delete failed");
+    } finally {
+      setDeleteBusy(false);
     }
   }
 
@@ -299,7 +339,28 @@ export function StaffInvoicesPanel() {
             <>
               <div className="stitch-detail-panel-head">
                 <h3>Invoice Details</h3>
-                <div className="flex gap-2">
+                <div className="flex flex-wrap gap-2">
+                  {canAdminBilling ? (
+                    <>
+                      <button
+                        type="button"
+                        className="stitch-btn-outline-sm"
+                        onClick={() => setShowEdit(true)}
+                      >
+                        <Pencil className="h-3.5 w-3.5" />
+                        Edit
+                      </button>
+                      <button
+                        type="button"
+                        className="stitch-btn-outline-sm"
+                        onClick={deleteInvoice}
+                        disabled={deleteBusy}
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                        Delete
+                      </button>
+                    </>
+                  ) : null}
                   <a
                     href={`/api/invoices/${selected.id}/pdf`}
                     target="_blank"
@@ -442,6 +503,23 @@ export function StaffInvoicesPanel() {
           )}
         </aside>
       </div>
+
+      {showEdit && selected ? (
+        <InvoiceEditModal
+          invoice={selected}
+          vatRate={vatRate}
+          onClose={() => setShowEdit(false)}
+          onSaved={() => {
+            load();
+            fetch(`/api/staff/invoices/${selected.id}`)
+              .then(async (r) => {
+                const d = await r.json();
+                if (d.success) setSelected(d.data);
+              })
+              .catch(() => undefined);
+          }}
+        />
+      ) : null}
     </div>
   );
 }
