@@ -40,7 +40,7 @@ COPY prisma ./prisma
 COPY scripts ./scripts
 # seed.ts imports static data from lib/data/* (blogs, knowledge-base, etc.)
 COPY lib ./lib
-CMD ["sh", "-c", "npx prisma db push --skip-generate --accept-data-loss && npx tsx prisma/seed.ts"]
+CMD ["sh", "-c", "npx prisma migrate deploy && npx tsx prisma/seed.ts"]
 
 # ---- runner: minimal runtime image ----
 FROM base AS runner
