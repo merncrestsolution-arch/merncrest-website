@@ -51,6 +51,7 @@ export async function issueInvoicesForPendingSchedules(
     const lineSubtotal = schedule.amountCents;
     const totals = calcBillingTotals({
       lineSubtotalCents: lineSubtotal,
+      vatRatePercent: 0,
       defaultVatRatePercent: defaultVat,
     });
 
