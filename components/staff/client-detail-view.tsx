@@ -48,6 +48,7 @@ type ClientDetail = {
   stats: {
     activeProjects: number;
     totalRevenueCents: number;
+    collectedCents?: number;
     outstandingBalanceCents: number;
     invoiceCount: number;
     serviceCount: number;
@@ -178,18 +179,26 @@ export function ClientDetailView({ clientId }: { clientId: string }) {
         <Badge variant={statusVariant("ACTIVE")}>Active</Badge>
       </div>
 
-      <div className="stitch-kpi-grid !grid-cols-2 lg:!grid-cols-4 mb-6">
+      <div className="stitch-kpi-grid !grid-cols-2 lg:!grid-cols-5 mb-6">
         <div className="stitch-kpi-card">
           <div className="stitch-kpi-value">{data.stats.activeProjects}</div>
           <div className="stitch-kpi-label">Active Projects</div>
         </div>
         <div className="stitch-kpi-card">
           <div className="stitch-kpi-value text-lg">{formatMoney(data.stats.totalRevenueCents)}</div>
-          <div className="stitch-kpi-label">Total Revenue</div>
+          <div className="stitch-kpi-label">Contract value</div>
         </div>
         <div className="stitch-kpi-card">
-          <div className="stitch-kpi-value text-lg">{formatMoney(data.stats.outstandingBalanceCents)}</div>
-          <div className="stitch-kpi-label">Outstanding Balance</div>
+          <div className="stitch-kpi-value text-lg">
+            {formatMoney(data.stats.collectedCents ?? 0)}
+          </div>
+          <div className="stitch-kpi-label">Collected</div>
+        </div>
+        <div className="stitch-kpi-card">
+          <div className="stitch-kpi-value text-lg text-amber-500">
+            {formatMoney(data.stats.outstandingBalanceCents)}
+          </div>
+          <div className="stitch-kpi-label">Outstanding balance</div>
         </div>
         <div className="stitch-kpi-card">
           <div className="stitch-kpi-value">{data.stats.serviceCount}</div>

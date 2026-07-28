@@ -84,6 +84,7 @@ export async function GET(
     paidCents: 0,
     balanceCents: 0,
     invoiceCount: 0,
+    contractCents: 0,
   };
 
   const canReadPii = isAdminRole(auth.user.role);
@@ -134,7 +135,9 @@ export async function GET(
     profile,
     stats: {
       activeProjects,
-      totalRevenueCents: billing.paidCents,
+      totalRevenueCents:
+        billing.contractCents > 0 ? billing.contractCents : billing.invoicedCents,
+      collectedCents: billing.paidCents,
       outstandingBalanceCents: billing.balanceCents,
       invoiceCount: billing.invoiceCount,
       serviceCount: services.length,
