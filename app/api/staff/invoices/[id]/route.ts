@@ -8,6 +8,7 @@ import { writeAuditLog } from "@/lib/erp/audit";
 import { isBillingAdmin } from "@/lib/billing/billing-admin";
 import {
   applyInvoiceLineUpdate,
+  deriveInvoiceStatusFromPayments,
   unlinkInvoiceSchedules,
   type InvoiceLineInput,
 } from "@/lib/billing/update-invoice";
@@ -20,13 +21,16 @@ const lineSchema = z.object({
 });
 
 const patchSchema = z.object({
-  status: z.enum(["DRAFT", "SENT", "VOID", "CANCELLED"]).optional(),
+  status: z
+    .enum(["DRAFT", "SENT", "PAID", "PARTIALLY_PAID", "OVERDUE", "VOID", "CANCELLED"])
+    .optional(),
   dueAt: z.string().optional().nullable(),
   notes: z.string().max(2000).optional(),
   lineItems: z.array(lineSchema).min(1).optional(),
   discountCents: z.number().int().nonnegative().optional(),
   taxCents: z.number().int().nonnegative().optional(),
   vatRatePercent: z.number().min(0).max(100).optional(),
+  advanceCents: z.number().int().nonnegative().optional(),
 });
 
 async function loadInvoice(id: string) {
@@ -94,10 +98,17 @@ export async function PATCH(
 
   try {
     await prisma.$transaction(async (tx) => {
+      const dueAtValue =
+        parsed.data.dueAt !== undefined
+          ? parsed.data.dueAt
+            ? new Date(parsed.data.dueAt)
+            : null
+          : existing.dueAt;
+
       if (parsed.data.lineItems) {
         await applyInvoiceLineUpdate(
           tx,
-          existing,
+          { ...existing, dueAt: dueAtValue },
           parsed.data.lineItems as InvoiceLineInput[],
           {
             discountCents: parsed.data.discountCents,
@@ -105,13 +116,32 @@ export async function PATCH(
             vatRatePercent: parsed.data.vatRatePercent,
             notes: parsed.data.notes,
             updatedBy: auth.user.id,
+            explicitStatus: parsed.data.status,
+            advanceCents: parsed.data.advanceCents,
           }
         );
       }
 
       const data: Prisma.InvoiceUpdateInput = { updatedBy: auth.user.id };
 
-      if (parsed.data.status) data.status = parsed.data.status;
+      if (parsed.data.status && !parsed.data.lineItems) {
+        if (["VOID", "CANCELLED"].includes(parsed.data.status)) {
+          data.status = parsed.data.status;
+          data.paidAt = null;
+        } else if (existing.paidCents > 0) {
+          const derived = deriveInvoiceStatusFromPayments(
+            existing.paidCents,
+            existing.totalCents,
+            dueAtValue,
+            parsed.data.status
+          );
+          data.status = derived.status;
+          data.paidAt = derived.paidAt;
+        } else {
+          data.status = parsed.data.status;
+        }
+      }
+
       if (parsed.data.dueAt !== undefined) {
         data.dueAt = parsed.data.dueAt ? new Date(parsed.data.dueAt) : null;
       }

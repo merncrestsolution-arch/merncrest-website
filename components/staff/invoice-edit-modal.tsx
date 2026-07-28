@@ -16,6 +16,7 @@ type InvoiceEditModalProps = {
     invoiceNumber: string;
     status: string;
     paidCents: number;
+    totalCents: number;
     dueAt?: string | null;
     lineItemsJson?: string | null;
   };
@@ -34,6 +35,16 @@ function lkrToCents(value: string) {
   return Math.round(n * 100);
 }
 
+function readAdvanceCents(json?: string | null) {
+  if (!json) return 0;
+  try {
+    const p = JSON.parse(json) as { advanceCents?: number };
+    return Math.max(0, p.advanceCents ?? 0);
+  } catch {
+    return 0;
+  }
+}
+
 export function InvoiceEditModal({ invoice, vatRate, onClose, onSaved }: InvoiceEditModalProps) {
   const parsed = useMemo(
     () => parseInvoiceDocument(invoice.lineItemsJson, []),
@@ -46,6 +57,8 @@ export function InvoiceEditModal({ invoice, vatRate, onClose, onSaved }: Invoice
   );
   const [notes, setNotes] = useState(parsed.notes ?? "");
   const [vatRatePercent, setVatRatePercent] = useState(parsed.vatRatePercent ?? vatRate);
+  const [discountCents, setDiscountCents] = useState(parsed.discountCents ?? 0);
+  const [advanceCents, setAdvanceCents] = useState(readAdvanceCents(invoice.lineItemsJson));
   const [lines, setLines] = useState<LineRow[]>(
     parsed.lines.length
       ? parsed.lines.map((l) => ({
@@ -58,13 +71,15 @@ export function InvoiceEditModal({ invoice, vatRate, onClose, onSaved }: Invoice
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
 
-  const canEditLines = invoice.paidCents === 0;
+  const hasPayments = invoice.paidCents > 0;
 
   useEffect(() => {
     setStatus(invoice.status);
     setDueAt(invoice.dueAt ? new Date(invoice.dueAt).toISOString().slice(0, 10) : "");
     setNotes(parsed.notes ?? "");
     setVatRatePercent(parsed.vatRatePercent ?? vatRate);
+    setDiscountCents(parsed.discountCents ?? 0);
+    setAdvanceCents(readAdvanceCents(invoice.lineItemsJson));
     setLines(
       parsed.lines.length
         ? parsed.lines.map((l) => ({
@@ -93,26 +108,26 @@ export function InvoiceEditModal({ invoice, vatRate, onClose, onSaved }: Invoice
     setBusy(true);
     setError("");
 
-    const payload: Record<string, unknown> = {
+    const validLines = lines.filter((l) => l.description.trim() && l.unitCents > 0);
+    if (!validLines.length) {
+      setError("Add at least one line item with description and amount.");
+      setBusy(false);
+      return;
+    }
+
+    const payload = {
       status,
       dueAt: dueAt ? new Date(dueAt).toISOString() : null,
       notes: notes.trim() || undefined,
-    };
-
-    if (canEditLines) {
-      const validLines = lines.filter((l) => l.description.trim() && l.unitCents > 0);
-      if (!validLines.length) {
-        setError("Add at least one line item with description and amount.");
-        setBusy(false);
-        return;
-      }
-      payload.lineItems = validLines.map((l) => ({
+      lineItems: validLines.map((l) => ({
         description: l.description.trim(),
         qty: l.qty,
         unitCents: l.unitCents,
-      }));
-      payload.vatRatePercent = vatRatePercent;
-    }
+      })),
+      vatRatePercent,
+      discountCents,
+      advanceCents,
+    };
 
     try {
       const res = await fetch(`/api/staff/invoices/${invoice.id}`, {
@@ -133,7 +148,7 @@ export function InvoiceEditModal({ invoice, vatRate, onClose, onSaved }: Invoice
 
   return (
     <div className="stitch-modal-backdrop" onClick={onClose}>
-      <div className="stitch-modal" onClick={(e) => e.stopPropagation()}>
+      <div className="stitch-modal stitch-modal-lg max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
         <div className="stitch-modal-head">
           <h3>Edit invoice {invoice.invoiceNumber}</h3>
           <button type="button" className="stitch-btn-icon" onClick={onClose}>
@@ -143,12 +158,22 @@ export function InvoiceEditModal({ invoice, vatRate, onClose, onSaved }: Invoice
         <form onSubmit={submit} className="stitch-modal-body space-y-4 text-sm">
           {error ? <p className="stitch-auth-error">{error}</p> : null}
 
+          {hasPayments ? (
+            <p className="text-xs rounded-lg border border-amber-500/40 bg-amber-500/10 p-3 text-amber-800 dark:text-amber-200">
+              This invoice has {centsToLkr(invoice.paidCents)} LKR recorded. You can edit all
+              fields; balance and status will update based on payments vs the new total.
+            </p>
+          ) : null}
+
           <div className="grid gap-3 sm:grid-cols-2">
             <label className="block">
               <span className="text-[var(--sp-muted)] text-xs">Status</span>
               <select className="stitch-input mt-1" value={status} onChange={(e) => setStatus(e.target.value)}>
                 <option value="DRAFT">DRAFT</option>
                 <option value="SENT">SENT</option>
+                <option value="PARTIALLY_PAID">PARTIALLY_PAID</option>
+                <option value="PAID">PAID</option>
+                <option value="OVERDUE">OVERDUE</option>
                 <option value="VOID">VOID</option>
                 <option value="CANCELLED">CANCELLED</option>
               </select>
@@ -174,73 +199,91 @@ export function InvoiceEditModal({ invoice, vatRate, onClose, onSaved }: Invoice
             />
           </label>
 
-          {canEditLines ? (
-            <div>
-              <div className="flex items-center justify-between mb-2">
-                <span className="font-medium">Line items</span>
-                <button type="button" className="stitch-btn-outline-sm" onClick={addLine}>
-                  <Plus className="h-3.5 w-3.5" />
-                  Add line
-                </button>
-              </div>
-              <div className="space-y-2">
-                {lines.map((line, i) => (
-                  <div key={i} className="grid gap-2 sm:grid-cols-[1fr_80px_120px_36px] items-end">
-                    <input
-                      className="stitch-input"
-                      placeholder="Description"
-                      value={line.description}
-                      onChange={(e) => updateLine(i, { description: e.target.value })}
-                      required
-                    />
-                    <input
-                      className="stitch-input"
-                      type="number"
-                      min={1}
-                      step={1}
-                      value={line.qty}
-                      onChange={(e) => updateLine(i, { qty: Number(e.target.value) || 1 })}
-                    />
-                    <input
-                      className="stitch-input"
-                      type="number"
-                      min={0}
-                      step="0.01"
-                      placeholder="LKR"
-                      value={centsToLkr(line.unitCents)}
-                      onChange={(e) => updateLine(i, { unitCents: lkrToCents(e.target.value) })}
-                      required
-                    />
-                    <button
-                      type="button"
-                      className="stitch-btn-icon"
-                      onClick={() => removeLine(i)}
-                      disabled={lines.length <= 1}
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </button>
-                  </div>
-                ))}
-              </div>
-              <label className="block mt-3">
-                <span className="text-[var(--sp-muted)] text-xs">VAT rate (%)</span>
-                <input
-                  className="stitch-input mt-1 w-32"
-                  type="number"
-                  min={0}
-                  max={100}
-                  step={0.01}
-                  value={vatRatePercent}
-                  onChange={(e) => setVatRatePercent(Number(e.target.value) || 0)}
-                />
-              </label>
+          <div>
+            <div className="flex items-center justify-between mb-2">
+              <span className="font-medium">Line items</span>
+              <button type="button" className="stitch-btn-outline-sm" onClick={addLine}>
+                <Plus className="h-3.5 w-3.5" />
+                Add line
+              </button>
             </div>
-          ) : (
-            <p className="text-[var(--sp-muted)] text-xs rounded-lg border border-[var(--sp-outline)] p-3">
-              Line items cannot be changed because this invoice has recorded payments. You can still
-              update status, due date, and notes.
-            </p>
-          )}
+            <div className="space-y-2">
+              {lines.map((line, i) => (
+                <div key={i} className="grid gap-2 sm:grid-cols-[1fr_80px_120px_36px] items-end">
+                  <input
+                    className="stitch-input"
+                    placeholder="Description"
+                    value={line.description}
+                    onChange={(e) => updateLine(i, { description: e.target.value })}
+                    required
+                  />
+                  <input
+                    className="stitch-input"
+                    type="number"
+                    min={1}
+                    step={1}
+                    value={line.qty}
+                    onChange={(e) => updateLine(i, { qty: Number(e.target.value) || 1 })}
+                  />
+                  <input
+                    className="stitch-input"
+                    type="number"
+                    min={0}
+                    step="0.01"
+                    placeholder="LKR"
+                    value={centsToLkr(line.unitCents)}
+                    onChange={(e) => updateLine(i, { unitCents: lkrToCents(e.target.value) })}
+                    required
+                  />
+                  <button
+                    type="button"
+                    className="stitch-btn-icon"
+                    onClick={() => removeLine(i)}
+                    disabled={lines.length <= 1}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="grid gap-3 sm:grid-cols-3">
+            <label className="block">
+              <span className="text-[var(--sp-muted)] text-xs">Discount (LKR)</span>
+              <input
+                className="stitch-input mt-1"
+                type="number"
+                min={0}
+                step="0.01"
+                value={centsToLkr(discountCents)}
+                onChange={(e) => setDiscountCents(lkrToCents(e.target.value))}
+              />
+            </label>
+            <label className="block">
+              <span className="text-[var(--sp-muted)] text-xs">VAT rate (%)</span>
+              <input
+                className="stitch-input mt-1"
+                type="number"
+                min={0}
+                max={100}
+                step={0.01}
+                value={vatRatePercent}
+                onChange={(e) => setVatRatePercent(Number(e.target.value) || 0)}
+              />
+            </label>
+            <label className="block">
+              <span className="text-[var(--sp-muted)] text-xs">Advance (LKR)</span>
+              <input
+                className="stitch-input mt-1"
+                type="number"
+                min={0}
+                step="0.01"
+                value={centsToLkr(advanceCents)}
+                onChange={(e) => setAdvanceCents(lkrToCents(e.target.value))}
+              />
+            </label>
+          </div>
 
           <div className="flex justify-end gap-2 pt-2">
             <button type="button" className="stitch-btn-outline-sm" onClick={onClose}>
