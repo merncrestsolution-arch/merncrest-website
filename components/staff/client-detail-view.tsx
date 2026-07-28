@@ -76,6 +76,7 @@ type ClientDetail = {
     status: string;
     totalCents: number;
     paidCents: number;
+    remainingBalanceCents?: number;
     dueAt?: string | null;
     createdAt: string;
   }>;
@@ -409,6 +410,11 @@ export function ClientDetailView({ clientId }: { clientId: string }) {
                         </div>
                         <div className="text-right">
                           <span className="font-medium">{formatMoney(inv.totalCents)}</span>
+                          {(inv.remainingBalanceCents ?? 0) > 0 ? (
+                            <p className="text-xs text-amber-600 font-medium">
+                              Due {formatMoney(inv.remainingBalanceCents ?? 0)}
+                            </p>
+                          ) : null}
                           <Badge variant={statusVariant(inv.status)} className="ml-2">
                             {inv.status}
                           </Badge>

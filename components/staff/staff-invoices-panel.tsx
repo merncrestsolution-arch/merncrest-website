@@ -106,16 +106,20 @@ export function StaffInvoicesPanel() {
 
   const stats = useMemo(() => {
     const paid = invoices.filter((i) => i.status.toUpperCase() === "PAID");
-    const pending = invoices.filter((i) => ["SENT", "PARTIALLY_PAID", "DRAFT"].includes(i.status.toUpperCase()));
+    const pending = invoices.filter((i) =>
+      ["SENT", "PARTIALLY_PAID", "DRAFT", "OVERDUE"].includes(i.status.toUpperCase())
+    );
     const overdue = invoices.filter((i) => i.status.toUpperCase() === "OVERDUE");
+    const dueOf = (i: InvoiceRow) =>
+      i.remainingBalanceCents ?? i.dueAmountCents ?? i.balanceCents ?? Math.max(0, i.totalCents - i.paidCents);
     return {
       total: invoices.length,
       paidCount: paid.length,
       paidAmount: paid.reduce((s, i) => s + i.paidCents, 0),
       pendingCount: pending.length,
-      pendingAmount: pending.reduce((s, i) => s + (i.totalCents - i.paidCents), 0),
+      pendingAmount: pending.reduce((s, i) => s + dueOf(i), 0),
       overdueCount: overdue.length,
-      overdueAmount: overdue.reduce((s, i) => s + (i.totalCents - i.paidCents), 0),
+      overdueAmount: overdue.reduce((s, i) => s + dueOf(i), 0),
     };
   }, [invoices]);
 
