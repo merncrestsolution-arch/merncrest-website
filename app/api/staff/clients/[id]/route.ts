@@ -53,6 +53,14 @@ export async function GET(
         where: { deletedAt: null },
         orderBy: { createdAt: "desc" },
         take: 50,
+        select: {
+          id: true,
+          amountCents: true,
+          method: true,
+          referenceNumber: true,
+          status: true,
+          createdAt: true,
+        },
       },
     },
   });

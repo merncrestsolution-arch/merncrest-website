@@ -129,7 +129,9 @@ export function ClientDetailView({ clientId }: { clientId: string }) {
     setError("");
     fetch(`/api/staff/clients/${clientId}`)
       .then(async (r) => {
-        const d = await r.json();
+        const text = await r.text();
+        if (!text) throw new Error("Empty response from server");
+        const d = JSON.parse(text);
         if (!d.success) throw new Error(d.error?.message ?? "Failed to load client");
         setData(d.data);
       })
