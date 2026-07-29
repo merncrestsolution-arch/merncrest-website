@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Link } from "@/i18n/routing";
-import { calculateServiceDates } from "@/shared/renewal-calculator";
+import { calculateServiceDates, resolveFreePeriodDays } from "@/shared/renewal-calculator";
 import {
   ServiceAttachForm,
   attachDomainOrHosting,
@@ -87,10 +87,10 @@ export function CreateServiceWizard() {
     if (Number.isNaN(startDate.getTime())) return null;
     return calculateServiceDates({
       startDate,
-      freePeriodDays: Number(form.freePeriodPreset) || 0,
+      freePeriodDays: resolveFreePeriodDays(form.freePeriodPreset, form.freePeriodCustomDays),
       billingCycle: form.billingCycle,
     });
-  }, [form.startDate, form.freePeriodPreset, form.billingCycle]);
+  }, [form.startDate, form.freePeriodPreset, form.freePeriodCustomDays, form.billingCycle]);
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();

@@ -5,6 +5,7 @@ import { effectiveProjectProgress, currentMilestoneLabel } from "@/lib/projects/
 import { serializeProjectService } from "@/lib/services/project-services";
 import { serializeServiceDomain } from "@/lib/services/service-domains";
 import { serializeServiceHosting } from "@/lib/services/service-hosting";
+import { ensureLiveDnsSyncedIfEmpty } from "@/lib/dns/sync-domain-live";
 import { getServiceTypeLabel } from "@/shared/service-types";
 
 function readMetadata(record: unknown): Record<string, unknown> {
@@ -161,6 +162,30 @@ export async function loadProjectHub(erpProjectId: string) {
       },
     }),
   ]);
+
+  if (serviceProject?.services?.length) {
+    const emptyDomainIds = serviceProject.services
+      .filter((s) => s.serviceDomain)
+      .map((s) => s.serviceDomain!)
+      .filter((d) => {
+        const records = Array.isArray(d.dnsRecords) ? d.dnsRecords : [];
+        return d.nameservers.length === 0 && records.length === 0;
+      })
+      .map((d) => d.id);
+
+    if (emptyDomainIds.length > 0) {
+      await Promise.all(emptyDomainIds.map((id) => ensureLiveDnsSyncedIfEmpty(id)));
+      const refreshed = await prisma.serviceDomain.findMany({
+        where: { id: { in: emptyDomainIds } },
+      });
+      const refreshedMap = new Map(refreshed.map((d) => [d.id, d]));
+      for (const service of serviceProject.services) {
+        if (service.serviceDomain && refreshedMap.has(service.serviceDomain.id)) {
+          service.serviceDomain = refreshedMap.get(service.serviceDomain.id)!;
+        }
+      }
+    }
+  }
 
   const invoiceMap = new Map<string, ReturnType<typeof serializeInvoice>>();
   for (const inv of [...erpInvoices, ...serviceInvoices]) {

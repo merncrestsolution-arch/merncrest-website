@@ -295,6 +295,21 @@ export function serializeServiceDomain(
   domain: Prisma.ServiceDomainGetPayload<{ include: { history: true } }> | Prisma.ServiceDomainGetPayload<object>
 ) {
   const effectiveStatus = computeEffectiveDomainStatus(domain.domainStatus, domain.expiryDate);
+
+  let registrationPeriodMonths = domain.registrationPeriodMonths;
+  if (!registrationPeriodMonths && domain.registrationDate && domain.expiryDate) {
+    registrationPeriodMonths = Math.max(
+      1,
+      Math.round(
+        (domain.expiryDate.getTime() - domain.registrationDate.getTime()) / (30.44 * 86400000)
+      )
+    );
+  }
+
+  const renewalDate =
+    domain.renewalDate ??
+    (domain.autoRenew && domain.expiryDate ? domain.expiryDate : null);
+
   return {
     id: domain.id,
     projectServiceId: domain.projectServiceId,
@@ -304,8 +319,8 @@ export function serializeServiceDomain(
     purchasedViaMernCrest: domain.purchasedViaMernCrest,
     registrationDate: domain.registrationDate,
     expiryDate: domain.expiryDate,
-    renewalDate: domain.renewalDate,
-    registrationPeriodMonths: domain.registrationPeriodMonths,
+    renewalDate,
+    registrationPeriodMonths,
     nameservers: domain.nameservers,
     dnsRecords: domain.dnsRecords,
     dnsZone: domain.dnsZone,

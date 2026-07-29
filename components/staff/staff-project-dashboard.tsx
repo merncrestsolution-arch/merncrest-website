@@ -377,15 +377,16 @@ export function StaffProjectDashboard({
                         Registered: {formatSriLankaDate(s.domain.registrationDate)} · Expires:{" "}
                         {formatSriLankaDate(s.domain.expiryDate)}
                       </p>
-                      <p className="m-0">
-                        Status: {s.domain.domainStatus} · Auto-renew:{" "}
-                        {s.domain.purchasedViaMernCrest ? "Managed" : "External"}
+                      <p className="m-0 text-xs text-[var(--sp-muted)]">
+                        DNS records: {s.domain.dnsRecordCount ?? 0}
+                        {s.domain.nameservers?.length
+                          ? ` · NS: ${s.domain.nameservers.slice(0, 2).join(", ")}${s.domain.nameservers.length > 2 ? "…" : ""}`
+                          : ""}
                       </p>
-                      {s.domain.nameservers?.length ? (
-                        <p className="m-0 text-xs font-mono text-[var(--sp-muted)]">
-                          NS: {s.domain.nameservers.join(", ")}
-                        </p>
-                      ) : null}
+                      <p className="m-0">
+                        Status: {s.domain.domainStatus} · SSL: {s.domain.sslCertificateStatus ?? "—"} ·
+                        Auto-renew: {s.domain.autoRenew ? "Yes" : "No"}
+                      </p>
                       <Link
                         href={`/staff/domains/managed/${s.domain.id}`}
                         className="stitch-btn-sm inline-flex mt-2"

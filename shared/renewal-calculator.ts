@@ -153,3 +153,16 @@ export const FREE_PERIOD_PRESETS = [
   { label: "6 months free", days: 182 },
   { label: "12 months free", days: 365 },
 ] as const;
+
+export const FREE_PERIOD_CUSTOM = "custom" as const;
+
+/** Resolve preset or custom free-period input to a day count. */
+export function resolveFreePeriodDays(preset: string, customDays?: string | number | null): number {
+  if (preset === FREE_PERIOD_CUSTOM) {
+    const n = typeof customDays === "number" ? customDays : Number(customDays);
+    if (!Number.isFinite(n) || n < 0) return 0;
+    return Math.min(Math.floor(n), 3650);
+  }
+  const n = Number(preset);
+  return Number.isFinite(n) && n >= 0 ? Math.floor(n) : 0;
+}

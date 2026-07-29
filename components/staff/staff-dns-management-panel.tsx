@@ -12,6 +12,7 @@ type DnsRow = {
   registrar: string | null;
   effectiveDomainStatus: string;
   dnsRecordCount: number;
+  nameservers: string[];
   purchasedViaMernCrest: boolean;
   project: { id: string; name: string; erpProjectId: string | null } | null;
   client: { id: string; fullName: string; email: string } | null;
@@ -85,6 +86,7 @@ export function StaffDnsManagementPanel() {
                 <tr>
                   <th>Domain</th>
                   <th>Registrar</th>
+                  <th>Nameservers</th>
                   <th>Records</th>
                   <th>Status</th>
                   <th>Project</th>
@@ -94,7 +96,7 @@ export function StaffDnsManagementPanel() {
               <tbody>
                 {rows.length === 0 ? (
                   <tr>
-                    <td colSpan={6} className="text-center text-[var(--sp-muted)] py-8">
+                    <td colSpan={7} className="text-center text-[var(--sp-muted)] py-8">
                       No managed domains found.
                     </td>
                   </tr>
@@ -103,6 +105,11 @@ export function StaffDnsManagementPanel() {
                     <tr key={row.id}>
                       <td className="font-mono">{row.domainName}</td>
                       <td>{registrarLabel(row.registrar)}</td>
+                      <td className="font-mono text-xs max-w-[200px] truncate">
+                        {row.nameservers?.length
+                          ? row.nameservers.slice(0, 2).join(", ")
+                          : "—"}
+                      </td>
                       <td>{row.dnsRecordCount}</td>
                       <td>{row.effectiveDomainStatus.replace("_", " ")}</td>
                       <td>

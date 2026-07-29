@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { calculateRenewalDate } from "./renewal-calculator";
+import { calculateRenewalDate, resolveFreePeriodDays, FREE_PERIOD_CUSTOM } from "./renewal-calculator";
 
 describe("calculateRenewalDate", () => {
   it("adds one annual billing cycle with no free period", () => {
@@ -72,5 +72,21 @@ describe("calculateRenewalDate", () => {
     expect(renewal.getUTCFullYear()).toBe(2026);
     expect(renewal.getUTCMonth()).toBe(3);
     expect(renewal.getUTCDate()).toBe(1);
+  });
+});
+
+describe("resolveFreePeriodDays", () => {
+  it("returns preset days", () => {
+    expect(resolveFreePeriodDays("90", "")).toBe(90);
+    expect(resolveFreePeriodDays("0", "")).toBe(0);
+  });
+
+  it("returns custom days when preset is custom", () => {
+    expect(resolveFreePeriodDays(FREE_PERIOD_CUSTOM, "45")).toBe(45);
+    expect(resolveFreePeriodDays(FREE_PERIOD_CUSTOM, "")).toBe(0);
+  });
+
+  it("caps custom days at 3650", () => {
+    expect(resolveFreePeriodDays(FREE_PERIOD_CUSTOM, "9999")).toBe(3650);
   });
 });

@@ -9,6 +9,8 @@ import {
   softDeleteServiceDomain,
   updateServiceDomain,
 } from "@/lib/services/service-domains";
+import { ensureLiveDnsSyncedIfEmpty, enrichServiceDomainFromLiveIfNeeded } from "@/lib/dns/sync-domain-live";
+import type { DnsRecord } from "@/shared/service-types";
 
 const patchSchema = z.object({
   registrar: z.string().max(120).optional().nullable(),
@@ -37,7 +39,7 @@ export async function GET(
   if (!canView) return apiError("FORBIDDEN", "Missing domains.view permission", 403);
 
   const { id } = await context.params;
-  const domain = await prisma.serviceDomain.findFirst({
+  let domain = await prisma.serviceDomain.findFirst({
     where: { id, deletedAt: null },
     include: {
       history: { orderBy: { createdAt: "desc" }, take: 100 },
@@ -45,6 +47,23 @@ export async function GET(
   });
 
   if (!domain) return apiError("NOT_FOUND", "Domain not found", 404);
+
+  const storedRecords = Array.isArray(domain.dnsRecords)
+    ? (domain.dnsRecords as DnsRecord[])
+    : [];
+  if (domain.nameservers.length === 0 && storedRecords.length === 0) {
+    await ensureLiveDnsSyncedIfEmpty(id, auth.user.id);
+  } else {
+    await enrichServiceDomainFromLiveIfNeeded(id, auth.user.id);
+  }
+
+  domain =
+    (await prisma.serviceDomain.findFirst({
+      where: { id, deletedAt: null },
+      include: {
+        history: { orderBy: { createdAt: "desc" }, take: 100 },
+      },
+    })) ?? domain;
 
   return apiSuccess(serializeServiceDomain(domain));
 }

@@ -151,10 +151,21 @@ export function PortalProjectHubView({ projectId }: { projectId: string }) {
                   {(d.domain?.domainName as string) ?? d.label}
                 </p>
                 {d.domain ? (
-                  <p className="text-xs text-muted mt-1">
-                    SSL: {(d.domain.sslCertificateStatus as string) ?? "—"} · Auto-renew:{" "}
-                    {d.domain.autoRenew ? "Yes" : "No"}
-                  </p>
+                  <>
+                    <p className="text-xs text-muted mt-1">
+                      SSL: {(d.domain.sslCertificateStatus as string) ?? "—"} · Auto-renew:{" "}
+                      {d.domain.autoRenew ? "Yes" : "No"}
+                    </p>
+                    {(d.domain.dnsRecordCount as number) > 0 ||
+                    (Array.isArray(d.domain.nameservers) && d.domain.nameservers.length > 0) ? (
+                      <p className="text-xs text-muted mt-1 font-mono">
+                        DNS: {d.domain.dnsRecordCount as number} records
+                        {Array.isArray(d.domain.nameservers) && d.domain.nameservers.length > 0
+                          ? ` · NS: ${(d.domain.nameservers as string[]).slice(0, 2).join(", ")}`
+                          : ""}
+                      </p>
+                    ) : null}
+                  </>
                 ) : null}
               </div>
             ))

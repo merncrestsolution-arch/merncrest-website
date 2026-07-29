@@ -3,7 +3,7 @@
 import { useMemo } from "react";
 import { Loader2 } from "lucide-react";
 import type { BillingCycle, ServiceType } from "@prisma/client";
-import { calculateServiceDates, FREE_PERIOD_PRESETS } from "@/shared/renewal-calculator";
+import { calculateServiceDates, FREE_PERIOD_CUSTOM, FREE_PERIOD_PRESETS, resolveFreePeriodDays } from "@/shared/renewal-calculator";
 import { getServiceTypeLabel } from "@/shared/service-types";
 import { DOMAIN_REGISTRARS } from "@/shared/domain-registrars";
 import { formatSriLankaDate } from "@/lib/timezone";
@@ -27,6 +27,7 @@ export type ServiceAttachFormState = {
   startDate: string;
   billingCycle: BillingCycle;
   freePeriodPreset: string;
+  freePeriodCustomDays: string;
   serviceCostLkr: string;
   renewalCostLkr: string;
   notes: string;
@@ -48,6 +49,7 @@ export const defaultServiceAttachForm = (): ServiceAttachFormState => ({
   startDate: new Date().toISOString().slice(0, 10),
   billingCycle: "ANNUAL",
   freePeriodPreset: "0",
+  freePeriodCustomDays: "",
   serviceCostLkr: "",
   renewalCostLkr: "",
   notes: "",
@@ -86,15 +88,17 @@ export function ServiceAttachForm({
   const set = <K extends keyof ServiceAttachFormState>(key: K, value: ServiceAttachFormState[K]) =>
     onChange({ ...form, [key]: value });
 
+  const freePeriodDays = resolveFreePeriodDays(form.freePeriodPreset, form.freePeriodCustomDays);
+
   const datePreview = useMemo(() => {
     const startDate = new Date(`${form.startDate}T00:00:00.000Z`);
     if (Number.isNaN(startDate.getTime())) return null;
     return calculateServiceDates({
       startDate,
-      freePeriodDays: Number(form.freePeriodPreset) || 0,
+      freePeriodDays,
       billingCycle: form.billingCycle,
     });
-  }, [form.startDate, form.freePeriodPreset, form.billingCycle]);
+  }, [form.startDate, form.billingCycle, freePeriodDays]);
 
   const isDomain = form.serviceType === "DOMAIN_REGISTRATION";
   const isHosting = form.serviceType === "HOSTING";
@@ -157,8 +161,29 @@ export function ServiceAttachForm({
                   {p.label}
                 </option>
               ))}
+              <option value={FREE_PERIOD_CUSTOM}>Custom free period</option>
             </select>
           </label>
+          {form.freePeriodPreset === FREE_PERIOD_CUSTOM ? (
+            <label className="block space-y-1 sm:col-span-2">
+              <span className="text-[var(--sp-muted)]">Custom free period (days)</span>
+              <input
+                type="number"
+                min={0}
+                max={3650}
+                className="stitch-input w-full"
+                value={form.freePeriodCustomDays}
+                onChange={(e) => set("freePeriodCustomDays", e.target.value)}
+                placeholder="e.g. 45 for 45 days free"
+                required
+              />
+              {freePeriodDays > 0 ? (
+                <p className="text-xs text-[var(--sp-muted)] m-0">
+                  ≈ {Math.round(freePeriodDays / 30)} month(s) · {freePeriodDays} days
+                </p>
+              ) : null}
+            </label>
+          ) : null}
         </div>
 
         {datePreview ? (
@@ -365,11 +390,13 @@ export function buildServicePayload(form: ServiceAttachFormState) {
   if (form.notes.trim()) metadata.notes = form.notes.trim();
   if (form.assignedStaffId.trim()) metadata.assignedStaffId = form.assignedStaffId.trim();
 
+  const freePeriodDays = resolveFreePeriodDays(form.freePeriodPreset, form.freePeriodCustomDays);
+
   return {
     serviceType: form.serviceType,
     startDate: new Date(`${form.startDate}T00:00:00.000Z`).toISOString(),
     billingCycle: form.billingCycle,
-    freePeriodDays: Number(form.freePeriodPreset) || 0,
+    freePeriodDays,
     metadata: Object.keys(metadata).length ? metadata : undefined,
     notes: form.notes.trim() || undefined,
     assignedStaffId: form.assignedStaffId.trim() || undefined,
@@ -401,6 +428,9 @@ export async function attachDomainOrHosting(
     });
     const d = await r.json();
     if (!d.success) throw new Error(d.error?.message ?? "Failed to create domain record");
+    if (d.data?.id) {
+      await fetch(`/api/domains/${d.data.id}/live-dns`, { method: "POST" });
+    }
   }
 
   if (form.serviceType === "HOSTING" && form.packageName.trim()) {

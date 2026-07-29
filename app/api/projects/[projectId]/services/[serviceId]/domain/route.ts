@@ -7,6 +7,7 @@ import {
   createServiceDomain,
   serializeServiceDomain,
 } from "@/lib/services/service-domains";
+import { syncLiveDnsForDomain } from "@/lib/dns/sync-domain-live";
 
 const createSchema = z.object({
   domainName: z.string().min(1).max(255),
@@ -100,7 +101,10 @@ export async function POST(
       return apiError("NOT_FOUND", "Service not found", 404);
     }
 
-    return apiSuccess(serializeServiceDomain(result), undefined, 201);
+    const synced = await syncLiveDnsForDomain(result.id, auth.user.id);
+    const domain = synced?.domain ?? result;
+
+    return apiSuccess(serializeServiceDomain(domain), undefined, 201);
   } catch (error) {
     const message = error instanceof Error ? error.message : "Failed to create domain";
     return apiError("VALIDATION", message);

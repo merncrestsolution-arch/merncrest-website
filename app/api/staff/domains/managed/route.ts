@@ -53,26 +53,20 @@ export async function GET(request: Request) {
   const clientId = searchParams.get("clientId");
   const { page, limit, skip } = parsePagination(searchParams);
 
+  const projectFilter = {
+    deletedAt: null,
+    ...(clientId ? { clientId } : {}),
+  };
+
   const where = {
     deletedAt: null,
+    projectService: {
+      deletedAt: null,
+      ...(projectServiceId ? { id: projectServiceId } : {}),
+      ...(projectId ? { projectId } : {}),
+      project: projectFilter,
+    },
     ...(q ? { domainName: { contains: q, mode: "insensitive" as const } } : {}),
-    ...(projectServiceId ? { projectServiceId } : {}),
-    ...(projectId || clientId
-      ? {
-          projectService: {
-            deletedAt: null,
-            ...(projectId ? { projectId } : {}),
-            ...(clientId
-              ? {
-                  project: {
-                    clientId,
-                    deletedAt: null,
-                  },
-                }
-              : {}),
-          },
-        }
-      : {}),
   };
 
   const [domains, total] = await Promise.all([

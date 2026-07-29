@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { Link } from "@/i18n/routing";
 import { useSearchParams } from "next/navigation";
-import { ArrowLeft, Loader2 } from "lucide-react";
+import { ArrowLeft, Loader2, RefreshCw } from "lucide-react";
 import { formatSriLankaDate, formatSriLankaDateTime } from "@/lib/timezone";
 import { DOMAIN_REGISTRARS, registrarLabel } from "@/shared/domain-registrars";
 import {
@@ -18,6 +18,7 @@ import { Badge } from "@/components/ui/badge";
 import { LoadingState } from "@/components/system/loading-state";
 import { ErrorState } from "@/components/system/error-state";
 import type { DnsRecord } from "@/shared/service-types";
+import type { LiveDnsSnapshot } from "@/lib/dns/live-dns-lookup";
 
 type HistoryEntry = {
   id: string;
@@ -67,7 +68,20 @@ export function ManagedDomainDetailView({ domainId }: { domainId: string }) {
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
   const [nsInput, setNsInput] = useState("");
+  const [live, setLive] = useState<LiveDnsSnapshot | null>(null);
+  const [liveLoading, setLiveLoading] = useState(false);
   const [dnsRecords, setDnsRecords] = useState<DnsRecord[]>([]);
+
+  const loadLive = useCallback(() => {
+    setLiveLoading(true);
+    fetch(`/api/domains/${domainId}/live-dns`)
+      .then(async (r) => {
+        const d = await r.json();
+        if (d.success) setLive(d.data.live);
+      })
+      .catch(() => {})
+      .finally(() => setLiveLoading(false));
+  }, [domainId]);
 
   const load = useCallback(() => {
     setLoading(true);
@@ -82,7 +96,8 @@ export function ManagedDomainDetailView({ domainId }: { domainId: string }) {
       })
       .catch((e) => setError(e instanceof Error ? e.message : "Failed"))
       .finally(() => setLoading(false));
-  }, [domainId]);
+    loadLive();
+  }, [domainId, loadLive]);
 
   useEffect(() => {
     load();
@@ -112,6 +127,26 @@ export function ManagedDomainDetailView({ domainId }: { domainId: string }) {
       setBusy(false);
     }
   }
+
+  async function syncFromLive() {
+    setBusy(true);
+    setError("");
+    try {
+      const r = await fetch(`/api/domains/${domainId}/live-dns`, { method: "POST" });
+      const d = await r.json();
+      if (!d.success) throw new Error(d.error?.message ?? "Sync failed");
+      load();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Sync failed");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  const displayRecords =
+    dnsRecords.length > 0 ? dnsRecords : (live?.records ?? []);
+  const displayNameservers =
+    (data?.nameservers?.length ? data.nameservers : live?.nameservers) ?? [];
 
   async function saveDns(e: React.FormEvent) {
     e.preventDefault();
@@ -169,10 +204,25 @@ export function ManagedDomainDetailView({ domainId }: { domainId: string }) {
             )}
           </div>
         </div>
-        <Link href="/staff/domains" className="stitch-btn-outline-sm">
-          <ArrowLeft className="h-4 w-4" />
-          All domains
-        </Link>
+        <div className="flex flex-wrap gap-2">
+          <button
+            type="button"
+            className="stitch-btn-outline-sm"
+            onClick={syncFromLive}
+            disabled={busy || liveLoading}
+          >
+            {busy || liveLoading ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <RefreshCw className="h-4 w-4" />
+            )}
+            Sync live DNS
+          </button>
+          <Link href="/staff/domains" className="stitch-btn-outline-sm">
+            <ArrowLeft className="h-4 w-4" />
+            All domains
+          </Link>
+        </div>
       </div>
 
       {error ? <p className="stitch-auth-error mb-4">{error}</p> : null}
@@ -242,7 +292,27 @@ export function ManagedDomainDetailView({ domainId }: { domainId: string }) {
             </div>
             <div>
               <span className="text-[var(--sp-muted)]">WHOIS status</span>
-              <p className="font-medium">{data.whoisStatus || "—"}</p>
+              <p className="font-medium">
+                {data.whoisStatus || live?.rdap?.whoisStatus || "—"}
+              </p>
+            </div>
+            <div className="sm:col-span-2 lg:col-span-3">
+              <span className="text-[var(--sp-muted)]">Live nameservers</span>
+              {displayNameservers.length === 0 ? (
+                <p className="font-medium m-0">—</p>
+              ) : (
+                <ul className="font-mono text-xs m-0 mt-1 space-y-1">
+                  {displayNameservers.map((ns) => (
+                    <li key={ns}>{ns}</li>
+                  ))}
+                </ul>
+              )}
+              {live?.fetchedAt ? (
+                <p className="text-xs text-[var(--sp-muted)] m-0 mt-2">
+                  Live lookup: {formatSriLankaDateTime(live.fetchedAt)}
+                  {live.sslCertificateStatus ? ` · SSL: ${live.sslCertificateStatus}` : ""}
+                </p>
+              ) : null}
             </div>
             <div>
               <span className="text-[var(--sp-muted)]">Service ID</span>
@@ -288,23 +358,54 @@ export function ManagedDomainDetailView({ domainId }: { domainId: string }) {
       {tab === "dns" && (
         <section className="stitch-section-card">
           <div className="stitch-section-head">
-            <h3>DNS records</h3>
-            <button
-              type="button"
-              className="stitch-btn-sm"
-              onClick={() =>
-                setDnsRecords((r) => [
-                  ...r,
-                  { type: "A", name: "@", value: "", ttl: 3600 },
-                ])
-              }
-            >
-              Add record
-            </button>
+            <h3>DNS records {live ? `(${displayRecords.length} live/stored)` : ""}</h3>
+            <div className="flex gap-2">
+              <button type="button" className="stitch-btn-sm" onClick={loadLive} disabled={liveLoading}>
+                {liveLoading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : "Refresh live"}
+              </button>
+              <button
+                type="button"
+                className="stitch-btn-sm"
+                onClick={() =>
+                  setDnsRecords((r) => [...r, { type: "A", name: "@", value: "", ttl: 3600 }])
+                }
+              >
+                Add record
+              </button>
+            </div>
           </div>
-          <form onSubmit={saveDns} className="stitch-section-body space-y-3">
+          {displayRecords.length > 0 ? (
+            <div className="stitch-section-body overflow-x-auto !pt-0">
+              <table className="stitch-table">
+                <thead>
+                  <tr>
+                    <th>Type</th>
+                    <th>Name</th>
+                    <th>Value</th>
+                    <th>TTL</th>
+                    <th>Priority</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {displayRecords.map((rec, idx) => (
+                    <tr key={`${rec.type}-${rec.name}-${rec.value}-${idx}`}>
+                      <td className="font-mono text-xs">{rec.type}</td>
+                      <td>{rec.name}</td>
+                      <td className="font-mono text-xs max-w-xs truncate">{rec.value}</td>
+                      <td>{rec.ttl}</td>
+                      <td>{rec.priority ?? "—"}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          ) : null}
+          <form onSubmit={saveDns} className="stitch-section-body space-y-3 border-t border-[var(--sp-outline)]">
+            <p className="text-sm text-[var(--sp-muted)] m-0">
+              Edit stored DNS records below. Use &quot;Sync live DNS&quot; to import public records.
+            </p>
             {dnsRecords.length === 0 ? (
-              <p className="text-sm text-[var(--sp-muted)]">No DNS records configured.</p>
+              <p className="text-sm text-[var(--sp-muted)]">No stored records — showing live DNS above.</p>
             ) : (
               dnsRecords.map((rec, idx) => (
                 <div key={idx} className="grid sm:grid-cols-5 gap-2 items-end">
@@ -361,9 +462,11 @@ export function ManagedDomainDetailView({ domainId }: { domainId: string }) {
                 </div>
               ))
             )}
-            <button type="submit" className="stitch-btn-primary-sm" disabled={busy}>
-              {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : "Save DNS"}
-            </button>
+            {dnsRecords.length > 0 ? (
+              <button type="submit" className="stitch-btn-primary-sm" disabled={busy}>
+                {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : "Save DNS"}
+              </button>
+            ) : null}
           </form>
         </section>
       )}
@@ -372,9 +475,27 @@ export function ManagedDomainDetailView({ domainId }: { domainId: string }) {
         <section className="stitch-section-card">
           <div className="stitch-section-head">
             <h3>Nameservers</h3>
+            <button type="button" className="stitch-btn-sm" onClick={loadLive} disabled={liveLoading}>
+              Refresh live
+            </button>
           </div>
-          <form onSubmit={saveNameservers} className="stitch-section-body space-y-3">
-            <p className="text-sm text-[var(--sp-muted)] m-0">One nameserver per line.</p>
+          <div className="stitch-section-body space-y-4">
+            {live?.nameservers?.length ? (
+              <div>
+                <p className="text-xs uppercase tracking-wide text-[var(--sp-muted)] mb-2">
+                  Live public DNS
+                </p>
+                <ul className="font-mono text-sm m-0 space-y-1 bg-violet-500/5 border border-violet-500/20 rounded-lg p-3">
+                  {live.nameservers.map((ns) => (
+                    <li key={ns}>{ns}</li>
+                  ))}
+                </ul>
+              </div>
+            ) : (
+              <p className="text-sm text-[var(--sp-muted)]">No live nameservers resolved.</p>
+            )}
+            <form onSubmit={saveNameservers} className="space-y-3">
+              <p className="text-sm text-[var(--sp-muted)] m-0">Stored nameservers (one per line).</p>
             <textarea
               className="stitch-input w-full min-h-[120px] font-mono text-sm"
               value={nsInput}
@@ -385,6 +506,7 @@ export function ManagedDomainDetailView({ domainId }: { domainId: string }) {
               {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : "Save nameservers"}
             </button>
           </form>
+          </div>
         </section>
       )}
     </div>

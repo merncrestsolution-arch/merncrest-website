@@ -6,7 +6,7 @@ import { Globe2, Plus, Server } from "lucide-react";
 import type { BillingCycle, ServiceType } from "@prisma/client";
 import { formatSriLankaDate } from "@/lib/timezone";
 import { getServiceTypeLabel } from "@/shared/service-types";
-import { calculateServiceDates } from "@/shared/renewal-calculator";
+import { calculateServiceDates, resolveFreePeriodDays } from "@/shared/renewal-calculator";
 import { EmptyState } from "@/components/system/empty-state";
 import { LoadingState } from "@/components/system/loading-state";
 import { ErrorState } from "@/components/system/error-state";
@@ -86,10 +86,10 @@ export function ProjectServicesPanel({
     if (Number.isNaN(startDate.getTime())) return null;
     return calculateServiceDates({
       startDate,
-      freePeriodDays: Number(form.freePeriodPreset) || 0,
+      freePeriodDays: resolveFreePeriodDays(form.freePeriodPreset, form.freePeriodCustomDays),
       billingCycle: form.billingCycle,
     });
-  }, [form.startDate, form.freePeriodPreset, form.billingCycle]);
+  }, [form.startDate, form.freePeriodPreset, form.freePeriodCustomDays, form.billingCycle]);
 
   async function attachService(e: React.FormEvent) {
     e.preventDefault();
