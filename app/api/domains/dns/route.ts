@@ -29,6 +29,15 @@ export async function POST(request: Request) {
     if (!domain) {
       return NextResponse.json({ error: "Domain not found" }, { status: 404 });
     }
+    if (domain.managedByMernCrest) {
+      return NextResponse.json(
+        {
+          error:
+            "This domain is managed by MernCrest. Please submit a DNS change request from your project portal.",
+        },
+        { status: 403 }
+      );
+    }
     if (domain.locked) {
       return NextResponse.json({ error: "Domain is locked" }, { status: 400 });
     }

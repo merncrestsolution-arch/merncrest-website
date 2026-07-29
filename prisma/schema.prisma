@@ -95,6 +95,8 @@ model User {
   accessRequestsReviewed CrossClientAccessRequest[] @relation("AccessReviewer")
   domainDocSubmissions DomainRegistrationSubmission[] @relation("DomainDocSubmitter")
   domainDocReviews     DomainRegistrationSubmission[] @relation("DomainDocReviewer")
+  dnsChangeRequests    DnsChangeRequest[]             @relation("DnsChangeRequester")
+  dnsChangeReviews     DnsChangeRequest[]             @relation("DnsChangeReviewer")
   salesClientOf        SalesClientAssignment[] @relation("SalesClient")
   accessRequestsAsClient CrossClientAccessRequest[] @relation("AccessRequestClient")
   businessMailboxes    BusinessMailbox[]
@@ -574,6 +576,7 @@ model Domain {
   status               String    @default("PENDING")
   autoRenew            Boolean   @default(true)
   locked               Boolean   @default(false)
+  managedByMernCrest   Boolean   @default(false)
   registeredAt         DateTime?
   expiresAt            DateTime?
   registrationCostCents Int      @default(0)
@@ -1478,6 +1481,16 @@ model ProjectResource {
   projectId           String          @unique
   project             ErpProject      @relation(fields: [projectId], references: [id], onDelete: Cascade)
   gitRepoUrl          String?
+  gitProvider         String?
+  defaultBranch       String?
+  deploymentBranch    String?
+  latestCommitSha     String?
+  latestCommitMessage String?
+  latestCommitAt      DateTime?
+  repositoryStatus    String?         @default("UNKNOWN")
+  devEnvironmentUrl   String?
+  productionEnvironmentUrl String?
+  clientCanViewGit    Boolean         @default(false)
   sourceCodeNotes     String?
   docsUrl             String?
   apiDocsUrl          String?
@@ -3288,15 +3301,23 @@ model ServiceDomain {
   id                    String               @id @default(cuid())
   projectServiceId      String               @unique
   domainName            String
+  domainExtension       String?
   registrar             String?
   purchasedViaMernCrest Boolean              @default(false)
   registrationDate      DateTime
   expiryDate            DateTime
+  renewalDate           DateTime?
+  registrationPeriodMonths Int?
   nameservers           String[]
   dnsRecords            Json?
+  dnsZone               String?
+  sslCertificateStatus  String               @default("UNKNOWN")
+  autoRenew             Boolean              @default(false)
+  whoisStatus           String?
   domainStatus          DomainStatus         @default(ACTIVE)
   projectService        ProjectService       @relation(fields: [projectServiceId], references: [id], onDelete: Cascade)
   history               ServiceDomainHistoryEntry[]
+  dnsChangeRequests     DnsChangeRequest[]
   createdAt             DateTime             @default(now())
   updatedAt             DateTime             @updatedAt
   deletedAt             DateTime?
@@ -3305,6 +3326,7 @@ model ServiceDomain {
 
   @@index([domainName])
   @@index([expiryDate])
+  @@index([renewalDate])
   @@index([domainStatus])
   @@index([deletedAt])
 }
@@ -3332,6 +3354,11 @@ model ServiceHostingAccount {
   diskUsedMb       Int                       @default(0)
   bandwidthUsedMb  Int                       @default(0)
   serverLocation   String?
+  serverStatus     String                    @default("UNKNOWN")
+  cpuUsagePct      Float                     @default(0)
+  memoryUsagePct   Float                     @default(0)
+  sslStatus        String                    @default("UNKNOWN")
+  uptimePct        Float                     @default(100)
   hostingStatus    HostingStatus             @default(ACTIVE)
   renewalDate      DateTime
   expiryDate       DateTime
@@ -3440,6 +3467,39 @@ model CrossClientAccessRequest {
   @@index([requesterId])
   @@index([clientId])
   @@index([status])
+}
+
+enum DnsChangeRequestStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  APPLIED
+}
+
+/// Client-submitted DNS change request for MernCrest-managed domains
+model DnsChangeRequest {
+  id              String                 @id @default(cuid())
+  serviceDomainId String
+  serviceDomain   ServiceDomain          @relation(fields: [serviceDomainId], references: [id], onDelete: Cascade)
+  requestedBy     String
+  requester       User                   @relation("DnsChangeRequester", fields: [requestedBy], references: [id])
+  status          DnsChangeRequestStatus @default(PENDING)
+  proposedRecords Json
+  clientNotes     String?
+  reviewNotes     String?
+  reviewedBy      String?
+  reviewer        User?                  @relation("DnsChangeReviewer", fields: [reviewedBy], references: [id], onDelete: SetNull)
+  appliedAt       DateTime?
+  createdAt       DateTime               @default(now())
+  updatedAt       DateTime               @updatedAt
+  deletedAt       DateTime?
+  createdBy       String
+  updatedBy       String
+
+  @@index([serviceDomainId])
+  @@index([requestedBy])
+  @@index([status])
+  @@index([deletedAt])
 }
 
 enum BusinessMailboxStatus {

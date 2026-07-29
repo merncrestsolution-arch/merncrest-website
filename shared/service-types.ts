@@ -120,7 +120,7 @@ export function validateServiceMetadata(
 }
 
 export const DNS_RECORD_SCHEMA = z.object({
-  type: z.enum(["A", "AAAA", "CNAME", "MX", "TXT", "NS", "SRV"]),
+  type: z.enum(["A", "AAAA", "CNAME", "MX", "TXT", "NS", "SRV", "REDIRECT"]),
   name: z.string().max(255),
   value: z.string().max(2000),
   ttl: z.number().int().min(60).max(86400).default(3600),

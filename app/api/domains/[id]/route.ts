@@ -14,6 +14,12 @@ const patchSchema = z.object({
   registrar: z.string().max(120).optional().nullable(),
   registrationDate: z.string().datetime().optional(),
   expiryDate: z.string().datetime().optional(),
+  renewalDate: z.string().datetime().optional().nullable(),
+  registrationPeriodMonths: z.number().int().min(1).max(120).optional().nullable(),
+  dnsZone: z.string().max(255).optional().nullable(),
+  sslCertificateStatus: z.string().max(32).optional(),
+  autoRenew: z.boolean().optional(),
+  whoisStatus: z.string().max(120).optional().nullable(),
   domainStatus: z
     .enum(["ACTIVE", "EXPIRING_SOON", "EXPIRED", "TRANSFERRED", "SUSPENDED"])
     .optional(),
@@ -80,6 +86,16 @@ export async function PATCH(
           ? new Date(parsed.data.registrationDate)
           : undefined,
         expiryDate: parsed.data.expiryDate ? new Date(parsed.data.expiryDate) : undefined,
+        renewalDate: parsed.data.renewalDate
+          ? new Date(parsed.data.renewalDate)
+          : parsed.data.renewalDate === null
+            ? null
+            : undefined,
+        registrationPeriodMonths: parsed.data.registrationPeriodMonths,
+        dnsZone: parsed.data.dnsZone,
+        sslCertificateStatus: parsed.data.sslCertificateStatus,
+        autoRenew: parsed.data.autoRenew,
+        whoisStatus: parsed.data.whoisStatus,
         domainStatus: parsed.data.domainStatus,
         actorId: auth.user.id,
       },

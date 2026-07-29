@@ -104,6 +104,8 @@ const navGroups: NavGroup[] = [
     label: "Resources",
     items: [
       { href: "/staff/domains", label: "Domains", icon: Globe2 },
+      { href: "/staff/dns", label: "DNS", icon: Globe2 },
+      { href: "/staff/dns-change-requests", label: "DNS Requests", icon: FileText },
       { href: "/staff/hosting", label: "Hosting", icon: Server },
       { href: "/staff/domain-docs", label: "Domain Docs", icon: FileText },
       { href: "/staff/access-requests", label: "Access Requests", icon: KeyRound },

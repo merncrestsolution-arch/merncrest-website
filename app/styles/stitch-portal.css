@@ -3525,17 +3525,28 @@ textarea.stitch-input {
   z-index: 100;
   background: rgba(11, 26, 51, 0.45);
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: center;
-  padding: 1rem;
+  padding: 1.5rem 1rem 2rem;
+  overflow-y: auto;
 }
 
 .stitch-modal {
   width: min(480px, 100%);
+  max-height: none;
+  margin: auto 0;
   background: var(--stitch-surface);
   border-radius: 0.75rem;
   border: 1px solid var(--sp-outline);
   box-shadow: 0 12px 16px -4px rgba(16, 24, 40, 0.12);
+}
+
+.stitch-modal-lg {
+  width: min(720px, 100%);
+}
+
+.stitch-modal-body {
+  padding: 1.25rem;
 }
 
 .stitch-modal-sm {
@@ -3553,10 +3564,6 @@ textarea.stitch-input {
 .stitch-modal-head h3 {
   font-size: 1rem;
   font-weight: 600;
-}
-
-.stitch-modal-body {
-  padding: 1.25rem;
 }
 
 .stitch-label {

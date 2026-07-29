@@ -20,6 +20,16 @@ function serializeResource(r: {
   id: string;
   projectId: string;
   gitRepoUrl: string | null;
+  gitProvider: string | null;
+  defaultBranch: string | null;
+  deploymentBranch: string | null;
+  latestCommitSha: string | null;
+  latestCommitMessage: string | null;
+  latestCommitAt: Date | null;
+  repositoryStatus: string | null;
+  devEnvironmentUrl: string | null;
+  productionEnvironmentUrl: string | null;
+  clientCanViewGit: boolean;
   sourceCodeNotes: string | null;
   docsUrl: string | null;
   apiDocsUrl: string | null;
@@ -45,6 +55,16 @@ function serializeResource(r: {
     id: r.id,
     projectId: r.projectId,
     gitRepoUrl: r.gitRepoUrl,
+    gitProvider: r.gitProvider,
+    defaultBranch: r.defaultBranch,
+    deploymentBranch: r.deploymentBranch,
+    latestCommitSha: r.latestCommitSha,
+    latestCommitMessage: r.latestCommitMessage,
+    latestCommitAt: r.latestCommitAt,
+    repositoryStatus: r.repositoryStatus,
+    devEnvironmentUrl: r.devEnvironmentUrl,
+    productionEnvironmentUrl: r.productionEnvironmentUrl,
+    clientCanViewGit: r.clientCanViewGit,
     sourceCodeNotes: r.sourceCodeNotes,
     docsUrl: r.docsUrl,
     apiDocsUrl: r.apiDocsUrl,
@@ -111,6 +131,16 @@ export async function GET(
 
 const patchSchema = z.object({
   gitRepoUrl: z.string().optional().nullable(),
+  gitProvider: z.string().optional().nullable(),
+  defaultBranch: z.string().optional().nullable(),
+  deploymentBranch: z.string().optional().nullable(),
+  latestCommitSha: z.string().optional().nullable(),
+  latestCommitMessage: z.string().optional().nullable(),
+  latestCommitAt: z.string().optional().nullable(),
+  repositoryStatus: z.string().optional().nullable(),
+  devEnvironmentUrl: z.string().optional().nullable(),
+  productionEnvironmentUrl: z.string().optional().nullable(),
+  clientCanViewGit: z.boolean().optional(),
   sourceCodeNotes: z.string().optional().nullable(),
   docsUrl: z.string().optional().nullable(),
   apiDocsUrl: z.string().optional().nullable(),
@@ -158,6 +188,15 @@ export async function PATCH(
   const data: Record<string, unknown> = {
     updatedBy: auth.user.id,
     gitRepoUrl: parsed.data.gitRepoUrl,
+    gitProvider: parsed.data.gitProvider,
+    defaultBranch: parsed.data.defaultBranch,
+    deploymentBranch: parsed.data.deploymentBranch,
+    latestCommitSha: parsed.data.latestCommitSha,
+    latestCommitMessage: parsed.data.latestCommitMessage,
+    repositoryStatus: parsed.data.repositoryStatus,
+    devEnvironmentUrl: parsed.data.devEnvironmentUrl,
+    productionEnvironmentUrl: parsed.data.productionEnvironmentUrl,
+    clientCanViewGit: parsed.data.clientCanViewGit,
     sourceCodeNotes: parsed.data.sourceCodeNotes,
     docsUrl: parsed.data.docsUrl,
     apiDocsUrl: parsed.data.apiDocsUrl,
@@ -170,6 +209,12 @@ export async function PATCH(
   if (parsed.data.lastDeployedAt !== undefined) {
     data.lastDeployedAt = parsed.data.lastDeployedAt
       ? new Date(parsed.data.lastDeployedAt)
+      : null;
+  }
+
+  if (parsed.data.latestCommitAt !== undefined) {
+    data.latestCommitAt = parsed.data.latestCommitAt
+      ? new Date(parsed.data.latestCommitAt)
       : null;
   }
 

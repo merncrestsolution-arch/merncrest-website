@@ -74,6 +74,11 @@ export type UpdateServiceHostingInput = {
   diskUsedMb?: number;
   bandwidthUsedMb?: number;
   serverLocation?: string | null;
+  serverStatus?: string;
+  cpuUsagePct?: number;
+  memoryUsagePct?: number;
+  sslStatus?: string;
+  uptimePct?: number;
   hostingStatus?: HostingStatus;
   expiryDate?: Date;
   actorId: string;
@@ -103,6 +108,11 @@ export async function updateServiceHosting(
   if (input.diskUsedMb !== undefined) data.diskUsedMb = input.diskUsedMb;
   if (input.bandwidthUsedMb !== undefined) data.bandwidthUsedMb = input.bandwidthUsedMb;
   if (input.serverLocation !== undefined) data.serverLocation = input.serverLocation;
+  if (input.serverStatus !== undefined) data.serverStatus = input.serverStatus;
+  if (input.cpuUsagePct !== undefined) data.cpuUsagePct = input.cpuUsagePct;
+  if (input.memoryUsagePct !== undefined) data.memoryUsagePct = input.memoryUsagePct;
+  if (input.sslStatus !== undefined) data.sslStatus = input.sslStatus;
+  if (input.uptimePct !== undefined) data.uptimePct = input.uptimePct;
   if (input.hostingStatus !== undefined) {
     data.hostingStatus = input.hostingStatus;
     changes.hostingStatus = { from: existing.hostingStatus, to: input.hostingStatus };
@@ -217,6 +227,11 @@ export function serializeServiceHosting(
     diskUsedMb: account.diskUsedMb,
     bandwidthUsedMb: account.bandwidthUsedMb,
     serverLocation: account.serverLocation,
+    serverStatus: account.serverStatus,
+    cpuUsagePct: account.cpuUsagePct,
+    memoryUsagePct: account.memoryUsagePct,
+    sslStatus: account.sslStatus,
+    uptimePct: account.uptimePct,
     hostingStatus: account.hostingStatus,
     renewalDate: account.renewalDate,
     expiryDate: account.expiryDate,

@@ -8,6 +8,16 @@ import type { ProjectCredentialEntry } from "@/lib/security/project-secrets";
 type Resource = {
   id: string;
   gitRepoUrl: string | null;
+  gitProvider: string | null;
+  defaultBranch: string | null;
+  deploymentBranch: string | null;
+  latestCommitSha: string | null;
+  latestCommitMessage: string | null;
+  latestCommitAt: string | null;
+  repositoryStatus: string | null;
+  devEnvironmentUrl: string | null;
+  productionEnvironmentUrl: string | null;
+  clientCanViewGit: boolean;
   sourceCodeNotes: string | null;
   docsUrl: string | null;
   apiDocsUrl: string | null;
@@ -28,6 +38,15 @@ export function ProjectResourcesPanel({ projectId }: { projectId: string }) {
   const [resource, setResource] = useState<Resource | null>(null);
   const [form, setForm] = useState({
     gitRepoUrl: "",
+    gitProvider: "",
+    defaultBranch: "main",
+    deploymentBranch: "main",
+    latestCommitSha: "",
+    latestCommitMessage: "",
+    repositoryStatus: "ACTIVE",
+    devEnvironmentUrl: "",
+    productionEnvironmentUrl: "",
+    clientCanViewGit: false,
     sourceCodeNotes: "",
     docsUrl: "",
     apiDocsUrl: "",
@@ -51,6 +70,15 @@ export function ProjectResourcesPanel({ projectId }: { projectId: string }) {
         setResource(row);
         setForm({
           gitRepoUrl: row.gitRepoUrl ?? "",
+          gitProvider: row.gitProvider ?? "",
+          defaultBranch: row.defaultBranch ?? "main",
+          deploymentBranch: row.deploymentBranch ?? "main",
+          latestCommitSha: row.latestCommitSha ?? "",
+          latestCommitMessage: row.latestCommitMessage ?? "",
+          repositoryStatus: row.repositoryStatus ?? "ACTIVE",
+          devEnvironmentUrl: row.devEnvironmentUrl ?? "",
+          productionEnvironmentUrl: row.productionEnvironmentUrl ?? "",
+          clientCanViewGit: row.clientCanViewGit ?? false,
           sourceCodeNotes: row.sourceCodeNotes ?? "",
           docsUrl: row.docsUrl ?? "",
           apiDocsUrl: row.apiDocsUrl ?? "",
@@ -98,6 +126,15 @@ export function ProjectResourcesPanel({ projectId }: { projectId: string }) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           gitRepoUrl: form.gitRepoUrl || null,
+          gitProvider: form.gitProvider || null,
+          defaultBranch: form.defaultBranch || null,
+          deploymentBranch: form.deploymentBranch || null,
+          latestCommitSha: form.latestCommitSha || null,
+          latestCommitMessage: form.latestCommitMessage || null,
+          repositoryStatus: form.repositoryStatus || null,
+          devEnvironmentUrl: form.devEnvironmentUrl || null,
+          productionEnvironmentUrl: form.productionEnvironmentUrl || null,
+          clientCanViewGit: form.clientCanViewGit,
           sourceCodeNotes: form.sourceCodeNotes || null,
           docsUrl: form.docsUrl || null,
           apiDocsUrl: form.apiDocsUrl || null,
@@ -157,12 +194,69 @@ export function ProjectResourcesPanel({ projectId }: { projectId: string }) {
           </button>
         </div>
         <div className="stitch-section-body grid gap-3 max-w-2xl">
+          <select
+            className="stitch-input"
+            value={form.gitProvider}
+            onChange={(e) => setForm({ ...form, gitProvider: e.target.value })}
+          >
+            <option value="">Git provider</option>
+            <option value="GITHUB">GitHub</option>
+            <option value="GITLAB">GitLab</option>
+            <option value="BITBUCKET">Bitbucket</option>
+            <option value="OTHER">Other</option>
+          </select>
           <input
             className="stitch-input"
             placeholder="Git repository URL"
             value={form.gitRepoUrl}
             onChange={(e) => setForm({ ...form, gitRepoUrl: e.target.value })}
           />
+          <div className="grid sm:grid-cols-2 gap-3">
+            <input
+              className="stitch-input"
+              placeholder="Default branch"
+              value={form.defaultBranch}
+              onChange={(e) => setForm({ ...form, defaultBranch: e.target.value })}
+            />
+            <input
+              className="stitch-input"
+              placeholder="Deployment branch"
+              value={form.deploymentBranch}
+              onChange={(e) => setForm({ ...form, deploymentBranch: e.target.value })}
+            />
+          </div>
+          <div className="grid sm:grid-cols-2 gap-3">
+            <input
+              className="stitch-input font-mono text-xs"
+              placeholder="Latest commit SHA"
+              value={form.latestCommitSha}
+              onChange={(e) => setForm({ ...form, latestCommitSha: e.target.value })}
+            />
+            <select
+              className="stitch-input"
+              value={form.repositoryStatus}
+              onChange={(e) => setForm({ ...form, repositoryStatus: e.target.value })}
+            >
+              <option value="ACTIVE">Active</option>
+              <option value="ARCHIVED">Archived</option>
+              <option value="PRIVATE">Private</option>
+              <option value="UNKNOWN">Unknown</option>
+            </select>
+          </div>
+          <input
+            className="stitch-input"
+            placeholder="Latest commit message"
+            value={form.latestCommitMessage}
+            onChange={(e) => setForm({ ...form, latestCommitMessage: e.target.value })}
+          />
+          <label className="flex items-center gap-2 text-sm">
+            <input
+              type="checkbox"
+              checked={form.clientCanViewGit}
+              onChange={(e) => setForm({ ...form, clientCanViewGit: e.target.checked })}
+            />
+            Allow client to view repository (read-only)
+          </label>
           <textarea
             className="stitch-input min-h-[80px]"
             placeholder="Source code location / notes"
@@ -189,6 +283,18 @@ export function ProjectResourcesPanel({ projectId }: { projectId: string }) {
           <h3>Deployment</h3>
         </div>
         <div className="stitch-section-body grid gap-3 max-w-2xl">
+          <input
+            className="stitch-input"
+            placeholder="Development environment URL"
+            value={form.devEnvironmentUrl}
+            onChange={(e) => setForm({ ...form, devEnvironmentUrl: e.target.value })}
+          />
+          <input
+            className="stitch-input"
+            placeholder="Production environment URL"
+            value={form.productionEnvironmentUrl}
+            onChange={(e) => setForm({ ...form, productionEnvironmentUrl: e.target.value })}
+          />
           <input
             className="stitch-input"
             placeholder="Deployment method (e.g. Lightsail, Vercel)"

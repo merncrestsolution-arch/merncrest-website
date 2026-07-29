@@ -228,6 +228,13 @@ export function PortalProjectsPanel() {
                     <span className={badge(active.status)}>{active.status}</span>
                   </div>
 
+                  <Link
+                    href={`/portal/projects/${active.id}`}
+                    className="rlk-btn-green !w-auto !inline-flex text-sm"
+                  >
+                    Open project dashboard
+                  </Link>
+
                   <div className="rlk-stats !mb-0">
                     <div className="rlk-stat">
                       <div className="rlk-stat-num">{active.progressPct}%</div>

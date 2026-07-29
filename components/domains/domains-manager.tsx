@@ -13,6 +13,7 @@ type Domain = {
   status: string;
   autoRenew: boolean;
   locked: boolean;
+  managedByMernCrest?: boolean;
   expiresAt: string | null;
   nameservers: string;
   dnsRecords: DnsRecord[];
@@ -52,6 +53,13 @@ export function DomainsManager() {
   }
 
   async function addDns(domainId: string) {
+    const domain = domains.find((d) => d.id === domainId);
+    if (domain?.managedByMernCrest) {
+      setError(
+        "This domain is managed by MernCrest. Submit a DNS change request from your project portal."
+      );
+      return;
+    }
     const host = prompt("Host (e.g. @ or www)");
     const type = prompt("Type (A, CNAME, MX, TXT)", "A");
     const value = prompt("Value");
@@ -113,15 +121,26 @@ export function DomainsManager() {
 
         {active && (
           <div className="rounded-xl border border-white/10 p-5 space-y-4">
-            <div className="flex flex-wrap gap-2">
-              <Button size="sm" variant="outline" onClick={() => toggle(active.id, { autoRenew: !active.autoRenew })}>
-                {active.autoRenew ? "Disable auto-renew" : "Enable auto-renew"}
-              </Button>
-              <Button size="sm" variant="outline" onClick={() => toggle(active.id, { locked: !active.locked })}>
-                {active.locked ? "Unlock" : "Lock domain"}
-              </Button>
-              <Button size="sm" onClick={() => addDns(active.id)}>Add DNS record</Button>
-            </div>
+            {active.managedByMernCrest ? (
+              <p className="text-sm text-amber-400/90">
+                This domain is managed by MernCrest. DNS changes require administrator approval —
+                submit a request from your{" "}
+                <Link href="/portal/projects" className="underline">
+                  project portal
+                </Link>
+                .
+              </p>
+            ) : (
+              <div className="flex flex-wrap gap-2">
+                <Button size="sm" variant="outline" onClick={() => toggle(active.id, { autoRenew: !active.autoRenew })}>
+                  {active.autoRenew ? "Disable auto-renew" : "Enable auto-renew"}
+                </Button>
+                <Button size="sm" variant="outline" onClick={() => toggle(active.id, { locked: !active.locked })}>
+                  {active.locked ? "Unlock" : "Lock domain"}
+                </Button>
+                <Button size="sm" onClick={() => addDns(active.id)}>Add DNS record</Button>
+              </div>
+            )}
             <p className="text-xs text-muted">Nameservers: {active.nameservers}</p>
             <div className="overflow-x-auto">
               <table className="w-full text-sm">

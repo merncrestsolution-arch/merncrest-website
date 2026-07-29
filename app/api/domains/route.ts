@@ -44,6 +44,12 @@ export async function PATCH(request: Request) {
     if (!domain) {
       return NextResponse.json({ error: "Domain not found" }, { status: 404 });
     }
+    if (domain.managedByMernCrest) {
+      return NextResponse.json(
+        { error: "This domain is managed by MernCrest. Contact support for changes." },
+        { status: 403 }
+      );
+    }
 
     const updated = await prisma.domain.update({
       where: { id: domain.id },

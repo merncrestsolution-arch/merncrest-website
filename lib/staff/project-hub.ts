@@ -97,7 +97,7 @@ export async function loadProjectHub(erpProjectId: string) {
     },
   });
 
-  const [erpInvoices, serviceInvoices, auditLogs] = await Promise.all([
+  const [erpInvoices, serviceInvoices, auditLogs, projectResource] = await Promise.all([
     prisma.invoice.findMany({
       where: { projectId: erpProjectId, deletedAt: null },
       include: {
@@ -136,6 +136,28 @@ export async function loadProjectHub(erpProjectId: string) {
         module: true,
         actorEmail: true,
         createdAt: true,
+      },
+    }),
+    prisma.projectResource.findFirst({
+      where: { projectId: erpProjectId, deletedAt: null },
+      select: {
+        id: true,
+        gitRepoUrl: true,
+        gitProvider: true,
+        defaultBranch: true,
+        deploymentBranch: true,
+        latestCommitSha: true,
+        latestCommitMessage: true,
+        latestCommitAt: true,
+        repositoryStatus: true,
+        devEnvironmentUrl: true,
+        productionEnvironmentUrl: true,
+        clientCanViewGit: true,
+        deploymentMethod: true,
+        lastDeployedAt: true,
+        lastDeployedVersion: true,
+        docsUrl: true,
+        apiDocsUrl: true,
       },
     }),
   ]);
@@ -254,6 +276,27 @@ export async function loadProjectHub(erpProjectId: string) {
       return ad - bd;
     });
 
+  const dnsSummary = {
+    totalDomains: servicesByType.domains.length,
+    managedDomains: servicesByType.domains.filter((s) => s.domain?.purchasedViaMernCrest).length,
+    totalRecords: servicesByType.domains.reduce(
+      (acc, s) => acc + (s.domain?.dnsRecordCount ?? 0),
+      0
+    ),
+    sslActive: servicesByType.domains.filter((s) => s.domain?.sslCertificateStatus === "ACTIVE")
+      .length,
+  };
+
+  const deploymentStatus = projectResource
+    ? {
+        method: projectResource.deploymentMethod,
+        lastDeployedAt: projectResource.lastDeployedAt,
+        lastDeployedVersion: projectResource.lastDeployedVersion,
+        devUrl: projectResource.devEnvironmentUrl,
+        productionUrl: projectResource.productionEnvironmentUrl,
+      }
+    : null;
+
   return {
     erpProject: {
       id: erpProject.id,
@@ -305,6 +348,9 @@ export async function loadProjectHub(erpProjectId: string) {
     },
     renewals,
     activity,
+    resources: projectResource,
+    dnsSummary,
+    deploymentStatus,
   };
 }
 

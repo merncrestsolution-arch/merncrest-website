@@ -1,46 +1,38 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { useRouter } from "@/i18n/routing";
-import { Loader2 } from "lucide-react";
-import type { BillingCycle, ServiceType } from "@prisma/client";
-import { calculateServiceDates, FREE_PERIOD_PRESETS } from "@/shared/renewal-calculator";
-import { getServiceTypeLabel } from "@/shared/service-types";
-import { formatSriLankaDate } from "@/lib/timezone";
+import { useRouter, useSearchParams } from "next/navigation";
+import { Link } from "@/i18n/routing";
+import { calculateServiceDates } from "@/shared/renewal-calculator";
+import {
+  ServiceAttachForm,
+  attachDomainOrHosting,
+  buildServicePayload,
+  defaultServiceAttachForm,
+} from "@/components/staff/service-attach-form";
 
 type ClientOption = { id: string; fullName: string; email: string; company?: string | null };
-type ProjectOption = { id: string; name: string; projectCode: string; status: string };
-
-const SERVICE_TYPES: ServiceType[] = [
-  "DOMAIN_REGISTRATION",
-  "HOSTING",
-  "SECURITY",
-  "SSL_CERTIFICATE",
-  "CLOUD_SERVICE",
-  "EMAIL_HOSTING",
-  "MAINTENANCE",
-  "BACKUP",
-  "OTHER",
-];
+type ProjectOption = {
+  id: string;
+  name: string;
+  projectCode: string;
+  status: string;
+  customer?: { id: string };
+};
 
 export function CreateServiceWizard() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const presetProjectId = searchParams.get("erpProjectId") ?? "";
+
   const [clients, setClients] = useState<ClientOption[]>([]);
   const [projects, setProjects] = useState<ProjectOption[]>([]);
   const [loadingProjects, setLoadingProjects] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
-  const [form, setForm] = useState({
-    clientId: "",
-    erpProjectId: "",
-    serviceType: "DOMAIN_REGISTRATION" as ServiceType,
-    startDate: new Date().toISOString().slice(0, 10),
-    billingCycle: "ANNUAL" as BillingCycle,
-    freePeriodPreset: "0",
-    serviceCostLkr: "",
-    renewalCostLkr: "",
-    notes: "",
-  });
+  const [clientId, setClientId] = useState("");
+  const [erpProjectId, setErpProjectId] = useState(presetProjectId);
+  const [form, setForm] = useState(defaultServiceAttachForm());
 
   useEffect(() => {
     fetch("/api/staff/clients?limit=200")
@@ -51,13 +43,13 @@ export function CreateServiceWizard() {
       .catch(() => {});
   }, []);
 
-  const loadProjects = useCallback((clientId: string) => {
-    if (!clientId) {
+  const loadProjects = useCallback((cid: string) => {
+    if (!cid) {
       setProjects([]);
       return;
     }
     setLoadingProjects(true);
-    fetch(`/api/erp/projects?customerId=${encodeURIComponent(clientId)}`)
+    fetch(`/api/erp/projects?customerId=${encodeURIComponent(cid)}`)
       .then((r) => r.json())
       .then((d) => setProjects(d.projects ?? []))
       .catch(() => setProjects([]))
@@ -65,11 +57,30 @@ export function CreateServiceWizard() {
   }, []);
 
   useEffect(() => {
-    loadProjects(form.clientId);
-    setForm((f) => ({ ...f, erpProjectId: "" }));
-  }, [form.clientId, loadProjects]);
+    setErpProjectId(presetProjectId);
+  }, [presetProjectId]);
 
-  const selectedProject = projects.find((p) => p.id === form.erpProjectId);
+  useEffect(() => {
+    if (!presetProjectId) return;
+    fetch(`/api/erp/projects?projectId=${encodeURIComponent(presetProjectId)}`)
+      .then((r) => r.json())
+      .then((d) => {
+        const p = d.projects?.[0] as ProjectOption | undefined;
+        if (!p) return;
+        setProjects([p]);
+        if (p.customer?.id) {
+          setClientId(p.customer.id);
+          loadProjects(p.customer.id);
+        }
+      })
+      .catch(() => {});
+  }, [presetProjectId, loadProjects]);
+
+  useEffect(() => {
+    if (clientId) loadProjects(clientId);
+  }, [clientId, loadProjects]);
+
+  const selectedProject = projects.find((p) => p.id === erpProjectId);
 
   const datePreview = useMemo(() => {
     const startDate = new Date(`${form.startDate}T00:00:00.000Z`);
@@ -83,33 +94,29 @@ export function CreateServiceWizard() {
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
-    if (!form.erpProjectId) {
+    const projectId = erpProjectId;
+    if (!projectId) {
       setError("Select a project");
       return;
     }
     setBusy(true);
     setError("");
     try {
-      const metadata: Record<string, unknown> = {};
-      if (form.serviceCostLkr) metadata.serviceCostCents = Math.round(Number(form.serviceCostLkr) * 100);
-      if (form.renewalCostLkr) metadata.renewalCostCents = Math.round(Number(form.renewalCostLkr) * 100);
-      if (form.notes.trim()) metadata.notes = form.notes.trim();
-
-      const r = await fetch(`/api/staff/projects/${form.erpProjectId}/services`, {
+      const r = await fetch(`/api/staff/projects/${projectId}/services`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          serviceType: form.serviceType,
-          startDate: new Date(`${form.startDate}T00:00:00.000Z`).toISOString(),
-          billingCycle: form.billingCycle,
-          freePeriodDays: Number(form.freePeriodPreset) || 0,
-          metadata: Object.keys(metadata).length ? metadata : undefined,
-          notes: form.notes.trim() || undefined,
-        }),
+        body: JSON.stringify(buildServicePayload(form)),
       });
       const d = await r.json();
       if (!d.success) throw new Error(d.error?.message ?? "Failed");
-      router.push(`/staff/projects/${form.erpProjectId}#services`);
+
+      const spId = d.data?.serviceProjectId as string | undefined;
+      const serviceId = d.data?.id as string | undefined;
+      if (spId && serviceId) {
+        await attachDomainOrHosting(spId, serviceId, form, datePreview);
+      }
+
+      router.push(`/staff/projects/${projectId}#services`);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed");
     } finally {
@@ -118,174 +125,87 @@ export function CreateServiceWizard() {
   }
 
   return (
-    <div className="max-w-2xl">
+    <div className="max-w-3xl pb-12">
       <div className="stitch-page-head mb-6">
+        <Link href="/staff/projects" className="stitch-btn-sm mb-3 inline-flex">
+          ← Back to projects
+        </Link>
         <h1 className="stitch-page-title">Add service</h1>
         <p className="stitch-page-sub !mb-0">
-          Select the client and project — project details auto-fill. Complete only the service information.
+          Select the client and project — then complete service, billing, and type-specific details.
         </p>
       </div>
 
       {error ? <p className="stitch-auth-error mb-4">{error}</p> : null}
 
-      <form onSubmit={submit} className="stitch-section-card">
+      <div className="stitch-section-card mb-6">
         <div className="stitch-section-body space-y-4 text-sm">
-          <label className="block space-y-1">
-            <span className="text-[var(--sp-muted)]">Client</span>
-            <select
-              className="stitch-input w-full"
-              value={form.clientId}
-              onChange={(e) => setForm((f) => ({ ...f, clientId: e.target.value }))}
-              required
-            >
-              <option value="">Select client…</option>
-              {clients.map((c) => (
-                <option key={c.id} value={c.id}>
-                  {c.company || c.fullName} ({c.email})
-                </option>
-              ))}
-            </select>
-          </label>
-
-          <label className="block space-y-1">
-            <span className="text-[var(--sp-muted)]">Project</span>
-            <select
-              className="stitch-input w-full"
-              value={form.erpProjectId}
-              onChange={(e) => setForm((f) => ({ ...f, erpProjectId: e.target.value }))}
-              required
-              disabled={!form.clientId || loadingProjects}
-            >
-              <option value="">
-                {loadingProjects ? "Loading projects…" : "Select project…"}
-              </option>
-              {projects.map((p) => (
-                <option key={p.id} value={p.id}>
-                  {p.name} ({p.projectCode})
-                </option>
-              ))}
-            </select>
-          </label>
-
-          {selectedProject ? (
+          {!presetProjectId ? (
+            <>
+              <label className="block space-y-1">
+                <span className="text-[var(--sp-muted)]">Client</span>
+                <select
+                  className="stitch-input w-full"
+                  value={clientId}
+                  onChange={(e) => setClientId(e.target.value)}
+                  required
+                >
+                  <option value="">Select client…</option>
+                  {clients.map((c) => (
+                    <option key={c.id} value={c.id}>
+                      {c.company || c.fullName} ({c.email})
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <label className="block space-y-1">
+                <span className="text-[var(--sp-muted)]">Project</span>
+                <select
+                  className="stitch-input w-full"
+                  value={erpProjectId}
+                  onChange={(e) => {
+                    const id = e.target.value;
+                    setErpProjectId(id);
+                    router.replace(id ? `/staff/services/new?erpProjectId=${id}` : "/staff/services/new");
+                  }}
+                  required
+                  disabled={!clientId || loadingProjects}
+                >
+                  <option value="">
+                    {loadingProjects ? "Loading projects…" : "Select project…"}
+                  </option>
+                  {projects.map((p) => (
+                    <option key={p.id} value={p.id}>
+                      {p.name} ({p.projectCode})
+                    </option>
+                  ))}
+                </select>
+              </label>
+            </>
+          ) : selectedProject ? (
             <div className="rounded-lg bg-violet-500/10 border border-violet-500/20 p-3 text-sm">
               <p className="m-0 font-medium">{selectedProject.name}</p>
               <p className="m-0 text-[var(--sp-muted)] font-mono text-xs">{selectedProject.projectCode}</p>
               <p className="m-0 text-xs mt-1">Status: {selectedProject.status}</p>
             </div>
           ) : null}
-
-          <label className="block space-y-1">
-            <span className="text-[var(--sp-muted)]">Service type</span>
-            <select
-              className="stitch-input w-full"
-              value={form.serviceType}
-              onChange={(e) => setForm((f) => ({ ...f, serviceType: e.target.value as ServiceType }))}
-            >
-              {SERVICE_TYPES.map((t) => (
-                <option key={t} value={t}>
-                  {getServiceTypeLabel(t)}
-                </option>
-              ))}
-            </select>
-          </label>
-
-          <div className="grid sm:grid-cols-2 gap-3">
-            <label className="block space-y-1">
-              <span className="text-[var(--sp-muted)]">Start date</span>
-              <input
-                type="date"
-                className="stitch-input w-full"
-                value={form.startDate}
-                onChange={(e) => setForm((f) => ({ ...f, startDate: e.target.value }))}
-                required
-              />
-            </label>
-            <label className="block space-y-1">
-              <span className="text-[var(--sp-muted)]">Billing cycle</span>
-              <select
-                className="stitch-input w-full"
-                value={form.billingCycle}
-                onChange={(e) =>
-                  setForm((f) => ({ ...f, billingCycle: e.target.value as BillingCycle }))
-                }
-              >
-                <option value="MONTHLY">Monthly</option>
-                <option value="QUARTERLY">Quarterly</option>
-                <option value="ANNUAL">Annual (12 months)</option>
-                <option value="ONE_TIME">One time</option>
-              </select>
-            </label>
-          </div>
-
-          <label className="block space-y-1">
-            <span className="text-[var(--sp-muted)]">Free period</span>
-            <select
-              className="stitch-input w-full"
-              value={form.freePeriodPreset}
-              onChange={(e) => setForm((f) => ({ ...f, freePeriodPreset: e.target.value }))}
-            >
-              {FREE_PERIOD_PRESETS.map((p) => (
-                <option key={p.days} value={String(p.days)}>
-                  {p.label}
-                </option>
-              ))}
-            </select>
-          </label>
-
-          {datePreview ? (
-            <div className="rounded-lg bg-[var(--stitch-surface-low)] border border-[var(--sp-outline)] p-3 text-xs space-y-1">
-              <p className="m-0">
-                <strong>Next billing:</strong> {formatSriLankaDate(datePreview.nextBillingDate)}
-              </p>
-              <p className="m-0">
-                <strong>Renewal:</strong> {formatSriLankaDate(datePreview.renewalDate)}
-              </p>
-              <p className="m-0">
-                <strong>Expiry:</strong> {formatSriLankaDate(datePreview.expiryDate)}
-              </p>
-            </div>
-          ) : null}
-
-          <div className="grid sm:grid-cols-2 gap-3">
-            <label className="block space-y-1">
-              <span className="text-[var(--sp-muted)]">Service cost (LKR)</span>
-              <input
-                type="number"
-                min={0}
-                step="0.01"
-                className="stitch-input w-full"
-                value={form.serviceCostLkr}
-                onChange={(e) => setForm((f) => ({ ...f, serviceCostLkr: e.target.value }))}
-              />
-            </label>
-            <label className="block space-y-1">
-              <span className="text-[var(--sp-muted)]">Renewal price (LKR)</span>
-              <input
-                type="number"
-                min={0}
-                step="0.01"
-                className="stitch-input w-full"
-                value={form.renewalCostLkr}
-                onChange={(e) => setForm((f) => ({ ...f, renewalCostLkr: e.target.value }))}
-              />
-            </label>
-          </div>
-
-          <label className="block space-y-1">
-            <span className="text-[var(--sp-muted)]">Notes</span>
-            <textarea
-              className="stitch-input w-full min-h-[72px]"
-              value={form.notes}
-              onChange={(e) => setForm((f) => ({ ...f, notes: e.target.value }))}
-            />
-          </label>
-
-          <button type="submit" className="stitch-btn-primary" disabled={busy}>
-            {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : "Create service"}
-          </button>
         </div>
-      </form>
+      </div>
+
+      <div className="stitch-section-card">
+        <div className="stitch-section-head">
+          <h3>Service configuration</h3>
+        </div>
+        <div className="stitch-section-body">
+          <ServiceAttachForm
+            form={form}
+            onChange={setForm}
+            onSubmit={submit}
+            busy={busy}
+            submitLabel={busy ? "Creating…" : "Create service"}
+          />
+        </div>
+      </div>
     </div>
   );
 }

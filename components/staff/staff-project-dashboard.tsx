@@ -10,12 +10,14 @@ import { ProjectServicesPanel } from "@/components/staff/project-services-panel"
 import { ProjectTeamPanel } from "@/components/staff/project-team-panel";
 import { ProjectUpdatesPanel } from "@/components/staff/project-updates-panel";
 import { ProjectDevNotesPanel } from "@/components/staff/project-dev-notes-panel";
+import { ProjectResourcesPanel } from "@/components/staff/project-resources-panel";
 import { ServiceSetupModals } from "@/components/staff/service-setup-modals";
 import {
   Activity,
   ArrowLeft,
   Briefcase,
   Calendar,
+  Code2,
   CreditCard,
   FileText,
   Globe2,
@@ -118,6 +120,7 @@ export function StaffProjectDashboard({
       { id: "client", label: "Client" },
       { id: "services", label: "Services" },
       { id: "billing", label: "Billing" },
+      { id: "resources", label: "Resources" },
       { id: "tasks", label: "Tasks" },
       { id: "activity", label: "Activity" },
     ],
@@ -444,6 +447,82 @@ export function StaffProjectDashboard({
             </p>
           </DashboardCard>
         ) : null}
+
+        <DashboardCard title="DNS status" icon={Globe2}>
+          <div className="grid sm:grid-cols-3 gap-3 text-sm">
+            <div>
+              <p className="text-xs text-[var(--sp-muted)] m-0">Domains</p>
+              <p className="font-medium m-0">{hub.dnsSummary.totalDomains}</p>
+            </div>
+            <div>
+              <p className="text-xs text-[var(--sp-muted)] m-0">Managed</p>
+              <p className="font-medium m-0">{hub.dnsSummary.managedDomains}</p>
+            </div>
+            <div>
+              <p className="text-xs text-[var(--sp-muted)] m-0">DNS records</p>
+              <p className="font-medium m-0">{hub.dnsSummary.totalRecords}</p>
+            </div>
+          </div>
+          <Link href="/staff/dns" className="stitch-btn-sm inline-flex mt-3">
+            Open DNS management
+          </Link>
+        </DashboardCard>
+      </div>
+
+      <div id="resources" className="grid lg:grid-cols-2 gap-5 scroll-mt-24">
+        <DashboardCard title="Git repository" icon={Code2}>
+          {hub.resources?.gitRepoUrl ? (
+            <div className="space-y-2 text-sm">
+              <p className="m-0">
+                Provider: <strong>{hub.resources.gitProvider ?? "—"}</strong>
+              </p>
+              <p className="m-0 font-mono text-xs break-all">{hub.resources.gitRepoUrl}</p>
+              <p className="m-0 text-[var(--sp-muted)]">
+                Branch: {hub.resources.defaultBranch ?? "—"} · Deploy:{" "}
+                {hub.resources.deploymentBranch ?? "—"}
+              </p>
+              {hub.resources.latestCommitSha ? (
+                <p className="m-0 text-xs">
+                  {hub.resources.latestCommitSha.slice(0, 7)} — {hub.resources.latestCommitMessage}
+                </p>
+              ) : null}
+              <p className="m-0 text-xs text-[var(--sp-muted)]">
+                Status: {hub.resources.repositoryStatus} · Client view:{" "}
+                {hub.resources.clientCanViewGit ? "Allowed" : "Hidden"}
+              </p>
+            </div>
+          ) : (
+            <p className="text-sm text-[var(--sp-muted)]">No repository linked.</p>
+          )}
+        </DashboardCard>
+
+        <DashboardCard title="Deployment status" icon={Server}>
+          {hub.deploymentStatus ? (
+            <div className="space-y-2 text-sm">
+              <p className="m-0">Method: {hub.deploymentStatus.method ?? "—"}</p>
+              <p className="m-0">Version: {hub.deploymentStatus.lastDeployedVersion ?? "—"}</p>
+              {hub.deploymentStatus.lastDeployedAt ? (
+                <p className="m-0 text-[var(--sp-muted)]">
+                  Last deployed: {formatSriLankaDate(hub.deploymentStatus.lastDeployedAt)}
+                </p>
+              ) : null}
+              {hub.deploymentStatus.productionUrl ? (
+                <p className="m-0 font-mono text-xs">{hub.deploymentStatus.productionUrl}</p>
+              ) : null}
+              {hub.deploymentStatus.devUrl ? (
+                <p className="m-0 font-mono text-xs text-[var(--sp-muted)]">
+                  Dev: {hub.deploymentStatus.devUrl}
+                </p>
+              ) : null}
+            </div>
+          ) : (
+            <p className="text-sm text-[var(--sp-muted)]">No deployment information.</p>
+          )}
+        </DashboardCard>
+
+        <div className="lg:col-span-2">
+          <ProjectResourcesPanel projectId={erpProjectId} />
+        </div>
       </div>
 
       <div className="grid lg:grid-cols-2 gap-5">

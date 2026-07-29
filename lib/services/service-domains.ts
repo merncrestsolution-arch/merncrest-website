@@ -1,6 +1,7 @@
 import type { DomainStatus, Prisma } from "@prisma/client";
 import { prisma } from "@/lib/db";
 import { SL_TIMEZONE } from "@/lib/timezone";
+import { parseDomainParts } from "@/shared/domain-registrars";
 import { DNS_RECORDS_SCHEMA } from "@/shared/service-types";
 
 const EXPIRING_SOON_DAYS = 30;
@@ -43,8 +44,14 @@ export type CreateServiceDomainInput = {
   purchasedViaMernCrest?: boolean;
   registrationDate: Date;
   expiryDate: Date;
+  renewalDate?: Date | null;
+  registrationPeriodMonths?: number | null;
   nameservers?: string[];
   dnsRecords?: unknown;
+  dnsZone?: string | null;
+  sslCertificateStatus?: string;
+  autoRenew?: boolean;
+  whoisStatus?: string | null;
   domainStatus?: DomainStatus;
   actorId: string;
 };
@@ -68,16 +75,25 @@ export async function createServiceDomain(input: CreateServiceDomainInput) {
     ? DNS_RECORDS_SCHEMA.parse(input.dnsRecords)
     : null;
 
+  const { extension } = parseDomainParts(input.domainName);
+
   const domain = await prisma.serviceDomain.create({
     data: {
       projectServiceId: input.projectServiceId,
       domainName: input.domainName,
+      domainExtension: extension || null,
       registrar: input.registrar ?? null,
       purchasedViaMernCrest: input.purchasedViaMernCrest ?? false,
       registrationDate: input.registrationDate,
       expiryDate: input.expiryDate,
+      renewalDate: input.renewalDate ?? null,
+      registrationPeriodMonths: input.registrationPeriodMonths ?? null,
       nameservers: input.nameservers ?? [],
       dnsRecords: dnsRecords ?? undefined,
+      dnsZone: input.dnsZone ?? input.domainName,
+      sslCertificateStatus: input.sslCertificateStatus ?? "UNKNOWN",
+      autoRenew: input.autoRenew ?? false,
+      whoisStatus: input.whoisStatus ?? null,
       domainStatus: input.domainStatus ?? "ACTIVE",
       createdBy: input.actorId,
       updatedBy: input.actorId,
@@ -95,6 +111,12 @@ export type UpdateServiceDomainInput = {
   registrar?: string | null;
   registrationDate?: Date;
   expiryDate?: Date;
+  renewalDate?: Date | null;
+  registrationPeriodMonths?: number | null;
+  dnsZone?: string | null;
+  sslCertificateStatus?: string;
+  autoRenew?: boolean;
+  whoisStatus?: string | null;
   domainStatus?: DomainStatus;
   purchasedViaMernCrest?: boolean;
   actorId: string;
@@ -127,6 +149,30 @@ export async function updateServiceDomain(
   if (input.expiryDate !== undefined) {
     data.expiryDate = input.expiryDate;
     changes.expiryDate = input.expiryDate;
+  }
+  if (input.renewalDate !== undefined) {
+    data.renewalDate = input.renewalDate;
+    changes.renewalDate = input.renewalDate;
+  }
+  if (input.registrationPeriodMonths !== undefined) {
+    data.registrationPeriodMonths = input.registrationPeriodMonths;
+    changes.registrationPeriodMonths = input.registrationPeriodMonths;
+  }
+  if (input.dnsZone !== undefined) {
+    data.dnsZone = input.dnsZone;
+    changes.dnsZone = input.dnsZone;
+  }
+  if (input.sslCertificateStatus !== undefined) {
+    data.sslCertificateStatus = input.sslCertificateStatus;
+    changes.sslCertificateStatus = input.sslCertificateStatus;
+  }
+  if (input.autoRenew !== undefined) {
+    data.autoRenew = input.autoRenew;
+    changes.autoRenew = input.autoRenew;
+  }
+  if (input.whoisStatus !== undefined) {
+    data.whoisStatus = input.whoisStatus;
+    changes.whoisStatus = input.whoisStatus;
   }
 
   if (canMutateLifecycle || informationalOnly) {
@@ -253,14 +299,22 @@ export function serializeServiceDomain(
     id: domain.id,
     projectServiceId: domain.projectServiceId,
     domainName: domain.domainName,
+    domainExtension: domain.domainExtension,
     registrar: domain.registrar,
     purchasedViaMernCrest: domain.purchasedViaMernCrest,
     registrationDate: domain.registrationDate,
     expiryDate: domain.expiryDate,
+    renewalDate: domain.renewalDate,
+    registrationPeriodMonths: domain.registrationPeriodMonths,
     nameservers: domain.nameservers,
     dnsRecords: domain.dnsRecords,
+    dnsZone: domain.dnsZone,
+    sslCertificateStatus: domain.sslCertificateStatus,
+    autoRenew: domain.autoRenew,
+    whoisStatus: domain.whoisStatus,
     domainStatus: domain.domainStatus,
     effectiveDomainStatus: effectiveStatus,
+    dnsRecordCount: Array.isArray(domain.dnsRecords) ? domain.dnsRecords.length : 0,
     createdAt: domain.createdAt,
     updatedAt: domain.updatedAt,
     history: "history" in domain ? domain.history : undefined,

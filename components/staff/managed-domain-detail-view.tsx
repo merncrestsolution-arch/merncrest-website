@@ -2,8 +2,10 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { Link } from "@/i18n/routing";
+import { useSearchParams } from "next/navigation";
 import { ArrowLeft, Loader2 } from "lucide-react";
 import { formatSriLankaDate, formatSriLankaDateTime } from "@/lib/timezone";
+import { DOMAIN_REGISTRARS, registrarLabel } from "@/shared/domain-registrars";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -29,12 +31,19 @@ type ManagedDomain = {
   id: string;
   projectServiceId: string;
   domainName: string;
+  domainExtension?: string | null;
   registrar: string | null;
   purchasedViaMernCrest: boolean;
   registrationDate: string;
   expiryDate: string;
+  renewalDate?: string | null;
+  registrationPeriodMonths?: number | null;
   nameservers: string[];
   dnsRecords: DnsRecord[] | null;
+  dnsZone?: string | null;
+  sslCertificateStatus?: string;
+  autoRenew?: boolean;
+  whoisStatus?: string | null;
   domainStatus: string;
   effectiveDomainStatus: string;
   history?: HistoryEntry[];
@@ -50,8 +59,10 @@ function statusVariant(status: string): "success" | "warning" | "destructive" | 
 }
 
 export function ManagedDomainDetailView({ domainId }: { domainId: string }) {
+  const searchParams = useSearchParams();
+  const initialTab = (searchParams.get("tab") as Tab) || "overview";
   const [data, setData] = useState<ManagedDomain | null>(null);
-  const [tab, setTab] = useState<Tab>("overview");
+  const [tab, setTab] = useState<Tab>(initialTab);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
@@ -188,10 +199,14 @@ export function ManagedDomainDetailView({ domainId }: { domainId: string }) {
 
       {tab === "overview" && (
         <section className="stitch-section-card">
-          <div className="stitch-section-body grid sm:grid-cols-2 gap-4 text-sm">
+          <div className="stitch-section-body grid sm:grid-cols-2 lg:grid-cols-3 gap-4 text-sm">
+            <div>
+              <span className="text-[var(--sp-muted)]">Extension</span>
+              <p className="font-medium">.{data.domainExtension || "—"}</p>
+            </div>
             <div>
               <span className="text-[var(--sp-muted)]">Registrar</span>
-              <p className="font-medium">{data.registrar || "—"}</p>
+              <p className="font-medium">{registrarLabel(data.registrar)}</p>
             </div>
             <div>
               <span className="text-[var(--sp-muted)]">Registered</span>
@@ -200,6 +215,34 @@ export function ManagedDomainDetailView({ domainId }: { domainId: string }) {
             <div>
               <span className="text-[var(--sp-muted)]">Expires</span>
               <p className="font-medium">{formatSriLankaDate(data.expiryDate)}</p>
+            </div>
+            <div>
+              <span className="text-[var(--sp-muted)]">Renewal date</span>
+              <p className="font-medium">
+                {data.renewalDate ? formatSriLankaDate(data.renewalDate) : "—"}
+              </p>
+            </div>
+            <div>
+              <span className="text-[var(--sp-muted)]">Registration period</span>
+              <p className="font-medium">
+                {data.registrationPeriodMonths ? `${data.registrationPeriodMonths} months` : "—"}
+              </p>
+            </div>
+            <div>
+              <span className="text-[var(--sp-muted)]">DNS zone</span>
+              <p className="font-medium font-mono text-xs">{data.dnsZone || data.domainName}</p>
+            </div>
+            <div>
+              <span className="text-[var(--sp-muted)]">SSL status</span>
+              <p className="font-medium">{data.sslCertificateStatus ?? "—"}</p>
+            </div>
+            <div>
+              <span className="text-[var(--sp-muted)]">Auto-renew</span>
+              <p className="font-medium">{data.autoRenew ? "Enabled" : "Disabled"}</p>
+            </div>
+            <div>
+              <span className="text-[var(--sp-muted)]">WHOIS status</span>
+              <p className="font-medium">{data.whoisStatus || "—"}</p>
             </div>
             <div>
               <span className="text-[var(--sp-muted)]">Service ID</span>
@@ -276,7 +319,7 @@ export function ManagedDomainDetailView({ domainId }: { domainId: string }) {
                       )
                     }
                   >
-                    {["A", "AAAA", "CNAME", "MX", "TXT", "NS", "SRV"].map((t) => (
+                    {["A", "AAAA", "CNAME", "MX", "TXT", "NS", "SRV", "REDIRECT"].map((t) => (
                       <option key={t} value={t}>
                         {t}
                       </option>
