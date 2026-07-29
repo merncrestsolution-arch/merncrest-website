@@ -1,6 +1,5 @@
-import { Suspense } from "react";
-import { StaffServiceProjectDetail } from "@/components/staff/staff-service-project-detail";
-import { LoadingState } from "@/components/system/loading-state";
+import { prisma } from "@/lib/db";
+import { redirect } from "next/navigation";
 
 export default async function Page({
   params,
@@ -8,9 +7,14 @@ export default async function Page({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  return (
-    <Suspense fallback={<LoadingState />}>
-      <StaffServiceProjectDetail projectId={id} />
-    </Suspense>
-  );
+  const serviceProject = await prisma.project.findFirst({
+    where: { id, deletedAt: null },
+    select: { erpProjectId: true },
+  });
+
+  if (serviceProject?.erpProjectId) {
+    redirect(`/staff/projects/${serviceProject.erpProjectId}#services`);
+  }
+
+  redirect("/staff/projects");
 }

@@ -43,7 +43,7 @@ type ManagedDomainRow = {
   expiryDate: string;
   registrar: string | null;
   purchasedViaMernCrest: boolean;
-  project: { id: string; name: string };
+  project: { id: string; name: string; erpProjectId?: string | null };
   client: { id: string; fullName: string; email: string; company: string | null };
 };
 
@@ -351,7 +351,11 @@ export function StaffDomainsPanel() {
                     </td>
                     <td>
                       <Link
-                        href={`/staff/service-projects/${d.project.id}`}
+                        href={
+                          d.project.erpProjectId
+                            ? `/staff/projects/${d.project.erpProjectId}#services`
+                            : `/staff/service-projects/${d.project.id}`
+                        }
                         className="hover:text-violet-400"
                       >
                         {d.project.name}

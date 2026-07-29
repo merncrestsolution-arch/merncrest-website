@@ -86,7 +86,7 @@ const navGroups: NavGroup[] = [
     items: [
       { href: "/staff/clients", label: "Clients", icon: Users },
       { href: "/staff/projects", label: "Projects", icon: FolderKanban },
-      { href: "/staff/service-projects", label: "Service Projects", icon: Briefcase },
+      { href: "/staff/services/new", label: "Add service", icon: Briefcase },
       { href: "/staff/projects/progress", label: "Progress tracker", icon: BarChart3 },
     ],
   },

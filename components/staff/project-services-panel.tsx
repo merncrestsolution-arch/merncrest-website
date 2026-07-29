@@ -1,11 +1,12 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link } from "@/i18n/routing";
 import { Globe2, Loader2, Plus, Server } from "lucide-react";
 import type { BillingCycle, ServiceType } from "@prisma/client";
 import { formatSriLankaDate } from "@/lib/timezone";
 import { getServiceTypeLabel } from "@/shared/service-types";
+import { calculateServiceDates, FREE_PERIOD_PRESETS } from "@/shared/renewal-calculator";
 import { EmptyState } from "@/components/system/empty-state";
 import { LoadingState } from "@/components/system/loading-state";
 import { ErrorState } from "@/components/system/error-state";
@@ -20,12 +21,10 @@ type ProjectService = {
   billingCycle: BillingCycle;
   renewalDate: string | null;
   expiryDate: string | null;
+  metadata: unknown;
   createdAt: string;
-};
-
-type EnrichedService = ProjectService & {
-  domainId?: string | null;
-  hostingId?: string | null;
+  domain?: { id: string; domainName: string } | null;
+  hosting?: { id: string; packageName: string } | null;
 };
 
 const SERVICE_TYPES: ServiceType[] = [
@@ -50,8 +49,22 @@ function statusChip(status: string) {
   return "stitch-chip stitch-chip-violet";
 }
 
-export function ProjectServicesPanel({ projectId }: { projectId: string }) {
-  const [services, setServices] = useState<EnrichedService[]>([]);
+function readMeta(metadata: unknown): Record<string, unknown> {
+  if (metadata && typeof metadata === "object" && !Array.isArray(metadata)) {
+    return metadata as Record<string, unknown>;
+  }
+  return {};
+}
+
+export function ProjectServicesPanel({
+  erpProjectId,
+  onChanged,
+}: {
+  erpProjectId: string;
+  onChanged?: () => void;
+}) {
+  const [services, setServices] = useState<ProjectService[]>([]);
+  const [serviceProjectId, setServiceProjectId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [showForm, setShowForm] = useState(false);
@@ -60,57 +73,42 @@ export function ProjectServicesPanel({ projectId }: { projectId: string }) {
     serviceType: "DOMAIN_REGISTRATION" as ServiceType,
     startDate: new Date().toISOString().slice(0, 10),
     billingCycle: "ANNUAL" as BillingCycle,
-    freePeriodDays: "",
+    freePeriodPreset: "0",
     renewalCostLkr: "",
     serviceCostLkr: "",
+    notes: "",
+    assignedStaffId: "",
   });
 
   const load = useCallback(() => {
     setLoading(true);
     setError("");
-
-    Promise.all([
-      fetch(`/api/projects/${projectId}/services?limit=100`).then((r) => r.json()),
-      fetch(`/api/staff/service-projects/${projectId}`).then((r) => r.json()),
-    ])
-      .then(([servicesRes, detailRes]) => {
-        if (!servicesRes.success) {
-          throw new Error(servicesRes.error?.message ?? "Failed to load services");
-        }
-
-        const enrichment = new Map<
-          string,
-          { domainId: string | null; hostingId: string | null }
-        >();
-        if (detailRes.success && detailRes.data?.services) {
-          for (const s of detailRes.data.services as Array<{
-            id: string;
-            domain?: { id: string } | null;
-            hosting?: { id: string } | null;
-          }>) {
-            enrichment.set(s.id, {
-              domainId: s.domain?.id ?? null,
-              hostingId: s.hosting?.id ?? null,
-            });
-          }
-        }
-
-        const rows = (servicesRes.data ?? []) as ProjectService[];
-        setServices(
-          rows.map((s) => ({
-            ...s,
-            domainId: enrichment.get(s.id)?.domainId ?? null,
-            hostingId: enrichment.get(s.id)?.hostingId ?? null,
-          }))
-        );
+    fetch(`/api/staff/projects/${erpProjectId}/services`)
+      .then(async (r) => {
+        const d = await r.json();
+        if (!d.success) throw new Error(d.error?.message ?? "Failed to load services");
+        setServices(d.data?.services ?? []);
+        setServiceProjectId(d.data?.serviceProjectId ?? null);
       })
       .catch((e) => setError(e instanceof Error ? e.message : "Failed"))
       .finally(() => setLoading(false));
-  }, [projectId]);
+  }, [erpProjectId]);
 
   useEffect(() => {
     load();
   }, [load]);
+
+  const datePreview = useMemo(() => {
+    const freePeriodDays = Number(form.freePeriodPreset) || 0;
+    const startDate = new Date(`${form.startDate}T00:00:00.000Z`);
+    if (Number.isNaN(startDate.getTime())) return null;
+    const dates = calculateServiceDates({
+      startDate,
+      freePeriodDays,
+      billingCycle: form.billingCycle,
+    });
+    return dates;
+  }, [form.startDate, form.freePeriodPreset, form.billingCycle]);
 
   async function attachService(e: React.FormEvent) {
     e.preventDefault();
@@ -118,20 +116,21 @@ export function ProjectServicesPanel({ projectId }: { projectId: string }) {
     setError("");
 
     const startDate = new Date(`${form.startDate}T00:00:00.000Z`).toISOString();
-    const freePeriodDays = form.freePeriodDays ? Number(form.freePeriodDays) : null;
+    const freePeriodDays = Number(form.freePeriodPreset) || 0;
     const renewalCostCents = form.renewalCostLkr
       ? Math.round(Number(form.renewalCostLkr) * 100)
       : undefined;
     const serviceCostCents = form.serviceCostLkr
       ? Math.round(Number(form.serviceCostLkr) * 100)
       : undefined;
-    const metadata: Record<string, number> = {};
+    const metadata: Record<string, unknown> = {};
     if (renewalCostCents && renewalCostCents > 0) metadata.renewalCostCents = renewalCostCents;
     if (serviceCostCents && serviceCostCents > 0) metadata.serviceCostCents = serviceCostCents;
-    const metadataPayload = Object.keys(metadata).length ? metadata : undefined;
+    if (form.notes.trim()) metadata.notes = form.notes.trim();
+    if (form.assignedStaffId.trim()) metadata.assignedStaffId = form.assignedStaffId.trim();
 
     try {
-      const r = await fetch(`/api/projects/${projectId}/services`, {
+      const r = await fetch(`/api/staff/projects/${erpProjectId}/services`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -139,7 +138,9 @@ export function ProjectServicesPanel({ projectId }: { projectId: string }) {
           startDate,
           billingCycle: form.billingCycle,
           freePeriodDays,
-          metadata: metadataPayload,
+          metadata: Object.keys(metadata).length ? metadata : undefined,
+          notes: form.notes.trim() || undefined,
+          assignedStaffId: form.assignedStaffId.trim() || undefined,
         }),
       });
       const d = await r.json();
@@ -150,11 +151,14 @@ export function ProjectServicesPanel({ projectId }: { projectId: string }) {
         serviceType: "DOMAIN_REGISTRATION",
         startDate: new Date().toISOString().slice(0, 10),
         billingCycle: "ANNUAL",
-        freePeriodDays: "",
+        freePeriodPreset: "0",
         renewalCostLkr: "",
         serviceCostLkr: "",
+        notes: "",
+        assignedStaffId: "",
       });
       load();
+      onChanged?.();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed");
     } finally {
@@ -162,31 +166,31 @@ export function ProjectServicesPanel({ projectId }: { projectId: string }) {
     }
   }
 
-  function setupLink(service: EnrichedService) {
+  function setupLink(service: ProjectService) {
     if (service.serviceType === "DOMAIN_REGISTRATION") {
-      if (service.domainId) {
+      if (service.domain) {
         return {
-          href: `/staff/domains/managed/${service.domainId}`,
+          href: `/staff/domains/managed/${service.domain.id}`,
           label: "View domain",
           icon: Globe2,
         };
       }
       return {
-        href: `/staff/service-projects/${projectId}?setup=domain&serviceId=${service.id}`,
+        href: `/staff/projects/${erpProjectId}?setup=domain&serviceId=${service.id}`,
         label: "Setup domain",
         icon: Globe2,
       };
     }
     if (service.serviceType === "HOSTING") {
-      if (service.hostingId) {
+      if (service.hosting) {
         return {
-          href: `/staff/hosting/managed/${service.hostingId}`,
+          href: `/staff/hosting/managed/${service.hosting.id}`,
           label: "View hosting",
           icon: Server,
         };
       }
       return {
-        href: `/staff/service-projects/${projectId}?setup=hosting&serviceId=${service.id}`,
+        href: `/staff/projects/${erpProjectId}?setup=hosting&serviceId=${service.id}`,
         label: "Setup hosting",
         icon: Server,
       };
@@ -195,20 +199,11 @@ export function ProjectServicesPanel({ projectId }: { projectId: string }) {
   }
 
   return (
-    <div>
-      <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
-        <div>
-          <h3 className="text-base font-semibold m-0">Project services</h3>
-          <p className="text-sm text-[var(--sp-muted)] m-0">
-            Domains, hosting, and other billable services attached to this project.
-          </p>
-        </div>
-        <button type="button" className="stitch-btn-primary-sm" onClick={() => setShowForm(true)}>
-          <Plus className="h-4 w-4" />
-          Attach service
-        </button>
-      </div>
-
+    <DashboardCardShell
+      title="Services"
+      description="All billable services for this project — domains, hosting, security, and more."
+      onAdd={() => setShowForm(true)}
+    >
       {error ? <p className="stitch-auth-error mb-4">{error}</p> : null}
 
       {loading ? (
@@ -218,70 +213,74 @@ export function ProjectServicesPanel({ projectId }: { projectId: string }) {
       ) : services.length === 0 ? (
         <EmptyState
           icon={Server}
-          title="No services attached"
-          description="Attach a domain, hosting, or other service to this project."
+          title="No services yet"
+          description="Add a domain, hosting, or other service to this project."
         />
       ) : (
-        <section className="stitch-section-card">
-          <div className="stitch-section-body overflow-x-auto !p-0">
-            <table className="stitch-table">
-              <thead>
-                <tr>
-                  <th>Service</th>
-                  <th>Status</th>
-                  <th>Start</th>
-                  <th>Billing</th>
-                  <th>Renewal</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {services.map((s) => {
-                  const link = setupLink(s);
-                  const Icon = link?.icon;
-                  return (
-                    <tr key={s.id}>
-                      <td>
-                        <span className="font-medium">{getServiceTypeLabel(s.serviceType)}</span>
-                        <span className="text-xs text-[var(--sp-muted)] block font-mono">{s.id.slice(0, 8)}…</span>
-                      </td>
-                      <td>
-                        <span className={statusChip(s.status)}>{s.status}</span>
-                      </td>
-                      <td>{formatSriLankaDate(s.startDate)}</td>
-                      <td>
-                        {s.billingCycle.replace("_", " ")}
-                        {s.freePeriodDays ? (
-                          <span className="text-xs text-[var(--sp-muted)] block">
-                            {s.freePeriodDays}d free
-                          </span>
-                        ) : null}
-                      </td>
-                      <td>{formatSriLankaDate(s.renewalDate)}</td>
-                      <td>
-                        {link && Icon ? (
-                          <Link href={link.href} className="stitch-btn-outline-sm inline-flex">
-                            <Icon className="h-3.5 w-3.5" />
-                            {link.label}
-                          </Link>
-                        ) : (
-                          <span className="text-xs text-[var(--sp-muted)]">—</span>
-                        )}
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
-        </section>
+        <div className="grid md:grid-cols-2 gap-4">
+          {services.map((s) => {
+            const link = setupLink(s);
+            const Icon = link?.icon;
+            const meta = readMeta(s.metadata);
+            return (
+              <div
+                key={s.id}
+                className="rounded-xl border border-[var(--sp-outline)] bg-[var(--stitch-surface-low)] p-4 space-y-3"
+              >
+                <div className="flex justify-between gap-2">
+                  <div>
+                    <p className="font-medium m-0">{getServiceTypeLabel(s.serviceType)}</p>
+                    <p className="text-xs text-[var(--sp-muted)] m-0">{s.serviceType}</p>
+                  </div>
+                  <span className={statusChip(s.status)}>{s.status}</span>
+                </div>
+                <div className="grid grid-cols-2 gap-2 text-xs">
+                  <div>
+                    <span className="text-[var(--sp-muted)]">Activation</span>
+                    <p className="m-0">{formatSriLankaDate(s.startDate)}</p>
+                  </div>
+                  <div>
+                    <span className="text-[var(--sp-muted)]">Renewal</span>
+                    <p className="m-0">{s.renewalDate ? formatSriLankaDate(s.renewalDate) : "—"}</p>
+                  </div>
+                  <div>
+                    <span className="text-[var(--sp-muted)]">Expiry</span>
+                    <p className="m-0">{s.expiryDate ? formatSriLankaDate(s.expiryDate) : "—"}</p>
+                  </div>
+                  <div>
+                    <span className="text-[var(--sp-muted)]">Cycle</span>
+                    <p className="m-0">{s.billingCycle.replace("_", " ")}</p>
+                  </div>
+                  {s.freePeriodDays ? (
+                    <div>
+                      <span className="text-[var(--sp-muted)]">Free period</span>
+                      <p className="m-0">{s.freePeriodDays} days</p>
+                    </div>
+                  ) : null}
+                  {typeof meta.notes === "string" && meta.notes ? (
+                    <div className="col-span-2">
+                      <span className="text-[var(--sp-muted)]">Notes</span>
+                      <p className="m-0">{meta.notes}</p>
+                    </div>
+                  ) : null}
+                </div>
+                {link && Icon ? (
+                  <Link href={link.href} className="stitch-btn-outline-sm inline-flex">
+                    <Icon className="h-3.5 w-3.5" />
+                    {link.label}
+                  </Link>
+                ) : null}
+              </div>
+            );
+          })}
+        </div>
       )}
 
       {showForm ? (
         <div className="stitch-modal-backdrop" onClick={() => setShowForm(false)}>
-          <div className="stitch-modal" onClick={(e) => e.stopPropagation()}>
+          <div className="stitch-modal max-w-lg" onClick={(e) => e.stopPropagation()}>
             <div className="stitch-modal-head">
-              <h3>Attach service</h3>
+              <h3>Add service</h3>
               <button type="button" className="stitch-btn-sm" onClick={() => setShowForm(false)}>
                 Close
               </button>
@@ -331,16 +330,32 @@ export function ProjectServicesPanel({ projectId }: { projectId: string }) {
                 </select>
               </label>
               <label className="block space-y-1">
-                <span className="text-[var(--sp-muted)]">Free period (days)</span>
-                <input
-                  type="number"
-                  min={0}
+                <span className="text-[var(--sp-muted)]">Free period</span>
+                <select
                   className="stitch-input w-full"
-                  value={form.freePeriodDays}
-                  onChange={(e) => setForm((f) => ({ ...f, freePeriodDays: e.target.value }))}
-                  placeholder="Optional"
-                />
+                  value={form.freePeriodPreset}
+                  onChange={(e) => setForm((f) => ({ ...f, freePeriodPreset: e.target.value }))}
+                >
+                  {FREE_PERIOD_PRESETS.map((p) => (
+                    <option key={p.days} value={String(p.days)}>
+                      {p.label}
+                    </option>
+                  ))}
+                </select>
               </label>
+              {datePreview ? (
+                <div className="rounded-lg bg-violet-500/10 border border-violet-500/20 p-3 text-xs space-y-1">
+                  <p className="m-0">
+                    <strong>Next billing:</strong> {formatSriLankaDate(datePreview.nextBillingDate)}
+                  </p>
+                  <p className="m-0">
+                    <strong>Renewal date:</strong> {formatSriLankaDate(datePreview.renewalDate)}
+                  </p>
+                  <p className="m-0">
+                    <strong>Expiry date:</strong> {formatSriLankaDate(datePreview.expiryDate)}
+                  </p>
+                </div>
+              ) : null}
               <label className="block space-y-1">
                 <span className="text-[var(--sp-muted)]">Service cost (LKR)</span>
                 <input
@@ -350,7 +365,6 @@ export function ProjectServicesPanel({ projectId }: { projectId: string }) {
                   className="stitch-input w-full"
                   value={form.serviceCostLkr}
                   onChange={(e) => setForm((f) => ({ ...f, serviceCostLkr: e.target.value }))}
-                  placeholder="Initial / setup cost"
                 />
               </label>
               <label className="block space-y-1">
@@ -362,7 +376,23 @@ export function ProjectServicesPanel({ projectId }: { projectId: string }) {
                   className="stitch-input w-full"
                   value={form.renewalCostLkr}
                   onChange={(e) => setForm((f) => ({ ...f, renewalCostLkr: e.target.value }))}
-                  placeholder="Used for auto renewal invoices"
+                />
+              </label>
+              <label className="block space-y-1">
+                <span className="text-[var(--sp-muted)]">Assigned staff ID</span>
+                <input
+                  className="stitch-input w-full"
+                  value={form.assignedStaffId}
+                  onChange={(e) => setForm((f) => ({ ...f, assignedStaffId: e.target.value }))}
+                  placeholder="Optional user ID"
+                />
+              </label>
+              <label className="block space-y-1">
+                <span className="text-[var(--sp-muted)]">Notes</span>
+                <textarea
+                  className="stitch-input w-full min-h-[72px]"
+                  value={form.notes}
+                  onChange={(e) => setForm((f) => ({ ...f, notes: e.target.value }))}
                 />
               </label>
               <div className="flex justify-end gap-2 pt-2">
@@ -370,13 +400,41 @@ export function ProjectServicesPanel({ projectId }: { projectId: string }) {
                   Cancel
                 </button>
                 <button type="submit" className="stitch-btn-primary-sm" disabled={busy}>
-                  {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : "Attach"}
+                  {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : "Add service"}
                 </button>
               </div>
             </form>
           </div>
         </div>
       ) : null}
-    </div>
+    </DashboardCardShell>
+  );
+}
+
+function DashboardCardShell({
+  title,
+  description,
+  onAdd,
+  children,
+}: {
+  title: string;
+  description: string;
+  onAdd: () => void;
+  children: React.ReactNode;
+}) {
+  return (
+    <section className="stitch-section-card">
+      <div className="stitch-section-head">
+        <div>
+          <h3 className="m-0 text-base">{title}</h3>
+          <p className="text-sm text-[var(--sp-muted)] m-0 mt-1">{description}</p>
+        </div>
+        <button type="button" className="stitch-btn-primary-sm" onClick={onAdd}>
+          <Plus className="h-4 w-4" />
+          Add service
+        </button>
+      </div>
+      <div className="stitch-section-body">{children}</div>
+    </section>
   );
 }

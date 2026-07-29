@@ -125,3 +125,31 @@ export function calculateRenewalDate(params: RenewalParams): Date {
   const afterFreePeriod = addCalendarDaysInTimezone(startDate, freePeriodDays, SL_TIMEZONE);
   return addBillingCycleInTimezone(afterFreePeriod, billingCycle, SL_TIMEZONE);
 }
+
+export type ServiceDates = {
+  renewalDate: Date;
+  expiryDate: Date;
+  nextBillingDate: Date;
+};
+
+/**
+ * Computes renewal, expiry, and next billing dates for a service lifecycle.
+ * Expiry aligns with renewal; next billing is the start of the paid period after free period.
+ */
+export function calculateServiceDates(params: RenewalParams): ServiceDates {
+  const { startDate, freePeriodDays = 0, billingCycle } = params;
+  const afterFreePeriod = addCalendarDaysInTimezone(startDate, freePeriodDays, SL_TIMEZONE);
+  const renewalDate = addBillingCycleInTimezone(afterFreePeriod, billingCycle, SL_TIMEZONE);
+  return {
+    renewalDate,
+    expiryDate: renewalDate,
+    nextBillingDate: afterFreePeriod,
+  };
+}
+
+export const FREE_PERIOD_PRESETS = [
+  { label: "No free period", days: 0 },
+  { label: "3 months free", days: 90 },
+  { label: "6 months free", days: 182 },
+  { label: "12 months free", days: 365 },
+] as const;

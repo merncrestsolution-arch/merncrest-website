@@ -33,15 +33,15 @@ function statusChip(status: string) {
   return "stitch-chip stitch-chip-violet";
 }
 
-function ServiceDetailCard({ service, serviceProjectId }: { service: HubService; serviceProjectId: string }) {
+function ServiceDetailCard({ service, erpProjectId }: { service: HubService; erpProjectId: string }) {
   const setupLink = () => {
     if (service.serviceType === "DOMAIN_REGISTRATION") {
       if (service.domain) return `/staff/domains/managed/${service.domain.id}`;
-      return `/staff/service-projects/${serviceProjectId}?setup=domain&serviceId=${service.id}`;
+      return `/staff/projects/${erpProjectId}?setup=domain&serviceId=${service.id}`;
     }
     if (service.serviceType === "HOSTING") {
       if (service.hosting) return `/staff/hosting/managed/${service.hosting.id}`;
-      return `/staff/service-projects/${serviceProjectId}?setup=hosting&serviceId=${service.id}`;
+      return `/staff/projects/${erpProjectId}?setup=hosting&serviceId=${service.id}`;
     }
     return null;
   };
@@ -294,13 +294,13 @@ export function ProjectHubServices({ hub }: { hub: ProjectHubData }) {
       <section className="stitch-section-card">
         <div className="stitch-section-body text-center py-8">
           <p className="text-[var(--sp-muted)] mb-4">
-            No service project linked. Create one to attach domains, hosting, and billable services.
+            No services attached yet. Add domains, hosting, security, and other billable services from this project.
           </p>
           <Link
-            href={`/staff/service-projects?erpProjectId=${hub.erpProject.id}&name=${encodeURIComponent(hub.erpProject.name)}`}
+            href={`/staff/projects/${hub.erpProject.id}#services`}
             className="stitch-btn-primary-sm"
           >
-            Create service project
+            Add first service
           </Link>
         </div>
       </section>
@@ -328,7 +328,7 @@ export function ProjectHubServices({ hub }: { hub: ProjectHubData }) {
       <section className="stitch-section-card">
         <div className="stitch-section-body text-center py-8">
           <p className="text-[var(--sp-muted)] mb-4">No services attached yet.</p>
-          <Link href={`/staff/service-projects/${hub.serviceProject.id}`} className="stitch-btn-primary-sm">
+          <Link href={`/staff/projects/${hub.erpProject.id}#services`} className="stitch-btn-primary-sm">
             Attach services
           </Link>
         </div>
@@ -351,7 +351,7 @@ export function ProjectHubServices({ hub }: { hub: ProjectHubData }) {
               <ServiceDetailCard
                 key={service.id}
                 service={service}
-                serviceProjectId={hub.serviceProject!.id}
+                erpProjectId={hub.erpProject.id}
               />
             ))}
           </div>

@@ -64,6 +64,7 @@ export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const view = searchParams.get("view");
   const projectId = searchParams.get("projectId");
+  const customerId = searchParams.get("customerId");
 
   if (view === "workload") {
     const tasks = await prisma.projectTask.findMany({
@@ -181,7 +182,11 @@ export async function GET(request: Request) {
   }
 
   const projects = await prisma.erpProject.findMany({
-    where: projectId ? { id: projectId } : undefined,
+    where: projectId
+      ? { id: projectId }
+      : customerId
+        ? { customerId }
+        : undefined,
     include: {
       department: true,
       customer: {

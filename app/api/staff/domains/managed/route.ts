@@ -15,6 +15,7 @@ function enrichDomain(
         id: string;
         name: string;
         status: string;
+        erpProjectId: string | null;
         client: { id: string; fullName: string; email: string; company: string | null };
       };
     };
@@ -32,6 +33,7 @@ function enrichDomain(
       id: domain.projectService.project.id,
       name: domain.projectService.project.name,
       status: domain.projectService.project.status,
+      erpProjectId: domain.projectService.project.erpProjectId,
     },
     client: domain.projectService.project.client,
   };

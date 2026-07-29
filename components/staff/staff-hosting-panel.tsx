@@ -28,7 +28,7 @@ type ManagedHostingRow = {
     disk: { usedMb: number; quotaMb: number; percentage: number };
     bandwidth: { usedMb: number; quotaMb: number; percentage: number };
   };
-  project: { id: string; name: string };
+  project: { id: string; name: string; erpProjectId?: string | null };
   client: { id: string; fullName: string; email: string; company: string | null };
 };
 
@@ -197,7 +197,11 @@ export function StaffHostingPanel() {
                     </td>
                     <td>
                       <Link
-                        href={`/staff/service-projects/${a.project.id}`}
+                        href={
+                          a.project.erpProjectId
+                            ? `/staff/projects/${a.project.erpProjectId}#services`
+                            : `/staff/service-projects/${a.project.id}`
+                        }
                         className="hover:text-violet-400"
                       >
                         {a.project.name}

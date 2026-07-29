@@ -219,7 +219,11 @@ export function DomainDocsReviewPanel() {
                     <td>
                       {r.projectService?.project ? (
                         <Link
-                          href={`/staff/service-projects/${r.projectService.project.id}`}
+                          href={
+                            r.projectService.project.erpProjectId
+                              ? `/staff/projects/${r.projectService.project.erpProjectId}#services`
+                              : `/staff/service-projects/${r.projectService.project.id}`
+                          }
                           className="hover:text-violet-400"
                         >
                           {r.projectService.project.name}

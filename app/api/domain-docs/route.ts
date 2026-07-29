@@ -38,7 +38,7 @@ function serializeSubmission(row: {
   projectService?: {
     id: string;
     serviceType: string;
-    project?: { id: string; name: string; clientId: string };
+    project?: { id: string; name: string; clientId: string; erpProjectId: string | null };
   };
   submitter?: { id: string; fullName: string; email: string };
   reviewer?: { id: string; fullName: string; email: string } | null;
@@ -129,7 +129,7 @@ export async function GET(request: Request) {
           select: {
             id: true,
             serviceType: true,
-            project: { select: { id: true, name: true, clientId: true } },
+            project: { select: { id: true, name: true, clientId: true, erpProjectId: true } },
           },
         },
         submitter: { select: { id: true, fullName: true, email: true } },

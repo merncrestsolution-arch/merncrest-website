@@ -1,11 +1,15 @@
-import { Suspense } from "react";
-import { StaffServiceProjectsPanel } from "@/components/staff/staff-service-projects-panel";
-import { LoadingState } from "@/components/system/loading-state";
+import { redirect } from "next/navigation";
 
-export default function Page() {
-  return (
-    <Suspense fallback={<LoadingState />}>
-      <StaffServiceProjectsPanel />
-    </Suspense>
-  );
+export default async function Page({
+  searchParams,
+}: {
+  searchParams: Promise<{ erpProjectId?: string; name?: string }>;
+}) {
+  const params = await searchParams;
+  if (params.erpProjectId) {
+    const q = new URLSearchParams();
+    if (params.name) q.set("name", params.name);
+    redirect(`/staff/projects/${params.erpProjectId}${q.size ? `?${q}` : ""}#services`);
+  }
+  redirect("/staff/projects");
 }

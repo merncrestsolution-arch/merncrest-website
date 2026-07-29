@@ -15,6 +15,7 @@ function enrichHosting(
         id: string;
         name: string;
         status: string;
+        erpProjectId: string | null;
         client: { id: string; fullName: string; email: string; company: string | null };
       };
     };
@@ -32,6 +33,7 @@ function enrichHosting(
       id: account.projectService.project.id,
       name: account.projectService.project.name,
       status: account.projectService.project.status,
+      erpProjectId: account.projectService.project.erpProjectId,
     },
     client: account.projectService.project.client,
   };

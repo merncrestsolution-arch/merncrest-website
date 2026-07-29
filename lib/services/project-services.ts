@@ -1,7 +1,7 @@
 import { Prisma } from "@prisma/client";
 import type { BillingCycle, ServiceType } from "@prisma/client";
 import { prisma } from "@/lib/db";
-import { calculateRenewalDate } from "@/shared/renewal-calculator";
+import { calculateServiceDates } from "@/shared/renewal-calculator";
 import { validateServiceMetadata } from "@/shared/service-types";
 
 export type CreateProjectServiceInput = {
@@ -27,12 +27,12 @@ export type UpdateProjectServiceInput = {
   actorId: string;
 };
 
-function computeRenewalForService(input: {
+function computeDatesForService(input: {
   startDate: Date;
   freePeriodDays?: number | null;
   billingCycle: BillingCycle;
-}): Date {
-  return calculateRenewalDate({
+}) {
+  return calculateServiceDates({
     startDate: input.startDate,
     freePeriodDays: input.freePeriodDays ?? undefined,
     billingCycle: input.billingCycle,
@@ -49,7 +49,7 @@ export async function createProjectService(input: CreateProjectServiceInput) {
   const metadata = input.metadata
     ? (validateServiceMetadata(input.serviceType, input.metadata) as Prisma.InputJsonValue)
     : undefined;
-  const renewalDate = computeRenewalForService({
+  const dates = computeDatesForService({
     startDate: input.startDate,
     freePeriodDays: input.freePeriodDays,
     billingCycle,
@@ -62,8 +62,8 @@ export async function createProjectService(input: CreateProjectServiceInput) {
       startDate: input.startDate,
       freePeriodDays: input.freePeriodDays ?? null,
       billingCycle,
-      renewalDate,
-      expiryDate: input.expiryDate ?? null,
+      renewalDate: dates.renewalDate,
+      expiryDate: input.expiryDate ?? dates.expiryDate,
       metadata,
       reminderScheduleDays: input.reminderScheduleDays ?? [3],
       createdBy: input.actorId,
@@ -115,11 +115,15 @@ export async function updateProjectService(
   }
 
   if (renewalFieldsChanged) {
-    data.renewalDate = computeRenewalForService({
+    const dates = computeDatesForService({
       startDate,
       freePeriodDays,
       billingCycle,
     });
+    data.renewalDate = dates.renewalDate;
+    if (input.expiryDate === undefined) {
+      data.expiryDate = dates.expiryDate;
+    }
   }
 
   return prisma.projectService.update({
