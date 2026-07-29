@@ -4,6 +4,7 @@ import { nextNumber, requireStaff } from "@/lib/commerce";
 import { requirePermission } from "@/lib/erp/permissions";
 import { writeAuditLog } from "@/lib/erp/audit";
 import { notifyUser } from "@/lib/support/notify";
+import { syncLeadStageFromQuotationApproval } from "@/lib/crm/lead-stage-approval";
 import { z } from "zod";
 
 /** Multi-level approval workflow hub */
@@ -165,6 +166,15 @@ export async function PATCH(request: Request) {
       data: { status: status === "APPROVED" ? "APPROVED" : "CANCELLED" },
     });
   }
+
+  await prisma.$transaction(async (tx) => {
+    await syncLeadStageFromQuotationApproval(tx, {
+      approval: { ...updated, status },
+      actorId: auth.user.id,
+      actorEmail: auth.user.email,
+      actorName: auth.user.fullName,
+    });
+  });
 
   await writeAuditLog({
     actorId: auth.user.id,

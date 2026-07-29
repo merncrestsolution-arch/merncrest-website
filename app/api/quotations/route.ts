@@ -2,6 +2,9 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { nextNumber, requireStaff, requireUser } from "@/lib/commerce";
 import { nextOrgNumber } from "@/lib/commerce/org-numbers";
+import { rateLimit, clientIp } from "@/lib/chat/rate-limit";
+import { getStaffScope } from "@/lib/erp/staff-scope";
+import { scopeCreateFields } from "@/lib/erp/scope-stamp";
 import { sendQuotationEmail } from "@/lib/crm/send-quotation-email";
 import { notifyUser } from "@/lib/support/notify";
 import { z } from "zod";
@@ -77,6 +80,15 @@ export async function POST(request: Request) {
   const auth = await requireStaff();
   if (auth.error) return auth.error;
 
+  const rl = rateLimit({
+    key: `quotation:create:${auth.user.id}:${clientIp(request)}`,
+    limit: 20,
+    windowMs: 60_000,
+  });
+  if (!rl.ok) {
+    return NextResponse.json({ error: "Too many quotation requests. Try again shortly." }, { status: 429 });
+  }
+
   try {
     const body = await request.json();
     const parsed = createSchema.safeParse(body);
@@ -98,9 +110,18 @@ export async function POST(request: Request) {
       Date.now() + (parsed.data.validDays ?? 14) * 24 * 60 * 60 * 1000
     );
 
-    const quote = await prisma.quotation.create({
+    const scope = await getStaffScope(auth.user);
+    const stamp = scopeCreateFields(scope);
+
+    const quote = await prisma.$transaction(async (tx) => {
+      const quoteNumber = await nextOrgNumber("QUOTATION", {
+        organizationId: stamp.organizationId,
+        branchId: stamp.branchId,
+      });
+      return tx.quotation.create({
       data: {
-        quoteNumber: nextNumber("QT"),
+        quoteNumber,
+        ...stamp,
         leadId: parsed.data.leadId,
         userId: parsed.data.userId,
         customerName: parsed.data.customerName,
@@ -117,6 +138,7 @@ export async function POST(request: Request) {
         items: { create: items },
       },
       include: { items: true },
+    });
     });
 
     if (parsed.data.leadId) {

@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { KANBAN_COLUMNS, POMODORO_MINUTES } from "@/lib/erp/projects/constants";
+import { KANBAN_COLUMNS, POMODORO_MINUTES, TASK_STATUS_TRANSITIONS, type TaskStatus } from "@/lib/erp/projects/constants";
 import { Clock, Timer } from "lucide-react";
 
 type Task = {
@@ -222,10 +222,7 @@ export function StaffTasksPanel() {
                         <Timer className="h-3 w-3" />
                         Start Focus
                       </button>
-                      {cols
-                        .filter((c) => c !== col)
-                        .slice(0, 2)
-                        .map((c) => (
+                      {(TASK_STATUS_TRANSITIONS[col as TaskStatus] ?? []).map((c) => (
                           <button
                             key={c}
                             type="button"

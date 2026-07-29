@@ -8,7 +8,7 @@ import {
   ROLE_DEFAULTS,
   type ErpPermission,
 } from "@/lib/erp/permission-matrix";
-import { getStaffScope, crmLeadScopeWhere, type StaffScope } from "@/lib/erp/staff-scope";
+import { resolveEffectivePermissions } from "@/lib/erp/permission-resolve";
 
 export {
   ERP_PERMISSIONS,
@@ -17,7 +17,15 @@ export {
   type ErpPermission,
 } from "@/lib/erp/permission-matrix";
 
-export { getStaffScope, crmLeadScopeWhere, type StaffScope } from "@/lib/erp/staff-scope";
+export {
+  getStaffScope,
+  crmLeadScopeWhere,
+  staffDataScopeWhere,
+  ticketScopeWhere,
+  erpProjectScopeWhere,
+  invoiceScopeWhere,
+  type StaffScope,
+} from "@/lib/erp/staff-scope";
 
 import { isAdminRole } from "@/lib/auth";
 import type { Role } from "@/lib/auth-types";
@@ -47,32 +55,32 @@ export async function requireSuperAdmin() {
   return { user: auth.user, error: undefined as undefined };
 }
 
+/**
+ * Permission precedence — Model A (platform role is the hard ceiling).
+ * See `lib/erp/permission-resolve.ts` for the full resolution algorithm and tests.
+ *
+ * OWNER / ADMIN receive the full ERP_PERMISSIONS set without intersection.
+ */
 export async function getUserPermissions(user: SessionUser): Promise<Set<string>> {
   if (user.role === "OWNER" || user.role === "ADMIN") {
     return new Set(ERP_PERMISSIONS);
   }
 
-  const set = new Set<string>();
-  const defaults = ROLE_DEFAULTS[user.role] || [];
-  if (defaults === "*") ERP_PERMISSIONS.forEach((p) => set.add(p));
-  else defaults.forEach((p) => set.add(p));
-
   const employee = await prisma.employee.findFirst({
     where: { userId: user.id },
     select: { orgRole: true },
   });
-  if (employee?.orgRole) {
-    const preset = ORG_ROLE_PRESETS[employee.orgRole];
-    if (preset === "*") ERP_PERMISSIONS.forEach((p) => set.add(p));
-    else if (preset) preset.forEach((p) => set.add(p));
-  }
 
   const extras = await prisma.staffPermission.findMany({
     where: { userId: user.id },
     select: { permission: true },
   });
-  extras.forEach((e) => set.add(e.permission));
-  return set;
+
+  return resolveEffectivePermissions({
+    platformRole: user.role,
+    orgRole: employee?.orgRole,
+    extraGrants: extras.map((e) => e.permission),
+  });
 }
 
 export async function hasPermission(user: SessionUser, permission: ErpPermission | ErpPermission[]) {

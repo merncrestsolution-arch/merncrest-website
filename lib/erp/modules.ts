@@ -281,5 +281,5 @@ export const ORG_ROLES = [
   "ENGINEER",
   "ACCOUNTANT",
   "AUDITOR",
-  "STAFF",
+  "GENERAL_STAFF",
 ] as const;

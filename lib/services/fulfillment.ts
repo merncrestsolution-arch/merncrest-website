@@ -10,6 +10,10 @@ import {
   getPrimaryDomainProvider,
 } from "@/lib/providers/registry";
 import { nextOrgNumber } from "@/lib/commerce/org-numbers";
+import {
+  findIdempotentProviderCall,
+  logProviderApiCall,
+} from "@/lib/providers/api-audit";
 
 type Tx = Prisma.TransactionClient;
 
@@ -107,6 +111,15 @@ export async function activateOrderServices(
     return { status: "COMPLETED" as const, alreadyDone: true };
   }
 
+  const idempotencyKey =
+    order.idempotencyKey ?? `provision-order-${order.id}`;
+  if (!order.idempotencyKey) {
+    await db.order.update({
+      where: { id: order.id },
+      data: { idempotencyKey },
+    });
+  }
+
   await db.order.update({
     where: { id: order.id },
     data: {
@@ -161,6 +174,12 @@ export async function activateOrderServices(
 
         if (bound) {
           resolvedProviderId = bound.provider.id;
+          const operation = `provisionDomain:${name}.${tld}:${action}`;
+          const cached = await findIdempotentProviderCall(idempotencyKey, operation);
+          if (cached?.success) {
+            providerRef = "idempotent-replay";
+            domainStatus = "ACTIVE";
+          } else {
           try {
             const { result, attempts } = await withProviderRetry(
               `domain:${name}.${tld}`,
@@ -206,6 +225,19 @@ export async function activateOrderServices(
                 attempts,
               },
             });
+
+            void logProviderApiCall({
+              orderId: order.id,
+              orderItemId: item.id,
+              providerId: bound.provider.id,
+              operation,
+              idempotencyKey,
+              requestPayload: { domain: `${name}.${tld}`, action },
+              responsePayload: result as unknown as Record<string, unknown>,
+              success: result.success,
+              errorMessage: result.success ? undefined : result.message,
+              actorId: opts?.actorId,
+            });
           } catch (error) {
             anyHardFailure = true;
             const msg = error instanceof Error ? error.message : "domain provision error";
@@ -219,6 +251,18 @@ export async function activateOrderServices(
               summary: msg,
               meta: { orderId, domain: `${name}.${tld}` },
             });
+            void logProviderApiCall({
+              orderId: order.id,
+              orderItemId: item.id,
+              providerId: bound.provider.id,
+              operation,
+              idempotencyKey,
+              requestPayload: { domain: `${name}.${tld}`, action },
+              success: false,
+              errorMessage: msg,
+              actorId: opts?.actorId,
+            });
+          }
           }
         }
 
@@ -328,6 +372,12 @@ export async function activateOrderServices(
         if (providerId) {
           const bound = await getAdapterForProviderId(providerId);
           if (bound) {
+            const operation = `provisionHosting:${planCode}`;
+            const cached = await findIdempotentProviderCall(idempotencyKey, operation);
+            if (cached?.success) {
+              providerRef = "idempotent-replay";
+              hostingStatus = "ACTIVE";
+            } else {
             try {
               const { result, attempts } = await withProviderRetry(
                 `hosting:${planCode}`,
@@ -371,6 +421,19 @@ export async function activateOrderServices(
                   result.message || `${item.productName} → ${hostingStatus} (${attempts} attempts)`,
                 meta: { orderId, providerRef, provider: bound.provider.code, attempts },
               });
+
+              void logProviderApiCall({
+                orderId: order.id,
+                orderItemId: item.id,
+                providerId: bound.provider.id,
+                operation,
+                idempotencyKey,
+                requestPayload: { planCode, primaryDomain: meta.domainName },
+                responsePayload: result as unknown as Record<string, unknown>,
+                success: result.success,
+                errorMessage: result.success ? undefined : result.message,
+                actorId: opts?.actorId,
+              });
             } catch (error) {
               anyHardFailure = true;
               const msg = error instanceof Error ? error.message : "hosting provision error";
@@ -384,6 +447,18 @@ export async function activateOrderServices(
                 summary: msg,
                 meta: { orderId, planCode },
               });
+              void logProviderApiCall({
+                orderId: order.id,
+                orderItemId: item.id,
+                providerId: bound.provider.id,
+                operation,
+                idempotencyKey,
+                requestPayload: { planCode },
+                success: false,
+                errorMessage: msg,
+                actorId: opts?.actorId,
+              });
+            }
             }
           }
         } else {

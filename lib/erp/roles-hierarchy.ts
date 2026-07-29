@@ -79,7 +79,7 @@ export const SYSTEM_ROLE_HIERARCHY: HierarchyRoleDef[] = [
   },
   {
     tier: "STAFF",
-    orgRoles: ["STAFF", "DEVELOPER", "ENGINEER", "SUPPORT", "MARKETING", "ACCOUNTANT", "AUDITOR"],
+    orgRoles: ["GENERAL_STAFF", "DEVELOPER", "ENGINEER", "SUPPORT", "MARKETING", "ACCOUNTANT", "AUDITOR"],
     userRoles: ["STAFF"],
     title: "Staff Member / Executive",
     summary: "Full operational access on System.merncrest.lk — billing, CRM, projects, clients, tickets.",

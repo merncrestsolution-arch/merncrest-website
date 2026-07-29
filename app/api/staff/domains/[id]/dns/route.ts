@@ -4,6 +4,7 @@ import { requireStaff } from "@/lib/commerce";
 import { apiError, apiSuccess } from "@/lib/api/envelope";
 import { writeAuditLog } from "@/lib/erp/audit";
 import { hasStaffPermission } from "@/lib/staff/permissions";
+import { rateLimit, clientIp } from "@/lib/chat/rate-limit";
 
 const dnsSchema = z.object({
   type: z.enum(["A", "AAAA", "CNAME", "MX", "TXT", "NS"]),
@@ -22,6 +23,15 @@ export async function POST(
 
   const canManage = await hasStaffPermission(auth.user, "domains.manage");
   if (!canManage) return apiError("FORBIDDEN", "Missing domains.manage permission", 403);
+
+  const rl = rateLimit({
+    key: `dns:change:${auth.user.id}:${clientIp(request)}`,
+    limit: 40,
+    windowMs: 60_000,
+  });
+  if (!rl.ok) {
+    return apiError("RATE_LIMIT", "Too many DNS change requests.", 429);
+  }
 
   const { id } = await context.params;
   const domain = await prisma.domain.findFirst({ where: { id, deletedAt: null } });

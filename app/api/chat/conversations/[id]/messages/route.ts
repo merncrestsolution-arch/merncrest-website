@@ -73,6 +73,13 @@ export async function POST(request: Request, ctx: Ctx) {
       return NextResponse.json({ error: "Invalid message" }, { status: 400 });
     }
 
+    if (parsed.data.attachmentUrl) {
+      const fileCheck = validateChatAttachmentUrl(parsed.data.attachmentUrl);
+      if (!fileCheck.ok) {
+        return NextResponse.json({ error: fileCheck.reason }, { status: 400 });
+      }
+    }
+
     const user = await getSessionUser();
     const visitor = await resolveVisitor(request);
     const session = await prisma.chatSession.findUnique({

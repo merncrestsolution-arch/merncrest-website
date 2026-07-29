@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/db";
 import { nextNumber } from "@/lib/commerce";
+import { nextOrgNumber } from "@/lib/commerce/org-numbers";
 import {
   formatPackagePrice,
   priceBookVolumes,
@@ -132,9 +133,10 @@ export async function createDraftQuotationFromLead(opts: {
     .filter(Boolean)
     .join("\n");
 
+  const quoteNumber = await nextOrgNumber("QUOTATION");
   const quote = await prisma.quotation.create({
     data: {
-      quoteNumber: nextNumber("QT"),
+      quoteNumber,
       leadId: opts.leadId,
       userId: opts.userId || null,
       customerName: opts.customerName,

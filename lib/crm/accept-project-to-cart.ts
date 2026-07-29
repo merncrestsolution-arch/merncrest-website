@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/db";
 import { nextNumber } from "@/lib/commerce";
+import { nextOrgNumber } from "@/lib/commerce/org-numbers";
 import { notifyUser } from "@/lib/support/notify";
 import { logCustomerActivity } from "@/lib/crm/customer-hooks";
 import { writeAuditLog } from "@/lib/erp/audit";
@@ -84,9 +85,10 @@ export async function acceptProjectToCart(opts: {
       : `${advancePercent}% advance of project total due now. Balance as agreed with Sales.`);
 
   const result = await prisma.$transaction(async (tx) => {
+    const quoteNumber = await nextOrgNumber("QUOTATION");
     const quotation = await tx.quotation.create({
       data: {
-        quoteNumber: nextNumber("QT"),
+        quoteNumber,
         leadId: lead.id,
         userId: customer.id,
         status: "SENT",

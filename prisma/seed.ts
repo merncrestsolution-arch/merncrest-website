@@ -1189,7 +1189,7 @@ async function main() {
   if (staffEmp && leadEmp) {
     await prisma.employee.update({
       where: { id: staffEmp.id },
-      data: { managerId: leadEmp.id, orgRole: "STAFF", departmentId: salesDept?.id || staffEmp.departmentId },
+      data: { managerId: leadEmp.id, orgRole: "GENERAL_STAFF", departmentId: salesDept?.id || staffEmp.departmentId },
     });
   }
 

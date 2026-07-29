@@ -2,6 +2,7 @@ import { prisma } from "@/lib/db";
 import { nextNumber } from "@/lib/commerce";
 import { computeLeadScore } from "@/lib/crm/stages";
 import { writeAuditLog } from "@/lib/erp/audit";
+import { defaultTenantStamp } from "@/lib/erp/scope-stamp";
 import type { ImportedLeadRow } from "@/lib/crm/spreadsheet-import";
 
 export async function importLeadRows(
@@ -11,11 +12,14 @@ export async function importLeadRows(
   const created = [];
   const skipped: string[] = [];
 
+  const stamp = await defaultTenantStamp();
+
   for (const row of rows) {
     const email = row.email.toLowerCase();
     const phone = row.phone || "";
     const existing = await prisma.crmLead.findFirst({
       where: {
+        organizationId: stamp.organizationId,
         OR: [{ email }, ...(phone ? [{ phone }] : [])],
       },
     });
@@ -27,6 +31,7 @@ export async function importLeadRows(
     const lead = await prisma.crmLead.create({
       data: {
         leadNumber: nextNumber("LD"),
+        ...stamp,
         fullName: row.fullName,
         email,
         phone: phone || null,

@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/lib/db";
 import { nextNumber } from "@/lib/commerce";
-import { requirePermission } from "@/lib/erp/permissions";
+import { requirePermission, getStaffScope, erpProjectScopeWhere } from "@/lib/erp/permissions";
 import { writeAuditLog } from "@/lib/erp/audit";
 import { notifyUser } from "@/lib/support/notify";
 import {
@@ -181,12 +181,15 @@ export async function GET(request: Request) {
     });
   }
 
+  const scope = await getStaffScope(auth.user);
+  const projectScope = erpProjectScopeWhere(scope);
+
   const projects = await prisma.erpProject.findMany({
     where: projectId
-      ? { id: projectId }
+      ? { id: projectId, ...projectScope }
       : customerId
-        ? { customerId }
-        : undefined,
+        ? { customerId, ...projectScope }
+        : projectScope,
     include: {
       department: true,
       customer: {

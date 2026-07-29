@@ -10,6 +10,9 @@ import { serializeInvoice } from "@/lib/billing/invoice-serialize";
 import { linkInvoiceToSchedule } from "@/lib/billing/sync-payment-schedule";
 import { writeAuditLog } from "@/lib/erp/audit";
 import { hasStaffPermission } from "@/lib/staff/permissions";
+import { getStaffScope, invoiceScopeWhere } from "@/lib/erp/staff-scope";
+import { scopeCreateFields } from "@/lib/erp/scope-stamp";
+import { rateLimit, clientIp } from "@/lib/chat/rate-limit";
 import { vatRatePercent } from "@/lib/billing/vat";
 
 export async function GET(request: Request) {
@@ -21,9 +24,12 @@ export async function GET(request: Request) {
   const projectId = url.searchParams.get("projectId");
   const status = url.searchParams.get("status");
 
+  const scope = await getStaffScope(auth.user);
+
   const invoices = await prisma.invoice.findMany({
     where: {
       deletedAt: null,
+      ...invoiceScopeWhere(scope),
       ...(userId ? { userId } : {}),
       ...(projectId ? { projectId } : {}),
       ...(status ? { status } : {}),
@@ -86,6 +92,15 @@ export async function POST(request: Request) {
   const auth = await requireStaff();
   if (auth.error) return auth.error;
 
+  const rl = rateLimit({
+    key: `invoice:create:${auth.user.id}:${clientIp(request)}`,
+    limit: 15,
+    windowMs: 60_000,
+  });
+  if (!rl.ok) {
+    return apiError("RATE_LIMIT", "Too many invoice creation requests.", 429);
+  }
+
   const canManage = await hasStaffPermission(auth.user, "billing.manage");
   if (!canManage) return apiError("FORBIDDEN", "Missing billing.manage permission", 403);
 
@@ -115,10 +130,17 @@ export async function POST(request: Request) {
     return apiError("VALIDATION", "Invoice total must be greater than zero");
   }
 
-  const orderNumber = await nextOrgNumber("ORDER");
+  const scope = await getStaffScope(auth.user);
+  const stamp = scopeCreateFields(scope);
+
+  const orderNumber = await nextOrgNumber("ORDER", {
+    organizationId: stamp.organizationId,
+    branchId: stamp.branchId,
+  });
   const order = await prisma.order.create({
     data: {
       orderNumber,
+      ...stamp,
       userId: user.id,
       status: "WAITING_PAYMENT",
       subtotalCents: totals.subtotalCents,
@@ -139,7 +161,10 @@ export async function POST(request: Request) {
     },
   });
 
-  const invoiceNumber = await nextOrgNumber("INVOICE");
+  const invoiceNumber = await nextOrgNumber("INVOICE", {
+    organizationId: stamp.organizationId,
+    branchId: stamp.branchId,
+  });
   const dueAt = new Date();
   dueAt.setDate(dueAt.getDate() + (parsed.data.dueDays ?? 14));
 
@@ -149,6 +174,7 @@ export async function POST(request: Request) {
         invoiceNumber,
         orderId: order.id,
         userId: user.id,
+        ...stamp,
         projectId: parsed.data.projectId || null,
         domainId: parsed.data.domainId || null,
         hostingAccountId: parsed.data.hostingAccountId || null,

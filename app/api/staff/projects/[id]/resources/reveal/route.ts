@@ -7,6 +7,7 @@ import { requireProjectAccess } from "@/lib/projects/access";
 import { hasStaffPermission } from "@/lib/staff/permissions";
 import { decryptCredentials, decryptEnvVars } from "@/lib/security/project-secrets";
 import { writeAuditLog } from "@/lib/erp/audit";
+import { rateLimit, clientIp } from "@/lib/chat/rate-limit";
 
 const revealSchema = z.object({
   field: z.enum(["envVars", "credentials"]),
@@ -24,6 +25,15 @@ export async function POST(
     (await hasStaffPermission(auth.user, "projects.credentials.reveal"));
   if (!canReveal) {
     return apiError("FORBIDDEN", "Missing projects.credentials.reveal permission", 403);
+  }
+
+  const rl = rateLimit({
+    key: `project:reveal:${auth.user.id}:${clientIp(request)}`,
+    limit: 30,
+    windowMs: 60_000,
+  });
+  if (!rl.ok) {
+    return apiError("RATE_LIMIT", "Too many credential reveal requests.", 429);
   }
 
   const { id: projectId } = await context.params;

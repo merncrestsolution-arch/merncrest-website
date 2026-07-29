@@ -426,6 +426,10 @@ model Order {
   /// Auto-provision retry counter (max 3 per activateOrderServices run)
   provisioningAttempts Int @default(0)
   lastProvisionError   String?
+  /// Idempotency key for provider activation — prevents double-provision on retry
+  idempotencyKey       String?  @unique
+  organizationId       String?
+  branchId             String   @default("")
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
@@ -440,6 +444,7 @@ model Order {
   @@index([userId])
   @@index([status])
   @@index([createdAt])
+  @@index([organizationId, branchId])
 }
 
 model OrderItem {
@@ -493,6 +498,8 @@ model Invoice {
   lineItemsJson     String?
   dueAt             DateTime?
   paidAt            DateTime?
+  organizationId    String?
+  branchId          String   @default("")
   createdAt         DateTime        @default(now())
   updatedAt         DateTime        @updatedAt
   createdBy         String?
@@ -510,6 +517,7 @@ model Invoice {
   @@index([hostingAccountId])
   @@index([dueAt])
   @@index([deletedAt])
+  @@index([organizationId, branchId])
 }
 
 model Payment {
@@ -767,6 +775,8 @@ model Ticket {
   responseDueAt DateTime?
   resolveDueAt  DateTime?
   escalatedAt   DateTime?
+  organizationId String?
+  branchId       String   @default("")
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
   closedAt     DateTime?
@@ -779,6 +789,7 @@ model Ticket {
   @@index([createdAt])
   @@index([responseDueAt])
   @@index([category])
+  @@index([organizationId, branchId])
 }
 
 model TicketMessage {
@@ -834,6 +845,8 @@ model CrmLead {
   wonReason   String?
   lostReason  String?
   closedAt    DateTime?
+  organizationId String?
+  branchId     String   @default("")
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
 
@@ -851,6 +864,7 @@ model CrmLead {
   @@index([leadScore])
   @@index([departmentId])
   @@index([teamLeadId])
+  @@index([organizationId, branchId])
 }
 
 model CrmActivity {
@@ -1205,6 +1219,8 @@ model Quotation {
   terms         String?
   notes         String?
   orderId       String?
+  organizationId String?
+  branchId       String   @default("")
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
@@ -1213,6 +1229,8 @@ model Quotation {
   @@index([leadId])
   @@index([userId])
   @@index([status])
+  @@index([organizationId, branchId])
+  @@unique([organizationId, branchId, quoteNumber])
 }
 
 model QuotationItem {
@@ -1340,8 +1358,8 @@ model Employee {
   /// FULL_TIME | PART_TIME | CONTRACT | INTERN
   employmentType String      @default("FULL_TIME")
   jobTitle       String
-  /// CEO | DIRECTOR | DEPT_HEAD | TEAM_LEAD | HR | FINANCE | SALES | ... | STAFF
-  orgRole        String      @default("STAFF")
+  /// CEO | DIRECTOR | DEPT_HEAD | TEAM_LEAD | HR | FINANCE | SALES | ... | GENERAL_STAFF
+  orgRole        String      @default("GENERAL_STAFF")
   /// ACTIVE | ON_LEAVE | INACTIVE | TERMINATED
   status         String      @default("ACTIVE")
   hireDate       DateTime    @default(now())
@@ -1439,6 +1457,8 @@ model ErpProject {
   developmentNotes     String?
   /// When set, overrides auto-computed task/milestone progress
   progressOverridePct  Int?
+  organizationId       String?
+  branchId             String   @default("")
   createdAt    DateTime    @default(now())
   updatedAt    DateTime    @updatedAt
 
@@ -1457,6 +1477,7 @@ model ErpProject {
   @@index([departmentId])
   @@index([customerId])
   @@index([nextPaymentAt])
+  @@index([organizationId, branchId])
 }
 
 /// Client-facing update log (feeds email templates)
@@ -3137,17 +3158,19 @@ model SuggestionEvent {
   @@index([createdAt])
 }
 
-/// Atomic per-org counters for Order / Invoice numbers
+/// Atomic per-org/branch counters for Order / Invoice / Quotation numbers
 model OrgNumberSequence {
   id             String @id @default(cuid())
   organizationId String
   organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-  /// ORDER | INVOICE | RECEIPT
+  /// Empty string = org-wide sequence
+  branchId       String @default("")
+  /// ORDER | INVOICE | RECEIPT | QUOTATION
   kind           String
   prefix         String
   nextValue      Int    @default(1)
 
-  @@unique([organizationId, kind])
+  @@unique([organizationId, branchId, kind])
   @@index([organizationId])
 }
 
@@ -3535,4 +3558,26 @@ model BusinessMailbox {
   @@index([projectId])
   @@index([status])
   @@index([deletedAt])
+}
+
+/// Auditable log of outbound reseller/provider API calls (provisioning, activation).
+model ProviderApiCallLog {
+  id              String   @id @default(cuid())
+  orderId         String?
+  orderItemId     String?
+  providerId      String
+  operation       String
+  idempotencyKey  String
+  requestJson     String
+  responseJson    String?
+  httpStatus      Int?
+  success         Boolean  @default(false)
+  errorMessage    String?
+  actorId         String?
+  createdAt       DateTime @default(now())
+
+  @@index([orderId])
+  @@index([idempotencyKey, operation])
+  @@index([providerId])
+  @@index([createdAt])
 }

@@ -58,7 +58,7 @@ export function ErpHrPanel() {
     grade: "",
     departmentId: "",
     managerId: "",
-    orgRole: "STAFF",
+    orgRole: "GENERAL_STAFF",
     employmentType: "FULL_TIME",
     salaryCents: 10000000,
     nic: "",
@@ -121,7 +121,7 @@ export function ErpHrPanel() {
         grade: "",
         departmentId: "",
         managerId: "",
-        orgRole: "STAFF",
+        orgRole: "GENERAL_STAFF",
         employmentType: "FULL_TIME",
         salaryCents: 10000000,
         nic: "",
@@ -454,7 +454,7 @@ export function ErpHrPanel() {
                   required
                   rows={4}
                   placeholder={
-                    "fullName,email,jobTitle,departmentCode,orgRole\nJane Doe,jane@co.lk,Engineer,TECH,STAFF"
+                    "fullName,email,jobTitle,departmentCode,orgRole\nJane Doe,jane@co.lk,Engineer,TECH,GENERAL_STAFF"
                   }
                   className="rlk-input font-mono text-[12px]"
                 />

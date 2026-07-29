@@ -5,6 +5,7 @@ import { nextNumber } from "@/lib/commerce";
 import { requirePermission } from "@/lib/erp/permissions";
 import { writeAuditLog } from "@/lib/erp/audit";
 import { docsExpiringSoon, searchDocuments } from "@/lib/erp/dms";
+import { validateDmsFileUrl } from "@/lib/security/upload-policy";
 
 export async function GET(request: Request) {
   const auth = await requirePermission(["erp.dms.view", "erp.dms.manage"]);
@@ -92,6 +93,12 @@ export async function POST(request: Request) {
   const action = d.action || "document";
 
   if (action === "document" && d.title) {
+    if (d.fileUrl) {
+      const fileCheck = validateDmsFileUrl(d.fileUrl);
+      if (!fileCheck.ok) {
+        return NextResponse.json({ error: fileCheck.reason }, { status: 400 });
+      }
+    }
     const doc = await prisma.document.create({
       data: {
         docNumber: nextNumber("DOC"),

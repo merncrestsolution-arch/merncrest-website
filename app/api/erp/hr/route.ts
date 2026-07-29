@@ -148,7 +148,7 @@ export async function POST(request: Request) {
           email,
           jobTitle,
           departmentId,
-          orgRole: orgRole || "STAFF",
+          orgRole: orgRole || "GENERAL_STAFF",
         },
       });
       created.push(employee);
@@ -176,7 +176,7 @@ export async function POST(request: Request) {
       employeeCode: nextNumber("EMP"),
       ...rest,
       employmentType: rest.employmentType ?? "FULL_TIME",
-      orgRole: rest.orgRole ?? "STAFF",
+      orgRole: rest.orgRole ?? "GENERAL_STAFF",
       nicEncrypted: encryptPii(nic),
       bankAccountEncrypted: encryptPii(bankAccount),
     },

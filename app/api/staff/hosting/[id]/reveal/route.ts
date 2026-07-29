@@ -5,6 +5,7 @@ import { apiError, apiSuccess } from "@/lib/api/envelope";
 import { decryptCredential } from "@/lib/security/credentials";
 import { writeAuditLog } from "@/lib/erp/audit";
 import { hasStaffPermission } from "@/lib/staff/permissions";
+import { rateLimit, clientIp } from "@/lib/chat/rate-limit";
 
 const revealSchema = z.object({
   field: z.enum([
@@ -25,6 +26,15 @@ export async function POST(
   const canReveal = await hasStaffPermission(auth.user, "hosting.credentials.reveal");
   if (!canReveal) {
     return apiError("FORBIDDEN", "Missing hosting.credentials.reveal permission", 403);
+  }
+
+  const rl = rateLimit({
+    key: `hosting:reveal:${auth.user.id}:${clientIp(request)}`,
+    limit: 30,
+    windowMs: 60_000,
+  });
+  if (!rl.ok) {
+    return apiError("RATE_LIMIT", "Too many credential reveal requests.", 429);
   }
 
   const { id } = await context.params;

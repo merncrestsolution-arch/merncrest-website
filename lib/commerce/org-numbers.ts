@@ -1,12 +1,13 @@
 import { prisma } from "@/lib/db";
 import { getPrimaryOrganizationId } from "@/lib/chat/org";
 
-export type OrgNumberKind = "ORDER" | "INVOICE" | "RECEIPT";
+export type OrgNumberKind = "ORDER" | "INVOICE" | "RECEIPT" | "QUOTATION";
 
 const DEFAULT_PREFIX: Record<OrgNumberKind, string> = {
   ORDER: "ORD",
   INVOICE: "INV",
   RECEIPT: "RCP",
+  QUOTATION: "QT",
 };
 
 /** Middle segment in ORD-ERP-45872 (override via COMMERCE_NUMBER_SEGMENT). */
@@ -19,21 +20,40 @@ function formatOrgNumber(kind: OrgNumberKind, sequence: number): string {
   return `${DEFAULT_PREFIX[kind]}-${DOC_SEGMENT}-${sequence}`;
 }
 
-/** Collision-safe sequential numbers per organization (ORD/INV/RCP-ERP-45872). */
+type NextOrgNumberOpts = {
+  organizationId?: string;
+  branchId?: string | null;
+  prefix?: string;
+};
+
+/** Collision-safe sequential numbers per organization + branch (ORD/INV/RCP/QT-ERP-45872). */
 export async function nextOrgNumber(
   kind: OrgNumberKind,
-  prefix?: string
+  opts?: NextOrgNumberOpts
 ): Promise<string> {
-  const organizationId = await getPrimaryOrganizationId();
-  const p = prefix || DEFAULT_PREFIX[kind];
+  const organizationId = opts?.organizationId ?? (await getPrimaryOrganizationId());
+  const branchKey = opts?.branchId ?? "";
+  const p = opts?.prefix || DEFAULT_PREFIX[kind];
 
   const seq = await prisma.$transaction(async (tx) => {
     const existing = await tx.orgNumberSequence.findUnique({
-      where: { organizationId_kind: { organizationId, kind } },
+      where: {
+        organizationId_branchId_kind: {
+          organizationId,
+          branchId: branchKey,
+          kind,
+        },
+      },
     });
     if (!existing) {
       return tx.orgNumberSequence.create({
-        data: { organizationId, kind, prefix: p, nextValue: NUMBER_START + 1 },
+        data: {
+          organizationId,
+          branchId: branchKey,
+          kind,
+          prefix: p,
+          nextValue: NUMBER_START + 1,
+        },
       });
     }
     if (existing.nextValue < NUMBER_START) {
@@ -53,16 +73,21 @@ export async function nextOrgNumber(
 }
 
 /** Seed / migrate counters so the next ID is at least COMMERCE_NUMBER_START. */
-export async function ensureOrgNumberSequences(organizationId: string): Promise<void> {
-  const kinds: OrgNumberKind[] = ["ORDER", "INVOICE", "RECEIPT"];
+export async function ensureOrgNumberSequences(
+  organizationId: string,
+  branchId = ""
+): Promise<void> {
+  const kinds: OrgNumberKind[] = ["ORDER", "INVOICE", "RECEIPT", "QUOTATION"];
   for (const kind of kinds) {
     const prefix = DEFAULT_PREFIX[kind];
     const existing = await prisma.orgNumberSequence.findUnique({
-      where: { organizationId_kind: { organizationId, kind } },
+      where: {
+        organizationId_branchId_kind: { organizationId, branchId, kind },
+      },
     });
     if (!existing) {
       await prisma.orgNumberSequence.create({
-        data: { organizationId, kind, prefix, nextValue: NUMBER_START + 1 },
+        data: { organizationId, branchId, kind, prefix, nextValue: NUMBER_START + 1 },
       });
       continue;
     }
@@ -74,6 +99,7 @@ export async function ensureOrgNumberSequences(organizationId: string): Promise<
     }
   }
 }
+
 /** Assign or return the stored receipt number for a payment row. */
 export async function resolveReceiptNumber(payment: {
   id: string;

@@ -36,7 +36,7 @@ export function SystemLoginView() {
             ))}
           </div>
         </div>
-        <p className="text-xs opacity-60">System.merncrest.lk · v.1</p>
+        <p className="text-xs opacity-60">System.merncrest.lk · v1</p>
       </div>
 
       <div className="stitch-auth-panel">

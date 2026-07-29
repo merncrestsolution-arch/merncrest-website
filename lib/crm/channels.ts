@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/db";
 import { nextNumber } from "@/lib/commerce";
 import { computeLeadScore } from "@/lib/crm/stages";
+import { defaultTenantStamp } from "@/lib/erp/scope-stamp";
 
 /**
  * Ensure every inbound channel conversation lands on one CRM lead.
@@ -22,17 +23,21 @@ export async function ensureLeadFromChannel(opts: {
 }) {
   const email = opts.email?.toLowerCase().trim() || null;
   const phone = opts.phone?.replace(/\D/g, "") || null;
+  const stamp = await defaultTenantStamp();
 
   let lead =
     (email
       ? await prisma.crmLead.findFirst({
-          where: { email },
+          where: { email, organizationId: stamp.organizationId },
           orderBy: { updatedAt: "desc" },
         })
       : null) ||
     (phone
       ? await prisma.crmLead.findFirst({
-          where: { phone: { contains: phone.slice(-9) } },
+          where: {
+            phone: { contains: phone.slice(-9) },
+            organizationId: stamp.organizationId,
+          },
           orderBy: { updatedAt: "desc" },
         })
       : null);
@@ -47,6 +52,7 @@ export async function ensureLeadFromChannel(opts: {
     lead = await prisma.crmLead.create({
       data: {
         leadNumber: nextNumber("LEAD"),
+        ...stamp,
         stage: "NEW",
         source: opts.channel,
         fullName: opts.fullName || "Unknown",

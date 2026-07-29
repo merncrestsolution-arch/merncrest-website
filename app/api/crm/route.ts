@@ -3,6 +3,10 @@ import { prisma } from "@/lib/db";
 import { nextNumber, requireStaff } from "@/lib/commerce";
 import { CRM_STAGES, computeLeadScore } from "@/lib/crm/stages";
 import { getStaffScope, crmLeadScopeWhere } from "@/lib/erp/staff-scope";
+import { scopeCreateFields } from "@/lib/erp/scope-stamp";
+import {
+  handleLeadQuotationStage,
+} from "@/lib/crm/lead-stage-approval";
 import { z } from "zod";
 
 const stageEnum = z.enum(CRM_STAGES);
@@ -13,7 +17,7 @@ export async function GET() {
 
   try {
     const scope = await getStaffScope(auth.user);
-    const leadWhere = crmLeadScopeWhere(scope) as object | undefined;
+    const leadWhere = crmLeadScopeWhere(scope);
     const now = new Date();
     const [leads, activities, stats, overdueFollowUps, upcomingMeetings] =
       await Promise.all([
@@ -231,9 +235,13 @@ export async function POST(request: Request) {
         company: parsed.data.company,
       });
 
+    const scope = await getStaffScope(auth.user);
+    const stamp = scopeCreateFields(scope);
+
     const lead = await prisma.crmLead.create({
       data: {
         leadNumber: nextNumber("LEAD"),
+        ...stamp,
         fullName: parsed.data.fullName,
         email: parsed.data.email.toLowerCase(),
         phone: parsed.data.phone,
@@ -289,6 +297,7 @@ const patchSchema = z.object({
     })
     .optional(),
   completeFollowUpId: z.string().optional(),
+  quotationId: z.string().optional(),
 });
 
 export async function PATCH(request: Request) {
@@ -319,6 +328,23 @@ export async function PATCH(request: Request) {
             body: parsed.data.activity.body,
           },
         });
+      }
+
+      if (parsed.data.stage === "QUOTATION") {
+        try {
+          await handleLeadQuotationStage(tx, {
+            leadId: parsed.data.leadId,
+            actorId: auth.user.id,
+            actorEmail: auth.user.email,
+            actorName: auth.user.fullName,
+            quotationId: parsed.data.quotationId,
+          });
+        } catch (err) {
+          if (err instanceof Error && err.message === "QUOTATION_REQUIRED") {
+            throw new Error("QUOTATION_REQUIRED");
+          }
+          throw err;
+        }
       }
 
       if (parsed.data.stage) {
@@ -369,6 +395,12 @@ export async function PATCH(request: Request) {
 
     return NextResponse.json({ lead });
   } catch (error) {
+    if (error instanceof Error && error.message === "QUOTATION_REQUIRED") {
+      return NextResponse.json(
+        { error: "A quotation must be linked before moving to QUOTATION stage." },
+        { status: 400 }
+      );
+    }
     console.error("[crm:patch]", error);
     return NextResponse.json({ error: "Failed to update lead" }, { status: 500 });
   }

@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { formatMoney } from "@/lib/commerce-format";
-import { KANBAN_COLUMNS, POMODORO_MINUTES } from "@/lib/erp/projects/constants";
+import { KANBAN_COLUMNS, POMODORO_MINUTES, TASK_STATUS_TRANSITIONS, type TaskStatus } from "@/lib/erp/projects/constants";
 
 type Member = { user: { id: string; fullName: string; email: string }; role: string };
 type Milestone = {
@@ -1297,9 +1297,7 @@ export function ErpProjectsPanel() {
                                 {criticalIds.includes(t.id) ? " · critical" : ""}
                               </p>
                               <div className="flex flex-wrap gap-1">
-                                {KANBAN_COLUMNS.filter((c) => c !== col)
-                                  .slice(0, 3)
-                                  .map((c) => (
+                                {(TASK_STATUS_TRANSITIONS[col as TaskStatus] ?? []).map((c) => (
                                     <button
                                       key={c}
                                       type="button"

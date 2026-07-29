@@ -8,7 +8,7 @@ import {
 } from "@/lib/auth";
 import { loginSchema } from "@/lib/validations/auth";
 import { verifyTurnstile } from "@/lib/security/turnstile";
-import { isAccountLocked } from "@/lib/security/auth-policy";
+import { isAccountLocked, clearLoginFailures } from "@/lib/security/auth-policy";
 
 export async function POST(request: Request) {
   try {
@@ -64,6 +64,8 @@ export async function POST(request: Request) {
         userAgent: ua,
       },
     });
+
+    await clearLoginFailures(email);
 
     const { token, expiresAt } = await createSession(user.id, { userAgent: ua, ip });
     await setSessionCookie(token, expiresAt, request);

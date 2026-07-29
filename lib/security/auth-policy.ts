@@ -38,6 +38,14 @@ export async function isAccountLocked(email: string): Promise<{ locked: boolean;
   return { locked: failures >= max, attempts: failures };
 }
 
+/** Clear failed login attempts after a successful authentication. */
+export async function clearLoginFailures(email: string): Promise<void> {
+  const since = new Date(Date.now() - LOCK_WINDOW_MS);
+  await prisma.loginHistory.deleteMany({
+    where: { email: email.toLowerCase(), success: false, createdAt: { gte: since } },
+  });
+}
+
 export async function is2faRequired(): Promise<boolean> {
   return getSettingBool("security.require2fa", false);
 }

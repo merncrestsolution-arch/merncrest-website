@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/db";
 import { nextNumber } from "@/lib/commerce";
 import { computeLeadScore } from "@/lib/crm/stages";
+import { defaultTenantStamp } from "@/lib/erp/scope-stamp";
 
 /**
  * CRM + portal activity integration.
@@ -40,8 +41,9 @@ export async function syncCrmFromCustomerEvent(opts: {
   valueCents?: number;
   activityType?: string;
 }) {
+  const stamp = await defaultTenantStamp();
   let lead = await prisma.crmLead.findFirst({
-    where: { email: opts.email.toLowerCase() },
+    where: { email: opts.email.toLowerCase(), organizationId: stamp.organizationId },
     orderBy: { updatedAt: "desc" },
   });
 
@@ -56,6 +58,7 @@ export async function syncCrmFromCustomerEvent(opts: {
     lead = await prisma.crmLead.create({
       data: {
         leadNumber: nextNumber("LEAD"),
+        ...stamp,
         stage: "NEW",
         source: opts.source,
         fullName: opts.fullName,

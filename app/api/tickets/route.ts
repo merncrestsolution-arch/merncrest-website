@@ -3,6 +3,9 @@ import { prisma } from "@/lib/db";
 import { nextNumber, requireUser } from "@/lib/commerce";
 import { notifyUser } from "@/lib/support/notify";
 import { onCustomerTicketCreated } from "@/lib/crm/customer-hooks";
+import { getStaffScope, ticketScopeWhere } from "@/lib/erp/staff-scope";
+import { scopeCreateFields, defaultTenantStamp } from "@/lib/erp/scope-stamp";
+import { validateChatAttachmentUrl } from "@/lib/security/upload-policy";
 import { z } from "zod";
 
 export async function GET() {
@@ -11,8 +14,11 @@ export async function GET() {
 
   try {
     const isStaff = ["STAFF", "ADMIN", "OWNER"].includes(auth.user.role);
+    const scope = isStaff ? await getStaffScope(auth.user) : null;
     const tickets = await prisma.ticket.findMany({
-      where: isStaff ? undefined : { userId: auth.user.id },
+      where: isStaff
+        ? ticketScopeWhere(scope!)
+        : { userId: auth.user.id },
       include: {
         messages: { orderBy: { createdAt: "asc" }, take: 50 },
         user: { select: { email: true, fullName: true } },
@@ -64,9 +70,12 @@ export async function POST(request: Request) {
       /* routing optional */
     }
 
+    const stamp = await defaultTenantStamp();
+
     const ticket = await prisma.ticket.create({
       data: {
         ticketNumber: nextNumber("TKT"),
+        ...stamp,
         userId: auth.user.id,
         subject: parsed.data.subject,
         department,
@@ -132,10 +141,11 @@ export async function PATCH(request: Request) {
     }
 
     const isStaff = ["STAFF", "ADMIN", "OWNER"].includes(auth.user.role);
+    const scope = isStaff ? await getStaffScope(auth.user) : null;
     const ticket = await prisma.ticket.findFirst({
       where: {
         id: parsed.data.ticketId,
-        ...(isStaff ? {} : { userId: auth.user.id }),
+        ...(isStaff ? ticketScopeWhere(scope!) : { userId: auth.user.id }),
       },
     });
     if (!ticket) {
@@ -350,10 +360,11 @@ export async function PUT(request: Request) {
     }
 
     const isStaff = ["STAFF", "ADMIN", "OWNER"].includes(auth.user.role);
+    const scope = isStaff ? await getStaffScope(auth.user) : null;
     const existing = await prisma.ticket.findFirst({
       where: {
         id: parsed.data.ticketId,
-        ...(isStaff ? {} : { userId: auth.user.id }),
+        ...(isStaff ? ticketScopeWhere(scope!) : { userId: auth.user.id }),
       },
     });
     if (!existing) {

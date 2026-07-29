@@ -18,7 +18,7 @@ export type OrgRole =
   | "DEVELOPER"
   | "ENGINEER"
   | "AUDITOR"
-  | "STAFF";
+  | "GENERAL_STAFF";
 
 /** Role hierarchy for permission inheritance (higher index = more privilege). */
 export const ROLE_HIERARCHY: SystemRole[] = ["CUSTOMER", "STAFF", "ADMIN", "OWNER"];
