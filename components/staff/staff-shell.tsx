@@ -11,6 +11,7 @@ import {
   Receipt,
   BarChart3,
   FolderKanban,
+  Briefcase,
   CheckSquare,
   CreditCard,
   Users,
@@ -37,6 +38,7 @@ import {
   Activity,
   Cloud,
   Globe2,
+  Mailbox,
   type LucideIcon,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -84,6 +86,7 @@ const navGroups: NavGroup[] = [
     items: [
       { href: "/staff/clients", label: "Clients", icon: Users },
       { href: "/staff/projects", label: "Projects", icon: FolderKanban },
+      { href: "/staff/service-projects", label: "Service Projects", icon: Briefcase },
       { href: "/staff/projects/progress", label: "Progress tracker", icon: BarChart3 },
     ],
   },
@@ -102,6 +105,9 @@ const navGroups: NavGroup[] = [
     items: [
       { href: "/staff/domains", label: "Domains", icon: Globe2 },
       { href: "/staff/hosting", label: "Hosting", icon: Server },
+      { href: "/staff/domain-docs", label: "Domain Docs", icon: FileText },
+      { href: "/staff/access-requests", label: "Access Requests", icon: KeyRound },
+      { href: "/staff/mailbox", label: "Mailbox", icon: Mailbox },
       { href: "/staff/resources-hub", label: "Domain & Hosting Hub", icon: Globe2 },
       { href: "/staff/cloud", label: "AWS Cloud", icon: Cloud },
       { href: "/staff/monitoring", label: "Monitoring", icon: Server },

@@ -123,7 +123,7 @@ export async function sendMailWithAttachment(opts: {
   return { queued: true, logged: false };
 }
 
-async function sendMail(opts: { to: string; subject: string; text: string; html: string }) {
+export async function sendMail(opts: { to: string; subject: string; text: string; html: string }) {
   const fromName = process.env.MAIL_FROM_NAME || "MernCrest";
   const from = `${fromName} <${DEFAULT_FROM_EMAIL}>`;
   const replyTo = process.env.MAIL_REPLY_TO || DEFAULT_REPLY_TO;

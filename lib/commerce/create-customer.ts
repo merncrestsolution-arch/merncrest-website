@@ -1,7 +1,7 @@
 import { prisma } from "@/lib/db";
 import { generateToken, hashPassword } from "@/lib/auth";
 import { onCustomerRegistered } from "@/lib/crm/customer-hooks";
-import { sendMailRaw } from "@/lib/mail";
+import { sendClientWelcomeEmail } from "@/lib/email/welcome";
 import { writeAuditLog } from "@/lib/erp/audit";
 
 export type CreateCustomerInput = {
@@ -77,34 +77,29 @@ export async function createCustomerAccount(input: CreateCustomerInput) {
 
   if (input.sendWelcomeEmail !== false) {
     const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://merncrest.lk";
-    void sendMailRaw({
+    const portalUrl = `${siteUrl}/en/login`;
+    void sendClientWelcomeEmail({
       to: user.email,
-      subject: "Your MernCrest customer portal account",
-      text: [
-        `Hi ${user.fullName},`,
-        "",
-        "A MernCrest customer portal account has been created for you.",
-        "",
-        `Login: ${siteUrl}/en/login`,
-        `Email: ${user.email}`,
-        `Temporary password: ${tempPassword}`,
-        "",
-        "Please change your password after your first login.",
-        "",
-        `Customer code: ${customerCode}`,
-      ].join("\n"),
-      html: `
-        <div style="font-family:sans-serif;max-width:520px;margin:0 auto">
-          <h1 style="color:#7C3AED">Welcome to MernCrest</h1>
-          <p>Hi <strong>${user.fullName}</strong>,</p>
-          <p>Your customer portal account is ready.</p>
-          <p><strong>Customer code:</strong> ${customerCode}</p>
-          <p><strong>Email:</strong> ${user.email}<br/>
-          <strong>Temporary password:</strong> ${tempPassword}</p>
-          <p><a href="${siteUrl}/en/login" style="display:inline-block;background:#14B8A6;color:#fff;padding:12px 20px;border-radius:8px;text-decoration:none">Sign in to portal</a></p>
-          <p style="color:#64748b;font-size:13px">Please change your password after your first login.</p>
-        </div>`,
+      fullName: user.fullName,
+      portalUrl,
     });
+    if (!input.password) {
+      const { sendMailRaw } = await import("@/lib/mail");
+      void sendMailRaw({
+        to: user.email,
+        subject: "Your MernCrest portal login credentials",
+        text: [
+          `Hi ${user.fullName},`,
+          "",
+          `Email: ${user.email}`,
+          `Temporary password: ${tempPassword}`,
+          "",
+          "Please change your password after your first login.",
+          `Customer code: ${customerCode}`,
+        ].join("\n"),
+        html: `<p>Your temporary password is <strong>${tempPassword}</strong>. Please change it after first login.</p>`,
+      });
+    }
   }
 
   return {

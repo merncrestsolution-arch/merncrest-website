@@ -92,6 +92,11 @@ export function PortalServicesPanel() {
             </span>
           </div>
         ))}
+        <p className="mt-3 text-sm">
+          <Link href="/portal/domain-registration" className="rlk-link">
+            Submit domain registration documents →
+          </Link>
+        </p>
       </ServiceBlock>
 
       <ServiceBlock

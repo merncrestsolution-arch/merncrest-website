@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link } from "@/i18n/routing";
-import { AlertTriangle, Search, Server } from "lucide-react";
+import { Search, Server } from "lucide-react";
 import { formatSriLankaDate } from "@/lib/timezone";
 import {
   Breadcrumb,
@@ -17,30 +17,33 @@ import { EmptyState } from "@/components/system/empty-state";
 import { LoadingState } from "@/components/system/loading-state";
 import { ErrorState } from "@/components/system/error-state";
 
-type HostingRow = {
+type ManagedHostingRow = {
   id: string;
-  label: string;
-  planCode: string;
-  status: string;
-  sslStatus: string;
-  sslExpiresAt: string | null;
-  renewsAt: string | null;
-  provider: string | null;
-  linkedDomains: string[];
-  client: { id: string; name: string; email: string };
+  packageName: string;
+  hostingStatus: string;
+  serverLocation: string | null;
+  expiryDate: string | null;
+  renewalDate: string | null;
+  usage: {
+    disk: { usedMb: number; quotaMb: number; percentage: number };
+    bandwidth: { usedMb: number; quotaMb: number; percentage: number };
+  };
+  project: { id: string; name: string };
+  client: { id: string; fullName: string; email: string; company: string | null };
 };
 
-function sslVariant(status: string): "success" | "warning" | "destructive" | "secondary" {
-  if (status === "Active") return "success";
-  if (status === "Expiring Soon") return "warning";
-  if (status === "Expired" || status === "Not Configured") return "destructive";
+function statusVariant(status: string): "success" | "warning" | "destructive" | "secondary" {
+  const s = status.toUpperCase();
+  if (s === "ACTIVE") return "success";
+  if (s === "SUSPENDED") return "warning";
+  if (s === "EXPIRED" || s === "CANCELLED") return "destructive";
   return "secondary";
 }
 
 export function StaffHostingPanel() {
-  const [accounts, setAccounts] = useState<HostingRow[]>([]);
+  const [accounts, setAccounts] = useState<ManagedHostingRow[]>([]);
   const [search, setSearch] = useState("");
-  const [sslIssuesOnly, setSslIssuesOnly] = useState(false);
+  const [statusFilter, setStatusFilter] = useState("");
   const [expiringOnly, setExpiringOnly] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -48,20 +51,29 @@ export function StaffHostingPanel() {
   const load = useCallback(() => {
     setLoading(true);
     setError("");
-    const params = new URLSearchParams();
+    const params = new URLSearchParams({ limit: "100" });
     if (search) params.set("q", search);
-    if (sslIssuesOnly) params.set("sslIssues", "1");
-    if (expiringOnly) params.set("expiringOnly", "1");
 
-    fetch(`/api/staff/hosting?${params}`)
+    fetch(`/api/staff/hosting/managed?${params}`)
       .then(async (r) => {
         const d = await r.json();
         if (!d.success) throw new Error(d.error?.message ?? "Failed");
-        setAccounts(d.data ?? []);
+        let rows = (d.data ?? []) as ManagedHostingRow[];
+        if (statusFilter) {
+          rows = rows.filter((a) => a.hostingStatus === statusFilter);
+        }
+        if (expiringOnly) {
+          const cutoff = Date.now() + 30 * 86400000;
+          rows = rows.filter((a) => {
+            if (!a.expiryDate) return false;
+            return new Date(a.expiryDate).getTime() <= cutoff;
+          });
+        }
+        setAccounts(rows);
       })
       .catch((e) => setError(e instanceof Error ? e.message : "Failed"))
       .finally(() => setLoading(false));
-  }, [search, sslIssuesOnly, expiringOnly]);
+  }, [search, statusFilter, expiringOnly]);
 
   useEffect(() => {
     const t = setTimeout(load, 200);
@@ -71,10 +83,10 @@ export function StaffHostingPanel() {
   const stats = useMemo(
     () => ({
       total: accounts.length,
-      sslIssues: accounts.filter((a) => a.sslStatus !== "Active").length,
+      highDisk: accounts.filter((a) => a.usage.disk.percentage >= 80).length,
       expiring: accounts.filter((a) => {
-        if (!a.renewsAt) return false;
-        return new Date(a.renewsAt).getTime() <= Date.now() + 30 * 86400000;
+        if (!a.expiryDate) return false;
+        return new Date(a.expiryDate).getTime() <= Date.now() + 30 * 86400000;
       }).length,
     }),
     [accounts]
@@ -97,7 +109,7 @@ export function StaffHostingPanel() {
       <div className="mb-5">
         <h1 className="stitch-page-title">Hosting Management</h1>
         <p className="stitch-page-sub !mb-0">
-          Hosting accounts, credentials (encrypted), SSL, and linked domains.
+          Service-project hosting accounts — packages, usage, and renewal tracking.
         </p>
       </div>
 
@@ -107,8 +119,8 @@ export function StaffHostingPanel() {
           <div className="stitch-kpi-label">Accounts</div>
         </div>
         <div className="stitch-kpi-card">
-          <div className="stitch-kpi-value text-amber-400">{stats.sslIssues}</div>
-          <div className="stitch-kpi-label">SSL alerts</div>
+          <div className="stitch-kpi-value text-amber-400">{stats.highDisk}</div>
+          <div className="stitch-kpi-label">High disk usage</div>
         </div>
         <div className="stitch-kpi-card">
           <div className="stitch-kpi-value text-amber-400">{stats.expiring}</div>
@@ -116,30 +128,27 @@ export function StaffHostingPanel() {
         </div>
       </div>
 
-      {stats.sslIssues > 0 && (
-        <div className="mb-4 flex items-center gap-2 rounded-lg border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-sm">
-          <AlertTriangle className="h-4 w-4 text-amber-400 shrink-0" />
-          <span>{stats.sslIssues} account(s) with SSL issues or expiring certificates</span>
-        </div>
-      )}
-
       <div className="stitch-toolbar mb-4">
         <div className="stitch-search-wrap !max-w-none flex-1">
           <Search className="stitch-search-icon" />
           <input
             type="search"
-            placeholder="Search label, domain, client, IP…"
+            placeholder="Search package, client, project…"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
         </div>
-        <button
-          type="button"
-          className={sslIssuesOnly ? "stitch-btn-primary-sm" : "stitch-btn-outline-sm"}
-          onClick={() => setSslIssuesOnly((v) => !v)}
+        <select
+          className="stitch-input !w-auto"
+          value={statusFilter}
+          onChange={(e) => setStatusFilter(e.target.value)}
         >
-          SSL issues
-        </button>
+          <option value="">All statuses</option>
+          <option value="ACTIVE">Active</option>
+          <option value="SUSPENDED">Suspended</option>
+          <option value="EXPIRED">Expired</option>
+          <option value="CANCELLED">Cancelled</option>
+        </select>
         <button
           type="button"
           className={expiringOnly ? "stitch-btn-primary-sm" : "stitch-btn-outline-sm"}
@@ -161,12 +170,12 @@ export function StaffHostingPanel() {
             <table className="stitch-table">
               <thead>
                 <tr>
-                  <th>Account</th>
+                  <th>Package</th>
                   <th>Client</th>
-                  <th>Provider</th>
-                  <th>Domains</th>
-                  <th>SSL</th>
-                  <th>Renews</th>
+                  <th>Project</th>
+                  <th>Disk</th>
+                  <th>Location</th>
+                  <th>Expires</th>
                   <th>Status</th>
                 </tr>
               </thead>
@@ -175,27 +184,35 @@ export function StaffHostingPanel() {
                   <tr key={a.id}>
                     <td>
                       <Link
-                        href={`/staff/hosting/${a.id}`}
+                        href={`/staff/hosting/managed/${a.id}`}
                         className="font-medium hover:text-violet-400"
                       >
-                        {a.label}
+                        {a.packageName}
                       </Link>
-                      <span className="text-xs text-[var(--sp-muted)] block">{a.planCode}</span>
                     </td>
                     <td>
                       <Link href={`/staff/clients/${a.client.id}`} className="hover:text-violet-400">
-                        {a.client.name}
+                        {a.client.company || a.client.fullName}
                       </Link>
                     </td>
-                    <td>{a.provider || "—"}</td>
-                    <td className="text-xs max-w-[140px] truncate">
-                      {a.linkedDomains.join(", ") || "—"}
+                    <td>
+                      <Link
+                        href={`/staff/service-projects/${a.project.id}`}
+                        className="hover:text-violet-400"
+                      >
+                        {a.project.name}
+                      </Link>
                     </td>
                     <td>
-                      <Badge variant={sslVariant(a.sslStatus)}>{a.sslStatus}</Badge>
+                      <span className="text-xs">
+                        {a.usage.disk.percentage}% ({a.usage.disk.usedMb} MB)
+                      </span>
                     </td>
-                    <td>{formatSriLankaDate(a.renewsAt)}</td>
-                    <td>{a.status}</td>
+                    <td>{a.serverLocation || "—"}</td>
+                    <td>{formatSriLankaDate(a.expiryDate)}</td>
+                    <td>
+                      <Badge variant={statusVariant(a.hostingStatus)}>{a.hostingStatus}</Badge>
+                    </td>
                   </tr>
                 ))}
               </tbody>

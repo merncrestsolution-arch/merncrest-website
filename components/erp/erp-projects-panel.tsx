@@ -653,7 +653,7 @@ export function ErpProjectsPanel() {
         <div className="rlk-section rlk-section-accent-orange !mb-4">
           <div className="rlk-section-body flex items-center justify-between gap-3">
             <p className="font-medium text-[#333]">
-              Pomodoro · {Math.floor(pomodoroLeft / 60)}:{String(pomodoroLeft % 60).padStart(2, "0")}
+              Focus session · {Math.floor(pomodoroLeft / 60)}:{String(pomodoroLeft % 60).padStart(2, "0")}
             </p>
             <button
               type="button"
@@ -1498,7 +1498,7 @@ export function ErpProjectsPanel() {
                       onClick={() => startPomodoro(detail.id)}
                       disabled={!!pomodoroTaskId}
                     >
-                      Start {POMODORO_MINUTES}m Pomodoro
+                      Start {POMODORO_MINUTES}m focus session
                     </button>
                   </div>
                 </section>
@@ -1552,7 +1552,7 @@ function TaskRow({
             className="rlk-btn-sm"
             onClick={() => onPomodoro(task.id)}
           >
-            Pomo
+            Focus
           </button>
         </div>
       </div>

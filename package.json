@@ -15,6 +15,11 @@
     "db:setup": "prisma generate && prisma db push && tsx prisma/seed.ts",
     "migrate:crm-contacted": "tsx scripts/migrate-crm-contacted.ts",
     "smoke:p0": "tsx scripts/smoke-p0.ts",
+    "smoke:phase1": "tsx scripts/smoke-phase1.ts",
+    "cron:renewal-reminders": "tsx scripts/renewal-reminder-cron.ts",
+    "cron:renewal-invoices": "tsx scripts/renewal-invoice-cron.ts",
+    "test": "vitest run",
+    "test:watch": "vitest",
     "postinstall": "prisma generate"
   },
   "prisma": {
@@ -64,6 +69,7 @@
     "tailwindcss": "^3.4.1",
     "tailwindcss-animate": "^1.0.7",
     "tsx": "^4.23.1",
-    "typescript": "^5"
+    "typescript": "^5",
+    "vitest": "^3.2.7"
   }
 }

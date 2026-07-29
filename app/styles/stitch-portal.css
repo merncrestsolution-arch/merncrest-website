@@ -3317,6 +3317,68 @@ textarea.stitch-input {
   border-radius: 999px;
 }
 
+.stitch-wave-progress {
+  position: relative;
+  height: 10px;
+  border-radius: 999px;
+  background: var(--stitch-surface-container);
+  overflow: hidden;
+  transition: box-shadow 0.3s ease;
+}
+
+.stitch-wave-progress:hover {
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--stitch-primary) 20%, transparent);
+}
+
+.stitch-wave-progress-fill {
+  position: relative;
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(
+    90deg,
+    #7c3aed 0%,
+    #a78bfa 35%,
+    #c4b5fd 50%,
+    #a78bfa 65%,
+    #7c3aed 100%
+  );
+  background-size: 200% 100%;
+  animation: stitch-wave-shimmer 2.4s ease-in-out infinite;
+  transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.stitch-wave-progress-fill::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.35) 0%,
+    transparent 45%,
+    rgba(0, 0, 0, 0.08) 100%
+  );
+  pointer-events: none;
+}
+
+@keyframes stitch-wave-shimmer {
+  0% {
+    background-position: 100% 0;
+  }
+  100% {
+    background-position: -100% 0;
+  }
+}
+
+.stitch-progress-card {
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.stitch-progress-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px color-mix(in srgb, var(--stitch-primary) 12%, transparent);
+}
+
 .stitch-progress-cell > span {
   font-size: 0.75rem;
   color: var(--sp-muted);

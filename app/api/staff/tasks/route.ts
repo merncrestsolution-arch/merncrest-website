@@ -111,7 +111,7 @@ export async function PATCH(request: Request) {
         minutes: POMODORO_MINUTES,
         startedAt,
         endedAt,
-        note: "Pomodoro session",
+        note: "Focus session",
       },
     });
     const updated = await prisma.projectTask.update({

@@ -6,6 +6,7 @@ import { decryptPii, redactPii } from "@/lib/security/pii";
 import { getCustomerBillingSummaries } from "@/lib/billing/customer-summary";
 import { serializeInvoice } from "@/lib/billing/invoice-serialize";
 import { apiError, apiSuccess } from "@/lib/api/envelope";
+import { canAccessClient } from "@/lib/sales/scope";
 
 /** Staff client 360 — unified profile for client detail page */
 export async function GET(
@@ -68,6 +69,9 @@ export async function GET(
   if (!user || user.profile?.deletedAt) {
     return apiError("NOT_FOUND", "Client not found", 404);
   }
+
+  const allowed = await canAccessClient(auth.user, user.id);
+  if (!allowed) return apiError("FORBIDDEN", "You do not have access to this client", 403);
 
   const projects = await prisma.erpProject.findMany({
     where: { customerId: user.id },

@@ -89,6 +89,14 @@ model User {
   messageTemplatesCreated MessageTemplate[] @relation("TemplateCreator")
   suggestionEvents SuggestionEvent[] @relation("SuggestionActor")
   emailOutboxRecorded EmailOutbox[] @relation("EmailOutboxActor")
+  clientProjects       Project[] @relation("ProjectClient")
+  salesAssignments     SalesClientAssignment[] @relation("SalesAgent")
+  accessRequestsFiled  CrossClientAccessRequest[] @relation("AccessRequester")
+  accessRequestsReviewed CrossClientAccessRequest[] @relation("AccessReviewer")
+  domainDocSubmissions DomainRegistrationSubmission[] @relation("DomainDocSubmitter")
+  domainDocReviews     DomainRegistrationSubmission[] @relation("DomainDocReviewer")
+  salesClientOf        SalesClientAssignment[] @relation("SalesClient")
+  accessRequestsAsClient CrossClientAccessRequest[] @relation("AccessRequestClient")
 
   @@index([role])
 }
@@ -464,6 +472,8 @@ model Invoice {
   /// Optional links for multi-project / service billing
   projectId         String?
   project           ErpProject?     @relation(fields: [projectId], references: [id], onDelete: SetNull)
+  serviceProjectId  String?
+  serviceProject    Project?        @relation("ServiceProjectInvoices", fields: [serviceProjectId], references: [id], onDelete: SetNull)
   domainId          String?
   domain            Domain?         @relation(fields: [domainId], references: [id], onDelete: SetNull)
   hostingAccountId  String?
@@ -492,6 +502,7 @@ model Invoice {
   @@index([userId])
   @@index([status])
   @@index([projectId])
+  @@index([serviceProjectId])
   @@index([domainId])
   @@index([hostingAccountId])
   @@index([dueAt])
@@ -1436,6 +1447,7 @@ model ErpProject {
   invoices   Invoice[]
   resource   ProjectResource?
   backlogItems ProjectFutureImprovement[]
+  serviceProject Project? @relation("ErpServiceProject")
 
   @@index([status])
   @@index([departmentId])
@@ -3162,5 +3174,269 @@ model EmailNotifySetting {
 
   @@unique([organizationId, eventType])
   @@index([organizationId])
+}
+
+// —— Phase 1: Multi-Service Projects, Domain & Hosting Management ——
+
+enum ProjectStatus {
+  ACTIVE
+  ON_HOLD
+  COMPLETED
+  CANCELLED
+}
+
+enum ServiceType {
+  DOMAIN_REGISTRATION
+  HOSTING
+  SECURITY
+  SSL_CERTIFICATE
+  CLOUD_SERVICE
+  EMAIL_HOSTING
+  MAINTENANCE
+  BACKUP
+  OTHER
+}
+
+enum ServiceStatus {
+  ACTIVE
+  EXPIRED
+  SUSPENDED
+  CANCELLED
+  PENDING_RENEWAL
+}
+
+enum BillingCycle {
+  MONTHLY
+  QUARTERLY
+  ANNUAL
+  ONE_TIME
+}
+
+enum DomainStatus {
+  ACTIVE
+  EXPIRING_SOON
+  EXPIRED
+  TRANSFERRED
+  SUSPENDED
+}
+
+enum HostingStatus {
+  ACTIVE
+  SUSPENDED
+  EXPIRED
+  CANCELLED
+}
+
+/// Service-delivery project (multi-service). Distinct from ErpProject.
+model Project {
+  id           String        @id @default(cuid())
+  clientId     String
+  name         String
+  status       ProjectStatus @default(ACTIVE)
+  erpProjectId String?       @unique
+  services     ProjectService[]
+  invoices     Invoice[]     @relation("ServiceProjectInvoices")
+  accessRequests CrossClientAccessRequest[]
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  deletedAt    DateTime?
+  createdBy    String
+  updatedBy    String
+  client       User          @relation("ProjectClient", fields: [clientId], references: [id])
+  erpProject   ErpProject?   @relation("ErpServiceProject", fields: [erpProjectId], references: [id], onDelete: SetNull)
+
+  @@index([clientId])
+  @@index([status])
+  @@index([deletedAt])
+  @@index([erpProjectId])
+}
+
+model ProjectService {
+  id                   String        @id @default(cuid())
+  projectId            String
+  serviceType          ServiceType
+  status               ServiceStatus @default(ACTIVE)
+  startDate            DateTime
+  freePeriodDays       Int?
+  billingCycle         BillingCycle  @default(ANNUAL)
+  renewalDate          DateTime?
+  expiryDate           DateTime?
+  metadata             Json?
+  /// Days before renewal to send reminders (Phase 4 reads this)
+  reminderScheduleDays Int[]         @default([3])
+  project              Project       @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  serviceDomain        ServiceDomain?
+  serviceHosting       ServiceHostingAccount?
+  domainDocSubmissions DomainRegistrationSubmission[]
+  createdAt            DateTime      @default(now())
+  updatedAt            DateTime      @updatedAt
+  deletedAt            DateTime?
+  createdBy            String
+  updatedBy            String
+
+  @@index([projectId])
+  @@index([serviceType])
+  @@index([status])
+  @@index([renewalDate])
+  @@index([deletedAt])
+}
+
+/// Domain record scoped to a ProjectService of type DOMAIN_REGISTRATION
+model ServiceDomain {
+  id                    String               @id @default(cuid())
+  projectServiceId      String               @unique
+  domainName            String
+  registrar             String?
+  purchasedViaMernCrest Boolean              @default(false)
+  registrationDate      DateTime
+  expiryDate            DateTime
+  nameservers           String[]
+  dnsRecords            Json?
+  domainStatus          DomainStatus         @default(ACTIVE)
+  projectService        ProjectService       @relation(fields: [projectServiceId], references: [id], onDelete: Cascade)
+  history               ServiceDomainHistoryEntry[]
+  createdAt             DateTime             @default(now())
+  updatedAt             DateTime             @updatedAt
+  deletedAt             DateTime?
+  createdBy             String
+  updatedBy             String
+
+  @@index([domainName])
+  @@index([expiryDate])
+  @@index([domainStatus])
+  @@index([deletedAt])
+}
+
+model ServiceDomainHistoryEntry {
+  id        String        @id @default(cuid())
+  domainId  String
+  action    String
+  detail    Json?
+  domain    ServiceDomain @relation(fields: [domainId], references: [id], onDelete: Cascade)
+  createdAt DateTime      @default(now())
+  createdBy String
+
+  @@index([domainId])
+  @@index([createdAt])
+}
+
+/// Hosting account scoped to a ProjectService of type HOSTING
+model ServiceHostingAccount {
+  id               String                    @id @default(cuid())
+  projectServiceId String                    @unique
+  packageName      String
+  diskQuotaMb      Int
+  bandwidthQuotaMb Int
+  diskUsedMb       Int                       @default(0)
+  bandwidthUsedMb  Int                       @default(0)
+  serverLocation   String?
+  hostingStatus    HostingStatus             @default(ACTIVE)
+  renewalDate      DateTime
+  expiryDate       DateTime
+  projectService   ProjectService            @relation(fields: [projectServiceId], references: [id], onDelete: Cascade)
+  history          ServiceHostingHistoryEntry[]
+  createdAt        DateTime                  @default(now())
+  updatedAt        DateTime                  @updatedAt
+  deletedAt        DateTime?
+  createdBy        String
+  updatedBy        String
+
+  @@index([hostingStatus])
+  @@index([renewalDate])
+  @@index([expiryDate])
+  @@index([deletedAt])
+}
+
+model ServiceHostingHistoryEntry {
+  id             String                @id @default(cuid())
+  hostingId      String
+  action         String
+  detail         Json?
+  hostingAccount ServiceHostingAccount @relation(fields: [hostingId], references: [id], onDelete: Cascade)
+  createdAt      DateTime              @default(now())
+  createdBy      String
+
+  @@index([hostingId])
+  @@index([createdAt])
+}
+
+enum DomainDocStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  CORRECTIONS_REQUESTED
+}
+
+enum AccessRequestStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+/// Domain registration documentation submitted by client
+model DomainRegistrationSubmission {
+  id                String          @id @default(cuid())
+  projectServiceId  String
+  projectService    ProjectService  @relation(fields: [projectServiceId], references: [id], onDelete: Cascade)
+  fullName          String
+  companyName       String?
+  purpose           String
+  phone             String
+  email             String
+  letterheadUrl     String?
+  supportingDocsJson Json?
+  idDocsJson        Json?
+  status            DomainDocStatus @default(PENDING)
+  reviewNotes       String?
+  reviewedBy        String?
+  reviewer          User?           @relation("DomainDocReviewer", fields: [reviewedBy], references: [id], onDelete: SetNull)
+  submittedBy       String
+  submitter         User            @relation("DomainDocSubmitter", fields: [submittedBy], references: [id])
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
+  deletedAt         DateTime?
+  createdBy         String
+  updatedBy         String
+
+  @@index([projectServiceId])
+  @@index([status])
+  @@index([deletedAt])
+}
+
+/// Sales agent assigned to a client account
+model SalesClientAssignment {
+  id        String   @id @default(cuid())
+  agentId   String
+  agent     User     @relation("SalesAgent", fields: [agentId], references: [id], onDelete: Cascade)
+  clientId  String
+  client    User     @relation("SalesClient", fields: [clientId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  createdBy String
+
+  @@unique([agentId, clientId])
+  @@index([agentId])
+  @@index([clientId])
+}
+
+/// Cross-client access request from sales agent
+model CrossClientAccessRequest {
+  id          String              @id @default(cuid())
+  requesterId String
+  requester   User                @relation("AccessRequester", fields: [requesterId], references: [id], onDelete: Cascade)
+  clientId    String
+  client      User                @relation("AccessRequestClient", fields: [clientId], references: [id], onDelete: Cascade)
+  projectId   String?
+  project     Project?            @relation(fields: [projectId], references: [id], onDelete: SetNull)
+  reason      String
+  status      AccessRequestStatus @default(PENDING)
+  reviewedBy  String?
+  reviewer    User?               @relation("AccessReviewer", fields: [reviewedBy], references: [id], onDelete: SetNull)
+  reviewNotes String?
+  createdAt   DateTime            @default(now())
+  updatedAt   DateTime            @updatedAt
+
+  @@index([requesterId])
+  @@index([clientId])
+  @@index([status])
 }
 

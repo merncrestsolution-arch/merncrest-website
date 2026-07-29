@@ -24,6 +24,7 @@ const nav = [
   { href: "/portal", label: "Dashboard", icon: LayoutDashboard, exact: true },
   { href: "/portal/services", label: "Services", icon: Server },
   { href: "/portal/domains", label: "Domains", icon: Globe },
+  { href: "/portal/domain-registration", label: "Domain Docs", icon: Globe },
   { href: "/portal/hosting", label: "Hosting", icon: Cloud },
   { href: "/portal/projects", label: "Projects", icon: FolderKanban },
   { href: "/portal/invoices", label: "Billing", icon: CreditCard },

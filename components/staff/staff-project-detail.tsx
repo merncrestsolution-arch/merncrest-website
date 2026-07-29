@@ -9,6 +9,7 @@ import { ProjectUpdatesPanel } from "@/components/staff/project-updates-panel";
 import { ProjectTimelinePanel } from "@/components/staff/project-timeline-panel";
 import { ProjectBacklogPanel } from "@/components/staff/project-backlog-panel";
 import { ProjectDevNotesPanel } from "@/components/staff/project-dev-notes-panel";
+import { ProjectServicesPanel } from "@/components/staff/project-services-panel";
 import {
   ArrowLeft,
   Calendar,
@@ -126,13 +127,16 @@ type Tab =
   | "resources"
   | "backlog"
   | "devnotes"
-  | "finance";
+  | "finance"
+  | "services";
 
 export function StaffProjectDetail({ projectId }: { projectId: string }) {
   const [project, setProject] = useState<ProjectDetail | null>(null);
   const [tab, setTab] = useState<Tab>("overview");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
+  const [serviceProjectId, setServiceProjectId] = useState<string | null>(null);
+  const [serviceProjectLoading, setServiceProjectLoading] = useState(false);
 
   const load = useCallback(() => {
     setLoading(true);
@@ -152,6 +156,22 @@ export function StaffProjectDetail({ projectId }: { projectId: string }) {
   useEffect(() => {
     load();
   }, [load]);
+
+  useEffect(() => {
+    if (tab !== "services" && tab !== "finance") return;
+    setServiceProjectLoading(true);
+    fetch(`/api/staff/service-projects?erpProjectId=${encodeURIComponent(projectId)}&limit=1`)
+      .then(async (r) => {
+        const d = await r.json();
+        if (d.success && d.data?.[0]?.id) {
+          setServiceProjectId(d.data[0].id);
+        } else {
+          setServiceProjectId(null);
+        }
+      })
+      .catch(() => setServiceProjectId(null))
+      .finally(() => setServiceProjectLoading(false));
+  }, [tab, projectId]);
 
   if (loading) {
     return (
@@ -252,6 +272,7 @@ export function StaffProjectDetail({ projectId }: { projectId: string }) {
             ["resources", "Resources"],
             ["backlog", "Backlog"],
             ["devnotes", "Dev notes"],
+            ["services", "Services"],
             ["finance", "Finance"],
           ] as const
         ).map(([id, label]) => (
@@ -508,6 +529,33 @@ export function StaffProjectDetail({ projectId }: { projectId: string }) {
 
       {tab === "devnotes" && <ProjectDevNotesPanel projectId={projectId} />}
 
+      {tab === "services" && (
+        <div className="space-y-4">
+          {serviceProjectLoading ? (
+            <p className="stitch-page-sub flex items-center gap-2">
+              <Loader2 className="h-4 w-4 animate-spin" /> Loading service project…
+            </p>
+          ) : serviceProjectId ? (
+            <ProjectServicesPanel projectId={serviceProjectId} />
+          ) : (
+            <section className="stitch-section-card">
+              <div className="stitch-section-body text-sm space-y-3">
+                <p className="m-0 text-[var(--sp-muted)]">
+                  No service project is linked to this ERP delivery project yet. Create one to
+                  attach domains, hosting, SSL, and other billable services.
+                </p>
+                <Link
+                  href={`/staff/service-projects?erpProjectId=${encodeURIComponent(projectId)}&name=${encodeURIComponent(project.name)}`}
+                  className="stitch-btn-primary-sm inline-flex"
+                >
+                  Create service project
+                </Link>
+              </div>
+            </section>
+          )}
+        </div>
+      )}
+
       {tab === "finance" && (
         <div className="grid lg:grid-cols-2 gap-5">
           <section className="stitch-section-card">
@@ -562,9 +610,21 @@ export function StaffProjectDetail({ projectId }: { projectId: string }) {
           <section className="stitch-section-card">
             <div className="stitch-section-head">
               <h3>Payment schedule</h3>
-              <Link href="/staff/invoices" className="stitch-btn-sm">
-                Invoices
-              </Link>
+              <div className="flex gap-2">
+                {serviceProjectId ? (
+                  <a
+                    href={`/api/staff/service-projects/${serviceProjectId}/billing/pdf`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="stitch-btn-sm"
+                  >
+                    Billing history PDF
+                  </a>
+                ) : null}
+                <Link href="/staff/invoices" className="stitch-btn-sm">
+                  Invoices
+                </Link>
+              </div>
             </div>
             <div className="stitch-section-body overflow-x-auto !p-0">
               <table className="stitch-table">

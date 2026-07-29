@@ -2,6 +2,7 @@
 import type { SystemRole } from "./roles";
 
 export const STAFF_PERMISSIONS = [
+  "sales.agent",
   "clients.view",
   "clients.manage",
   "projects.view",
@@ -23,6 +24,15 @@ export const STAFF_PERMISSIONS = [
 ] as const;
 
 export type StaffPermission = (typeof STAFF_PERMISSIONS)[number];
+
+/** View-only permissions for scoped sales agents (client access enforced in lib/sales/scope.ts). */
+export const SALES_AGENT_DEFAULT_PERMISSIONS: StaffPermission[] = [
+  "clients.view",
+  "projects.view",
+  "domains.view",
+  "hosting.view",
+  "billing.view",
+];
 
 export const ROLE_DEFAULT_PERMISSIONS: Record<SystemRole, StaffPermission[] | "*"> = {
   OWNER: "*",

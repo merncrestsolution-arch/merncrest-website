@@ -118,7 +118,7 @@ export function StaffTasksPanel() {
       <div className="stitch-page-head">
         <div>
           <h1 className="stitch-page-title">My Tasks</h1>
-          <p className="stitch-page-sub">Task board, priorities, and Pomodoro time tracking.</p>
+          <p className="stitch-page-sub">Task board, priorities, and focus time tracking.</p>
         </div>
       </div>
 

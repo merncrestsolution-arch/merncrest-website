@@ -35,15 +35,6 @@ export function buildReceiptPdfHtml(data: ReceiptPdfData): string {
     minute: "2-digit",
   });
 
-  const hasInvoice =
-    data.invoiceNumber &&
-    data.invoiceTotalCents != null &&
-    data.invoiceTotalCents > 0;
-
-  const previousPaid =
-    hasInvoice && data.invoicePaidCents != null
-      ? Math.max(0, data.invoicePaidCents - data.amountCents)
-      : null;
 
   return `<!DOCTYPE html>
 <html lang="en">
@@ -288,55 +279,22 @@ export function buildReceiptPdfHtml(data: ReceiptPdfData): string {
 
       <table>
         <tbody>
-          ${
-            data.invoiceNumber
-              ? `<tr><th>Invoice</th><td>${escapeHtml(data.invoiceNumber)}</td></tr>`
-              : ""
-          }
-          ${
-            data.orderNumber
-              ? `<tr><th>Order</th><td>${escapeHtml(data.orderNumber)}</td></tr>`
-              : ""
-          }
+          <tr><th>Receipt number</th><td>${escapeHtml(data.receiptNumber)}</td></tr>
+          <tr><th>Receipt date</th><td>${paidOn} at ${paidTime}</td></tr>
+          <tr><th>Amount received</th><td>${formatMoney(data.amountCents, data.currency)}</td></tr>
           <tr><th>Payment method</th><td>${escapeHtml(formatMethod(data.method))}</td></tr>
           ${
             data.referenceNumber
-              ? `<tr><th>Bank / transaction reference</th><td>${escapeHtml(data.referenceNumber)}</td></tr>`
+              ? `<tr><th>Reference number</th><td>${escapeHtml(data.referenceNumber)}</td></tr>`
               : ""
           }
-          <tr><th>Receipt number</th><td>${escapeHtml(data.receiptNumber)}</td></tr>
-          <tr><th>Date & time</th><td>${paidOn} at ${paidTime}</td></tr>
         </tbody>
       </table>
-
-      ${
-        hasInvoice
-          ? `<div class="totals">
-              <div class="row"><span>Invoice total</span><span>${formatMoney(data.invoiceTotalCents!, data.currency)}</span></div>
-              ${
-                previousPaid != null && previousPaid > 0
-                  ? `<div class="row"><span>Previously paid</span><span>${formatMoney(previousPaid, data.currency)}</span></div>`
-                  : ""
-              }
-              <div class="row highlight"><span>This payment</span><span>${formatMoney(data.amountCents, data.currency)}</span></div>
-              ${
-                data.invoiceBalanceCents != null
-                  ? `<div class="row balance"><span>Remaining balance</span><span>${formatMoney(data.invoiceBalanceCents, data.currency)}</span></div>`
-                  : ""
-              }
-            </div>`
-          : ""
-      }
 
       <div class="footer">
         <strong>MernCrest Solutions (Pvt) Ltd</strong> · merncrest.lk · Colombo, Sri Lanka<br/>
         This document confirms that MernCrest Solutions has received the payment listed above.
         Please retain this receipt for your records.
-        ${
-          data.invoiceNumber
-            ? `<br/>For billing enquiries, quote invoice <strong>${escapeHtml(data.invoiceNumber)}</strong> or receipt <strong>${escapeHtml(data.receiptNumber)}</strong>.`
-            : ""
-        }
       </div>
     </div>
   </div>
