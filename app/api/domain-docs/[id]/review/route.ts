@@ -3,7 +3,7 @@ import { prisma } from "@/lib/db";
 import { requireStaff } from "@/lib/commerce";
 import { apiError, apiSuccess } from "@/lib/api/envelope";
 import { hasStaffPermission } from "@/lib/staff/permissions";
-import { sendMailRaw } from "@/lib/mail";
+import { sendDomainDocApprovedEmail, sendDomainDocRejectedEmail } from "@/lib/email/system-mails";
 
 const reviewSchema = z.object({
   action: z.enum(["approve", "reject", "request_corrections"]),
@@ -81,20 +81,22 @@ export async function PATCH(
       existing.projectService.project.name;
     const notes = parsed.data.reviewNotes?.trim() || "";
 
-    void sendMailRaw({
+    void sendDomainDocRejectedEmail({
       to: existing.submitter.email,
-      subject: `Domain registration documents rejected — ${domainName}`,
-      text: `Hi ${existing.submitter.fullName},\n\nYour domain registration documents for ${domainName} were rejected.\n\nReason:\n${notes}\n\nPlease resubmit corrected documents via your portal.`,
-      html: `
-        <div style="font-family:sans-serif;max-width:520px;margin:0 auto;color:#333">
-          <h2 style="color:#7C3AED">Domain registration documents rejected</h2>
-          <p>Hi ${existing.submitter.fullName},</p>
-          <p>Your domain registration documents for <strong>${domainName}</strong> were rejected.</p>
-          <p><strong>Reason:</strong></p>
-          <p style="white-space:pre-wrap;background:#f8fafc;padding:12px;border-radius:8px">${notes}</p>
-          <p>Please resubmit corrected documents via your customer portal.</p>
-          <p style="color:#64748b;font-size:12px;margin-top:24px">Powered by MERNcrest Solutions (Pvt) Ltd — merncrest.lk</p>
-        </div>`,
+      name: existing.submitter.fullName,
+      domainName,
+      reason: notes,
+    });
+  }
+
+  if (parsed.data.action === "approve") {
+    const domainName =
+      existing.projectService.serviceDomain?.domainName ||
+      existing.projectService.project.name;
+    void sendDomainDocApprovedEmail({
+      to: existing.submitter.email,
+      name: existing.submitter.fullName,
+      domainName,
     });
   }
 

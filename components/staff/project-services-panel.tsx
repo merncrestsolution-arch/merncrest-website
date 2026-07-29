@@ -62,6 +62,7 @@ export function ProjectServicesPanel({ projectId }: { projectId: string }) {
     billingCycle: "ANNUAL" as BillingCycle,
     freePeriodDays: "",
     renewalCostLkr: "",
+    serviceCostLkr: "",
   });
 
   const load = useCallback(() => {
@@ -121,8 +122,13 @@ export function ProjectServicesPanel({ projectId }: { projectId: string }) {
     const renewalCostCents = form.renewalCostLkr
       ? Math.round(Number(form.renewalCostLkr) * 100)
       : undefined;
-    const metadata =
-      renewalCostCents && renewalCostCents > 0 ? { renewalCostCents } : undefined;
+    const serviceCostCents = form.serviceCostLkr
+      ? Math.round(Number(form.serviceCostLkr) * 100)
+      : undefined;
+    const metadata: Record<string, number> = {};
+    if (renewalCostCents && renewalCostCents > 0) metadata.renewalCostCents = renewalCostCents;
+    if (serviceCostCents && serviceCostCents > 0) metadata.serviceCostCents = serviceCostCents;
+    const metadataPayload = Object.keys(metadata).length ? metadata : undefined;
 
     try {
       const r = await fetch(`/api/projects/${projectId}/services`, {
@@ -133,7 +139,7 @@ export function ProjectServicesPanel({ projectId }: { projectId: string }) {
           startDate,
           billingCycle: form.billingCycle,
           freePeriodDays,
-          metadata,
+          metadata: metadataPayload,
         }),
       });
       const d = await r.json();
@@ -146,6 +152,7 @@ export function ProjectServicesPanel({ projectId }: { projectId: string }) {
         billingCycle: "ANNUAL",
         freePeriodDays: "",
         renewalCostLkr: "",
+        serviceCostLkr: "",
       });
       load();
     } catch (err) {
@@ -332,6 +339,18 @@ export function ProjectServicesPanel({ projectId }: { projectId: string }) {
                   value={form.freePeriodDays}
                   onChange={(e) => setForm((f) => ({ ...f, freePeriodDays: e.target.value }))}
                   placeholder="Optional"
+                />
+              </label>
+              <label className="block space-y-1">
+                <span className="text-[var(--sp-muted)]">Service cost (LKR)</span>
+                <input
+                  type="number"
+                  min={0}
+                  step="0.01"
+                  className="stitch-input w-full"
+                  value={form.serviceCostLkr}
+                  onChange={(e) => setForm((f) => ({ ...f, serviceCostLkr: e.target.value }))}
+                  placeholder="Initial / setup cost"
                 />
               </label>
               <label className="block space-y-1">

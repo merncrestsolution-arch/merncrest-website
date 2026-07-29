@@ -5,6 +5,7 @@ import { apiError, apiSuccess } from "@/lib/api/envelope";
 import { isAdminRole } from "@/lib/auth";
 import { canMutateProject } from "@/lib/projects/access";
 import { hasStaffPermission } from "@/lib/staff/permissions";
+import { sendProjectUpdateEmail } from "@/lib/email/system-mails";
 
 export async function GET(
   _request: Request,
@@ -57,6 +58,24 @@ export async function POST(
       createdById: auth.user.id,
     },
   });
+
+  const erpProject = await prisma.erpProject.findUnique({
+    where: { id: projectId },
+    select: {
+      name: true,
+      customer: { select: { email: true, fullName: true } },
+    },
+  });
+
+  if (erpProject?.customer?.email) {
+    void sendProjectUpdateEmail({
+      to: erpProject.customer.email,
+      name: erpProject.customer.fullName,
+      projectName: erpProject.name,
+      title: parsed.data.title,
+      body: parsed.data.body,
+    });
+  }
 
   if (parsed.data.processStage) {
     await prisma.erpProject.update({

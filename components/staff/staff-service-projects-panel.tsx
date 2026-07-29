@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { Link } from "@/i18n/routing";
 import { FolderKanban, Plus, Search } from "lucide-react";
 import { formatSriLankaDate } from "@/lib/timezone";
@@ -50,6 +51,7 @@ function statusChip(status: string) {
 }
 
 export function StaffServiceProjectsPanel() {
+  const searchParams = useSearchParams();
   const [projects, setProjects] = useState<ServiceProjectRow[]>([]);
   const [clients, setClients] = useState<ClientOption[]>([]);
   const [search, setSearch] = useState("");
@@ -81,6 +83,19 @@ export function StaffServiceProjectsPanel() {
   useEffect(() => {
     load();
   }, [load]);
+
+  useEffect(() => {
+    const erpProjectId = searchParams.get("erpProjectId");
+    const name = searchParams.get("name");
+    if (erpProjectId || name) {
+      setShowModal(true);
+      setForm((f) => ({
+        ...f,
+        erpProjectId: erpProjectId || f.erpProjectId,
+        name: name || f.name,
+      }));
+    }
+  }, [searchParams]);
 
   useEffect(() => {
     if (!showModal) return;

@@ -425,3 +425,25 @@ export async function PATCH(request: Request) {
     return NextResponse.json({ error: "Failed" }, { status: 500 });
   }
 }
+
+export async function DELETE(request: Request) {
+  const auth = await requireStaff();
+  if (auth.error) return auth.error;
+
+  const { searchParams } = new URL(request.url);
+  const id = searchParams.get("id");
+  if (!id) return NextResponse.json({ error: "Missing quotation id" }, { status: 400 });
+
+  const quote = await prisma.quotation.findUnique({ where: { id } });
+  if (!quote) return NextResponse.json({ error: "Not found" }, { status: 404 });
+  if (quote.status === "ACCEPTED") {
+    return NextResponse.json({ error: "Cannot delete an accepted quotation" }, { status: 409 });
+  }
+
+  await prisma.$transaction([
+    prisma.quotationItem.deleteMany({ where: { quotationId: id } }),
+    prisma.quotation.delete({ where: { id } }),
+  ]);
+
+  return NextResponse.json({ ok: true, message: "Quotation deleted" });
+}

@@ -128,6 +128,7 @@ export function SystemQuotationsPanel({
   const [error, setError] = useState("");
   const [msg, setMsg] = useState("");
   const [busy, setBusy] = useState(false);
+  const [showCreate, setShowCreate] = useState(false);
 
   const [customerName, setCustomerName] = useState("");
   const [customerEmail, setCustomerEmail] = useState("");
@@ -202,7 +203,7 @@ export function SystemQuotationsPanel({
     });
   }, [items, discountLkr, taxLkr, vatPercent]);
 
-  const canEdit = selected && !["SENT", "ACCEPTED"].includes(selected.status);
+  const canEdit = showCreate || (selected && !["SENT", "ACCEPTED"].includes(selected.status));
 
   async function persistDraft() {
     if (!selected) throw new Error("No quotation selected");
@@ -268,6 +269,78 @@ export function SystemQuotationsPanel({
     }
   }
 
+  async function createQuotation() {
+    setBusy(true);
+    setError("");
+    setMsg("");
+    try {
+      const itemsPayload = items
+        .filter((i) => i.description.trim())
+        .map((i) => ({
+          description: i.description.trim(),
+          quantity: i.quantity,
+          unitPriceCents: lkrInputToCents(i.unitPriceLkr),
+        }));
+      if (!itemsPayload.length) throw new Error("Add at least one line item");
+      if (!customerName.trim() || !customerEmail.trim()) {
+        throw new Error("Customer name and email are required");
+      }
+      const lineSubtotal = itemsPayload.reduce((s, i) => s + i.quantity * i.unitPriceCents, 0);
+      const totals = calcBillingTotals({
+        lineSubtotalCents: lineSubtotal,
+        discountCents: lkrInputToCents(discountLkr),
+        taxCents: taxLkr.trim() ? lkrInputToCents(taxLkr) : undefined,
+        vatRatePercent: Number(vatPercent) || 18,
+      });
+      const res = await fetch("/api/quotations", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          customerName: customerName.trim(),
+          customerEmail: customerEmail.trim(),
+          company: company.trim() || undefined,
+          terms: terms.trim() || undefined,
+          notes: notes.trim() || undefined,
+          discountCents: totals.discountCents,
+          taxCents: totals.taxCents,
+          validDays: Number(validDays) || 14,
+          items: itemsPayload,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Create failed");
+      setShowCreate(false);
+      setMsg("Quotation created");
+      await load();
+      if (data.quotation?.id) setSelectedId(data.quotation.id);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Create failed");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function deleteQuotation() {
+    if (!selected) return;
+    if (!confirm(`Delete quotation ${selected.quoteNumber}?`)) return;
+    setBusy(true);
+    setError("");
+    try {
+      const res = await fetch(`/api/quotations?id=${encodeURIComponent(selected.id)}`, {
+        method: "DELETE",
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Delete failed");
+      setSelectedId(null);
+      setMsg("Quotation deleted");
+      await load();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Delete failed");
+    } finally {
+      setBusy(false);
+    }
+  }
+
   async function convertToInvoice() {
     if (!selected) return;
     setBusy(true);
@@ -312,9 +385,32 @@ export function SystemQuotationsPanel({
           </p>
         </div>
         {variant === "staff" ? (
-          <Link href="/staff/billing" className="stitch-btn-sm">
-            Billing hub
-          </Link>
+          <div className="flex gap-2">
+            <button
+              type="button"
+              className="stitch-btn-primary-sm"
+              onClick={() => {
+                setSelectedId(null);
+                setCustomerName("");
+                setCustomerEmail("");
+                setCompany("");
+                setTerms("");
+                setNotes("");
+                setDiscountLkr("0");
+                setTaxLkr("");
+                setVatPercent("18");
+                setValidDays("14");
+                setItems([emptyItem()]);
+                setShowCreate(true);
+              }}
+            >
+              <Plus className="h-4 w-4" />
+              New quotation
+            </button>
+            <Link href="/staff/billing" className="stitch-btn-sm">
+              Billing hub
+            </Link>
+          </div>
         ) : null}
       </div>
       {variant === "staff" ? <div className="mb-5" /> : null}
@@ -376,8 +472,14 @@ export function SystemQuotationsPanel({
 
         <section className="stitch-section-card lg:col-span-3">
           <div className="stitch-section-head">
-            <h3>{selected ? `Edit ${selected.quoteNumber}` : "Select a quotation"}</h3>
-            {selected ? (
+            <h3>
+              {showCreate
+                ? "New quotation"
+                : selected
+                  ? `Edit ${selected.quoteNumber}`
+                  : "Select a quotation"}
+            </h3>
+            {selected && !showCreate ? (
               <a
                 href={`/api/quotations/${selected.id}/pdf`}
                 className="stitch-btn-sm"
@@ -389,14 +491,13 @@ export function SystemQuotationsPanel({
             ) : null}
           </div>
           <div className="stitch-section-body space-y-4">
-            {!selected ? (
+            {!selected && !showCreate ? (
               <p className="text-sm text-muted">
-                Choose a quotation from the list — auto-generated requests appear as{" "}
-                <strong>Pending review</strong>.
+                Choose a quotation from the list — or click <strong>New quotation</strong> to create one.
               </p>
             ) : (
               <>
-                {selected.lead?.interest ? (
+                {selected?.lead?.interest ? (
                   <p className="text-xs rounded-lg border border-[var(--sp-outline)] bg-[var(--stitch-primary-soft)] px-3 py-2 text-[var(--sp-primary)]">
                     Lead interest: {selected.lead.interest}
                   </p>
@@ -592,37 +693,74 @@ export function SystemQuotationsPanel({
 
                 {canEdit ? (
                   <div className="flex flex-wrap gap-2">
-                    <button
-                      type="button"
-                      className="stitch-btn"
-                      onClick={saveDraft}
-                      disabled={busy}
-                    >
-                      {busy ? (
-                        <Loader2 className="h-4 w-4 animate-spin mr-2 inline" />
-                      ) : (
-                        <Save className="h-4 w-4 mr-2 inline" />
-                      )}
-                      Save draft
-                    </button>
-                    <button
-                      type="button"
-                      className="stitch-btn stitch-btn-primary"
-                      onClick={sendToCustomer}
-                      disabled={busy}
-                    >
-                      {busy ? (
-                        <Loader2 className="h-4 w-4 animate-spin mr-2 inline" />
-                      ) : (
-                        <Mail className="h-4 w-4 mr-2 inline" />
-                      )}
-                      Verify &amp; send to customer
-                    </button>
-                    <Link href="/staff/billing" className="stitch-btn-outline">
-                      Billing hub
-                    </Link>
+                    {showCreate ? (
+                      <>
+                        <button
+                          type="button"
+                          className="stitch-btn stitch-btn-primary"
+                          onClick={createQuotation}
+                          disabled={busy}
+                        >
+                          {busy ? (
+                            <Loader2 className="h-4 w-4 animate-spin mr-2 inline" />
+                          ) : (
+                            <Plus className="h-4 w-4 mr-2 inline" />
+                          )}
+                          Create quotation
+                        </button>
+                        <button
+                          type="button"
+                          className="stitch-btn-outline"
+                          onClick={() => setShowCreate(false)}
+                          disabled={busy}
+                        >
+                          Cancel
+                        </button>
+                      </>
+                    ) : (
+                      <>
+                        <button
+                          type="button"
+                          className="stitch-btn"
+                          onClick={saveDraft}
+                          disabled={busy}
+                        >
+                          {busy ? (
+                            <Loader2 className="h-4 w-4 animate-spin mr-2 inline" />
+                          ) : (
+                            <Save className="h-4 w-4 mr-2 inline" />
+                          )}
+                          Save draft
+                        </button>
+                        <button
+                          type="button"
+                          className="stitch-btn stitch-btn-primary"
+                          onClick={sendToCustomer}
+                          disabled={busy}
+                        >
+                          {busy ? (
+                            <Loader2 className="h-4 w-4 animate-spin mr-2 inline" />
+                          ) : (
+                            <Mail className="h-4 w-4 mr-2 inline" />
+                          )}
+                          Verify &amp; send to customer
+                        </button>
+                        <button
+                          type="button"
+                          className="stitch-btn-outline text-red-400"
+                          onClick={deleteQuotation}
+                          disabled={busy}
+                        >
+                          <Trash2 className="h-4 w-4 mr-2 inline" />
+                          Delete
+                        </button>
+                        <Link href="/staff/billing" className="stitch-btn-outline">
+                          Billing hub
+                        </Link>
+                      </>
+                    )}
                   </div>
-                ) : selected.status === "SENT" ? (
+                ) : selected && selected.status === "SENT" ? (
                   <div className="flex flex-wrap gap-2">
                     <button
                       type="button"

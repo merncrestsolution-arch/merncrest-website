@@ -7,45 +7,48 @@ export type ServiceTypeConfig = {
   metadataSchema: z.ZodType<Record<string, unknown>>;
 };
 
-const domainMetadataSchema = z.object({
+const costFields = z.object({
+  serviceCostCents: z.number().int().min(0).optional(),
+  renewalCostCents: z.number().int().min(0).optional(),
+});
+
+const domainMetadataSchema = costFields.extend({
   tld: z.string().min(1).max(32).optional(),
   autoRenew: z.boolean().optional(),
-  renewalCostCents: z.number().int().min(0).optional(),
 });
 
-const hostingMetadataSchema = z.object({
+const hostingMetadataSchema = costFields.extend({
   panelUrl: z.string().url().optional(),
   primaryDomain: z.string().max(255).optional(),
-  renewalCostCents: z.number().int().min(0).optional(),
 });
 
-const securityMetadataSchema = z.object({
+const securityMetadataSchema = costFields.extend({
   planName: z.string().max(120).optional(),
   coverageLevel: z.string().max(80).optional(),
 });
 
-const sslMetadataSchema = z.object({
+const sslMetadataSchema = costFields.extend({
   certificateType: z.enum(["DV", "OV", "EV", "WILDCARD"]).optional(),
   commonName: z.string().max(255).optional(),
 });
 
-const cloudMetadataSchema = z.object({
+const cloudMetadataSchema = costFields.extend({
   provider: z.string().max(80).optional(),
   instanceType: z.string().max(80).optional(),
   region: z.string().max(80).optional(),
 });
 
-const emailHostingMetadataSchema = z.object({
+const emailHostingMetadataSchema = costFields.extend({
   mailboxCount: z.number().int().min(1).optional(),
   storageGb: z.number().min(0).optional(),
 });
 
-const maintenanceMetadataSchema = z.object({
+const maintenanceMetadataSchema = costFields.extend({
   scope: z.string().max(500).optional(),
   hoursPerMonth: z.number().min(0).optional(),
 });
 
-const backupMetadataSchema = z.object({
+const backupMetadataSchema = costFields.extend({
   frequency: z.enum(["DAILY", "WEEKLY", "MONTHLY"]).optional(),
   retentionDays: z.number().int().min(1).optional(),
 });

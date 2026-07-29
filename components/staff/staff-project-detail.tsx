@@ -11,6 +11,14 @@ import { ProjectBacklogPanel } from "@/components/staff/project-backlog-panel";
 import { ProjectDevNotesPanel } from "@/components/staff/project-dev-notes-panel";
 import { ProjectServicesPanel } from "@/components/staff/project-services-panel";
 import {
+  ProjectHubActivity,
+  ProjectHubBilling,
+  ProjectHubOverview,
+  ProjectHubServices,
+  ProjectHubTimeline,
+} from "@/components/staff/project-hub-sections";
+import type { ProjectHubData } from "@/lib/staff/project-hub";
+import {
   ArrowLeft,
   Calendar,
   FileText,
@@ -128,26 +136,33 @@ type Tab =
   | "backlog"
   | "devnotes"
   | "finance"
-  | "services";
+  | "services"
+  | "activity";
 
 export function StaffProjectDetail({ projectId }: { projectId: string }) {
   const [project, setProject] = useState<ProjectDetail | null>(null);
+  const [hub, setHub] = useState<ProjectHubData | null>(null);
   const [tab, setTab] = useState<Tab>("overview");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
   const [serviceProjectId, setServiceProjectId] = useState<string | null>(null);
-  const [serviceProjectLoading, setServiceProjectLoading] = useState(false);
 
   const load = useCallback(() => {
     setLoading(true);
     setError("");
-    fetch(`/api/erp/projects?projectId=${encodeURIComponent(projectId)}`)
-      .then(async (r) => {
-        const d = await r.json();
-        if (!r.ok) throw new Error(d.error || "Failed to load project");
-        const row = d.projects?.[0];
-        if (!row) throw new Error("Project not found");
-        setProject(row);
+    Promise.all([
+      fetch(`/api/erp/projects?projectId=${encodeURIComponent(projectId)}`).then((r) => r.json()),
+      fetch(`/api/staff/projects/${projectId}/hub`).then((r) => r.json()),
+    ])
+      .then(([erpRes, hubRes]) => {
+        if (!erpRes.projects?.[0]) throw new Error(erpRes.error || "Project not found");
+        setProject(erpRes.projects[0]);
+        if (hubRes.success) {
+          setHub(hubRes.data);
+          setServiceProjectId(hubRes.data.serviceProject?.id ?? null);
+        } else {
+          setHub(null);
+        }
       })
       .catch((e) => setError(e instanceof Error ? e.message : "Failed"))
       .finally(() => setLoading(false));
@@ -156,22 +171,6 @@ export function StaffProjectDetail({ projectId }: { projectId: string }) {
   useEffect(() => {
     load();
   }, [load]);
-
-  useEffect(() => {
-    if (tab !== "services" && tab !== "finance") return;
-    setServiceProjectLoading(true);
-    fetch(`/api/staff/service-projects?erpProjectId=${encodeURIComponent(projectId)}&limit=1`)
-      .then(async (r) => {
-        const d = await r.json();
-        if (d.success && d.data?.[0]?.id) {
-          setServiceProjectId(d.data[0].id);
-        } else {
-          setServiceProjectId(null);
-        }
-      })
-      .catch(() => setServiceProjectId(null))
-      .finally(() => setServiceProjectLoading(false));
-  }, [tab, projectId]);
 
   if (loading) {
     return (
@@ -194,6 +193,7 @@ export function StaffProjectDetail({ projectId }: { projectId: string }) {
 
   const client = project.customer;
   const finance = project.finance;
+  const progressPct = hub?.progress.percent ?? project.progressPct ?? 0;
   const doneTasks = project.tasks.filter((t) => t.status === "DONE").length;
   const pendingTasks = project.tasks.filter((t) => t.status !== "DONE" && !t.parentId);
   const completedTasks = project.tasks.filter((t) => t.status === "DONE" && !t.parentId);
@@ -229,7 +229,7 @@ export function StaffProjectDetail({ projectId }: { projectId: string }) {
           <div className="stitch-kpi-icon stitch-kpi-icon-blue">
             <FileText className="h-5 w-5" />
           </div>
-          <div className="stitch-kpi-value">{project.progressPct ?? 0}%</div>
+          <div className="stitch-kpi-value">{progressPct}%</div>
           <div className="stitch-kpi-label">Progress</div>
         </div>
         <div className="stitch-kpi-card">
@@ -272,8 +272,9 @@ export function StaffProjectDetail({ projectId }: { projectId: string }) {
             ["resources", "Resources"],
             ["backlog", "Backlog"],
             ["devnotes", "Dev notes"],
-            ["services", "Services"],
-            ["finance", "Finance"],
+            ["services", `Services (${hub?.services.length ?? 0})`],
+            ["finance", "Billing"],
+            ["activity", "Activity"],
           ] as const
         ).map(([id, label]) => (
           <button
@@ -287,7 +288,50 @@ export function StaffProjectDetail({ projectId }: { projectId: string }) {
         ))}
       </div>
 
-      {tab === "overview" && (
+      {tab === "overview" && hub ? (
+        <div className="space-y-5">
+          <ProjectHubOverview hub={hub} />
+          <div className="grid lg:grid-cols-3 gap-5">
+            <section className="stitch-section-card lg:col-span-2">
+              <div className="stitch-section-head">
+                <h3>Project notes</h3>
+              </div>
+              <div className="stitch-section-body space-y-4 text-sm">
+                {hub.erpProject.developmentNotes ? (
+                  <div>
+                    <p className="text-xs font-semibold uppercase tracking-wide text-[var(--sp-muted)] mb-1">
+                      Development notes
+                    </p>
+                    <p className="whitespace-pre-wrap m-0">{hub.erpProject.developmentNotes}</p>
+                  </div>
+                ) : null}
+                {!hub.erpProject.clientBrief && !hub.erpProject.nextSteps && !hub.erpProject.developmentNotes ? (
+                  <p className="text-[var(--sp-muted)]">No project notes yet. Use Dev notes tab to add internal notes.</p>
+                ) : null}
+              </div>
+            </section>
+            <section className="stitch-section-card">
+              <div className="stitch-section-head">
+                <h3>Recent updates</h3>
+              </div>
+              <div className="stitch-section-body space-y-3">
+                {hub.clientUpdates.length === 0 ? (
+                  <p className="text-sm text-[var(--sp-muted)]">No client updates posted.</p>
+                ) : (
+                  hub.clientUpdates.slice(0, 5).map((u) => (
+                    <div key={u.id} className="text-sm border-b border-[var(--sp-outline)] pb-2">
+                      <p className="font-medium m-0">{u.title}</p>
+                      <p className="text-xs text-[var(--sp-muted)] m-0 mt-1 line-clamp-2">{u.body}</p>
+                    </div>
+                  ))
+                )}
+              </div>
+            </section>
+          </div>
+        </div>
+      ) : null}
+
+      {tab === "overview" && !hub && (
         <div className="grid lg:grid-cols-3 gap-5">
           <section className="stitch-section-card lg:col-span-2">
             <div className="stitch-section-head">
@@ -530,12 +574,9 @@ export function StaffProjectDetail({ projectId }: { projectId: string }) {
       {tab === "devnotes" && <ProjectDevNotesPanel projectId={projectId} />}
 
       {tab === "services" && (
-        <div className="space-y-4">
-          {serviceProjectLoading ? (
-            <p className="stitch-page-sub flex items-center gap-2">
-              <Loader2 className="h-4 w-4 animate-spin" /> Loading service project…
-            </p>
-          ) : serviceProjectId ? (
+        <div className="space-y-5">
+          {hub ? <ProjectHubServices hub={hub} /> : null}
+          {serviceProjectId ? (
             <ProjectServicesPanel projectId={serviceProjectId} />
           ) : (
             <section className="stitch-section-card">
@@ -556,7 +597,12 @@ export function StaffProjectDetail({ projectId }: { projectId: string }) {
         </div>
       )}
 
-      {tab === "finance" && (
+      {tab === "finance" && hub ? (
+        <div className="space-y-5">
+          <ProjectHubBilling hub={hub} />
+          <ProjectHubTimeline hub={hub} />
+        </div>
+      ) : tab === "finance" ? (
         <div className="grid lg:grid-cols-2 gap-5">
           <section className="stitch-section-card">
             <div className="stitch-section-head">
@@ -672,7 +718,9 @@ export function StaffProjectDetail({ projectId }: { projectId: string }) {
             </div>
           </section>
         </div>
-      )}
+      ) : null}
+
+      {tab === "activity" && hub ? <ProjectHubActivity hub={hub} /> : null}
     </div>
   );
 }

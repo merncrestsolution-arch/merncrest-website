@@ -172,10 +172,17 @@ export function StaffServiceProjectDetail({ projectId }: { projectId: string }) 
             {project.client.company || project.client.fullName} · {project.client.email}
           </p>
         </div>
-        <Link href="/staff/service-projects" className="stitch-btn-outline-sm">
-          <ArrowLeft className="h-4 w-4" />
-          All projects
-        </Link>
+        <div className="flex flex-wrap gap-2">
+          {project.erpProject ? (
+            <Link href={`/staff/projects/${project.erpProject.id}`} className="stitch-btn-primary-sm">
+              Full project hub
+            </Link>
+          ) : null}
+          <Link href="/staff/service-projects" className="stitch-btn-outline-sm">
+            <ArrowLeft className="h-4 w-4" />
+            All projects
+          </Link>
+        </div>
       </div>
 
       <div className="stitch-kpi-grid !grid-cols-2 lg:!grid-cols-3 mb-6">

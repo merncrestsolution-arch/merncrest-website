@@ -1,3 +1,5 @@
+import { effectiveProjectProgress } from "@/lib/projects/progress";
+
 /** Customer-facing custom project / software service types */
 export const PORTAL_PROJECT_TYPES = [
   {
@@ -57,8 +59,9 @@ export function toPortalProject(project: {
   nextProcess?: string | null;
   nextPaymentAt?: Date | null;
   nextPaymentCents?: number;
-  milestones?: { id: string; title: string; status: string; dueDate: Date | null }[];
-  tasks?: { status: string }[];
+  progressOverridePct?: number | null;
+  milestones?: { id: string; title: string; status: string; dueDate: Date | null; progressPct?: number }[];
+  tasks?: { status: string; parentId?: string | null; progressPct?: number }[];
   payments?: {
     id: string;
     label: string;
@@ -77,17 +80,11 @@ export function toPortalProject(project: {
   const milestones = project.milestones ?? [];
   const tasks = project.tasks ?? [];
   const doneTasks = tasks.filter((t) => t.status === "DONE").length;
-  const doneMilestones = milestones.filter((m) => m.status === "DONE").length;
-  const progressPct =
-    milestones.length > 0
-      ? Math.round((doneMilestones / milestones.length) * 100)
-      : tasks.length > 0
-        ? Math.round((doneTasks / tasks.length) * 100)
-        : project.status === "COMPLETED"
-          ? 100
-          : project.status === "PLANNING"
-            ? 5
-            : 25;
+  const progressPct = effectiveProjectProgress(
+    tasks,
+    milestones,
+    project.progressOverridePct
+  );
 
   return {
     id: project.id,

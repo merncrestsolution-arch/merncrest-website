@@ -23,6 +23,7 @@ import {
 } from "@/lib/erp/projects";
 import type { SessionUser } from "@/lib/auth-types";
 import { canMutateProject } from "@/lib/projects/access";
+import { effectiveProjectProgress } from "@/lib/projects/progress";
 
 async function projectEditGuard(user: SessionUser, projectId: string) {
   if (!(await canMutateProject(user, projectId))) {
@@ -214,7 +215,11 @@ export async function GET(request: Request) {
   });
 
   const enriched = projects.map((p) => {
-    const progressPct = projectProgressFromTasks(p.tasks);
+    const progressPct = effectiveProjectProgress(
+      p.tasks,
+      p.milestones,
+      p.progressOverridePct
+    );
     const finance = computeProjectFinance({
       budgetCents: p.budgetCents,
       spentCents: p.spentCents,

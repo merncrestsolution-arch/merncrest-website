@@ -18,7 +18,14 @@ fi
 
 if [ "${1:-}" != "--no-git" ]; then
   echo "==> Pulling latest code"
-  git pull --ff-only
+  git fetch origin
+  if git rev-parse --verify origin/main >/dev/null 2>&1; then
+    git checkout -B main origin/main
+    git branch --set-upstream-to=origin/main main 2>/dev/null || true
+    git pull --ff-only origin main
+  else
+    git pull --ff-only
+  fi
 fi
 
 echo "==> Starting datastores (postgres, redis)"

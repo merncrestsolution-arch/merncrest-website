@@ -2,6 +2,7 @@ import { prisma } from "@/lib/db";
 import { generateToken, hashPassword } from "@/lib/auth";
 import { onCustomerRegistered } from "@/lib/crm/customer-hooks";
 import { sendClientWelcomeEmail } from "@/lib/email/welcome";
+import { provisionClientBusinessMailbox } from "@/lib/email/professional-mailbox";
 import { writeAuditLog } from "@/lib/erp/audit";
 
 export type CreateCustomerInput = {
@@ -100,6 +101,16 @@ export async function createCustomerAccount(input: CreateCustomerInput) {
         html: `<p>Your temporary password is <strong>${tempPassword}</strong>. Please change it after first login.</p>`,
       });
     }
+  }
+
+  if (input.createdById) {
+    void provisionClientBusinessMailbox({
+      userId: user.id,
+      fullName: user.fullName,
+      company: user.company,
+      actorId: input.createdById,
+      sendCredentialsEmail: true,
+    }).catch((err) => console.error("[create-customer] mailbox provision:", err));
   }
 
   return {
