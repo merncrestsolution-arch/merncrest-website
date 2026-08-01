@@ -20,6 +20,8 @@ const ORG_ROLES: readonly OrgRole[] = [
   "FINANCE",
   "SALES",
   "MARKETING",
+  "WEBSITE_MANAGER",
+  "CONTENT_MANAGER",
   "SUPPORT",
   "DEVELOPER",
   "ENGINEER",

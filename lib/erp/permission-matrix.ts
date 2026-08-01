@@ -34,7 +34,15 @@ export const ERP_PERMISSIONS = [
   "erp.cloud.manage",
   "erp.monitoring.view",
   "erp.monitoring.manage",
+  "website.offers.view",
+  "website.offers.manage",
 ] as const;
+
+/** Website / marketing content management */
+export const WEBSITE_OFFERS_PERMISSIONS: ErpPermission[] = [
+  "website.offers.view",
+  "website.offers.manage",
+];
 
 export type ErpPermission = (typeof ERP_PERMISSIONS)[number];
 
@@ -59,6 +67,8 @@ export const ORG_ROLE_PRESETS: Record<string, ErpPermission[] | "*"> = {
   FINANCE: OPERATIONAL_PERMISSIONS,
   SALES: OPERATIONAL_PERMISSIONS,
   MARKETING: OPERATIONAL_PERMISSIONS,
+  WEBSITE_MANAGER: WEBSITE_OFFERS_PERMISSIONS,
+  CONTENT_MANAGER: WEBSITE_OFFERS_PERMISSIONS,
   SUPPORT: OPERATIONAL_PERMISSIONS,
   DEVELOPER: OPERATIONAL_PERMISSIONS,
   ENGINEER: OPERATIONAL_PERMISSIONS,

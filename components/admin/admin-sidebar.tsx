@@ -40,6 +40,8 @@ import {
 
   Globe,
 
+  Flame,
+
   Server,
 
   Receipt,
@@ -90,6 +92,8 @@ const links = [
   { key: "users", href: "/admin/users", icon: UserCog },
 
   { key: "media", href: "/admin/media", icon: FolderOpen },
+
+  { key: "homepageOffers", href: "/admin/website/offers", icon: Flame },
 
   { key: "calendar", href: "/admin/calendar", icon: CalendarDays },
 

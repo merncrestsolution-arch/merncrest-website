@@ -1357,6 +1357,97 @@ async function main() {
     "job openings"
   );
 
+  // ---- Homepage promotional offers ----
+  const homepageOffers = [
+    {
+      slug: "erp-system",
+      title: "ERP System",
+      description: "Complete Windows ERP Solution for Sri Lankan Businesses.",
+      price: "LKR 130,000.00",
+      badge: "HOT OFFER",
+      category: "Enterprise Software",
+      features: ["Inventory", "Sales", "Purchase", "Billing", "Reports", "Customer Management"],
+      gradientTheme: "blue",
+      priority: 100,
+      sortOrder: 1,
+      seoTitle: "ERP System for Sri Lankan Businesses | MernCrest",
+      seoDescription:
+        "Complete Windows ERP solution with inventory, sales, billing, and reports. Starting from LKR 130,000.",
+    },
+    {
+      slug: "mobile-app-development",
+      title: "Mobile App Development",
+      description: "Professional Android & iOS Mobile Applications for your business.",
+      price: "LKR 150,000.00",
+      badge: "LIMITED OFFER",
+      category: "Mobile Development",
+      features: ["Android", "iOS", "Flutter", "React Native", "API Integration"],
+      gradientTheme: "purple",
+      priority: 90,
+      sortOrder: 2,
+      seoTitle: "Mobile App Development Sri Lanka | MernCrest",
+      seoDescription:
+        "Professional Android and iOS mobile applications. Flutter and React Native. Starting from LKR 150,000.",
+    },
+    {
+      slug: "finance-management-system",
+      title: "Finance Management System",
+      description: "Smart Finance & Accounting Software for Businesses.",
+      price: "LKR 100,000.00",
+      badge: "SPECIAL OFFER",
+      category: "Finance Software",
+      features: ["Accounting", "Expenses", "Income", "Reports", "Invoices"],
+      gradientTheme: "green",
+      priority: 80,
+      sortOrder: 3,
+      seoTitle: "Finance Management System | MernCrest",
+      seoDescription:
+        "Smart finance and accounting software for Sri Lankan businesses. Starting from LKR 100,000.",
+    },
+  ];
+
+  for (const offer of homepageOffers) {
+    await prisma.homepageOffer.upsert({
+      where: { slug: offer.slug },
+      update: {
+        title: offer.title,
+        description: offer.description,
+        price: offer.price,
+        badge: offer.badge,
+        category: offer.category,
+        featuresJson: JSON.stringify(offer.features),
+        gradientTheme: offer.gradientTheme,
+        ctaText: "View Details",
+        ctaUrl: `/offers/${offer.slug}`,
+        priority: offer.priority,
+        sortOrder: offer.sortOrder,
+        isEnabled: true,
+        status: "PUBLISHED",
+        seoTitle: offer.seoTitle,
+        seoDescription: offer.seoDescription,
+      },
+      create: {
+        slug: offer.slug,
+        title: offer.title,
+        description: offer.description,
+        price: offer.price,
+        badge: offer.badge,
+        category: offer.category,
+        featuresJson: JSON.stringify(offer.features),
+        gradientTheme: offer.gradientTheme,
+        ctaText: "View Details",
+        ctaUrl: `/offers/${offer.slug}`,
+        priority: offer.priority,
+        sortOrder: offer.sortOrder,
+        isEnabled: true,
+        status: "PUBLISHED",
+        seoTitle: offer.seoTitle,
+        seoDescription: offer.seoDescription,
+      },
+    });
+  }
+  console.log("  Homepage offers:", homepageOffers.length);
+
   await seedDissanayakeDistributionErp(prisma);
   console.log("  Project: Distribution ERP — Dissanayake Enterprise (ERP/458/06/2026)");
 

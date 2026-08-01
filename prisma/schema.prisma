@@ -3063,6 +3063,48 @@ model CaseStudy {
   @@index([industry])
 }
 
+/// Homepage promotional offer cards (carousel on merncrest.lk).
+model HomepageOffer {
+  id              String    @id @default(cuid())
+  slug            String    @unique
+  title           String
+  description     String?
+  /// Display price label, e.g. "LKR 130,000.00"
+  price           String?
+  badge           String?
+  category        String?
+  /// Card thumbnail / icon image
+  imageUrl        String?
+  /// Hero banner for offer detail page
+  bannerImageUrl  String?
+  /// JSON string array of feature labels
+  featuresJson    String?
+  /// blue | purple | green — card gradient theme when no banner
+  gradientTheme   String    @default("blue")
+  ctaText         String    @default("View Details")
+  ctaUrl          String?
+  priority        Int       @default(0)
+  sortOrder       Int       @default(0)
+  isEnabled       Boolean   @default(true)
+  /// DRAFT | PUBLISHED | EXPIRED
+  status          String    @default("DRAFT")
+  startDate       DateTime?
+  endDate         DateTime?
+  seoTitle        String?
+  seoDescription  String?
+  createdById     String?
+  updatedById     String?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  @@index([status])
+  @@index([isEnabled])
+  @@index([priority])
+  @@index([sortOrder])
+  @@index([startDate])
+  @@index([endDate])
+}
+
 /// —— Chat / AI platform (Phases 3–9) ——
 
 model AiProviderConfig {

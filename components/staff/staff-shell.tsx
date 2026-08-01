@@ -39,6 +39,7 @@ import {
   Cloud,
   Globe2,
   Mailbox,
+  Flame,
   type LucideIcon,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -132,6 +133,13 @@ const navGroups: NavGroup[] = [
     id: "ops",
     label: "Operations",
     items: [{ href: "/staff/command-center", label: "Command Center", icon: Activity }],
+  },
+  {
+    id: "website",
+    label: "Website Management",
+    items: [
+      { href: "/admin/website/offers", label: "Homepage Offers", icon: Flame },
+    ],
   },
   {
     id: "settings",

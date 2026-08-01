@@ -1,6 +1,7 @@
 import type { MetadataRoute } from "next";
 import { routing } from "@/i18n/routing";
 import { getAllPostSlugs, getAllArticleSlugs, getAllCaseStudySlugs } from "@/lib/cms";
+import { getAllOfferSlugs } from "@/lib/offers";
 import { priceBookCatalog } from "@/lib/data/price-book";
 
 const BASE_URL = (process.env.NEXT_PUBLIC_SITE_URL || "https://merncrest.lk").replace(/\/$/, "");
@@ -40,10 +41,11 @@ function localizedEntries(path: string, opts?: Partial<MetadataRoute.Sitemap[num
 }
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const [postSlugs, articleSlugs, caseStudySlugs] = await Promise.all([
+  const [postSlugs, articleSlugs, caseStudySlugs, offerSlugs] = await Promise.all([
     getAllPostSlugs().catch(() => [] as string[]),
     getAllArticleSlugs().catch(() => [] as string[]),
     getAllCaseStudySlugs().catch(() => [] as string[]),
+    getAllOfferSlugs().catch(() => [] as string[]),
   ]);
 
   const staticEntries = STATIC_PATHS.flatMap((p) =>
@@ -62,5 +64,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     localizedEntries(`/portfolio/${slug}`, { changeFrequency: "monthly", priority: 0.6 })
   );
 
-  return [...staticEntries, ...blogEntries, ...kbEntries, ...caseStudyEntries];
+  const offerEntries = offerSlugs.flatMap((slug) =>
+    localizedEntries(`/offers/${slug}`, { changeFrequency: "weekly", priority: 0.8 })
+  );
+
+  return [...staticEntries, ...blogEntries, ...kbEntries, ...caseStudyEntries, ...offerEntries];
 }

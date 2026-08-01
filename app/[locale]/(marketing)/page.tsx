@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { unstable_cache } from "next/cache";
-import { getTranslations, setRequestLocale } from "next-intl/server";import { HeroSection } from "@/components/sections/hero-section";
+import { getTranslations, setRequestLocale } from "next-intl/server";
+import { HeroSection } from "@/components/sections/hero-section";
+import { HotOffersSection } from "@/components/sections/hot-offers-section";
 import { TrustPartnersSection } from "@/components/sections/trust-partners-section";
 import { FeaturedServicesSection } from "@/components/sections/featured-services-section";
 import { MarketplaceTeaserSection } from "@/components/sections/marketplace-teaser-section";
@@ -87,6 +89,7 @@ export default async function HomePage({
   return (
     <>
       <HeroSection />
+      <HotOffersSection />
       <TrustPartnersSection />
       <FeaturedServicesSection />
       <MarketplaceTeaserSection />

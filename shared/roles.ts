@@ -14,6 +14,8 @@ export type OrgRole =
   | "FINANCE"
   | "SALES"
   | "MARKETING"
+  | "WEBSITE_MANAGER"
+  | "CONTENT_MANAGER"
   | "SUPPORT"
   | "DEVELOPER"
   | "ENGINEER"
