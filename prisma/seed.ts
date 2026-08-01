@@ -1366,6 +1366,8 @@ async function main() {
       price: "LKR 130,000.00",
       badge: "HOT OFFER",
       category: "Enterprise Software",
+      imageUrl: "/images/offers/erp-system.png",
+      bannerImageUrl: "/images/offers/erp-system.png",
       features: ["Inventory", "Sales", "Purchase", "Billing", "Reports", "Customer Management"],
       gradientTheme: "blue",
       priority: 100,
