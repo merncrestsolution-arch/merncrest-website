@@ -18,6 +18,32 @@ export type PublicOffer = {
   seoDescription: string | null;
 };
 
+/** Stitch offer card accents per theme */
+export const OFFER_THEME_ACCENTS: Record<
+  string,
+  { a: string; b: string; chip: string; label: string }
+> = {
+  blue: {
+    a: "#2563eb",
+    b: "#4f46e5",
+    chip: "border-blue-200/80 bg-blue-50 text-blue-800",
+    label: "Enterprise",
+  },
+  purple: {
+    a: "#7c3aed",
+    b: "#db2777",
+    chip: "border-violet-200/80 bg-violet-50 text-violet-800",
+    label: "Mobile",
+  },
+  green: {
+    a: "#059669",
+    b: "#0d9488",
+    chip: "border-emerald-200/80 bg-emerald-50 text-emerald-800",
+    label: "Finance",
+  },
+};
+
+/** @deprecated use OFFER_THEME_ACCENTS — kept for non-poster fallback cards */
 export const GRADIENT_THEMES: Record<
   string,
   {

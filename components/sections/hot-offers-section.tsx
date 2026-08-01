@@ -2,23 +2,25 @@ import { StitchHeader, StitchReveal, StitchSection } from "@/components/ui/stitc
 import { getPublishedHomepageOffers } from "@/lib/offers";
 import { HotOffersCarouselClient } from "./hot-offers-carousel-client";
 
-/** Homepage: Hot Offers & Featured Solutions — immediately after Hero */
+/** Homepage: Hot Offers & Featured Solutions — Google Stitch luminous enterprise */
 export async function HotOffersSection() {
   const offers = await getPublishedHomepageOffers();
   if (offers.length === 0) return null;
 
   return (
-    <StitchSection mesh className="!py-20 sm:!py-24">
+    <StitchSection mesh id="hot-offers" className="!py-20 sm:!py-28">
       <StitchReveal>
         <StitchHeader
-          eyebrow="Limited Time"
+          eyebrow="Limited Time · Sri Lanka"
           title="Hot Offers & Featured Solutions"
-          description="Exclusive packages for Sri Lankan businesses — enterprise-grade software at promotional rates."
+          description="Enterprise-grade software packages at promotional rates — built for Sri Lankan businesses."
           align="center"
-          className="mb-12 sm:mb-14"
+          className="mb-10 max-w-3xl sm:mb-14"
         />
       </StitchReveal>
-      <HotOffersCarouselClient offers={offers} />
+      <StitchReveal delay={0.08}>
+        <HotOffersCarouselClient offers={offers} />
+      </StitchReveal>
     </StitchSection>
   );
 }

@@ -259,6 +259,138 @@
     box-shadow: 0 8px 28px var(--stitch-glow), var(--stitch-card-shadow);
   }
 
+  /* Homepage offer cards — Google Stitch luminous enterprise */
+  .offer-stitch-card {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    border-radius: 1.25rem;
+    background: var(--stitch-card-bg);
+    border: 1px solid var(--stitch-card-border);
+    box-shadow: var(--stitch-card-shadow);
+    transition:
+      transform 0.4s cubic-bezier(0.22, 1, 0.36, 1),
+      box-shadow 0.4s cubic-bezier(0.22, 1, 0.36, 1),
+      border-color 0.35s ease;
+  }
+
+  .offer-stitch-card:hover {
+    border-color: color-mix(in srgb, var(--stitch-primary) 45%, var(--stitch-card-border));
+    box-shadow:
+      0 20px 48px -12px var(--stitch-glow),
+      0 8px 24px -8px rgba(27, 24, 55, 0.12),
+      var(--stitch-card-shadow);
+    transform: translateY(-6px);
+  }
+
+  .offer-stitch-frame {
+    position: relative;
+    margin: 0.75rem 0.75rem 0;
+    overflow: hidden;
+    border-radius: 0.875rem;
+    background: var(--stitch-surface-low);
+    border: 1px solid var(--stitch-outline);
+    aspect-ratio: 4 / 5;
+  }
+
+  @media (min-width: 1024px) {
+    .offer-stitch-frame {
+      margin: 1rem 1rem 0;
+      border-radius: 1rem;
+    }
+  }
+
+  .offer-stitch-accent {
+    position: absolute;
+    inset-inline: 0;
+    top: 0;
+    z-index: 2;
+    height: 3px;
+    background: linear-gradient(90deg, var(--offer-accent-a), var(--offer-accent-b));
+  }
+
+  .offer-stitch-cta {
+    display: flex;
+    width: 100%;
+    align-items: center;
+    justify-content: center;
+    gap: 0.625rem;
+    padding: 0.875rem 1.25rem;
+    border-radius: 9999px;
+    background: linear-gradient(135deg, #2563eb 0%, #6d28d9 48%, #db2777 100%);
+    color: #fff;
+    font-weight: 600;
+    font-size: 0.875rem;
+    letter-spacing: 0.02em;
+    box-shadow: 0 4px 20px rgba(90, 47, 214, 0.32);
+    transition:
+      transform 0.25s ease,
+      box-shadow 0.25s ease,
+      filter 0.25s ease;
+  }
+
+  .offer-stitch-card:hover .offer-stitch-cta {
+    box-shadow: 0 8px 28px rgba(90, 47, 214, 0.45);
+    filter: brightness(1.05);
+  }
+
+  .offer-stitch-cta:active {
+    transform: scale(0.98);
+  }
+
+  .offer-stitch-cta-sub {
+    font-size: 0.6875rem;
+    font-weight: 500;
+    opacity: 0.92;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  .offer-carousel-shell {
+    position: relative;
+    padding: 1.25rem;
+    border-radius: 1.5rem;
+    background: color-mix(in srgb, var(--stitch-surface) 88%, transparent);
+    border: 1px solid var(--stitch-outline);
+    box-shadow: var(--stitch-card-shadow);
+    backdrop-filter: blur(12px);
+  }
+
+  @media (min-width: 1024px) {
+    .offer-carousel-shell {
+      padding: 1.75rem 2rem 2rem;
+      border-radius: 1.75rem;
+    }
+  }
+
+  .offer-nav-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    border-radius: 9999px;
+    border: 1px solid var(--stitch-outline);
+    background: var(--stitch-surface);
+    color: var(--stitch-on);
+    box-shadow: var(--stitch-card-shadow);
+    transition: all 0.25s ease;
+  }
+
+  .offer-nav-btn:hover {
+    border-color: var(--stitch-primary);
+    color: var(--stitch-primary);
+    box-shadow: 0 6px 20px var(--stitch-glow);
+    transform: scale(1.06);
+  }
+
+  @media (min-width: 1024px) {
+    .offer-nav-btn {
+      width: 3.25rem;
+      height: 3.25rem;
+    }
+  }
+
   .luminous-border {
     position: relative;
     background: var(--stitch-surface);

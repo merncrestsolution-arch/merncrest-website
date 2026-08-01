@@ -81,92 +81,89 @@ export function OffersCarousel({ offers }: OffersCarouselProps) {
         : [...offers.slice(index), ...offers.slice(0, visibleCount - (offers.length - index))];
 
   const pageCount = Math.max(1, maxIndex + 1);
+  const showNav = offers.length > visibleCount;
 
   return (
     <div
-      className="relative"
+      className="offer-carousel-shell"
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
       onFocus={() => setPaused(true)}
       onBlur={() => setPaused(false)}
     >
-      <div className="relative overflow-hidden">
-        <AnimatePresence mode="wait" custom={direction}>
-          <motion.div
-            key={`${index}-${visibleCount}`}
-            custom={direction}
-            initial={{ opacity: 0, x: direction >= 0 ? 40 : -40 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: direction >= 0 ? -40 : 40 }}
-            transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
-            drag={offers.length > visibleCount ? "x" : false}
-            dragConstraints={{ left: 0, right: 0 }}
-            dragElastic={0.12}
-            onDragEnd={onDragEnd}
-            className={cn(
-              "grid items-start gap-5 sm:gap-6",
-              visibleCount === 1 && "grid-cols-1",
-              visibleCount === 2 && "grid-cols-2",
-              visibleCount === 3 && "grid-cols-3"
-            )}
-          >
-            {slideOffers.map((offer, i) => (
-              <OfferCard key={offer.id} offer={offer} priority={index === 0 && i === 0} />
-            ))}
-          </motion.div>
-        </AnimatePresence>
+      <div className={cn("relative", showNav && "px-1 sm:px-2 lg:px-4")}>
+        <div className="relative overflow-hidden">
+          <AnimatePresence mode="wait" custom={direction}>
+            <motion.div
+              key={`${index}-${visibleCount}`}
+              custom={direction}
+              initial={{ opacity: 0, x: direction >= 0 ? 32 : -32 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: direction >= 0 ? -32 : 32 }}
+              transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+              drag={showNav ? "x" : false}
+              dragConstraints={{ left: 0, right: 0 }}
+              dragElastic={0.1}
+              onDragEnd={onDragEnd}
+              className={cn(
+                "grid items-stretch gap-4 sm:gap-5 lg:gap-6",
+                visibleCount === 1 && "grid-cols-1",
+                visibleCount === 2 && "grid-cols-2",
+                visibleCount === 3 && "grid-cols-3"
+              )}
+            >
+              {slideOffers.map((offer, i) => (
+                <OfferCard key={offer.id} offer={offer} priority={index === 0 && i === 0} />
+              ))}
+            </motion.div>
+          </AnimatePresence>
+        </div>
+
+        {showNav && (
+          <>
+            <button
+              type="button"
+              onClick={prev}
+              aria-label="Previous offers"
+              className={cn(
+                "offer-nav-btn absolute left-0 top-[42%] z-20 -translate-x-1/2 -translate-y-1/2",
+                "hidden sm:flex"
+              )}
+            >
+              <ChevronLeft className="h-5 w-5" />
+            </button>
+            <button
+              type="button"
+              onClick={next}
+              aria-label="Next offers"
+              className={cn(
+                "offer-nav-btn absolute right-0 top-[42%] z-20 translate-x-1/2 -translate-y-1/2",
+                "hidden sm:flex"
+              )}
+            >
+              <ChevronRight className="h-5 w-5" />
+            </button>
+          </>
+        )}
       </div>
 
-      {offers.length > visibleCount && (
-        <>
-          <button
-            type="button"
-            onClick={prev}
-            aria-label="Previous offers"
-            className={cn(
-              "absolute left-0 top-1/2 z-20 -translate-x-2 -translate-y-1/2 sm:-translate-x-4 lg:-translate-x-6",
-              "flex h-11 w-11 items-center justify-center rounded-full lg:h-14 lg:w-14",
-              "border border-violet-200/30 bg-gradient-to-br from-slate-900/95 to-violet-950/95 text-white backdrop-blur-md",
-              "shadow-lg shadow-violet-500/20 transition-all duration-300",
-              "hover:scale-110 hover:border-violet-300/50 hover:shadow-xl hover:shadow-violet-500/30",
-              "active:scale-95"
-            )}
-          >
-            <ChevronLeft className="h-5 w-5 lg:h-6 lg:w-6" />
-          </button>
-          <button
-            type="button"
-            onClick={next}
-            aria-label="Next offers"
-            className={cn(
-              "absolute right-0 top-1/2 z-20 translate-x-2 -translate-y-1/2 sm:translate-x-4 lg:translate-x-6",
-              "flex h-11 w-11 items-center justify-center rounded-full lg:h-14 lg:w-14",
-              "border border-violet-200/30 bg-gradient-to-br from-slate-900/95 to-violet-950/95 text-white backdrop-blur-md",
-              "shadow-lg shadow-violet-500/20 transition-all duration-300",
-              "hover:scale-110 hover:border-violet-300/50 hover:shadow-xl hover:shadow-violet-500/30",
-              "active:scale-95"
-            )}
-          >
-            <ChevronRight className="h-5 w-5 lg:h-6 lg:w-6" />
-          </button>
-
-          <div className="mt-8 flex items-center justify-center gap-2.5 lg:mt-10 lg:gap-3">
-            {Array.from({ length: pageCount }).map((_, i) => (
-              <button
-                key={i}
-                type="button"
-                aria-label={`Go to slide ${i + 1}`}
-                onClick={() => goTo(i)}
-                className={cn(
-                  "rounded-full transition-all duration-300",
-                  i === index
-                    ? "h-2.5 w-10 bg-gradient-to-r from-violet-600 to-fuchsia-600 shadow-md shadow-violet-500/40 lg:h-3 lg:w-12"
-                    : "h-2 w-2 bg-slate-300/60 hover:bg-violet-400/60 lg:h-2.5 lg:w-2.5"
-                )}
-              />
-            ))}
-          </div>
-        </>
+      {showNav && (
+        <div className="mt-6 flex items-center justify-center gap-2 lg:mt-8">
+          {Array.from({ length: pageCount }).map((_, i) => (
+            <button
+              key={i}
+              type="button"
+              aria-label={`Go to slide ${i + 1}`}
+              onClick={() => goTo(i)}
+              className={cn(
+                "rounded-full transition-all duration-300",
+                i === index
+                  ? "h-2 w-9 bg-gradient-to-r from-blue-600 via-violet-600 to-pink-600 shadow-sm"
+                  : "h-2 w-2 bg-stitch-outline hover:bg-stitch-primary/50"
+              )}
+            />
+          ))}
+        </div>
       )}
     </div>
   );
