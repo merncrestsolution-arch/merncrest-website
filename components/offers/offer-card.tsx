@@ -16,6 +16,45 @@ type OfferCardProps = {
 export function OfferCard({ offer, className, priority = false }: OfferCardProps) {
   const theme = GRADIENT_THEMES[offer.gradientTheme] ?? GRADIENT_THEMES.blue;
   const href = `/offers/${offer.slug}`;
+  const posterSrc = offer.imageUrl;
+
+  if (posterSrc) {
+    return (
+      <motion.article
+        whileHover={{ scale: 1.02, y: -4 }}
+        transition={{ type: "spring", stiffness: 320, damping: 24 }}
+        className={cn("group h-full", className)}
+      >
+        <Link
+          href={href}
+          className={cn(
+            "relative flex h-full min-h-[480px] flex-col overflow-hidden rounded-2xl border border-white/10",
+            "bg-white shadow-lg transition-shadow duration-500",
+            theme.glow,
+            "hover:shadow-2xl"
+          )}
+        >
+          <div className="relative flex-1 overflow-hidden">
+            <Image
+              src={posterSrc}
+              alt={offer.title}
+              fill
+              sizes="(max-width: 768px) 100vw, 33vw"
+              priority={priority}
+              loading={priority ? undefined : "lazy"}
+              className="object-cover object-top transition-transform duration-700 group-hover:scale-[1.03]"
+            />
+          </div>
+          <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-slate-950/85 via-slate-950/40 to-transparent px-5 pb-5 pt-16">
+            <span className="inline-flex items-center gap-2 rounded-full bg-white/95 px-4 py-2 text-sm font-semibold text-slate-900 shadow-lg transition group-hover:bg-white">
+              {offer.ctaText || "View Details"}
+              <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+            </span>
+          </div>
+        </Link>
+      </motion.article>
+    );
+  }
 
   return (
     <motion.article
@@ -33,11 +72,10 @@ export function OfferCard({ offer, className, priority = false }: OfferCardProps
           "hover:shadow-2xl"
         )}
       >
-        {/* Background image with zoom on hover */}
-        {(offer.bannerImageUrl || offer.imageUrl) && (
+        {offer.bannerImageUrl && (
           <div className="pointer-events-none absolute inset-0 overflow-hidden">
             <Image
-              src={offer.bannerImageUrl || offer.imageUrl || ""}
+              src={offer.bannerImageUrl}
               alt=""
               fill
               sizes="(max-width: 768px) 100vw, 33vw"
@@ -49,7 +87,6 @@ export function OfferCard({ offer, className, priority = false }: OfferCardProps
           </div>
         )}
 
-        {/* Glass overlay */}
         <div className="pointer-events-none absolute inset-0 bg-white/[0.03] backdrop-blur-[2px]" />
 
         <div className="relative z-10 flex flex-1 flex-col p-6 sm:p-7">
