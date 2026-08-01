@@ -114,6 +114,8 @@ const config: Config = {
         "pulse-soft": "pulse-soft 2s ease-in-out infinite",
         drift: "drift 18s ease-in-out infinite",
         "wave-slow": "wave-slow 12s ease-in-out infinite",
+        "offer-shimmer": "offer-shimmer 2.8s ease-in-out infinite",
+        "offer-cta-pulse": "offer-cta-pulse 2.2s ease-in-out infinite",
       },
       keyframes: {
         marquee: {
@@ -135,6 +137,14 @@ const config: Config = {
         "wave-slow": {
           "0%, 100%": { transform: "translateY(0)" },
           "50%": { transform: "translateY(-12px)" },
+        },
+        "offer-shimmer": {
+          "0%": { transform: "translateX(-120%) skewX(-12deg)" },
+          "100%": { transform: "translateX(220%) skewX(-12deg)" },
+        },
+        "offer-cta-pulse": {
+          "0%, 100%": { transform: "scale(1)", opacity: "0.55" },
+          "50%": { transform: "scale(1.04)", opacity: "0.9" },
         },
       },
     },

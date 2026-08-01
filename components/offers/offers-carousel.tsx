@@ -124,29 +124,33 @@ export function OffersCarousel({ offers }: OffersCarouselProps) {
             onClick={prev}
             aria-label="Previous offers"
             className={cn(
-              "absolute left-0 top-1/2 z-20 -translate-x-2 -translate-y-1/2 sm:-translate-x-4",
-              "flex h-11 w-11 items-center justify-center rounded-full",
-              "border border-white/15 bg-slate-900/80 text-white backdrop-blur-md",
-              "shadow-lg transition hover:bg-slate-800/90 hover:scale-105"
+              "absolute left-0 top-1/2 z-20 -translate-x-2 -translate-y-1/2 sm:-translate-x-4 lg:-translate-x-6",
+              "flex h-11 w-11 items-center justify-center rounded-full lg:h-14 lg:w-14",
+              "border border-violet-200/30 bg-gradient-to-br from-slate-900/95 to-violet-950/95 text-white backdrop-blur-md",
+              "shadow-lg shadow-violet-500/20 transition-all duration-300",
+              "hover:scale-110 hover:border-violet-300/50 hover:shadow-xl hover:shadow-violet-500/30",
+              "active:scale-95"
             )}
           >
-            <ChevronLeft className="h-5 w-5" />
+            <ChevronLeft className="h-5 w-5 lg:h-6 lg:w-6" />
           </button>
           <button
             type="button"
             onClick={next}
             aria-label="Next offers"
             className={cn(
-              "absolute right-0 top-1/2 z-20 translate-x-2 -translate-y-1/2 sm:translate-x-4",
-              "flex h-11 w-11 items-center justify-center rounded-full",
-              "border border-white/15 bg-slate-900/80 text-white backdrop-blur-md",
-              "shadow-lg transition hover:bg-slate-800/90 hover:scale-105"
+              "absolute right-0 top-1/2 z-20 translate-x-2 -translate-y-1/2 sm:translate-x-4 lg:translate-x-6",
+              "flex h-11 w-11 items-center justify-center rounded-full lg:h-14 lg:w-14",
+              "border border-violet-200/30 bg-gradient-to-br from-slate-900/95 to-violet-950/95 text-white backdrop-blur-md",
+              "shadow-lg shadow-violet-500/20 transition-all duration-300",
+              "hover:scale-110 hover:border-violet-300/50 hover:shadow-xl hover:shadow-violet-500/30",
+              "active:scale-95"
             )}
           >
-            <ChevronRight className="h-5 w-5" />
+            <ChevronRight className="h-5 w-5 lg:h-6 lg:w-6" />
           </button>
 
-          <div className="mt-8 flex items-center justify-center gap-2">
+          <div className="mt-8 flex items-center justify-center gap-2.5 lg:mt-10 lg:gap-3">
             {Array.from({ length: pageCount }).map((_, i) => (
               <button
                 key={i}
@@ -154,10 +158,10 @@ export function OffersCarousel({ offers }: OffersCarouselProps) {
                 aria-label={`Go to slide ${i + 1}`}
                 onClick={() => goTo(i)}
                 className={cn(
-                  "h-2 rounded-full transition-all duration-300",
+                  "rounded-full transition-all duration-300",
                   i === index
-                    ? "w-8 bg-stitch-primary"
-                    : "w-2 bg-white/25 hover:bg-white/40"
+                    ? "h-2.5 w-10 bg-gradient-to-r from-violet-600 to-fuchsia-600 shadow-md shadow-violet-500/40 lg:h-3 lg:w-12"
+                    : "h-2 w-2 bg-slate-300/60 hover:bg-violet-400/60 lg:h-2.5 lg:w-2.5"
                 )}
               />
             ))}
