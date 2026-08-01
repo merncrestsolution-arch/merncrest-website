@@ -28,13 +28,14 @@ export function OfferCard({ offer, className, priority = false }: OfferCardProps
         <Link
           href={href}
           className={cn(
-            "relative flex h-full min-h-[480px] flex-col overflow-hidden rounded-2xl border border-white/10",
+            "flex h-full flex-col overflow-hidden rounded-2xl border border-white/10",
             "bg-white shadow-lg transition-shadow duration-500",
             theme.glow,
             "hover:shadow-2xl"
           )}
         >
-          <div className="relative flex-1 overflow-hidden">
+          {/* 4:5 poster ratio — object-contain shows the full flyer without cropping */}
+          <div className="relative w-full aspect-[4/5] shrink-0 bg-white">
             <Image
               src={posterSrc}
               alt={offer.title}
@@ -42,13 +43,14 @@ export function OfferCard({ offer, className, priority = false }: OfferCardProps
               sizes="(max-width: 768px) 100vw, 33vw"
               priority={priority}
               loading={priority ? undefined : "lazy"}
-              className="object-cover object-top transition-transform duration-700 group-hover:scale-[1.03]"
+              className="object-contain object-center"
             />
           </div>
-          <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-slate-950/85 via-slate-950/40 to-transparent px-5 pb-5 pt-16">
-            <span className="inline-flex items-center gap-2 rounded-full bg-white/95 px-4 py-2 text-sm font-semibold text-slate-900 shadow-lg transition group-hover:bg-white">
+          <div className="flex items-center justify-between gap-3 border-t border-slate-100 bg-white px-4 py-3">
+            <span className="truncate text-sm font-semibold text-slate-800">{offer.title}</span>
+            <span className="inline-flex shrink-0 items-center gap-1.5 text-sm font-semibold text-stitch-primary">
               {offer.ctaText || "View Details"}
-              <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+              <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
             </span>
           </div>
         </Link>

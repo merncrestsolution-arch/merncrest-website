@@ -104,7 +104,7 @@ export function OffersCarousel({ offers }: OffersCarouselProps) {
             dragElastic={0.12}
             onDragEnd={onDragEnd}
             className={cn(
-              "grid gap-5 sm:gap-6",
+              "grid items-start gap-5 sm:gap-6",
               visibleCount === 1 && "grid-cols-1",
               visibleCount === 2 && "grid-cols-2",
               visibleCount === 3 && "grid-cols-3"
