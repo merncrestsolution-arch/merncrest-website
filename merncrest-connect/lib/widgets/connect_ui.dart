@@ -1,5 +1,8 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:merncrest_connect/theme/connect_theme.dart';
+import 'package:merncrest_connect/theme/connect_tokens.dart';
 
 /// Branded page scaffold with optional gradient header.
 class ConnectPage extends StatelessWidget {
@@ -70,10 +73,11 @@ class ConnectAmbientBackground extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final palette = ConnectPalette.of(context);
     return Stack(
       fit: StackFit.expand,
       children: [
-        const DecoratedBox(decoration: BoxDecoration(color: ConnectColors.background)),
+        DecoratedBox(decoration: BoxDecoration(color: palette.background)),
         Positioned(
           top: -100,
           right: -80,
@@ -111,6 +115,7 @@ class ConnectTopBar extends StatelessWidget {
     this.notificationCount = 0,
     this.onNotifications,
     this.onProfile,
+    this.onSettings,
     this.onLogout,
   });
 
@@ -119,56 +124,70 @@ class ConnectTopBar extends StatelessWidget {
   final int notificationCount;
   final VoidCallback? onNotifications;
   final VoidCallback? onProfile;
+  final VoidCallback? onSettings;
   final VoidCallback? onLogout;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.fromLTRB(20, 12, 12, 12),
-      decoration: const BoxDecoration(
-        border: Border(bottom: BorderSide(color: ConnectColors.borderSubtle)),
-      ),
-      child: SafeArea(
-        bottom: false,
-        child: Row(
-          children: [
-            ClipRRect(
-              borderRadius: BorderRadius.circular(14),
-              child: Image.asset('assets/images/app_icon.png', width: 44, height: 44),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text('MernCrest Connect', style: Theme.of(context).textTheme.labelSmall),
-                  Text(name, style: Theme.of(context).textTheme.titleMedium, maxLines: 1, overflow: TextOverflow.ellipsis),
-                  if (role != null)
-                    Text(role!, style: Theme.of(context).textTheme.bodyMedium, maxLines: 1, overflow: TextOverflow.ellipsis),
-                ],
-              ),
-            ),
-            IconButton(
-              onPressed: onNotifications,
-              icon: Badge(
-                isLabelVisible: notificationCount > 0,
-                label: Text('$notificationCount'),
-                child: const Icon(Icons.notifications_none_rounded, color: ConnectColors.textSecondary),
-              ),
-            ),
-            PopupMenuButton<String>(
-              icon: const Icon(Icons.more_vert_rounded, color: ConnectColors.textSecondary),
-              color: ConnectColors.surfaceRaised,
-              onSelected: (v) {
-                if (v == 'logout') onLogout?.call();
-                if (v == 'profile') onProfile?.call();
-              },
-              itemBuilder: (_) => [
-                PopupMenuItem(value: 'profile', child: Text(name)),
-                const PopupMenuItem(value: 'logout', child: Text('Sign out')),
+    final palette = ConnectPalette.of(context);
+    return ClipRect(
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
+        child: Container(
+          padding: const EdgeInsets.fromLTRB(16, 6, 8, 6),
+          decoration: BoxDecoration(
+            color: palette.surfaceRaised.withValues(alpha: 0.85),
+            border: Border(bottom: BorderSide(color: palette.borderSubtle)),
+          ),
+          child: SafeArea(
+            bottom: false,
+            child: Row(
+              children: [
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(10),
+                  child: Image.asset('assets/images/app_icon.png', width: 28, height: 28),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(name, style: Theme.of(context).textTheme.titleMedium?.copyWith(fontSize: 13), maxLines: 1, overflow: TextOverflow.ellipsis),
+                      if (role != null)
+                        Text(role!, style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontSize: 11), maxLines: 1, overflow: TextOverflow.ellipsis),
+                    ],
+                  ),
+                ),
+                IconButton(
+                  visualDensity: VisualDensity.compact,
+                  padding: EdgeInsets.zero,
+                  constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
+                  onPressed: onNotifications,
+                  icon: Badge(
+                    isLabelVisible: notificationCount > 0,
+                    label: Text('$notificationCount', style: const TextStyle(fontSize: 9)),
+                    child: Icon(Icons.notifications_none_rounded, size: 20, color: palette.textSecondary),
+                  ),
+                ),
+                PopupMenuButton<String>(
+                  padding: EdgeInsets.zero,
+                  icon: Icon(Icons.more_vert_rounded, size: 20, color: palette.textSecondary),
+                  color: palette.surfaceRaised,
+                  onSelected: (v) {
+                    if (v == 'logout') onLogout?.call();
+                    if (v == 'profile') onProfile?.call();
+                    if (v == 'settings') onSettings?.call();
+                  },
+                  itemBuilder: (_) => [
+                    PopupMenuItem(value: 'profile', child: Text(name, style: const TextStyle(fontSize: 13))),
+                    const PopupMenuItem(value: 'settings', child: Text('Settings', style: TextStyle(fontSize: 13))),
+                    const PopupMenuItem(value: 'logout', child: Text('Sign out', style: TextStyle(fontSize: 13))),
+                  ],
+                ),
               ],
             ),
-          ],
+          ),
         ),
       ),
     );
@@ -195,56 +214,58 @@ class ConnectBottomNav extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-      decoration: BoxDecoration(
-        color: ConnectColors.surfaceRaised.withValues(alpha: 0.96),
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: ConnectColors.borderSubtle),
-        boxShadow: [
-          BoxShadow(
-            color: ConnectColors.primary.withValues(alpha: 0.12),
-            blurRadius: 24,
-            offset: const Offset(0, 8),
+    final palette = ConnectPalette.of(context);
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(22),
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
+        child: Container(
+          margin: const EdgeInsets.fromLTRB(14, 0, 14, 12),
+          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 6),
+          decoration: BoxDecoration(
+            color: palette.surfaceRaised.withValues(alpha: 0.92),
+            borderRadius: BorderRadius.circular(22),
+            border: Border.all(color: palette.glassBorder),
+            boxShadow: connectSoftShadow(ConnectColors.primary),
           ),
-        ],
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
-        children: List.generate(_items.length, (i) {
-          final (icon, activeIcon, label) = _items[i];
-          final selected = index == i;
-          return Expanded(
-            child: GestureDetector(
-              onTap: () => onChanged(i),
-              behavior: HitTestBehavior.opaque,
-              child: AnimatedContainer(
-                duration: const Duration(milliseconds: 200),
-                padding: const EdgeInsets.symmetric(vertical: 8),
-                decoration: BoxDecoration(
-                  color: selected ? ConnectColors.primary.withValues(alpha: 0.18) : Colors.transparent,
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(selected ? activeIcon : icon, size: 22, color: selected ? ConnectColors.primaryGlow : ConnectColors.textMuted),
-                    const SizedBox(height: 4),
-                    Text(
-                      label,
-                      style: TextStyle(
-                        fontSize: 10,
-                        fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
-                        color: selected ? ConnectColors.primaryGlow : ConnectColors.textMuted,
-                      ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: List.generate(_items.length, (i) {
+              final (icon, activeIcon, label) = _items[i];
+              final selected = index == i;
+              return Expanded(
+                child: GestureDetector(
+                  onTap: () => onChanged(i),
+                  behavior: HitTestBehavior.opaque,
+                  child: AnimatedContainer(
+                    duration: ConnectDurations.normal,
+                    curve: Curves.easeOutCubic,
+                    padding: const EdgeInsets.symmetric(vertical: 6),
+                    decoration: BoxDecoration(
+                      color: selected ? ConnectColors.primary.withValues(alpha: 0.2) : Colors.transparent,
+                      borderRadius: BorderRadius.circular(14),
                     ),
-                  ],
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(selected ? activeIcon : icon, size: 20, color: selected ? ConnectColors.primaryGlow : palette.textMuted),
+                        const SizedBox(height: 2),
+                        Text(
+                          label,
+                          style: TextStyle(
+                            fontSize: 9,
+                            fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
+                            color: selected ? ConnectColors.primaryGlow : palette.textMuted,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
                 ),
-              ),
-            ),
-          );
-        }),
+              );
+            }),
+          ),
+        ),
       ),
     );
   }

@@ -49,6 +49,7 @@ class ConnectStatTile extends StatelessWidget {
     required this.icon,
     this.color = ConnectColors.primaryGlow,
     this.trend,
+    this.compact = false,
   });
 
   final String label;
@@ -56,32 +57,39 @@ class ConnectStatTile extends StatelessWidget {
   final IconData icon;
   final Color color;
   final String? trend;
+  final bool compact;
 
   @override
   Widget build(BuildContext context) {
     return ConnectCard(
+      padding: EdgeInsets.all(compact ? 12 : 16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
               Container(
-                padding: const EdgeInsets.all(8),
+                padding: EdgeInsets.all(compact ? 6 : 8),
                 decoration: BoxDecoration(
                   color: color.withValues(alpha: 0.15),
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(compact ? 10 : 12),
                 ),
-                child: Icon(icon, color: color, size: 20),
+                child: Icon(icon, color: color, size: compact ? 16 : 20),
               ),
               const Spacer(),
               if (trend != null)
                 Text(trend!, style: Theme.of(context).textTheme.labelSmall?.copyWith(color: ConnectColors.success)),
             ],
           ),
-          const SizedBox(height: 14),
-          Text(value, style: Theme.of(context).textTheme.headlineMedium),
+          SizedBox(height: compact ? 8 : 14),
+          Text(
+            value,
+            style: Theme.of(context).textTheme.headlineMedium?.copyWith(fontSize: compact ? 18 : null),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
           const SizedBox(height: 2),
-          Text(label, style: Theme.of(context).textTheme.bodyMedium),
+          Text(label, style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontSize: compact ? 11 : null)),
         ],
       ),
     );
@@ -140,6 +148,8 @@ class ConnectModuleRow extends StatelessWidget {
     required this.icon,
     this.onTap,
     this.trailing,
+    this.iconColor,
+    this.compact = false,
   });
 
   final String title;
@@ -147,22 +157,26 @@ class ConnectModuleRow extends StatelessWidget {
   final IconData icon;
   final VoidCallback? onTap;
   final Widget? trailing;
+  final Color? iconColor;
+  final bool compact;
 
   @override
   Widget build(BuildContext context) {
+    final accent = iconColor ?? ConnectColors.primaryGlow;
     return Padding(
-      padding: const EdgeInsets.only(bottom: 10),
+      padding: EdgeInsets.only(bottom: compact ? 6 : 10),
       child: ConnectCard(
         onTap: onTap,
+        padding: EdgeInsets.all(compact ? 10 : 16),
         child: Row(
           children: [
             Container(
-              padding: const EdgeInsets.all(12),
+              padding: EdgeInsets.all(compact ? 8 : 12),
               decoration: BoxDecoration(
-                color: ConnectColors.primary.withValues(alpha: 0.15),
-                borderRadius: BorderRadius.circular(14),
+                color: accent.withValues(alpha: 0.15),
+                borderRadius: BorderRadius.circular(compact ? 10 : 14),
               ),
-              child: Icon(icon, color: ConnectColors.primaryGlow, size: 22),
+              child: Icon(icon, color: accent, size: compact ? 18 : 22),
             ),
             const SizedBox(width: 14),
             Expanded(

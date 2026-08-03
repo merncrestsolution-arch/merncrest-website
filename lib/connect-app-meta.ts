@@ -4,8 +4,8 @@ import type { Metadata } from "next";
 export const CONNECT_APP = {
   name: "MernCrest Connect",
   tagline: "Staff mobile app for system.merncrest.lk",
-  version: "1.0.5",
-  build: 6,
+  version: "1.0.6",
+  build: 7,
   packageId: "lk.merncrest.merncrest_connect",
   minAndroid: "6.0",
   apkPath: "/downloads/merncrest-connect.apk",
@@ -13,9 +13,10 @@ export const CONNECT_APP = {
   apiHost: "https://system.merncrest.lk",
   forceUpdate: false,
   releaseNotes: [
-    "Complete dark enterprise UI redesign",
-    "Matches system.merncrest.lk Luminous Enterprise theme",
-    "New login, dashboard, navigation, and module screens",
+    "Fix CRM clients list (leads sync from server)",
+    "Profile & Settings with Light / Dark / AMOLED theme",
+    "More modules navigation wired to real screens",
+    "Dashboard announcements, quick actions, and error states",
   ],
 } as const;
 

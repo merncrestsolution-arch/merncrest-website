@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:merncrest_connect/providers/app_state.dart';
+import 'package:merncrest_connect/providers/theme_provider.dart';
 import 'package:merncrest_connect/screens/connect_shell.dart';
 import 'package:merncrest_connect/screens/login_screen.dart';
 import 'package:merncrest_connect/theme/connect_theme.dart';
@@ -9,8 +10,11 @@ import 'package:provider/provider.dart';
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
   runApp(
-    ChangeNotifierProvider(
-      create: (_) => AppState()..bootstrap(),
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => ThemeProvider()),
+        ChangeNotifierProvider(create: (_) => AppState()..bootstrap()),
+      ],
       child: const MernCrestConnectApp(),
     ),
   );
@@ -21,12 +25,14 @@ class MernCrestConnectApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = context.watch<ThemeProvider>();
+
     return MaterialApp(
       title: 'MernCrest Connect',
       debugShowCheckedModeBanner: false,
-      theme: ConnectTheme.dark(),
-      darkTheme: ConnectTheme.dark(),
-      themeMode: ThemeMode.dark,
+      theme: ConnectTheme.light(),
+      darkTheme: theme.isAmoled ? ConnectTheme.amoled() : ConnectTheme.dark(),
+      themeMode: theme.materialThemeMode,
       home: const AppUpdateGate(child: _RootGate()),
     );
   }
@@ -38,10 +44,11 @@ class _RootGate extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final state = context.watch<AppState>();
+    final palette = ConnectPalette.of(context);
 
     if (state.loading) {
       return Scaffold(
-        backgroundColor: ConnectColors.background,
+        backgroundColor: palette.background,
         body: Center(
           child: Column(
             mainAxisSize: MainAxisSize.min,

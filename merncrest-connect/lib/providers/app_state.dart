@@ -21,6 +21,15 @@ class AppState extends ChangeNotifier {
   AuthService get auth => _auth;
   PlatformSyncService? get sync => _sync;
 
+  int _shellTab = 0;
+  int get shellTab => _shellTab;
+
+  void goToShellTab(int index) {
+    if (_shellTab == index) return;
+    _shellTab = index;
+    notifyListeners();
+  }
+
   String get displayName =>
       _user?['user']?['fullName']?.toString() ?? _user?['fullName']?.toString() ?? 'Staff';
 
