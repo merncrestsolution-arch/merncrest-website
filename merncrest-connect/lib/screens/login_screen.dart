@@ -4,6 +4,8 @@ import 'package:merncrest_connect/config/api_config.dart';
 import 'package:merncrest_connect/services/api_client.dart';
 import 'package:merncrest_connect/theme/connect_theme.dart';
 import 'package:merncrest_connect/widgets/connect_motion.dart';
+import 'package:merncrest_connect/services/app_update_service.dart';
+import 'package:merncrest_connect/widgets/app_update_overlay.dart';
 import 'package:merncrest_connect/widgets/turnstile_challenge.dart';
 
 /// Stitch: Staff Login (Light) v2 — Cloudflare Turnstile (no TOTP).
@@ -25,11 +27,49 @@ class _LoginScreenState extends State<LoginScreen> {
   bool _turnstileConfigured = false;
   String _turnstileToken = '';
   String? _error;
+  AppUpdateInfo? _update;
+  bool _updateDialogShown = false;
+  final _updateService = AppUpdateService();
 
   @override
   void initState() {
     super.initState();
     _loadConfig();
+    _checkForUpdate();
+  }
+
+  Future<void> _checkForUpdate() async {
+    try {
+      final info = await _updateService.checkForUpdate();
+      if (!mounted || info == null) return;
+      setState(() => _update = info);
+      if (!_updateDialogShown) {
+        _updateDialogShown = true;
+        WidgetsBinding.instance.addPostFrameCallback((_) => _showUpdateDialog(info));
+      }
+    } catch (_) {
+      /* offline — login still works */
+    }
+  }
+
+  void _showUpdateDialog(AppUpdateInfo info) {
+    if (!mounted) return;
+    showDialog<void>(
+      context: context,
+      barrierDismissible: !info.forceUpdate,
+      builder: (ctx) => Dialog(
+        insetPadding: const EdgeInsets.symmetric(horizontal: 24),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+        child: AppUpdateCard(
+          info: info,
+          onDismiss: info.forceUpdate
+              ? null
+              : () {
+                  Navigator.of(ctx).pop();
+                },
+        ),
+      ),
+    );
   }
 
   Future<void> _loadConfig() async {
@@ -107,6 +147,10 @@ class _LoginScreenState extends State<LoginScreen> {
                 textAlign: TextAlign.center,
                 style: TextStyle(color: ConnectColors.textSecondary),
               ).stitchEntrance(delay: 140.ms),
+              if (_update != null) ...[
+                const SizedBox(height: 20),
+                AppUpdateLoginBanner(info: _update!).stitchEntrance(delay: 180.ms),
+              ],
               const SizedBox(height: 28),
               TextField(
                 controller: _email,

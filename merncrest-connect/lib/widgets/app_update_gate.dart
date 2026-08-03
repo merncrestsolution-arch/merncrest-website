@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:merncrest_connect/providers/app_state.dart';
 import 'package:merncrest_connect/services/app_update_service.dart';
 import 'package:merncrest_connect/widgets/app_update_overlay.dart';
+import 'package:provider/provider.dart';
 
 /// Checks for APK updates on launch and when the app resumes.
 class AppUpdateGate extends StatefulWidget {
@@ -17,12 +19,12 @@ class _AppUpdateGateState extends State<AppUpdateGate> with WidgetsBindingObserv
   AppUpdateInfo? _update;
   bool _checking = false;
   int? _dismissedBuild;
+  bool _checkedAfterBootstrap = false;
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-    _check();
   }
 
   @override
@@ -67,6 +69,12 @@ class _AppUpdateGateState extends State<AppUpdateGate> with WidgetsBindingObserv
 
   @override
   Widget build(BuildContext context) {
+    final loading = context.watch<AppState>().loading;
+    if (!loading && !_checkedAfterBootstrap) {
+      _checkedAfterBootstrap = true;
+      WidgetsBinding.instance.addPostFrameCallback((_) => _check());
+    }
+
     final update = _update;
     return Stack(
       fit: StackFit.expand,
