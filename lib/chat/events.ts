@@ -8,16 +8,6 @@ export type ChatEvent =
 const bus = new EventEmitter();
 bus.setMaxListeners(200);
 
-import { EventEmitter } from "events";
-
-export type ChatEvent =
-  | { type: "message"; sessionId: string; messageId?: string }
-  | { type: "session_closed"; sessionId: string }
-  | { type: "inbox_updated" };
-
-const bus = new EventEmitter();
-bus.setMaxListeners(200);
-
 function emitPlatformFromChat(event: ChatEvent) {
   import("@/lib/platform/sync-events")
     .then(({ publishPlatformSync }) => {
