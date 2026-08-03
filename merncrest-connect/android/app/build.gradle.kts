@@ -13,7 +13,7 @@ if (keystorePropertiesFile.exists()) {
 
 android {
     namespace = "lk.merncrest.merncrest_connect"
-    compileSdk = flutter.compileSdkVersion
+    compileSdk = 37
     ndkVersion = flutter.ndkVersion
 
     compileOptions {

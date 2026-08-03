@@ -1,8 +1,0 @@
-{
-  "projectId": "17402065891171962495",
-  "screenId": "a292edd3c51a447b86f3c1c0346c66cc",
-  "title": "Live Chat — MernCrest Solutions Staff Portal",
-  "route": "/staff/live-chat",
-  "component": "StaffVisitorChatPanel",
-  "designSystem": "assets/060de6acb3a74722a6e7f79ec90a20d0"
-}

@@ -53,14 +53,15 @@ class _LoginScreenState extends State<LoginScreen> {
 
   void _showUpdateDialog(AppUpdateInfo info) {
     if (!mounted) return;
+    final palette = ConnectPalette.of(context);
     showDialog<void>(
       context: context,
       barrierColor: Colors.black.withValues(alpha: 0.7),
       barrierDismissible: !info.forceUpdate,
       builder: (ctx) => Dialog(
-        backgroundColor: ConnectColors.surfaceRaised,
+        backgroundColor: palette.surfaceRaised,
         insetPadding: const EdgeInsets.symmetric(horizontal: 24),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24), side: const BorderSide(color: ConnectColors.borderSubtle)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24), side: BorderSide(color: palette.borderSubtle)),
         child: AppUpdateCard(info: info, onDismiss: info.forceUpdate ? null : () => Navigator.of(ctx).pop()),
       ),
     );
@@ -102,7 +103,9 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final palette = ConnectPalette.of(context);
     return Scaffold(
+      backgroundColor: palette.background,
       body: ConnectAmbientBackground(
         child: Column(
           children: [
@@ -115,14 +118,14 @@ class _LoginScreenState extends State<LoginScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('System', style: Theme.of(context).textTheme.labelSmall?.copyWith(color: ConnectColors.primaryGlow))
+                      Text('System', style: Theme.of(context).textTheme.labelSmall?.copyWith(color: palette.accentHighlight))
                           .stitchEntrance(),
                       RichText(
                         text: TextSpan(
                           style: Theme.of(context).textTheme.headlineLarge,
-                          children: const [
-                            TextSpan(text: 'System'),
-                            TextSpan(text: '.merncrest', style: TextStyle(color: ConnectColors.primaryGlow)),
+                          children: [
+                            const TextSpan(text: 'System'),
+                            TextSpan(text: '.merncrest', style: TextStyle(color: palette.accentHighlight)),
                           ],
                         ),
                       ).stitchEntrance(delay: 60.ms),
@@ -138,9 +141,9 @@ class _LoginScreenState extends State<LoginScreen> {
                         children: ['Attendance', 'Live chat', 'CRM', 'Tasks']
                             .map((f) => Chip(
                                   label: Text(f, style: const TextStyle(fontSize: 11)),
-                                  backgroundColor: ConnectColors.surfaceRaised,
-                                  side: const BorderSide(color: ConnectColors.borderSubtle),
-                                  labelStyle: const TextStyle(color: ConnectColors.textSecondary),
+                                  backgroundColor: palette.surfaceRaised,
+                                  side: BorderSide(color: palette.borderSubtle),
+                                  labelStyle: TextStyle(color: palette.textSecondary),
                                 ))
                             .toList(),
                       ).stitchEntrance(delay: 180.ms),
@@ -160,10 +163,10 @@ class _LoginScreenState extends State<LoginScreen> {
               flex: 58,
               child: Container(
                 width: double.infinity,
-                decoration: const BoxDecoration(
-                  color: ConnectColors.surface,
-                  borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
-                  border: Border(top: BorderSide(color: ConnectColors.borderSubtle)),
+                decoration: BoxDecoration(
+                  color: palette.surface,
+                  borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
+                  border: Border(top: BorderSide(color: palette.borderSubtle)),
                 ),
                 child: SafeArea(
                   top: false,
@@ -181,7 +184,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         controller: _email,
                         keyboardType: TextInputType.emailAddress,
                         autofillHints: const [AutofillHints.username, AutofillHints.email],
-                        style: const TextStyle(color: ConnectColors.textPrimary),
+                        style: TextStyle(color: palette.textPrimary),
                         decoration: const InputDecoration(labelText: 'Work email', hintText: 'staff@merncrest.lk', prefixIcon: Icon(Icons.alternate_email_rounded)),
                       ).stitchEntrance(delay: 100.ms),
                       const SizedBox(height: 14),
@@ -189,7 +192,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         controller: _password,
                         obscureText: _obscure,
                         autofillHints: const [AutofillHints.password],
-                        style: const TextStyle(color: ConnectColors.textPrimary),
+                        style: TextStyle(color: palette.textPrimary),
                         decoration: InputDecoration(
                           labelText: 'Password',
                           prefixIcon: const Icon(Icons.lock_outline_rounded),

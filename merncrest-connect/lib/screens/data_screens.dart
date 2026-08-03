@@ -599,6 +599,7 @@ class _LiveChatScreenState extends State<LiveChatScreen> {
 
       if (_filter == 'unread' && unread == 0) return false;
       if (_filter == 'open' && status.toUpperCase() != 'OPEN') return false;
+      if (_filter == 'pinned' && item['pinned'] != true) return false;
       if (_query.isNotEmpty && !name.toLowerCase().contains(_query.toLowerCase())) return false;
       return true;
     }).toList();
@@ -639,6 +640,7 @@ class _LiveChatScreenState extends State<LiveChatScreen> {
               final item = c as Map<String, dynamic>;
               final name = item['lead']?['fullName']?.toString() ?? 'Visitor';
               final unread = item['unreadCount'] as int? ?? 0;
+              final pinned = item['pinned'] == true;
               return Padding(
                 padding: const EdgeInsets.only(bottom: ConnectSpacing.sm),
                 child: ConnectCard(
@@ -676,6 +678,7 @@ class _LiveChatScreenState extends State<LiveChatScreen> {
                             Row(
                               children: [
                                 Expanded(child: Text(name, style: Theme.of(context).textTheme.titleMedium?.copyWith(fontSize: 13))),
+                                if (pinned) const Icon(Icons.push_pin_rounded, size: 14, color: ConnectColors.warning),
                                 if (unread > 0) ConnectChip(label: '$unread', color: ConnectColors.accent),
                               ],
                             ),
@@ -830,8 +833,8 @@ class _ClientsScreenState extends State<ClientsScreen> {
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(name, style: Theme.of(context).textTheme.titleMedium?.copyWith(fontSize: 13)),
+                            children: [
+                              Text(name, style: Theme.of(context).textTheme.titleMedium?.copyWith(fontSize: 13)),
                             Text(item['customerCode']?.toString() ?? item['leadNumber']?.toString() ?? item['email']?.toString() ?? '', style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontSize: 11)),
                           ],
                         ),

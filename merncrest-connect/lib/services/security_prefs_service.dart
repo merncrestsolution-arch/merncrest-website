@@ -37,4 +37,14 @@ class SecurityPrefsService {
     final stored = await getPin();
     return stored != null && stored == input;
   }
+
+  Future<void> setSignatureJson(String? json) async {
+    if (json == null) {
+      await _storage.delete(key: 'connect_signature_json');
+    } else {
+      await _storage.write(key: 'connect_signature_json', value: json);
+    }
+  }
+
+  Future<String?> getSignatureJson() async => _storage.read(key: 'connect_signature_json');
 }

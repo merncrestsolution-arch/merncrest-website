@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:merncrest_connect/navigation/module_router.dart';
 import 'package:merncrest_connect/providers/app_state.dart';
+import 'package:merncrest_connect/screens/erp_approvals_screen.dart';
 import 'package:merncrest_connect/screens/erp_assets_screen.dart';
 import 'package:merncrest_connect/screens/erp_fleet_screen.dart';
 import 'package:merncrest_connect/screens/erp_inventory_screen.dart';
@@ -139,6 +140,13 @@ class _ErpHubScreenState extends State<ErpHubScreen> {
                       icon: Icons.local_shipping_rounded,
                       iconColor: ConnectModuleColors.manufacturing,
                       onTap: () => _open(const ErpFleetScreen()),
+                    ),
+                    ConnectModuleRow(
+                      title: 'Approvals',
+                      subtitle: '${stats['approvalsPending'] ?? 0} pending workflows',
+                      icon: Icons.approval_rounded,
+                      iconColor: ConnectModuleColors.erp,
+                      onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const ErpApprovalsScreen())),
                     ),
                     ConnectModuleRow(
                       title: 'Finance',

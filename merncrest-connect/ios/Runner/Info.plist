@@ -66,5 +66,11 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
+	<key>NSCameraUsageDescription</key>
+	<string>Camera is used for QR attendance scanning and face verification.</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>Location is used to validate GPS attendance within the office geo-fence.</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>Microphone is used for AIRA voice input and optional chat features.</string>
 </dict>
 </plist>

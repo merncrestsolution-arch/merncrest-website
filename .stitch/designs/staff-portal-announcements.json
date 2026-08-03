@@ -1,8 +1,0 @@
-{
-  "projectId": "17402065891171962495",
-  "screenId": "2c80d640cc864ac5b0870e1b40b40730",
-  "title": "Announcements — MernCrest Solutions Staff Portal",
-  "route": "/staff/notifications",
-  "component": "StaffAnnouncementsPanel",
-  "designSystem": "assets/060de6acb3a74722a6e7f79ec90a20d0"
-}

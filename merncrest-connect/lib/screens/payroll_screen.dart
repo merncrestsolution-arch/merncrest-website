@@ -2,13 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:merncrest_connect/providers/app_state.dart';
 import 'package:merncrest_connect/theme/connect_theme.dart';
 import 'package:merncrest_connect/theme/connect_tokens.dart';
+import 'package:merncrest_connect/utils/document_viewer.dart';
 import 'package:merncrest_connect/utils/formatters.dart';
 import 'package:merncrest_connect/widgets/connect_card.dart';
 import 'package:merncrest_connect/widgets/connect_glass.dart';
 import 'package:merncrest_connect/widgets/connect_motion.dart';
 import 'package:merncrest_connect/widgets/connect_ui.dart';
 import 'package:provider/provider.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 class PayrollScreen extends StatefulWidget {
   const PayrollScreen({super.key});
@@ -189,11 +189,17 @@ class PayslipDetailScreen extends StatelessWidget {
             ),
             const SizedBox(height: ConnectSpacing.md),
             ConnectPrimaryButton(
-              label: 'Download PDF',
-              icon: Icons.download_rounded,
+              label: 'View payslip',
+              icon: Icons.visibility_rounded,
               onPressed: () {
-                final url = slip['pdfUrl']?.toString();
-                if (url != null && url.isNotEmpty) launchUrl(Uri.parse(url));
+                final id = slip['id']?.toString();
+                if (id == null) return;
+                openInAppDocument(
+                  context,
+                  title: slip['slipNumber']?.toString() ?? 'Payslip',
+                  apiPath: '/api/staff/payslips/$id/html',
+                  filename: 'payslip-${slip['slipNumber'] ?? id}.html',
+                );
               },
             ),
           ],

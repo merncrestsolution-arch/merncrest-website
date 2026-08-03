@@ -7,6 +7,7 @@ import 'package:merncrest_connect/screens/calendar_screen.dart';
 import 'package:merncrest_connect/screens/data_screens.dart';
 import 'package:merncrest_connect/screens/documents_screen.dart';
 import 'package:merncrest_connect/screens/erp_hub_screen.dart';
+import 'package:merncrest_connect/screens/erp_approvals_screen.dart';
 import 'package:merncrest_connect/screens/erp_assets_screen.dart';
 import 'package:merncrest_connect/screens/erp_fleet_screen.dart';
 import 'package:merncrest_connect/screens/erp_inventory_screen.dart';
@@ -23,6 +24,10 @@ import 'package:merncrest_connect/screens/notifications_screen.dart';
 import 'package:merncrest_connect/screens/payroll_screen.dart';
 import 'package:merncrest_connect/screens/profile_screen.dart';
 import 'package:merncrest_connect/screens/security_settings_screen.dart';
+import 'package:merncrest_connect/screens/about_screen.dart';
+import 'package:merncrest_connect/screens/admin_screen.dart';
+import 'package:merncrest_connect/screens/help_screen.dart';
+import 'package:merncrest_connect/screens/integrations_screen.dart';
 import 'package:merncrest_connect/screens/settings_screen.dart';
 import 'package:merncrest_connect/theme/connect_tokens.dart';
 
@@ -77,6 +82,8 @@ class ModuleRouter {
         screen = const AnalyticsScreen();
       case 'performance':
         screen = const PerformanceScreen();
+      case 'approvals':
+        screen = const ErpApprovalsScreen();
       case 'billing':
       case 'invoices':
       case 'finance':
@@ -121,12 +128,13 @@ class ModuleRouter {
       case 'security':
         screen = const SecuritySettingsScreen();
       case 'help':
-        screen = const ModuleListScreen(title: 'Help', endpoint: '/api/staff/navigation');
+        screen = const HelpScreen();
       case 'about':
-        screen = const SettingsScreen();
+        screen = const AboutScreen();
       case 'admin':
+        screen = const AdminScreen();
       case 'integrations':
-        screen = const SettingsScreen();
+        screen = const IntegrationsScreen();
       default:
         if (route.startsWith('/api/')) {
           screen = ModuleListScreen(title: label ?? 'Module', endpoint: route);

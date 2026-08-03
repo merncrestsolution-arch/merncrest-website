@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:merncrest_connect/providers/app_state.dart';
+import 'package:merncrest_connect/services/offline_api.dart';
+import 'package:merncrest_connect/services/platform_sync_service.dart';
 import 'package:merncrest_connect/theme/connect_theme.dart';
 import 'package:merncrest_connect/theme/connect_tokens.dart';
 import 'package:merncrest_connect/utils/formatters.dart';
@@ -20,6 +22,7 @@ class _ChatConversationScreenState extends State<ChatConversationScreen> {
   List<dynamic> _messages = [];
   Map<String, dynamic>? _context;
   final _controller = TextEditingController();
+  PlatformSyncService? _sync;
   bool _loading = true;
   bool _sending = false;
   bool _acting = false;
@@ -31,9 +34,39 @@ class _ChatConversationScreenState extends State<ChatConversationScreen> {
   }
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final next = context.read<AppState>().sync;
+    if (_sync != next) {
+      _sync?.removeListener(_onSync);
+      _sync = next?..addListener(_onSync);
+    }
+  }
+
+  @override
   void dispose() {
+    _sync?.removeListener(_onSync);
     _controller.dispose();
     super.dispose();
+  }
+
+  void _onSync() {
+    final type = _sync?.lastEventType;
+    if (type == 'chat_message') {
+      final sid = _sync?.lastChatSessionId;
+      if (sid == null || sid == widget.sessionId) _reloadMessages();
+    } else if (type == 'chat_inbox') {
+      _reloadMessages();
+    }
+  }
+
+  Future<void> _reloadMessages() async {
+    try {
+      final data = await context.read<AppState>().auth.api.get('/api/chat/conversations/${widget.sessionId}/messages');
+      if (mounted) {
+        setState(() => _messages = (data['messages'] as List<dynamic>?) ?? []);
+      }
+    } catch (_) {}
   }
 
   Future<void> _load() async {
@@ -62,10 +95,25 @@ class _ChatConversationScreenState extends State<ChatConversationScreen> {
     setState(() => _sending = true);
     _controller.clear();
     try {
-      await context.read<AppState>().auth.api.post('/api/chat/conversations/${widget.sessionId}/messages', {
-        'message': text,
-        'asAgent': true,
-      });
+      final state = context.read<AppState>();
+      final path = '/api/chat/conversations/${widget.sessionId}/messages';
+      final body = {'message': text, 'asAgent': true};
+      final ok = await postWithOfflineQueue(state, path: path, body: body);
+      if (!ok && mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Offline — message queued')));
+        setState(() {
+          _messages = [
+            ..._messages,
+            {
+              'message': text,
+              'asAgent': true,
+              'createdAt': DateTime.now().toIso8601String(),
+              'pending': true,
+            },
+          ];
+        });
+        return;
+      }
       await _load();
     } finally {
       if (mounted) setState(() => _sending = false);
@@ -104,6 +152,82 @@ class _ChatConversationScreenState extends State<ChatConversationScreen> {
     }
   }
 
+  Future<void> _transferChat() async {
+    if (_acting) return;
+    setState(() => _acting = true);
+    final api = context.read<AppState>().auth.api;
+    try {
+      final data = await api.get('/api/staff/presence');
+      final agents = (data['agents'] as List<dynamic>?) ?? [];
+      if (!mounted) return;
+      final targetId = await showModalBottomSheet<String>(
+        context: context,
+        backgroundColor: ConnectPalette.of(context).surfaceRaised,
+        builder: (ctx) => SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(ConnectSpacing.md),
+                child: Text('Transfer to agent', style: Theme.of(ctx).textTheme.titleMedium),
+              ),
+              Flexible(
+                child: ListView(
+                  shrinkWrap: true,
+                  children: agents.map((raw) {
+                    final a = raw as Map<String, dynamic>;
+                    return ListTile(
+                      title: Text(a['displayName']?.toString() ?? '', style: const TextStyle(fontSize: 13)),
+                      subtitle: Text('${a['status'] ?? ''} · ${a['activeChats'] ?? 0} chats', style: const TextStyle(fontSize: 11)),
+                      onTap: () => Navigator.pop(ctx, a['id']?.toString()),
+                    );
+                  }).toList(),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+      if (targetId == null) return;
+      await api.patch('/api/staff/chat/inbox', {
+        'sessionId': widget.sessionId,
+        'action': 'transfer',
+        'targetAgentId': targetId,
+      });
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Chat transferred')));
+        await _load();
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString().replaceFirst('Exception: ', ''))));
+      }
+    } finally {
+      if (mounted) setState(() => _acting = false);
+    }
+  }
+
+  Future<void> _togglePin() async {
+    if (_acting) return;
+    setState(() => _acting = true);
+    final isPinned = widget.preview['pinned'] == true;
+    try {
+      await context.read<AppState>().auth.api.patch('/api/staff/chat/inbox', {
+        'sessionId': widget.sessionId,
+        'action': isPinned ? 'unpin' : 'pin',
+      });
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(isPinned ? 'Unpinned' : 'Pinned to top')));
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString().replaceFirst('Exception: ', ''))));
+      }
+    } finally {
+      if (mounted) setState(() => _acting = false);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final palette = ConnectPalette.of(context);
@@ -112,6 +236,8 @@ class _ChatConversationScreenState extends State<ChatConversationScreen> {
     final status = widget.preview['status']?.toString() ?? 'OPEN';
     final isClosed = status == 'CLOSED' || status == 'RESOLVED';
 
+    final isPinned = widget.preview['pinned'] == true;
+
     return Scaffold(
       backgroundColor: palette.background,
       appBar: AppBar(
@@ -119,19 +245,44 @@ class _ChatConversationScreenState extends State<ChatConversationScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(name, style: const TextStyle(fontSize: 14)),
-            Text(status, style: const TextStyle(fontSize: 10)),
+            Row(
+              children: [
+                Text(status, style: const TextStyle(fontSize: 10)),
+                if (context.watch<AppState>().sync?.connected == true) ...[
+                  const SizedBox(width: 6),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                    decoration: BoxDecoration(
+                      color: ConnectColors.success.withValues(alpha: 0.2),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: const Text('LIVE', style: TextStyle(fontSize: 8, color: ConnectColors.success, fontWeight: FontWeight.w700)),
+                  ),
+                ],
+              ],
+            ),
           ],
         ),
         actions: [
           if (!isClosed)
             PopupMenuButton<String>(
               enabled: !_acting,
-              onSelected: _chatAction,
               itemBuilder: (context) => [
+                PopupMenuItem(value: 'pin', child: Text(isPinned ? 'Unpin chat' : 'Pin chat', style: const TextStyle(fontSize: 13))),
+                const PopupMenuItem(value: 'transfer', child: Text('Transfer to agent', style: TextStyle(fontSize: 13))),
                 const PopupMenuItem(value: 'to_ticket', child: Text('Convert to ticket', style: TextStyle(fontSize: 13))),
                 const PopupMenuItem(value: 'to_lead', child: Text('Convert to lead', style: TextStyle(fontSize: 13))),
                 const PopupMenuItem(value: 'close', child: Text('Close chat', style: TextStyle(fontSize: 13))),
               ],
+              onSelected: (value) {
+                if (value == 'transfer') {
+                  _transferChat();
+                } else if (value == 'pin') {
+                  _togglePin();
+                } else {
+                  _chatAction(value);
+                }
+              },
             ),
           IconButton(onPressed: _load, icon: const Icon(Icons.refresh_rounded, size: 20)),
         ],
@@ -164,6 +315,7 @@ class _ChatConversationScreenState extends State<ChatConversationScreen> {
                           itemBuilder: (context, i) {
                             final m = _messages[i] as Map<String, dynamic>;
                             final isStaff = m['role'] == 'AGENT' || m['role'] == 'STAFF' || m['isAgent'] == true;
+                            final pending = m['pending'] == true;
                             return Align(
                               alignment: isStaff ? Alignment.centerRight : Alignment.centerLeft,
                               child: Container(
@@ -171,14 +323,22 @@ class _ChatConversationScreenState extends State<ChatConversationScreen> {
                                 padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                                 constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width * 0.78),
                                 decoration: BoxDecoration(
-                                  color: isStaff ? ConnectColors.primary.withValues(alpha: 0.22) : palette.surfaceRaised,
+                                  color: pending
+                                      ? ConnectColors.warning.withValues(alpha: 0.12)
+                                      : isStaff
+                                          ? ConnectColors.primary.withValues(alpha: 0.22)
+                                          : palette.surfaceRaised,
                                   borderRadius: BorderRadius.circular(ConnectRadius.md),
-                                  border: Border.all(color: palette.borderSubtle),
+                                  border: Border.all(
+                                    color: pending ? ConnectColors.warning.withValues(alpha: 0.4) : palette.borderSubtle,
+                                  ),
                                 ),
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Text(m['body']?.toString() ?? m['message']?.toString() ?? '', style: TextStyle(color: palette.textPrimary, fontSize: 13)),
+                                    if (pending)
+                                      Text('Queued · will send when online', style: TextStyle(fontSize: 9, color: ConnectColors.warning)),
                                     if (m['createdAt'] != null)
                                       Text(
                                         DateTime.tryParse(m['createdAt'].toString()) != null ? formatDateTime(DateTime.parse(m['createdAt'].toString())) : '',

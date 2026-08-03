@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:merncrest_connect/screens/edit_profile_screen.dart';
 import 'package:merncrest_connect/providers/app_state.dart';
 import 'package:merncrest_connect/providers/theme_provider.dart';
 import 'package:merncrest_connect/screens/notifications_screen.dart';
 import 'package:merncrest_connect/screens/profile_screen.dart';
 import 'package:merncrest_connect/screens/security_settings_screen.dart';
+import 'package:merncrest_connect/services/app_update_service.dart';
 import 'package:merncrest_connect/theme/connect_theme.dart';
 import 'package:merncrest_connect/theme/connect_tokens.dart';
+import 'package:merncrest_connect/widgets/app_update_overlay.dart';
 import 'package:merncrest_connect/widgets/connect_card.dart';
 import 'package:merncrest_connect/widgets/connect_ui.dart';
 import 'package:package_info_plus/package_info_plus.dart';
@@ -20,6 +23,7 @@ class SettingsScreen extends StatefulWidget {
 
 class _SettingsScreenState extends State<SettingsScreen> {
   String _version = '';
+  String _languageLabel = 'English';
 
   @override
   void initState() {
@@ -27,9 +31,62 @@ class _SettingsScreenState extends State<SettingsScreen> {
     _loadVersion();
   }
 
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _loadLanguage();
+  }
+
+  Future<void> _loadLanguage() async {
+    try {
+      final data = await context.read<AppState>().auth.api.get('/api/portal/profile');
+      final lang = data['profile']?['preferredLanguage']?.toString() ?? 'en';
+      if (mounted) setState(() => _languageLabel = _labelFor(lang));
+    } catch (_) {}
+  }
+
+  String _labelFor(String code) {
+    switch (code) {
+      case 'si':
+        return 'Sinhala';
+      case 'ta':
+        return 'Tamil';
+      default:
+        return 'English';
+    }
+  }
+
   Future<void> _loadVersion() async {
     final info = await PackageInfo.fromPlatform();
     if (mounted) setState(() => _version = '${info.version}+${info.buildNumber}');
+  }
+
+  Future<void> _checkForUpdate() async {
+    try {
+      final info = await AppUpdateService().checkForUpdate();
+      if (!mounted) return;
+      if (info == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('You are on the latest version')),
+        );
+        return;
+      }
+      await showDialog<void>(
+        context: context,
+        builder: (ctx) => Dialog(
+          backgroundColor: ConnectPalette.of(ctx).surfaceRaised,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(24),
+            side: BorderSide(color: ConnectPalette.of(ctx).borderSubtle),
+          ),
+          child: AppUpdateCard(info: info, onDismiss: () => Navigator.of(ctx).pop()),
+        ),
+      );
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString())));
+      }
+    }
   }
 
   @override
@@ -70,8 +127,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   _SettingTile(
                     icon: Icons.language_rounded,
                     title: 'Language',
-                    subtitle: 'English',
-                    onTap: () {},
+                    subtitle: _languageLabel,
+                    onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const EditProfileScreen())),
                   ),
                 ],
               ),
@@ -102,6 +159,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   _SettingTile(icon: Icons.cloud_done_outlined, title: 'Cloud Status', subtitle: 'Connected'),
                   const Divider(height: 1),
                   _SettingTile(icon: Icons.storage_outlined, title: 'Storage', subtitle: 'Local cache'),
+                  const Divider(height: 1),
+                  _SettingTile(
+                    icon: Icons.system_update_alt_rounded,
+                    title: 'App update',
+                    subtitle: 'Check for new releases',
+                    onTap: _checkForUpdate,
+                  ),
                   const Divider(height: 1),
                   _SettingTile(icon: Icons.info_outline_rounded, title: 'Version', subtitle: _version.isEmpty ? 'Loading…' : _version),
                 ],
@@ -137,12 +201,13 @@ class _SettingTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final palette = ConnectPalette.of(context);
     return ListTile(
       contentPadding: EdgeInsets.zero,
-      leading: Icon(icon, color: ConnectColors.primaryGlow, size: 22),
+      leading: Icon(icon, color: palette.accentHighlight, size: 22),
       title: Text(title, style: Theme.of(context).textTheme.titleMedium),
       subtitle: subtitle != null ? Text(subtitle!) : null,
-      trailing: trailing ?? (onTap != null ? const Icon(Icons.chevron_right_rounded, color: ConnectColors.textMuted) : null),
+      trailing: trailing ?? (onTap != null ? Icon(Icons.chevron_right_rounded, color: palette.textMuted) : null),
       onTap: onTap,
     );
   }

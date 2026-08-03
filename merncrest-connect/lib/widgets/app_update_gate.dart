@@ -52,6 +52,15 @@ class _AppUpdateGateState extends State<AppUpdateGate> with WidgetsBindingObserv
       }
       if (!info.forceUpdate && _dismissedBuild == info.build) return;
       setState(() => _update = info);
+      // Brief snackbar so users see an update message even before reading the overlay.
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Update available — v${info.version} (build ${info.build})'),
+            duration: const Duration(seconds: 4),
+          ),
+        );
+      }
     } catch (_) {
       /* offline — keep using installed build */
     } finally {

@@ -1,8 +1,0 @@
-{
-  "projectId": "17402065891171962495",
-  "screenId": "0d57e4fb99854d37863e144e907f5d6c",
-  "title": "My Tasks — MernCrest Solutions Staff Portal",
-  "route": "/staff/tasks",
-  "component": "StaffTasksPanel",
-  "designSystem": "assets/060de6acb3a74722a6e7f79ec90a20d0"
-}

@@ -976,6 +976,7 @@ model ChatSession {
   updatedAt      DateTime @updatedAt
 
   messages ChatMessage[]
+  pins     ChatSessionPin[]
 
   @@index([userId])
   @@index([visitorId])
@@ -985,6 +986,18 @@ model ChatSession {
   @@index([agentId])
   @@index([leadId])
   @@index([channel])
+}
+
+model ChatSessionPin {
+  id        String        @id @default(cuid())
+  agentId   String
+  agent     SupportAgent  @relation(fields: [agentId], references: [id], onDelete: Cascade)
+  sessionId String
+  session   ChatSession   @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  createdAt DateTime      @default(now())
+
+  @@unique([agentId, sessionId])
+  @@index([agentId])
 }
 
 model ChatMessage {
@@ -1027,6 +1040,7 @@ model SupportAgent {
   updatedAt      DateTime    @updatedAt
 
   sessions ChatSession[]
+  pins     ChatSessionPin[]
 
   @@index([organizationId])
   @@index([status])
@@ -1355,6 +1369,10 @@ model Employee {
   bankAccountEncrypted String?
   bankName       String?
   qualifications String?
+  /// JSON stroke data for ESS digital signature
+  signatureJson      String?
+  /// SHA-256 hex hash of enrolled face capture (mobile ESS)
+  faceEnrollmentHash String?
   /// FULL_TIME | PART_TIME | CONTRACT | INTERN
   employmentType String      @default("FULL_TIME")
   jobTitle       String
@@ -1846,6 +1864,8 @@ model AttendanceRecord {
   /// PRESENT | ABSENT | LATE | HALF_DAY | REMOTE
   status     String    @default("PRESENT")
   notes      String?
+  /// MANUAL | GPS | QR | FACE
+  verifyMethod String?
   /// Minutes of approved overtime for this day
   overtimeMinutes Int   @default(0)
   shiftId    String?

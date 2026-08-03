@@ -5,10 +5,13 @@ import 'package:merncrest_connect/screens/connect_shell.dart';
 import 'package:merncrest_connect/screens/login_screen.dart';
 import 'package:merncrest_connect/theme/connect_theme.dart';
 import 'package:merncrest_connect/widgets/app_update_gate.dart';
+import 'package:merncrest_connect/services/ssl_pinning_service.dart';
+import 'package:merncrest_connect/widgets/security_lock_gate.dart';
 import 'package:provider/provider.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
+  SslPinningService.initialize();
   runApp(
     MultiProvider(
       providers: [
@@ -74,6 +77,6 @@ class _RootGate extends StatelessWidget {
       );
     }
 
-    return const ConnectShell();
+    return const SecurityLockGate(child: ConnectShell());
   }
 }

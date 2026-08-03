@@ -5,10 +5,10 @@ import { buildReceiptPdfHtml } from "@/lib/billing/receipt-pdf-html";
 import { resolveReceiptNumber } from "@/lib/commerce/org-numbers";
 
 export async function GET(
-  _request: Request,
+  request: Request,
   ctx: { params: Promise<{ id: string }> }
 ) {
-  const user = await getSessionUser();
+  const user = await getSessionUser(request);
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const { id } = await ctx.params;

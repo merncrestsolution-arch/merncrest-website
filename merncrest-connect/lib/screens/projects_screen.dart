@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:merncrest_connect/providers/app_state.dart';
+import 'package:merncrest_connect/screens/erp_project_detail_screen.dart';
 import 'package:merncrest_connect/screens/project_detail_screen.dart';
 import 'package:merncrest_connect/theme/connect_theme.dart';
 import 'package:merncrest_connect/theme/connect_tokens.dart';
@@ -135,6 +136,11 @@ class _ProjectsScreenState extends State<ProjectsScreen> with SingleTickerProvid
                           projects: _filtered(_erpProjects),
                           statusColor: _statusColor,
                           onRefresh: _load,
+                          onTap: (p) => Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (_) => ErpProjectDetailScreen(projectId: p['id']?.toString() ?? '', preview: p),
+                            ),
+                          ),
                         ),
                         _ServiceProjectList(
                           projects: _filtered(_serviceProjects),
@@ -197,10 +203,16 @@ class _FilterChip extends StatelessWidget {
 }
 
 class _ErpProjectList extends StatelessWidget {
-  const _ErpProjectList({required this.projects, required this.statusColor, required this.onRefresh});
+  const _ErpProjectList({
+    required this.projects,
+    required this.statusColor,
+    required this.onRefresh,
+    required this.onTap,
+  });
   final List<dynamic> projects;
   final Color Function(String?) statusColor;
   final Future<void> Function() onRefresh;
+  final void Function(Map<String, dynamic> p) onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -219,6 +231,7 @@ class _ErpProjectList extends StatelessWidget {
           return Padding(
             padding: const EdgeInsets.only(bottom: ConnectSpacing.sm),
             child: ConnectCard(
+              onTap: () => onTap(p),
               padding: const EdgeInsets.all(ConnectSpacing.sm),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,

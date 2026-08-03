@@ -39,6 +39,10 @@ class ConnectShell extends StatelessWidget {
           : null,
       body: Column(
         children: [
+          ConnectOfflineBanner(
+            online: state.sync?.connected == true,
+            pendingMutations: state.sync?.pendingMutations ?? 0,
+          ),
           ConnectTopBar(
             name: state.displayName,
             role: role,

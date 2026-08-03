@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:merncrest_connect/providers/app_state.dart';
+import 'package:merncrest_connect/services/offline_api.dart';
 import 'package:merncrest_connect/theme/connect_theme.dart';
 import 'package:merncrest_connect/theme/connect_tokens.dart';
 import 'package:merncrest_connect/utils/formatters.dart';
@@ -73,13 +74,30 @@ class _InternalChatScreenState extends State<InternalChatScreen> with SingleTick
     if (text.isEmpty || _sending) return;
     setState(() => _sending = true);
     _controller.clear();
-    final api = context.read<AppState>().auth.api;
     try {
-      await api.post('/api/staff/chat', {
+      final state = context.read<AppState>();
+      final me = state.user?['user']?['id']?.toString() ?? state.user?['id']?.toString();
+      final body = <String, dynamic>{
         'body': text,
         if (_peerId != null) 'recipientId': _peerId,
         if (_peerId == null) 'channel': _channel,
-      });
+      };
+      final ok = await postWithOfflineQueue(state, path: '/api/staff/chat', body: body);
+      if (!ok && mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Offline — message queued')));
+        setState(() {
+          _messages = [
+            ..._messages,
+            {
+              'body': text,
+              'senderId': me,
+              'createdAt': DateTime.now().toIso8601String(),
+              'pending': true,
+            },
+          ];
+        });
+        return;
+      }
       await _load();
     } finally {
       if (mounted) setState(() => _sending = false);

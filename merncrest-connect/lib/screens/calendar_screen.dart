@@ -169,7 +169,7 @@ class _CalendarScreenState extends State<CalendarScreen> with SingleTickerProvid
                                 title: item['title']?.toString() ?? 'Event',
                                 subtitle: start != null ? formatDateTime(start) : '',
                                 trailing: item['location'] != null ? ConnectChip(label: item['location'].toString(), color: ConnectModuleColors.erp) : null,
-                                onTap: () {},
+                                onTap: () => _showEventDetail(context, item),
                               );
                             }),
                         ],
@@ -178,6 +178,35 @@ class _CalendarScreenState extends State<CalendarScreen> with SingleTickerProvid
                   ),
                 ],
               ),
+      ),
+    );
+  }
+
+  void _showEventDetail(BuildContext context, Map<String, dynamic> item) {
+    final start = DateTime.tryParse(item['startsAt']?.toString() ?? '');
+    final end = DateTime.tryParse(item['endsAt']?.toString() ?? '');
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: ConnectPalette.of(context).surfaceRaised,
+      builder: (ctx) => Padding(
+        padding: const EdgeInsets.all(ConnectSpacing.lg),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(item['title']?.toString() ?? 'Event', style: Theme.of(ctx).textTheme.titleLarge),
+            const SizedBox(height: 8),
+            if (start != null) Text('Starts ${formatDateTime(start)}', style: Theme.of(ctx).textTheme.bodyMedium?.copyWith(fontSize: 12)),
+            if (end != null) Text('Ends ${formatDateTime(end)}', style: Theme.of(ctx).textTheme.bodyMedium?.copyWith(fontSize: 12)),
+            if (item['location'] != null) Text('Location: ${item['location']}', style: Theme.of(ctx).textTheme.bodyMedium?.copyWith(fontSize: 12)),
+            if (item['description'] != null) ...[
+              const SizedBox(height: 8),
+              Text(item['description'].toString(), style: Theme.of(ctx).textTheme.bodyMedium?.copyWith(fontSize: 11)),
+            ],
+            const SizedBox(height: ConnectSpacing.md),
+            ConnectChip(label: item['kind']?.toString() ?? 'EVENT', color: ConnectModuleColors.calendar),
+          ],
+        ),
       ),
     );
   }

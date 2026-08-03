@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:local_auth/local_auth.dart';
 import 'package:merncrest_connect/services/security_prefs_service.dart';
+import 'package:merncrest_connect/screens/login_history_screen.dart';
+import 'package:merncrest_connect/services/ssl_pinning_service.dart';
 import 'package:merncrest_connect/theme/connect_theme.dart';
 import 'package:merncrest_connect/theme/connect_tokens.dart';
 import 'package:merncrest_connect/widgets/connect_card.dart';
@@ -174,7 +176,7 @@ class _SecuritySettingsScreenState extends State<SecuritySettingsScreen> {
                     children: [
                       const ConnectInfoField(label: 'Storage', value: 'Flutter Secure Storage'),
                       const ConnectInfoField(label: 'Transport', value: 'TLS / HTTPS'),
-                      const ConnectInfoField(label: 'SSL Pinning', value: 'Planned — enterprise rollout'),
+                      ConnectInfoField(label: 'SSL Pinning', value: SslPinningService.statusLabel()),
                     ],
                   ),
                   const ConnectSectionHeader(title: 'Audit'),
@@ -187,16 +189,16 @@ class _SecuritySettingsScreenState extends State<SecuritySettingsScreen> {
                           title: const Text('Login history'),
                           subtitle: const Text('View recent sign-ins'),
                           trailing: const Icon(Icons.chevron_right_rounded, color: ConnectColors.textMuted),
-                          onTap: () {},
+                          onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const LoginHistoryScreen())),
                         ),
                         const Divider(height: 1),
                         ListTile(
                           contentPadding: EdgeInsets.zero,
                           leading: const Icon(Icons.article_outlined, color: ConnectColors.primaryGlow),
-                          title: const Text('Audit logs'),
-                          subtitle: const Text('Activity on your account'),
+                          title: const Text('Security activity'),
+                          subtitle: const Text('Same as login history on mobile'),
                           trailing: const Icon(Icons.chevron_right_rounded, color: ConnectColors.textMuted),
-                          onTap: () {},
+                          onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const LoginHistoryScreen())),
                         ),
                       ],
                     ),

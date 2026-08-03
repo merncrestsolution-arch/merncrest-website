@@ -1,8 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:merncrest_connect/navigation/module_router.dart';
 import 'package:merncrest_connect/config/api_config.dart';
 import 'package:merncrest_connect/providers/app_state.dart';
 import 'package:merncrest_connect/providers/theme_provider.dart';
+import 'package:merncrest_connect/screens/document_upload_screen.dart';
+import 'package:merncrest_connect/screens/edit_profile_screen.dart';
+import 'package:merncrest_connect/screens/employee_id_card_screen.dart';
+import 'package:merncrest_connect/screens/employee_qr_screen.dart';
+import 'package:merncrest_connect/screens/security_settings_screen.dart';
 import 'package:merncrest_connect/screens/settings_screen.dart';
+import 'package:merncrest_connect/screens/signature_screen.dart';
 import 'package:merncrest_connect/theme/connect_theme.dart';
 import 'package:merncrest_connect/theme/connect_tokens.dart';
 import 'package:merncrest_connect/widgets/connect_card.dart';
@@ -23,11 +30,27 @@ class ProfileScreen extends StatefulWidget {
 
 class _ProfileScreenState extends State<ProfileScreen> {
   String _version = '';
+  bool _hasSignature = false;
+  bool _faceEnrolled = false;
 
   @override
   void initState() {
     super.initState();
     _loadVersion();
+    _loadEssProfile();
+  }
+
+  Future<void> _loadEssProfile() async {
+    try {
+      final data = await context.read<AppState>().auth.api.get('/api/staff/profile');
+      final emp = data['employee'] as Map<String, dynamic>?;
+      if (mounted) {
+        setState(() {
+          _hasSignature = emp?['hasSignature'] == true;
+          _faceEnrolled = emp?['faceEnrolled'] == true;
+        });
+      }
+    } catch (_) {}
   }
 
   Future<void> _loadVersion() async {
@@ -58,7 +81,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         actions: [
           IconButton(
             icon: const Icon(Icons.edit_outlined, size: 20),
-            onPressed: () {},
+            onPressed: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const EditProfileScreen())),
             tooltip: 'Edit profile',
           ),
         ],
@@ -99,10 +122,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
             const SizedBox(height: ConnectSpacing.sm),
             ConnectHorizontalQuickActions(
               actions: [
-                QuickActionItem(icon: Icons.qr_code_2_rounded, label: 'QR Card', color: ConnectModuleColors.security, onTap: () {}),
-                QuickActionItem(icon: Icons.download_rounded, label: 'ID Card', color: ConnectModuleColors.docs, onTap: () {}),
-                QuickActionItem(icon: Icons.draw_rounded, label: 'Signature', color: ConnectModuleColors.hr, onTap: () {}),
-                QuickActionItem(icon: Icons.upload_file_rounded, label: 'Upload', color: ConnectModuleColors.docs, onTap: () {}),
+                QuickActionItem(icon: Icons.qr_code_2_rounded, label: 'QR Card', color: ConnectModuleColors.security, onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const EmployeeQrScreen()))),
+                QuickActionItem(icon: Icons.download_rounded, label: 'ID Card', color: ConnectModuleColors.docs, onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const EmployeeIdCardScreen()))),
+                QuickActionItem(icon: Icons.draw_rounded, label: 'Signature', color: ConnectModuleColors.hr, onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const SignatureScreen()))),
+                QuickActionItem(icon: Icons.upload_file_rounded, label: 'Upload', color: ConnectModuleColors.docs, onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const DocumentUploadScreen()))),
               ],
             ),
             const ConnectSectionHeader(title: 'Employee Profile', padding: EdgeInsets.fromLTRB(0, ConnectSpacing.md, 0, ConnectSpacing.xs)),
@@ -183,9 +206,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
               icon: Icons.shield_outlined,
               iconColor: ConnectModuleColors.security,
               children: [
-                ConnectInfoField(label: '2FA', value: user?['twoFactorEnabled'] == true ? 'Enabled' : 'Not enabled', onTap: () {}),
-                ConnectInfoField(label: 'Face ID', value: 'Configure in settings', onTap: () => _openSettings(context)),
-                ConnectInfoField(label: 'Fingerprint', value: 'Configure in settings', onTap: () => _openSettings(context)),
+                ConnectInfoField(label: '2FA', value: user?['twoFactorEnabled'] == true ? 'Enabled' : 'Not enabled', onTap: () => _toggle2FA(context, state)),
+                ConnectInfoField(label: 'Digital signature', value: _hasSignature ? 'Saved' : 'Not set', onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const SignatureScreen())).then((_) => _loadEssProfile())),
+                ConnectInfoField(label: 'Face attendance', value: _faceEnrolled ? 'Enrolled' : 'Not enrolled', onTap: () => ModuleRouter.open(context, '/attendance')),
+                ConnectInfoField(label: 'App lock', value: 'Biometric / PIN', onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const SecuritySettingsScreen()))),
                 ConnectInfoField(label: 'Last Login', value: _field(user, 'lastLoginAt')),
                 ConnectInfoField(label: 'Server', value: ApiConfig.baseUrl),
               ],
@@ -242,5 +266,22 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   void _openSettings(BuildContext context) {
     Navigator.of(context).push(MaterialPageRoute(builder: (_) => const SettingsScreen()));
+  }
+
+  Future<void> _toggle2FA(BuildContext context, AppState state) async {
+    try {
+      final api = state.auth.api;
+      final current = await api.get('/api/staff/security');
+      final enabled = current['twoFactorEnabled'] == true;
+      await api.patch('/api/staff/security', {'twoFactorEnabled': !enabled});
+      await state.refresh();
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(!enabled ? '2FA enabled' : '2FA disabled')));
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString().replaceFirst('Exception: ', ''))));
+      }
+    }
   }
 }

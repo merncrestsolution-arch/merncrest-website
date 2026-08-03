@@ -34,13 +34,26 @@ export async function GET() {
     where: { employeeId: employee.id, workDate: startOfDay() },
   });
 
-  return NextResponse.json({ employee, records, today });
+  return NextResponse.json({
+    employee: {
+      id: employee.id,
+      employeeCode: employee.employeeCode,
+      fullName: employee.fullName,
+      jobTitle: employee.jobTitle,
+      faceEnrolled: Boolean(employee.faceEnrollmentHash),
+      hasSignature: Boolean(employee.signatureJson),
+    },
+    records,
+    today,
+  });
 }
 
 const punchSchema = z.object({
-  action: z.enum(["IN", "OUT", "QR_TOKEN"]),
+  action: z.enum(["IN", "OUT", "QR_TOKEN", "ENROLL_FACE"]),
   notes: z.string().max(500).optional(),
   token: z.string().optional(),
+  verifyMethod: z.enum(["MANUAL", "GPS", "QR", "FACE"]).optional(),
+  faceHash: z.string().regex(/^[a-f0-9]{64}$/i).optional(),
 });
 
 export async function POST(request: Request) {
@@ -69,6 +82,41 @@ export async function POST(request: Request) {
     return NextResponse.json({ token, expiresAt });
   }
 
+  if (parsed.data.action === "ENROLL_FACE") {
+    if (!parsed.data.faceHash) {
+      return NextResponse.json({ error: "faceHash required" }, { status: 400 });
+    }
+    const hash = parsed.data.faceHash.toLowerCase();
+    await prisma.employee.update({
+      where: { id: employee.id },
+      data: { faceEnrollmentHash: hash },
+    });
+    void writeAuditLog({
+      actorId: auth.user.id,
+      actorEmail: auth.user.email,
+      actorName: auth.user.fullName,
+      action: "UPDATE",
+      module: "HR",
+      entityType: "Employee",
+      entityId: employee.id,
+      summary: "Face enrollment for ESS attendance",
+    });
+    return NextResponse.json({ enrolled: true });
+  }
+
+  if (parsed.data.verifyMethod === "FACE" || parsed.data.faceHash) {
+    if (!parsed.data.faceHash) {
+      return NextResponse.json({ error: "faceHash required for face verification" }, { status: 400 });
+    }
+    const hash = parsed.data.faceHash.toLowerCase();
+    if (!employee.faceEnrollmentHash) {
+      return NextResponse.json({ error: "Enroll your face first" }, { status: 400 });
+    }
+    if (employee.faceEnrollmentHash !== hash) {
+      return NextResponse.json({ error: "Face verification failed" }, { status: 403 });
+    }
+  }
+
   if (parsed.data.token) {
     const row = await prisma.attendancePunchToken.findFirst({
       where: {
@@ -92,6 +140,7 @@ export async function POST(request: Request) {
     where: { employeeId: employee.id, workDate: day },
   });
 
+  const verifyMethod = parsed.data.verifyMethod ?? (parsed.data.token ? "QR" : "MANUAL");
   const now = new Date();
   if (parsed.data.action === "IN") {
     if (record?.checkIn) {
@@ -105,6 +154,7 @@ export async function POST(request: Request) {
             checkIn: now,
             status: late ? "LATE" : "PRESENT",
             notes: parsed.data.notes,
+            verifyMethod,
             userId: auth.user.id,
           },
         })
@@ -116,16 +166,23 @@ export async function POST(request: Request) {
             checkIn: now,
             status: late ? "LATE" : "PRESENT",
             notes: parsed.data.notes,
+            verifyMethod,
           },
         });
-  } else {
+  } else if (parsed.data.action === "OUT") {
     if (!record?.checkIn) {
       return NextResponse.json({ error: "Punch in first" }, { status: 400 });
     }
     record = await prisma.attendanceRecord.update({
       where: { id: record.id },
-      data: { checkOut: now, notes: parsed.data.notes || record.notes },
+      data: {
+        checkOut: now,
+        notes: parsed.data.notes || record.notes,
+        verifyMethod,
+      },
     });
+  } else {
+    return NextResponse.json({ error: "Invalid punch action" }, { status: 400 });
   }
 
   void writeAuditLog({

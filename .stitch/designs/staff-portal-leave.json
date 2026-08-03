@@ -1,8 +1,0 @@
-{
-  "projectId": "17402065891171962495",
-  "screenId": "a9acfbfed60a4896997115ae388d5c37",
-  "title": "Leave Management — MernCrest Solutions Staff Portal",
-  "route": "/staff/leave",
-  "component": "StaffLeavePanel",
-  "designSystem": "assets/060de6acb3a74722a6e7f79ec90a20d0"
-}

@@ -19,3 +19,11 @@ Map<String, dynamic>? envelopeMeta(Map<String, dynamic> res) {
   if (meta is Map<String, dynamic>) return meta;
   return null;
 }
+
+/// Single-object payload from `{ success, data }` envelopes.
+Map<String, dynamic>? envelopeData(Map<String, dynamic> res) {
+  final data = res['data'];
+  if (data is Map<String, dynamic>) return data;
+  if (data is Map) return Map<String, dynamic>.from(data);
+  return null;
+}

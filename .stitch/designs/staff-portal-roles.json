@@ -1,8 +1,0 @@
-{
-  "projectId": "17402065891171962495",
-  "screenId": "e81cf76ff70948f4a7f8dc155e3dc3e1",
-  "title": "Roles & Permissions — MernCrest Solutions Staff Portal",
-  "route": "/staff/roles",
-  "component": "SystemRolesPanel",
-  "designSystem": "assets/060de6acb3a74722a6e7f79ec90a20d0"
-}

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:merncrest_connect/theme/connect_theme.dart';
+import 'package:merncrest_connect/theme/connect_tokens.dart';
 
 class ConnectCard extends StatelessWidget {
   const ConnectCard({
@@ -19,15 +20,24 @@ class ConnectCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final palette = ConnectPalette.of(context);
     final decoration = BoxDecoration(
-      color: gradient == null ? ConnectColors.surfaceRaised : null,
-      gradient: gradient ?? (featured ? ConnectColors.cardGradient : null),
+      color: gradient == null && !featured ? palette.surfaceRaised : null,
+      gradient: gradient ?? (featured ? palette.featuredCardGradient : null),
       borderRadius: BorderRadius.circular(20),
       border: Border.all(
-        color: featured ? ConnectColors.primary.withValues(alpha: 0.45) : ConnectColors.borderSubtle,
+        color: featured ? ConnectColors.primary.withValues(alpha: palette.isLight ? 0.35 : 0.45) : palette.borderSubtle,
       ),
-      boxShadow: featured
-          ? [BoxShadow(color: ConnectColors.primary.withValues(alpha: 0.12), blurRadius: 20, offset: const Offset(0, 8))]
+      boxShadow: featured || palette.isLight
+          ? [
+              BoxShadow(
+                color: featured
+                    ? ConnectColors.primary.withValues(alpha: palette.isLight ? 0.08 : 0.12)
+                    : Colors.black.withValues(alpha: palette.isLight ? 0.04 : 0),
+                blurRadius: featured ? 20 : 12,
+                offset: Offset(0, featured ? 8 : 2),
+              ),
+            ]
           : null,
     );
 
@@ -47,7 +57,7 @@ class ConnectStatTile extends StatelessWidget {
     required this.label,
     required this.value,
     required this.icon,
-    this.color = ConnectColors.primaryGlow,
+    this.color,
     this.trend,
     this.compact = false,
   });
@@ -55,12 +65,14 @@ class ConnectStatTile extends StatelessWidget {
   final String label;
   final String value;
   final IconData icon;
-  final Color color;
+  final Color? color;
   final String? trend;
   final bool compact;
 
   @override
   Widget build(BuildContext context) {
+    final palette = ConnectPalette.of(context);
+    final accent = color ?? palette.accentHighlight;
     return ConnectCard(
       padding: EdgeInsets.all(compact ? 10 : 14),
       child: Column(
@@ -72,10 +84,10 @@ class ConnectStatTile extends StatelessWidget {
               Container(
                 padding: EdgeInsets.all(compact ? 5 : 7),
                 decoration: BoxDecoration(
-                  color: color.withValues(alpha: 0.15),
+                  color: accent.withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(compact ? 8 : 10),
                 ),
-                child: Icon(icon, color: color, size: compact ? 14 : 18),
+                child: Icon(icon, color: accent, size: compact ? 14 : 18),
               ),
               const Spacer(),
               if (trend != null)
@@ -168,7 +180,8 @@ class ConnectModuleRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final accent = iconColor ?? ConnectColors.primaryGlow;
+    final palette = ConnectPalette.of(context);
+    final accent = iconColor ?? palette.accentHighlight;
     return Padding(
       padding: EdgeInsets.only(bottom: compact ? 6 : 10),
       child: ConnectCard(
@@ -195,7 +208,7 @@ class ConnectModuleRow extends StatelessWidget {
                 ],
               ),
             ),
-            trailing ?? const Icon(Icons.arrow_forward_ios_rounded, size: 16, color: ConnectColors.textMuted),
+            trailing ?? Icon(Icons.arrow_forward_ios_rounded, size: 16, color: palette.textMuted),
           ],
         ),
       ),

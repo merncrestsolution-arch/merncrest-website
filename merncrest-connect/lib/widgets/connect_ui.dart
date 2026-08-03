@@ -59,7 +59,7 @@ class ConnectPage extends StatelessWidget {
           ? body
           : RefreshIndicator(
               color: ConnectColors.primary,
-              backgroundColor: ConnectColors.surfaceRaised,
+              backgroundColor: ConnectPalette.of(context).surfaceRaised,
               onRefresh: onRefresh!,
               child: body,
             ),
@@ -75,6 +75,7 @@ class ConnectAmbientBackground extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final palette = ConnectPalette.of(context);
+    final orbAlpha = palette.ambientOrbAlpha;
     return Stack(
       fit: StackFit.expand,
       children: [
@@ -82,26 +83,26 @@ class ConnectAmbientBackground extends StatelessWidget {
         Positioned(
           top: -100,
           right: -80,
-          child: _orb(const Color(0xFF7C3AED), 240),
+          child: _orb(const Color(0xFF7C3AED), 240, orbAlpha),
         ),
         Positioned(
           bottom: 80,
           left: -100,
-          child: _orb(const Color(0xFFBE185D), 200),
+          child: _orb(const Color(0xFFBE185D), 200, orbAlpha),
         ),
         child,
       ],
     );
   }
 
-  Widget _orb(Color color, double size) {
+  Widget _orb(Color color, double size, double alpha) {
     return Container(
       width: size,
       height: size,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
         gradient: RadialGradient(
-          colors: [color.withValues(alpha: 0.18), Colors.transparent],
+          colors: [color.withValues(alpha: alpha), Colors.transparent],
         ),
       ),
     );
@@ -181,9 +182,9 @@ class ConnectTopBar extends StatelessWidget {
                     if (v == 'settings') onSettings?.call();
                   },
                   itemBuilder: (_) => [
-                    PopupMenuItem(value: 'profile', child: Text(name, style: const TextStyle(fontSize: 13))),
-                    const PopupMenuItem(value: 'settings', child: Text('Settings', style: TextStyle(fontSize: 13))),
-                    const PopupMenuItem(value: 'logout', child: Text('Sign out', style: TextStyle(fontSize: 13))),
+                    PopupMenuItem(value: 'profile', child: Text(name, style: TextStyle(fontSize: 13, color: palette.textPrimary))),
+                    PopupMenuItem(value: 'settings', child: Text('Settings', style: TextStyle(fontSize: 13, color: palette.textPrimary))),
+                    PopupMenuItem(value: 'logout', child: Text('Sign out', style: TextStyle(fontSize: 13, color: palette.textPrimary))),
                   ],
                 ),
               ],
@@ -243,20 +244,20 @@ class ConnectBottomNav extends StatelessWidget {
                     curve: Curves.easeOutCubic,
                     padding: const EdgeInsets.symmetric(vertical: 6),
                     decoration: BoxDecoration(
-                      color: selected ? ConnectColors.primary.withValues(alpha: 0.2) : Colors.transparent,
+                      color: selected ? ConnectColors.primary.withValues(alpha: palette.isLight ? 0.12 : 0.2) : Colors.transparent,
                       borderRadius: BorderRadius.circular(14),
                     ),
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Icon(selected ? activeIcon : icon, size: 20, color: selected ? ConnectColors.primaryGlow : palette.textMuted),
+                        Icon(selected ? activeIcon : icon, size: 20, color: selected ? palette.accentHighlight : palette.textMuted),
                         const SizedBox(height: 2),
                         Text(
                           label,
                           style: TextStyle(
                             fontSize: 9,
                             fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
-                            color: selected ? ConnectColors.primaryGlow : palette.textMuted,
+                            color: selected ? palette.accentHighlight : palette.textMuted,
                           ),
                         ),
                       ],
@@ -288,6 +289,7 @@ class ConnectPrimaryButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final palette = ConnectPalette.of(context);
     return SizedBox(
       width: double.infinity,
       height: 52,
@@ -295,12 +297,13 @@ class ConnectPrimaryButton extends StatelessWidget {
         decoration: BoxDecoration(
           gradient: onPressed == null ? null : ConnectColors.brandGradient,
           borderRadius: BorderRadius.circular(14),
-          color: onPressed == null ? ConnectColors.borderSubtle : null,
+          color: onPressed == null ? palette.disabledFill : null,
         ),
         child: ElevatedButton(
           onPressed: loading ? null : onPressed,
           style: ElevatedButton.styleFrom(
             backgroundColor: Colors.transparent,
+            foregroundColor: onPressed == null ? palette.textMuted : Colors.white,
             shadowColor: Colors.transparent,
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
           ),
@@ -333,6 +336,7 @@ class ConnectEmptyState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final palette = ConnectPalette.of(context);
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(32),
@@ -342,11 +346,11 @@ class ConnectEmptyState extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
-                color: ConnectColors.surfaceRaised,
+                color: palette.surfaceRaised,
                 shape: BoxShape.circle,
-                border: Border.all(color: ConnectColors.borderSubtle),
+                border: Border.all(color: palette.borderSubtle),
               ),
-              child: Icon(icon, size: 36, color: ConnectColors.primaryGlow.withValues(alpha: 0.8)),
+              child: Icon(icon, size: 36, color: palette.accentHighlight.withValues(alpha: 0.85)),
             ),
             const SizedBox(height: 16),
             Text(title, textAlign: TextAlign.center, style: Theme.of(context).textTheme.titleMedium),
@@ -466,25 +470,43 @@ class ConnectFab extends StatelessWidget {
 
 /// Offline / degraded connectivity banner.
 class ConnectOfflineBanner extends StatelessWidget {
-  const ConnectOfflineBanner({super.key, required this.online, this.message});
+  const ConnectOfflineBanner({
+    super.key,
+    required this.online,
+    this.message,
+    this.pendingMutations = 0,
+  });
 
   final bool online;
   final String? message;
+  final int pendingMutations;
 
   @override
   Widget build(BuildContext context) {
-    if (online) return const SizedBox.shrink();
+    if (online && pendingMutations == 0) return const SizedBox.shrink();
+
+    final offline = !online;
+    final label = offline
+        ? (pendingMutations > 0
+            ? 'Offline — $pendingMutations queued action${pendingMutations == 1 ? '' : 's'} will sync when online'
+            : message ?? 'Offline mode — some data may be cached')
+        : '$pendingMutations queued action${pendingMutations == 1 ? '' : 's'} syncing…';
+
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.symmetric(horizontal: ConnectSpacing.md, vertical: ConnectSpacing.xs),
       color: ConnectColors.warning.withValues(alpha: 0.15),
       child: Row(
         children: [
-          const Icon(Icons.wifi_off_rounded, size: 14, color: ConnectColors.warning),
+          Icon(
+            offline ? Icons.wifi_off_rounded : Icons.cloud_sync_outlined,
+            size: 14,
+            color: ConnectColors.warning,
+          ),
           const SizedBox(width: 8),
           Expanded(
             child: Text(
-              message ?? 'Offline mode — some data may be cached',
+              label,
               style: const TextStyle(fontSize: 11, color: ConnectColors.warning),
             ),
           ),

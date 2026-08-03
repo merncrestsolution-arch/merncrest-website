@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:merncrest_connect/providers/app_state.dart';
+import 'package:merncrest_connect/services/offline_api.dart';
 import 'package:merncrest_connect/theme/connect_theme.dart';
 import 'package:merncrest_connect/theme/connect_tokens.dart';
 import 'package:merncrest_connect/utils/formatters.dart';
@@ -58,17 +59,39 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
   }
 
   Future<void> _markAllRead() async {
-    try {
-      await context.read<AppState>().auth.api.patch('/api/staff/notifications', {'markAll': true});
-      await _load();
-    } catch (_) {}
+    final state = context.read<AppState>();
+    final ok = await patchWithOfflineQueue(state, path: '/api/staff/notifications', body: {'markAll': true});
+    if (!ok && mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Offline — mark-read queued')));
+      setState(() {
+        _unread = 0;
+        _items = _items.map((n) {
+          final m = Map<String, dynamic>.from(n as Map);
+          m['readAt'] = DateTime.now().toIso8601String();
+          return m;
+        }).toList();
+      });
+      return;
+    }
+    await _load();
   }
 
   Future<void> _markRead(String id) async {
-    try {
-      await context.read<AppState>().auth.api.patch('/api/staff/notifications', {'ids': [id]});
-      await _load();
-    } catch (_) {}
+    final state = context.read<AppState>();
+    final ok = await patchWithOfflineQueue(state, path: '/api/staff/notifications', body: {'ids': [id]});
+    if (!ok && mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Offline — mark-read queued')));
+      setState(() {
+        _items = _items.map((n) {
+          final m = Map<String, dynamic>.from(n as Map);
+          if (m['id'] == id) m['readAt'] = DateTime.now().toIso8601String();
+          return m;
+        }).toList();
+        _unread = _items.where((n) => (n as Map)['readAt'] == null).length;
+      });
+      return;
+    }
+    await _load();
   }
 
   IconData _iconForTone(String? tone) {

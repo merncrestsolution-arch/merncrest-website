@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:merncrest_connect/config/api_config.dart';
 import 'package:merncrest_connect/providers/app_state.dart';
+import 'package:merncrest_connect/screens/document_upload_screen.dart';
 import 'package:merncrest_connect/theme/connect_theme.dart';
 import 'package:merncrest_connect/theme/connect_tokens.dart';
 import 'package:merncrest_connect/widgets/connect_card.dart';
@@ -19,11 +21,13 @@ class DocumentsScreen extends StatefulWidget {
 class _DocumentsScreenState extends State<DocumentsScreen> {
   List<dynamic> _announcements = [];
   List<dynamic> _documents = [];
+  List<dynamic> _myDocuments = [];
   String _folder = 'all';
   String _query = '';
   bool _loading = true;
 
   static const _folders = [
+    ('my', 'My uploads', Icons.upload_file_outlined),
     ('all', 'All', Icons.folder_open_rounded),
     ('policies', 'Policies', Icons.policy_outlined),
     ('hr', 'HR Files', Icons.people_outline_rounded),
@@ -46,10 +50,16 @@ class _DocumentsScreenState extends State<DocumentsScreen> {
         final dms = await api.get('/api/erp/documents');
         docs = (dms['documents'] as List<dynamic>?) ?? [];
       } catch (_) {}
+      List<dynamic> mine = [];
+      try {
+        final staff = await api.get('/api/staff/documents');
+        mine = (staff['documents'] as List<dynamic>?) ?? [];
+      } catch (_) {}
       if (mounted) {
         setState(() {
           _announcements = (ann['data'] as List<dynamic>?) ?? (ann['announcements'] as List<dynamic>?) ?? [];
           _documents = docs;
+          _myDocuments = mine;
           _loading = false;
         });
       }
@@ -68,6 +78,16 @@ class _DocumentsScreenState extends State<DocumentsScreen> {
         folder: 'policies',
         icon: Icons.campaign_outlined,
         href: m['href']?.toString(),
+      ));
+    }
+    for (final d in _myDocuments) {
+      final m = d as Map<String, dynamic>;
+      items.add(_DocItem(
+        title: m['title']?.toString() ?? 'My upload',
+        subtitle: m['docType']?.toString() ?? 'ESS',
+        folder: 'my',
+        icon: Icons.upload_file_outlined,
+        href: m['fileUrl']?.toString(),
       ));
     }
     for (final d in _documents) {
@@ -103,7 +123,17 @@ class _DocumentsScreenState extends State<DocumentsScreen> {
       backgroundColor: ConnectPalette.of(context).background,
       appBar: AppBar(
         title: const Text('Documents'),
-        actions: [IconButton(onPressed: _load, icon: const Icon(Icons.refresh_rounded, size: 20))],
+        actions: [
+          IconButton(
+            onPressed: () async {
+              await Navigator.of(context).push(MaterialPageRoute(builder: (_) => const DocumentUploadScreen()));
+              _load();
+            },
+            icon: const Icon(Icons.upload_file_rounded, size: 20),
+            tooltip: 'Upload',
+          ),
+          IconButton(onPressed: _load, icon: const Icon(Icons.refresh_rounded, size: 20)),
+        ],
       ),
       body: ConnectAmbientBackground(
         child: Column(
@@ -169,7 +199,10 @@ class _DocumentsScreenState extends State<DocumentsScreen> {
                                 padding: const EdgeInsets.only(bottom: ConnectSpacing.sm),
                                 child: ConnectCard(
                                   onTap: () {
-                                    if (item.href != null && item.href!.isNotEmpty) launchUrl(Uri.parse(item.href!));
+                                    if (item.href == null || item.href!.isEmpty) return;
+                                    final href = item.href!;
+                                    final uri = href.startsWith('http') ? Uri.parse(href) : Uri.parse('${ApiConfig.baseUrl}$href');
+                                    launchUrl(uri, mode: LaunchMode.externalApplication);
                                   },
                                   padding: const EdgeInsets.all(ConnectSpacing.sm),
                                   child: Row(

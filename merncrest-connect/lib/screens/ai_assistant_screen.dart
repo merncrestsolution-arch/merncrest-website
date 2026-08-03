@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:merncrest_connect/providers/app_state.dart';
 import 'package:merncrest_connect/theme/connect_theme.dart';
 import 'package:merncrest_connect/theme/connect_tokens.dart';
+import 'package:provider/provider.dart';
 import 'package:merncrest_connect/widgets/connect_glass.dart';
 import 'package:merncrest_connect/widgets/connect_motion.dart';
 import 'package:merncrest_connect/widgets/connect_ui.dart';
+import 'package:merncrest_connect/widgets/connect_voice_input.dart';
 
 /// AIRA — Enterprise AI Assistant for MernCrest Connect.
 class AiAssistantScreen extends StatefulWidget {
@@ -28,22 +31,33 @@ class _AiAssistantScreenState extends State<AiAssistantScreen> {
     super.dispose();
   }
 
-  void _send() {
+  Future<void> _send() async {
     final text = _controller.text.trim();
     if (text.isEmpty) return;
     setState(() {
       _messages.add(_ChatMessage(isUser: true, text: text));
       _controller.clear();
     });
-    Future.delayed(const Duration(milliseconds: 600), () {
-      if (!mounted) return;
-      setState(() {
-        _messages.add(_ChatMessage(
-          isUser: false,
-          text: _generateResponse(text),
-        ));
+
+    String reply;
+    try {
+      final data = await context.read<AppState>().auth.api.post('/api/staff/ai', {
+        'prompt': text,
+        'category': 'ASSISTANT',
+        'locale': context.read<AppState>().user?['user']?['preferredLanguage'] ?? 'en',
       });
-    });
+      reply = data['reply']?.toString() ?? _generateResponse(text);
+    } catch (_) {
+      try {
+        final data = await context.read<AppState>().auth.api.post('/api/erp/ai', {'prompt': text, 'category': 'ASSISTANT'});
+        reply = data['reply']?.toString() ?? data['insight']?['summary']?.toString() ?? _generateResponse(text);
+      } catch (_) {
+        reply = _generateResponse(text);
+      }
+    }
+
+    if (!mounted) return;
+    setState(() => _messages.add(_ChatMessage(isUser: false, text: reply)));
   }
 
   String _generateResponse(String input) {
@@ -127,10 +141,7 @@ class _AiAssistantScreenState extends State<AiAssistantScreen> {
               ),
               child: Row(
                 children: [
-                  IconButton(
-                    onPressed: () {},
-                    icon: const Icon(Icons.mic_rounded, color: ConnectColors.primaryGlow),
-                  ),
+                  ConnectVoiceInputButton(controller: _controller, onFinal: _send),
                   Expanded(
                     child: TextField(
                       controller: _controller,

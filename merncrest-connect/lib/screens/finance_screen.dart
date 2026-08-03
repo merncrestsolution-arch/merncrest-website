@@ -4,6 +4,7 @@ import 'package:merncrest_connect/screens/invoice_detail_screen.dart';
 import 'package:merncrest_connect/theme/connect_theme.dart';
 import 'package:merncrest_connect/theme/connect_tokens.dart';
 import 'package:merncrest_connect/utils/api_envelope.dart';
+import 'package:merncrest_connect/utils/document_viewer.dart';
 import 'package:merncrest_connect/utils/formatters.dart';
 import 'package:merncrest_connect/widgets/connect_card.dart';
 import 'package:merncrest_connect/widgets/connect_charts.dart';
@@ -21,15 +22,17 @@ class FinanceScreen extends StatefulWidget {
 
 class _FinanceScreenState extends State<FinanceScreen> with SingleTickerProviderStateMixin {
   List<dynamic> _invoices = [];
+  List<dynamic> _payments = [];
   bool _loading = true;
   String _statusFilter = 'all';
   String _query = '';
+  String _paymentQuery = '';
   late TabController _tabs;
 
   @override
   void initState() {
     super.initState();
-    _tabs = TabController(length: 2, vsync: this);
+    _tabs = TabController(length: 4, vsync: this);
     _load();
   }
 
@@ -42,16 +45,56 @@ class _FinanceScreenState extends State<FinanceScreen> with SingleTickerProvider
   Future<void> _load() async {
     setState(() => _loading = true);
     try {
-      final data = await context.read<AppState>().auth.api.get('/api/staff/invoices');
+      final api = context.read<AppState>().auth.api;
+      final results = await Future.wait([
+        api.get('/api/staff/invoices'),
+        api.get('/api/staff/payments'),
+      ]);
       if (mounted) {
         setState(() {
-          _invoices = envelopeList(data);
+          _invoices = envelopeList(results[0]);
+          _payments = envelopeList(results[1]);
           _loading = false;
         });
       }
-    } catch (_) {
-      if (mounted) setState(() => _loading = false);
+    } catch (e) {
+      if (mounted) {
+        setState(() => _loading = false);
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString())));
+      }
     }
+  }
+
+  void _viewReceipt(Map<String, dynamic> pay) {
+    final id = pay['id']?.toString();
+    if (id == null) return;
+    openInAppDocument(
+      context,
+      title: pay['receiptNumber']?.toString() ?? 'Receipt',
+      apiPath: pay['receiptPath']?.toString() ?? '/api/payments/$id/receipt',
+      filename: 'receipt-${pay['receiptNumber'] ?? id}.html',
+    );
+  }
+
+  void _viewInvoicePdf(Map<String, dynamic> inv) {
+    final id = inv['id']?.toString();
+    if (id == null) return;
+    openInAppDocument(
+      context,
+      title: inv['invoiceNumber']?.toString() ?? 'Invoice',
+      apiPath: '/api/invoices/$id/pdf',
+      filename: 'invoice-${inv['invoiceNumber'] ?? id}.html',
+    );
+  }
+
+  List<dynamic> _filteredPayments() {
+    final q = _paymentQuery.toLowerCase();
+    return _payments.where((p) {
+      final m = p as Map<String, dynamic>;
+      if (q.isEmpty) return true;
+      final text = '${m['receiptNumber']} ${m['invoiceNumber']} ${m['customer']?['fullName']} ${m['method']}'.toLowerCase();
+      return text.contains(q);
+    }).toList();
   }
 
   num _sumPaid() => _invoices.fold<num>(0, (s, i) => s + ((i as Map)['paidCents'] as num? ?? 0));
@@ -116,9 +159,12 @@ class _FinanceScreenState extends State<FinanceScreen> with SingleTickerProvider
         actions: [IconButton(onPressed: _load, icon: const Icon(Icons.refresh_rounded, size: 20))],
         bottom: TabBar(
           controller: _tabs,
+          isScrollable: true,
           tabs: const [
             Tab(text: 'Overview'),
             Tab(text: 'Invoices'),
+            Tab(text: 'Payments'),
+            Tab(text: 'Reports'),
           ],
         ),
       ),
@@ -177,6 +223,19 @@ class _FinanceScreenState extends State<FinanceScreen> with SingleTickerProvider
                             color: ConnectColors.primary,
                           ),
                         ),
+                        const ConnectSectionHeader(title: 'Quick view', padding: EdgeInsets.fromLTRB(0, ConnectSpacing.sm, 0, ConnectSpacing.xs)),
+                        ConnectCard(
+                          onTap: () => openInAppDocument(context, title: 'Finance summary report', apiPath: '/api/staff/reports/finance', filename: 'finance-report.html'),
+                          padding: const EdgeInsets.all(ConnectSpacing.sm),
+                          child: const Row(
+                            children: [
+                              Icon(Icons.analytics_outlined, color: ConnectModuleColors.finance),
+                              SizedBox(width: 8),
+                              Expanded(child: Text('Finance summary report', style: TextStyle(fontSize: 13))),
+                              Icon(Icons.visibility_rounded, size: 18, color: ConnectColors.textMuted),
+                            ],
+                          ),
+                        ),
                       ],
                     ),
                   ),
@@ -212,7 +271,11 @@ class _FinanceScreenState extends State<FinanceScreen> with SingleTickerProvider
                                     return Padding(
                                       padding: const EdgeInsets.only(bottom: ConnectSpacing.sm),
                                       child: ConnectCard(
-                                        onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => InvoiceDetailScreen(invoice: inv))),
+                                        onTap: () => Navigator.of(context).push(
+                                          MaterialPageRoute(
+                                            builder: (_) => InvoiceDetailScreen(invoiceId: inv['id']?.toString(), invoice: inv),
+                                          ),
+                                        ),
                                         padding: const EdgeInsets.all(ConnectSpacing.sm),
                                         child: Row(
                                           children: [
@@ -241,6 +304,11 @@ class _FinanceScreenState extends State<FinanceScreen> with SingleTickerProvider
                                                 ConnectChip(label: inv['status']?.toString() ?? '', color: _invoiceStatusColor(inv['status']?.toString())),
                                               ],
                                             ),
+                                            IconButton(
+                                              onPressed: () => _viewInvoicePdf(inv),
+                                              icon: const Icon(Icons.visibility_rounded, size: 18),
+                                              tooltip: 'View invoice',
+                                            ),
                                           ],
                                         ),
                                       ),
@@ -249,6 +317,83 @@ class _FinanceScreenState extends State<FinanceScreen> with SingleTickerProvider
                                 ),
                               ),
                       ),
+                    ],
+                  ),
+                  Column(
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.all(ConnectSpacing.lg),
+                        child: ConnectSearchBar(hint: 'Search payments…', onChanged: (v) => setState(() => _paymentQuery = v)),
+                      ),
+                      Expanded(
+                        child: _filteredPayments().isEmpty
+                            ? const ConnectEmptyState(icon: Icons.receipt_rounded, title: 'No payments', subtitle: 'Receipts appear when payments are recorded.')
+                            : RefreshIndicator(
+                                color: ConnectColors.primary,
+                                onRefresh: _load,
+                                child: ListView.builder(
+                                  padding: const EdgeInsets.all(ConnectSpacing.lg),
+                                  itemCount: _filteredPayments().length,
+                                  itemBuilder: (context, i) {
+                                    final pay = _filteredPayments()[i] as Map<String, dynamic>;
+                                    return Padding(
+                                      padding: const EdgeInsets.only(bottom: ConnectSpacing.sm),
+                                      child: ConnectCard(
+                                        onTap: () => _viewReceipt(pay),
+                                        padding: const EdgeInsets.all(ConnectSpacing.sm),
+                                        child: Row(
+                                          children: [
+                                            const Icon(Icons.receipt_rounded, color: ConnectColors.success, size: 18),
+                                            const SizedBox(width: ConnectSpacing.sm),
+                                            Expanded(
+                                              child: Column(
+                                                crossAxisAlignment: CrossAxisAlignment.start,
+                                                children: [
+                                                  Text(pay['receiptNumber']?.toString() ?? pay['invoiceNumber']?.toString() ?? 'Payment', style: Theme.of(context).textTheme.titleMedium?.copyWith(fontSize: 13)),
+                                                  Text(
+                                                    '${pay['customer']?['fullName'] ?? ''} · ${pay['method']?.toString() ?? ''}',
+                                                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontSize: 11),
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                            Text(formatCurrencyCents(pay['amountCents'] ?? 0), style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600)),
+                                            const Icon(Icons.visibility_rounded, size: 18, color: ConnectColors.textMuted),
+                                          ],
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                ),
+                              ),
+                      ),
+                    ],
+                  ),
+                  ListView(
+                    padding: const EdgeInsets.all(ConnectSpacing.lg),
+                    children: [
+                      ConnectCard(
+                        onTap: () => openInAppDocument(context, title: 'Finance summary', apiPath: '/api/staff/reports/finance', filename: 'finance-report.html'),
+                        padding: const EdgeInsets.all(ConnectSpacing.md),
+                        child: Row(
+                          children: [
+                            const Icon(Icons.assessment_rounded, color: ConnectModuleColors.finance, size: 22),
+                            const SizedBox(width: ConnectSpacing.sm),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text('Finance summary report', style: Theme.of(context).textTheme.titleMedium?.copyWith(fontSize: 13)),
+                                  Text('Invoices, collections & outstanding balances', style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontSize: 11)),
+                                ],
+                              ),
+                            ),
+                            const Icon(Icons.visibility_rounded, color: ConnectColors.textMuted),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: ConnectSpacing.sm),
+                      Text('Tap any report to view inside the app. Sharing is optional from the viewer toolbar.', style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontSize: 11)),
                     ],
                   ),
                 ],

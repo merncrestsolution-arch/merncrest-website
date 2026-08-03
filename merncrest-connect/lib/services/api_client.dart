@@ -79,10 +79,16 @@ class ApiClient {
       );
     }
     if (res.statusCode >= 400) {
-      throw ApiException(
-        statusCode: res.statusCode,
-        message: data['error']?.toString() ?? 'Request failed (${res.statusCode})',
-      );
+      final err = data['error'];
+      String message = 'Request failed (${res.statusCode})';
+      if (err is Map) {
+        message = err['message']?.toString() ?? message;
+      } else if (err != null) {
+        message = err.toString();
+      } else if (data['message'] != null) {
+        message = data['message'].toString();
+      }
+      throw ApiException(statusCode: res.statusCode, message: message);
     }
     return data;
   }

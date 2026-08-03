@@ -169,11 +169,11 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
       QuickActionItem(icon: Icons.auto_awesome_rounded, label: 'AIRA', color: ConnectModuleColors.ai, onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const AiAssistantScreen()))),
       QuickActionItem(icon: Icons.payments_rounded, label: 'Payments', color: ConnectModuleColors.finance, onTap: () => ModuleRouter.open(context, '/billing')),
       QuickActionItem(icon: Icons.money_off_rounded, label: 'Expenses', color: ConnectModuleColors.finance, onTap: () => ModuleRouter.open(context, '/billing')),
-      QuickActionItem(icon: Icons.approval_rounded, label: 'Approvals', color: ConnectModuleColors.erp, onTap: () => ModuleRouter.open(context, '/tasks')),
+      QuickActionItem(icon: Icons.approval_rounded, label: 'Approvals', color: ConnectModuleColors.erp, onTap: () => ModuleRouter.open(context, '/approvals')),
       QuickActionItem(icon: Icons.campaign_rounded, label: 'News', color: ConnectModuleColors.hr, onTap: () => ModuleRouter.open(context, '/announcements')),
       QuickActionItem(icon: Icons.description_rounded, label: 'Documents', color: ConnectModuleColors.docs, onTap: () => ModuleRouter.open(context, '/documents')),
       QuickActionItem(icon: Icons.folder_open_rounded, label: 'Files', color: ConnectModuleColors.docs, onTap: () => ModuleRouter.open(context, '/documents')),
-      QuickActionItem(icon: Icons.emergency_rounded, label: 'Emergency', color: ConnectColors.error, onTap: () {}),
+      QuickActionItem(icon: Icons.emergency_rounded, label: 'Emergency', color: ConnectColors.error, onTap: () => ModuleRouter.open(context, '/tickets')),
       QuickActionItem(icon: Icons.settings_rounded, label: 'Settings', color: ConnectModuleColors.settings, onTap: () => ModuleRouter.open(context, '/settings')),
     ];
   }

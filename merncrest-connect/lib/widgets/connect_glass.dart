@@ -30,16 +30,18 @@ class ConnectGlassCard extends StatelessWidget {
       borderRadius: BorderRadius.circular(borderRadius),
       gradient: gradient ??
           (featured
-              ? ConnectColors.cardGradient
+              ? palette.featuredCardGradient
               : LinearGradient(
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
-                  colors: [palette.glassFill, palette.glassFill.withValues(alpha: 0.5)],
+                  colors: [palette.glassFill, palette.glassFill.withValues(alpha: palette.isLight ? 0.85 : 0.5)],
                 )),
       border: Border.all(
-        color: featured ? ConnectColors.primary.withValues(alpha: 0.45) : palette.glassBorder,
+        color: featured ? ConnectColors.primary.withValues(alpha: palette.isLight ? 0.35 : 0.45) : palette.glassBorder,
       ),
-      boxShadow: featured ? connectSoftShadow(ConnectColors.primary) : connectGlassShadow(palette.textMuted),
+      boxShadow: featured
+          ? connectSoftShadow(ConnectColors.primary, blur: palette.isLight ? 14 : 20)
+          : (palette.isLight ? connectGlassShadow(palette.textMuted) : connectGlassShadow(palette.textMuted)),
     );
 
     final content = ClipRRect(

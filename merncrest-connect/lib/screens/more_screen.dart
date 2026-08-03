@@ -41,6 +41,7 @@ class MoreScreen extends StatelessWidget {
       'Enterprise ERP',
       [
         ('ERP Hub', '/erp', Icons.hub_rounded),
+        ('Approvals', '/approvals', Icons.approval_rounded),
         ('Finance', '/billing', Icons.account_balance_wallet_rounded),
         ('Inventory', '/inventory', Icons.inventory_2_rounded),
         ('Sales', '/sales', Icons.point_of_sale_rounded),

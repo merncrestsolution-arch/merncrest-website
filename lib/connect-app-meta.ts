@@ -4,8 +4,8 @@ import type { Metadata } from "next";
 export const CONNECT_APP = {
   name: "MernCrest Connect",
   tagline: "Staff mobile app for system.merncrest.lk",
-  version: "1.0.7",
-  build: 8,
+  version: "1.0.8",
+  build: 9,
   packageId: "lk.merncrest.merncrest_connect",
   minAndroid: "6.0",
   apkPath: "/downloads/merncrest-connect.apk",
@@ -13,10 +13,12 @@ export const CONNECT_APP = {
   apiHost: "https://system.merncrest.lk",
   forceUpdate: false,
   releaseNotes: [
-    "Module screens show real lists instead of raw JSON/code",
-    "Dashboard uses live API data only (no fake charts or weather)",
-    "KPI tiles hide placeholder system metrics",
-    "Payroll loads from your staff profile",
+    "Finance: view invoices, payments & receipts in-app (no download required)",
+    "Record client payments and create invoices from Client 360",
+    "Add services & projects for clients from mobile",
+    "Finance summary reports and payslip viewer in-app",
+    "Light theme fixed — readable cards, text, and navigation",
+    "Billing PDF/receipt share optional from document viewer",
   ],
 } as const;
 

@@ -4,6 +4,8 @@ import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:merncrest_connect/config/api_config.dart';
 import 'package:merncrest_connect/services/api_client.dart';
+import 'package:merncrest_connect/services/offline_mutation_queue.dart';
+import 'package:merncrest_connect/services/offline_cache_service.dart';
 
 /// Real-time sync — instant SSE push + 2s reconnect (website · system · mobile).
 class PlatformSyncService extends ChangeNotifier {
@@ -16,17 +18,27 @@ class PlatformSyncService extends ChangeNotifier {
   String? _since;
   bool _connected = false;
   String? lastEventType;
+  String? lastChatSessionId;
+  String? lastChatMessageId;
 
   int unreadNotifications = 0;
   int liveChats = 0;
   int openTasks = 0;
   int openTickets = 0;
   String? lastSyncAt;
+  int pendingMutations = 0;
 
   bool get connected => _connected;
 
+  Future<void> refreshPendingMutations() async {
+    pendingMutations = await OfflineMutationQueue.pendingCount();
+    notifyListeners();
+  }
+
   void start() {
     stop();
+    _restoreCachedSnapshot();
+    refreshPendingMutations();
     pull();
     _connectStream();
     // Safety net only — primary path is SSE
@@ -43,6 +55,11 @@ class PlatformSyncService extends ChangeNotifier {
     _connected = false;
   }
 
+  Future<void> _restoreCachedSnapshot() async {
+    final cached = await OfflineCacheService.readSyncSnapshot();
+    if (cached != null) _applyPayload(cached, persist: false);
+  }
+
   Future<void> pull() async {
     try {
       final path = _since != null
@@ -50,19 +67,34 @@ class PlatformSyncService extends ChangeNotifier {
           : '/api/platform/sync';
       final data = await _api.get(path);
       _applyPayload(data);
+      await _flushOfflineQueue();
     } catch (_) {
       _connected = false;
       notifyListeners();
     }
   }
 
-  void _applyPayload(Map<String, dynamic> data) {
+  Future<void> _flushOfflineQueue() async {
+    final sent = await OfflineMutationQueue.flush((method, path, body) async {
+      if (method == 'PATCH') {
+        await _api.patch(path, body);
+      } else {
+        await _api.post(path, body);
+      }
+    });
+    if (sent > 0) await refreshPendingMutations();
+  }
+
+  void _applyPayload(Map<String, dynamic> data, {bool persist = true}) {
     unreadNotifications = (data['unreadNotifications'] as num?)?.toInt() ?? unreadNotifications;
     liveChats = (data['liveChats'] as num?)?.toInt() ?? liveChats;
     openTasks = (data['openTasks'] as num?)?.toInt() ?? openTasks;
     openTickets = (data['openTickets'] as num?)?.toInt() ?? openTickets;
     lastSyncAt = data['serverTime']?.toString();
     _since = lastSyncAt;
+    if (persist) {
+      OfflineCacheService.saveSyncSnapshot(data);
+    }
     notifyListeners();
   }
 
@@ -81,6 +113,10 @@ class PlatformSyncService extends ChangeNotifier {
     if (type == 'snapshot_user') {
       unreadNotifications = (data['unreadNotifications'] as num?)?.toInt() ?? unreadNotifications;
       openTasks = (data['openTasks'] as num?)?.toInt() ?? openTasks;
+    }
+    if (type == 'chat_message') {
+      lastChatSessionId = data['sessionId']?.toString();
+      lastChatMessageId = data['messageId']?.toString();
     }
 
     notifyListeners();
@@ -111,6 +147,7 @@ class PlatformSyncService extends ChangeNotifier {
         .then((streamed) {
       _connected = true;
       notifyListeners();
+      _flushOfflineQueue();
 
       final buffer = StringBuffer();
       _sseSub = streamed.stream.listen(

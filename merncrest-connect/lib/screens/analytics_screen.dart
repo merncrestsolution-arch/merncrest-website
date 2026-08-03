@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:merncrest_connect/providers/app_state.dart';
 import 'package:merncrest_connect/theme/connect_theme.dart';
 import 'package:merncrest_connect/theme/connect_tokens.dart';
+import 'package:merncrest_connect/utils/document_viewer.dart';
 import 'package:merncrest_connect/utils/formatters.dart';
 import 'package:merncrest_connect/widgets/connect_card.dart';
 import 'package:merncrest_connect/widgets/connect_charts.dart';
@@ -96,6 +97,19 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                     ),
                     const ConnectSectionHeader(title: 'Revenue Trend'),
                     ConnectChartCard(title: 'Performance', child: ConnectSparkline(values: revenueSeries, color: ConnectColors.primary)),
+                    const ConnectSectionHeader(title: 'Reports'),
+                    ConnectCard(
+                      onTap: () => openInAppDocument(context, title: 'Finance summary', apiPath: '/api/staff/reports/finance', filename: 'finance-report.html'),
+                      padding: const EdgeInsets.all(ConnectSpacing.sm),
+                      child: const Row(
+                        children: [
+                          Icon(Icons.assessment_outlined, color: ConnectModuleColors.finance),
+                          SizedBox(width: 8),
+                          Expanded(child: Text('Finance summary report', style: TextStyle(fontSize: 13))),
+                          Icon(Icons.visibility_rounded, size: 18, color: ConnectColors.textMuted),
+                        ],
+                      ),
+                    ),
                     const ConnectSectionHeader(title: 'Recent Activity'),
                     if (activities.isEmpty)
                       const ConnectEmptyState(icon: Icons.timeline, title: 'No activity', subtitle: 'Platform events will appear here.')

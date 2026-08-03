@@ -26,6 +26,7 @@ class AppUpdateCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final palette = ConnectPalette.of(context);
     final iconSize = compact ? 56.0 : 72.0;
 
     return Padding(
@@ -54,7 +55,7 @@ class AppUpdateCard extends StatelessWidget {
           Text(
             'v${info.localVersion} → v${info.version}',
             textAlign: TextAlign.center,
-            style: const TextStyle(color: ConnectColors.textSecondary),
+            style: TextStyle(color: palette.textSecondary),
           ),
           if (!compact && info.releaseNotes.isNotEmpty) ...[
             const SizedBox(height: 14),
@@ -112,6 +113,7 @@ class AppUpdateOverlay extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final palette = ConnectPalette.of(context);
     return Material(
       color: Colors.black.withValues(alpha: 0.55),
       child: Center(
@@ -121,8 +123,8 @@ class AppUpdateOverlay extends StatelessWidget {
             constraints: const BoxConstraints(maxWidth: 380),
             child: Card(
               elevation: 12,
-              color: ConnectColors.surfaceRaised,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24), side: const BorderSide(color: ConnectColors.borderSubtle)),
+              color: palette.surfaceRaised,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24), side: BorderSide(color: palette.borderSubtle)),
               child: AppUpdateCard(info: info, onDismiss: onDismiss),
             ),
           ),
@@ -140,12 +142,13 @@ class AppUpdateLoginBanner extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final palette = ConnectPalette.of(context);
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: ConnectColors.primary.withValues(alpha: 0.35)),
-        color: ConnectColors.surfaceRaised,
+        color: palette.surfaceRaised,
       ),
       child: AppUpdateCard(info: info, compact: true),
     );

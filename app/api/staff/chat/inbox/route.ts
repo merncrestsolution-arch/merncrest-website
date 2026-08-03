@@ -17,6 +17,12 @@ export async function GET() {
 
   const agent = await ensureSupportAgent(auth.user.id, auth.user.fullName);
 
+  const pinnedRows = await prisma.chatSessionPin.findMany({
+    where: { agentId: agent.id },
+    select: { sessionId: true },
+  });
+  const pinnedSet = new Set(pinnedRows.map((p) => p.sessionId));
+
   const sessions = await prisma.chatSession.findMany({
     where: {
       status: { in: ["OPEN", "HANDOFF", "PENDING"] },
@@ -62,6 +68,7 @@ export async function GET() {
           agent: s.agent,
           lastMessage: s.messages[0] || null,
           updatedAt: s.updatedAt,
+          pinned: pinnedSet.has(s.id),
           isKnownCustomer: hint.isKnownCustomer,
           customerCode: hint.customerCode,
         };
@@ -72,7 +79,7 @@ export async function GET() {
 
 const actionSchema = z.object({
   sessionId: z.string(),
-  action: z.enum(["to_ticket", "to_lead", "transfer", "close"]),
+  action: z.enum(["to_ticket", "to_lead", "transfer", "close", "pin", "unpin"]),
   targetAgentId: z.string().optional(),
   subject: z.string().optional(),
 });
@@ -89,6 +96,23 @@ export async function PATCH(request: Request) {
 
   try {
     const { sessionId, action } = parsed.data;
+    const agent = await ensureSupportAgent(auth.user.id, auth.user.fullName);
+
+    if (action === "pin") {
+      await prisma.chatSessionPin.upsert({
+        where: { agentId_sessionId: { agentId: agent.id, sessionId } },
+        create: { agentId: agent.id, sessionId },
+        update: {},
+      });
+      return NextResponse.json({ ok: true, pinned: true });
+    }
+
+    if (action === "unpin") {
+      await prisma.chatSessionPin.deleteMany({
+        where: { agentId: agent.id, sessionId },
+      });
+      return NextResponse.json({ ok: true, pinned: false });
+    }
 
     if (action === "to_ticket") {
       const ticket = await convertChatToTicket({

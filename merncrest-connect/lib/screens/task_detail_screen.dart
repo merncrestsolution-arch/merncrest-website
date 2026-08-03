@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:merncrest_connect/providers/app_state.dart';
+import 'package:merncrest_connect/services/offline_api.dart';
 import 'package:merncrest_connect/theme/connect_theme.dart';
 import 'package:merncrest_connect/theme/connect_tokens.dart';
 import 'package:merncrest_connect/widgets/connect_card.dart';
@@ -34,11 +35,17 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
       _error = null;
     });
     try {
-      await context.read<AppState>().auth.api.patch('/api/staff/tasks', {
+      final state = context.read<AppState>();
+      final ok = await patchWithOfflineQueue(state, path: '/api/staff/tasks', body: {
         'taskId': widget.task['id'],
         'action': 'status',
         'status': status,
       });
+      if (!ok && mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Offline — status change queued')));
+        Navigator.pop(context);
+        return;
+      }
       widget.onUpdated?.call();
       if (mounted) Navigator.pop(context);
     } catch (e) {
@@ -53,11 +60,15 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
     if (body.isEmpty) return;
     setState(() => _busy = true);
     try {
-      await context.read<AppState>().auth.api.patch('/api/staff/tasks', {
+      final state = context.read<AppState>();
+      final ok = await patchWithOfflineQueue(state, path: '/api/staff/tasks', body: {
         'taskId': widget.task['id'],
         'action': 'comment',
         'body': body,
       });
+      if (!ok && mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Offline — comment queued')));
+      }
       _comment.clear();
       widget.onUpdated?.call();
     } catch (e) {

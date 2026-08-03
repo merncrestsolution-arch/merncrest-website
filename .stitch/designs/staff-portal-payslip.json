@@ -1,8 +1,0 @@
-{
-  "projectId": "17402065891171962495",
-  "screenId": "504e826b271440e6832c9f0defe19716",
-  "title": "Payslip — MernCrest Solutions Staff Portal",
-  "route": "/staff/payslip",
-  "component": "StaffPayslipPanel",
-  "designSystem": "assets/060de6acb3a74722a6e7f79ec90a20d0"
-}

@@ -4,7 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:merncrest_connect/providers/theme_provider.dart';
 import 'package:merncrest_connect/theme/connect_tokens.dart';
 
-/// Luminous Enterprise — matches system.merncrest.lk (Stitch System surface).
+/// Brand accents — shared across light and dark modes.
 class ConnectColors {
   static const background = Color(0xFF0E0E12);
   static const surface = Color(0xFF131317);
@@ -36,6 +36,12 @@ class ConnectColors {
     colors: [Color(0xFF2A1F4A), Color(0xFF131317)],
   );
 
+  static const lightCardGradient = LinearGradient(
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+    colors: [Color(0xFFEDE9FE), Color(0xFFFFFFFF)],
+  );
+
   static const brandGradient = LinearGradient(
     colors: [Color(0xFF7C3AED), Color(0xFFBE185D)],
   );
@@ -61,6 +67,9 @@ class ConnectPalette extends ThemeExtension<ConnectPalette> {
     required this.textMuted,
     required this.glassFill,
     required this.glassBorder,
+    required this.accentHighlight,
+    required this.disabledFill,
+    required this.isLight,
     required this.isAmoled,
   });
 
@@ -75,7 +84,15 @@ class ConnectPalette extends ThemeExtension<ConnectPalette> {
   final Color textMuted;
   final Color glassFill;
   final Color glassBorder;
+  /// Selected nav icons, module accents — readable on current surface.
+  final Color accentHighlight;
+  final Color disabledFill;
+  final bool isLight;
   final bool isAmoled;
+
+  Gradient get featuredCardGradient => isLight ? ConnectColors.lightCardGradient : ConnectColors.cardGradient;
+
+  double get ambientOrbAlpha => isLight ? 0.07 : 0.18;
 
   static ConnectPalette of(BuildContext context) {
     final ext = Theme.of(context).extension<ConnectPalette>();
@@ -94,21 +111,27 @@ class ConnectPalette extends ThemeExtension<ConnectPalette> {
         textMuted: ConnectColors.textMuted,
         glassFill: Color(0x1AFFFFFF),
         glassBorder: Color(0x33FFFFFF),
+        accentHighlight: ConnectColors.primaryGlow,
+        disabledFill: ConnectColors.borderSubtle,
+        isLight: false,
         isAmoled: false,
       );
 
   factory ConnectPalette.light() => const ConnectPalette(
         background: Color(0xFFF1F5F9),
         surface: Color(0xFFFFFFFF),
-        surfaceRaised: Color(0xFFF8FAFC),
+        surfaceRaised: Color(0xFFFFFFFF),
         surfaceOverlay: Color(0xFFE2E8F0),
         border: Color(0xFFCBD5E1),
         borderSubtle: Color(0xFFE2E8F0),
         textPrimary: Color(0xFF0F172A),
         textSecondary: Color(0xFF475569),
-        textMuted: Color(0xFF94A3B8),
-        glassFill: Color(0x99FFFFFF),
-        glassBorder: Color(0x66FFFFFF),
+        textMuted: Color(0xFF64748B),
+        glassFill: Color(0xF2FFFFFF),
+        glassBorder: Color(0xFFD8DEE9),
+        accentHighlight: ConnectColors.primary,
+        disabledFill: Color(0xFFE2E8F0),
+        isLight: true,
         isAmoled: false,
       );
 
@@ -124,6 +147,9 @@ class ConnectPalette extends ThemeExtension<ConnectPalette> {
         textMuted: Color(0xFF64748B),
         glassFill: Color(0x14FFFFFF),
         glassBorder: Color(0x28FFFFFF),
+        accentHighlight: ConnectColors.primaryGlow,
+        disabledFill: Color(0xFF1F1F1F),
+        isLight: false,
         isAmoled: true,
       );
 
@@ -140,6 +166,9 @@ class ConnectPalette extends ThemeExtension<ConnectPalette> {
     Color? textMuted,
     Color? glassFill,
     Color? glassBorder,
+    Color? accentHighlight,
+    Color? disabledFill,
+    bool? isLight,
     bool? isAmoled,
   }) {
     return ConnectPalette(
@@ -154,6 +183,9 @@ class ConnectPalette extends ThemeExtension<ConnectPalette> {
       textMuted: textMuted ?? this.textMuted,
       glassFill: glassFill ?? this.glassFill,
       glassBorder: glassBorder ?? this.glassBorder,
+      accentHighlight: accentHighlight ?? this.accentHighlight,
+      disabledFill: disabledFill ?? this.disabledFill,
+      isLight: isLight ?? this.isLight,
       isAmoled: isAmoled ?? this.isAmoled,
     );
   }
@@ -173,6 +205,9 @@ class ConnectPalette extends ThemeExtension<ConnectPalette> {
       textMuted: Color.lerp(textMuted, other.textMuted, t)!,
       glassFill: Color.lerp(glassFill, other.glassFill, t)!,
       glassBorder: Color.lerp(glassBorder, other.glassBorder, t)!,
+      accentHighlight: Color.lerp(accentHighlight, other.accentHighlight, t)!,
+      disabledFill: Color.lerp(disabledFill, other.disabledFill, t)!,
+      isLight: t < 0.5 ? isLight : other.isLight,
       isAmoled: t < 0.5 ? isAmoled : other.isAmoled,
     );
   }
@@ -218,23 +253,17 @@ class ConnectTheme {
       useMaterial3: true,
       brightness: brightness,
       scaffoldBackgroundColor: palette.background,
-      colorScheme: isDark
-          ? const ColorScheme.dark(
-              primary: ConnectColors.primary,
-              secondary: ConnectColors.accent,
-              surface: ConnectColors.surface,
-              error: ConnectColors.error,
-              onPrimary: Colors.white,
-              onSurface: ConnectColors.textPrimary,
-            )
-          : ColorScheme.light(
-              primary: ConnectColors.primary,
-              secondary: ConnectColors.accent,
-              surface: palette.surface,
-              error: ConnectColors.error,
-              onPrimary: Colors.white,
-              onSurface: palette.textPrimary,
-            ),
+      colorScheme: ColorScheme(
+        brightness: brightness,
+        primary: ConnectColors.primary,
+        onPrimary: Colors.white,
+        secondary: ConnectColors.accent,
+        onSecondary: Colors.white,
+        surface: palette.surface,
+        onSurface: palette.textPrimary,
+        error: ConnectColors.error,
+        onError: Colors.white,
+      ),
       extensions: [palette],
     );
 
@@ -277,12 +306,14 @@ class ConnectTheme {
           letterSpacing: 0.6,
         ),
       ),
+      iconTheme: IconThemeData(color: palette.textSecondary),
       appBarTheme: AppBarTheme(
         backgroundColor: palette.background,
         foregroundColor: palette.textPrimary,
         elevation: 0,
         scrolledUnderElevation: 0,
         systemOverlayStyle: overlayStyle,
+        iconTheme: IconThemeData(color: palette.textSecondary),
         titleTextStyle: GoogleFonts.plusJakartaSans(
           fontSize: 16,
           fontWeight: FontWeight.w700,
@@ -291,15 +322,48 @@ class ConnectTheme {
       ),
       cardTheme: CardThemeData(
         color: palette.surfaceRaised,
-        elevation: 0,
+        elevation: palette.isLight ? 1 : 0,
+        shadowColor: palette.isLight ? Colors.black.withValues(alpha: 0.06) : Colors.transparent,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(ConnectRadius.lg),
           side: BorderSide(color: palette.borderSubtle),
         ),
       ),
+      tabBarTheme: TabBarThemeData(
+        labelColor: palette.accentHighlight,
+        unselectedLabelColor: palette.textMuted,
+        indicatorColor: ConnectColors.primary,
+        dividerColor: palette.borderSubtle,
+      ),
+      bottomNavigationBarTheme: BottomNavigationBarThemeData(
+        backgroundColor: palette.surface,
+        selectedItemColor: ConnectColors.primary,
+        unselectedItemColor: palette.textMuted,
+      ),
+      dialogTheme: DialogThemeData(
+        backgroundColor: palette.surfaceRaised,
+        surfaceTintColor: Colors.transparent,
+        titleTextStyle: GoogleFonts.plusJakartaSans(
+          fontSize: 16,
+          fontWeight: FontWeight.w700,
+          color: palette.textPrimary,
+        ),
+        contentTextStyle: GoogleFonts.inter(fontSize: 13, color: palette.textSecondary),
+      ),
+      popupMenuTheme: PopupMenuThemeData(
+        color: palette.surfaceRaised,
+        textStyle: TextStyle(color: palette.textPrimary, fontSize: 13),
+      ),
+      chipTheme: ChipThemeData(
+        backgroundColor: palette.surfaceOverlay,
+        labelStyle: TextStyle(color: palette.textSecondary, fontSize: 11),
+        side: BorderSide(color: palette.borderSubtle),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(ConnectRadius.pill)),
+      ),
+      progressIndicatorTheme: const ProgressIndicatorThemeData(color: ConnectColors.primary),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
-        fillColor: palette.surfaceRaised,
+        fillColor: palette.isLight ? palette.surfaceOverlay.withValues(alpha: 0.35) : palette.surfaceRaised,
         labelStyle: TextStyle(color: palette.textSecondary),
         hintStyle: TextStyle(color: palette.textMuted),
         border: OutlineInputBorder(
