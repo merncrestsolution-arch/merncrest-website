@@ -12,7 +12,11 @@ import {
   Briefcase,
 } from "lucide-react";
 import { Link } from "@/i18n/routing";
-import { COMPANY_EMAILS, mailto } from "@/lib/company/emails";
+import {
+  FREE_CONSULTING_DETAIL,
+  FREE_CONSULTING_LABEL,
+} from "@/lib/support/consulting-schedule";
+import { ConsultingSlots } from "@/components/sections/consulting-slots";
 
 export async function generateMetadata({
   params,
@@ -60,6 +64,12 @@ export default async function ContactPage({
       label: "WhatsApp",
       value: "+94 713 838 638",
       href: "https://wa.me/94713838638",
+    },
+    {
+      icon: Clock3,
+      label: "Free consulting",
+      value: `${FREE_CONSULTING_LABEL}\n${FREE_CONSULTING_DETAIL}`,
+      href: "#free-consulting",
     },
     {
       icon: Clock3,
@@ -229,6 +239,9 @@ export default async function ContactPage({
           </aside>
 
           <div className="lg:col-span-7">
+            <div id="free-consulting" className="mb-6 scroll-mt-28">
+              <ConsultingSlots />
+            </div>
             <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-[0_10px_30px_-12px_rgba(15,23,42,0.06)] sm:p-8">
               <div className="mb-6">
                 <h2 className="font-display text-2xl font-semibold tracking-tight text-slate-900">

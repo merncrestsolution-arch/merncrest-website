@@ -78,6 +78,9 @@ const postSchema = z.object({
   clientMessageId: z.string().min(1).max(120).optional(),
   pageContext: z.string().max(500).optional(),
   visitorName: z.string().max(120).optional(),
+  visitorEmail: z.string().max(200).optional(),
+  visitorPhone: z.string().max(40).optional(),
+  visitorInterest: z.string().max(200).optional(),
 });
 
 function normalizeChatBody(raw: unknown) {
@@ -86,6 +89,9 @@ function normalizeChatBody(raw: unknown) {
   if (typeof body.message === "string") body.message = body.message.trim().slice(0, 2000);
   if (typeof body.pageContext === "string") body.pageContext = body.pageContext.slice(0, 500);
   if (typeof body.visitorName === "string") body.visitorName = body.visitorName.slice(0, 120);
+  if (typeof body.visitorEmail === "string") body.visitorEmail = body.visitorEmail.slice(0, 200);
+  if (typeof body.visitorPhone === "string") body.visitorPhone = body.visitorPhone.slice(0, 40);
+  if (typeof body.visitorInterest === "string") body.visitorInterest = body.visitorInterest.slice(0, 200);
   if (typeof body.clientMessageId === "string") {
     body.clientMessageId = body.clientMessageId.slice(0, 120);
     if (body.clientMessageId.length < 1) delete body.clientMessageId;
@@ -121,6 +127,23 @@ export async function POST(request: Request) {
       sessionId: parsed.data.sessionId,
       channel: "WEB",
     });
+
+    if (
+      !session.leadId &&
+      parsed.data.visitorName &&
+      (parsed.data.visitorEmail || parsed.data.visitorPhone)
+    ) {
+      const { linkChatVisitorToCrm } = await import("@/lib/chat/link-visitor-lead");
+      await linkChatVisitorToCrm({
+        sessionId: session.id,
+        fullName: parsed.data.visitorName,
+        email: parsed.data.visitorEmail,
+        phone: parsed.data.visitorPhone,
+        interest: parsed.data.visitorInterest,
+        userId: user?.id,
+        activityBody: `Chat message: ${parsed.data.message.slice(0, 200)}`,
+      });
+    }
 
     await appendUserMessage({
       sessionId: session.id,

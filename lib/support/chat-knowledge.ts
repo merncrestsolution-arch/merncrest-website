@@ -1,6 +1,10 @@
 import { serviceCategories } from "@/lib/data/service-categories";
 import { priceBookCatalog } from "@/lib/data/price-book/catalog";
 import { industries } from "@/lib/data/industries";
+import {
+  FREE_CONSULTING_DETAIL,
+  FREE_CONSULTING_LABEL,
+} from "@/lib/support/consulting-schedule";
 import { getChatSiteOrigin, publicSiteUrl } from "@/lib/support/public-site-url";
 
 /** Public site origin for links shared in chat / WhatsApp (always merncrest.lk). */
@@ -181,6 +185,11 @@ export function buildAiraSystemPrompt(opts?: { pageContext?: string | null }) {
     "- If a visitor shares name, email, or phone → call capture_lead_info to save it.",
     "- Do NOT ask for personal details unless they want a quote, callback, or human handoff.",
     "",
+    "FREE CONSULTING",
+    `- ${FREE_CONSULTING_LABEL}`,
+    `- ${FREE_CONSULTING_DETAIL}`,
+    `- Booking page: ${siteUrl(PAGE_LINKS.contact)}#free-consulting`,
+    "",
     "HANDOFF",
     "- Human / agent / person request → request_human_handoff.",
     "- Escalate billing issues, complaints, or complex technical questions to a human.",
@@ -206,6 +215,11 @@ function findServiceLink(query: string): { path: string; label: string } | null 
 type FaqEntry = { keys: string[]; answer: string | ((q: string) => string) };
 
 const FAQ_ENTRIES: FaqEntry[] = [
+  {
+    keys: ["consult", "consultation", "free consulting", "book a call", "meeting", "appointment", "slot"],
+    answer: () =>
+      `${FREE_CONSULTING_LABEL}. ${FREE_CONSULTING_DETAIL} Book a slot: ${siteUrl(PAGE_LINKS.contact)}#free-consulting`,
+  },
   {
     keys: ["contact", "phone", "number", "call", "whatsapp", "email", "address", "location", "reach you", "reach us"],
     answer: () =>

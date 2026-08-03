@@ -25,6 +25,7 @@ import {
   defaultChatFallback,
   matchChatKnowledge,
 } from "@/lib/support/chat-knowledge";
+import { CHAT_SERVICE_OPTIONS } from "@/lib/support/consulting-schedule";
 import { sanitizeChatReply } from "@/lib/support/sanitize-chat-reply";
 import { ChatMessageBody } from "@/components/chatbot/chat-message-body";
 
@@ -46,10 +47,40 @@ const SESSION_KEY = "mc-chat-session-id-v1";
 const UNREAD_KEY = "mc-chat-unread-v1";
 const LAST_READ_KEY = "mc-chat-last-read-v1";
 const PENDING_CSAT_KEY = "mc-chat-pending-csat-v1";
+const STARTED_KEY = "mc-chat-started-v1";
+const VISITOR_KEY = "mc-chat-visitor-v1";
 
 const TEASER_KEY = "mc-chat-teaser-v1";
 
 const QUICK_REPLIES = [...CHAT_QUICK_REPLIES];
+
+const emailOk = (v: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
+
+type VisitorProfile = {
+  name: string;
+  email: string;
+  phone: string;
+  service: string;
+};
+
+function readVisitorProfile(): VisitorProfile | null {
+  try {
+    const raw = sessionStorage.getItem(VISITOR_KEY);
+    if (!raw) return null;
+    return JSON.parse(raw) as VisitorProfile;
+  } catch {
+    return null;
+  }
+}
+
+function writeVisitorProfile(v: VisitorProfile | null) {
+  try {
+    if (v) sessionStorage.setItem(VISITOR_KEY, JSON.stringify(v));
+    else sessionStorage.removeItem(VISITOR_KEY);
+  } catch {
+    /* ignore */
+  }
+}
 
 function readPendingCsat(): string | null {
   try {
@@ -73,6 +104,8 @@ function clearChatStorage() {
     sessionStorage.removeItem(SESSION_KEY);
     sessionStorage.removeItem(UNREAD_KEY);
     sessionStorage.removeItem(LAST_READ_KEY);
+    sessionStorage.removeItem(STARTED_KEY);
+    sessionStorage.removeItem(VISITOR_KEY);
   } catch {
     /* ignore */
   }
@@ -110,7 +143,7 @@ export function AiChatWidget() {
 
   const [open, setOpen] = useState(false);
   const [tab, setTab] = useState<Tab>("home");
-  const [phase] = useState<"chat">("chat");
+  const [phase, setPhase] = useState<"form" | "chat">("form");
 
   const [input, setInput] = useState("");
   const [messages, setMessages] = useState<Msg[]>([]);
@@ -119,6 +152,9 @@ export function AiChatWidget() {
   const [handoff, setHandoff] = useState(false);
   const [ticketNumber, setTicketNumber] = useState<string | null>(null);
   const [visitorName, setVisitorName] = useState("");
+  const [visitorEmail, setVisitorEmail] = useState("");
+  const [visitorPhone, setVisitorPhone] = useState("");
+  const [visitorInterest, setVisitorInterest] = useState("");
   const [handlerType, setHandlerType] = useState<"AI" | "AGENT" | string>("AI");
   const [agentName, setAgentName] = useState<string | null>(null);
   const [assistantName, setAssistantName] = useState(AIRA.name);
@@ -131,6 +167,15 @@ export function AiChatWidget() {
   const typingTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const [teaser, setTeaser] = useState(false);
+  const [form, setForm] = useState({
+    name: "",
+    email: "",
+    phone: "",
+    service: CHAT_SERVICE_OPTIONS[0],
+    agree: false,
+  });
+  const [formError, setFormError] = useState<string | null>(null);
+  const [submitting, setSubmitting] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [chatClosed, setChatClosed] = useState(false);
@@ -240,6 +285,18 @@ export function AiChatWidget() {
     setHandlerType("AI");
     setAgentName(null);
     setVisitorName("");
+    setVisitorEmail("");
+    setVisitorPhone("");
+    setVisitorInterest("");
+    setForm({
+      name: "",
+      email: "",
+      phone: "",
+      service: CHAT_SERVICE_OPTIONS[0],
+      agree: false,
+    });
+    setFormError(null);
+    setPhase("form");
     setInput("");
     setBusy(false);
     setUnread(0);
@@ -248,7 +305,26 @@ export function AiChatWidget() {
 
   useEffect(() => {
     const id = readSessionId();
-    if (id && !readPendingCsat()) setSessionId(id);
+    const started = sessionStorage.getItem(STARTED_KEY) === "1";
+    const profile = readVisitorProfile();
+    if (id && !readPendingCsat() && started) {
+      setSessionId(id);
+      setPhase("chat");
+    }
+    if (profile) {
+      setVisitorName(profile.name);
+      setVisitorEmail(profile.email);
+      setVisitorPhone(profile.phone);
+      setVisitorInterest(profile.service);
+      setForm((f) => ({
+        ...f,
+        name: profile.name,
+        email: profile.email,
+        phone: profile.phone,
+        service: profile.service || CHAT_SERVICE_OPTIONS[0],
+      }));
+      if (started) setPhase("chat");
+    }
     try {
       setUnread(Number(sessionStorage.getItem(UNREAD_KEY) || 0) || 0);
     } catch {
@@ -334,8 +410,8 @@ export function AiChatWidget() {
       if (d.agent?.displayName) setAgentName(d.agent.displayName);
       if (typeof d.agent?.online === "boolean") setAgentOnline(d.agent.online);
       if (d.assistantName) setAssistantName(d.assistantName);
-      if ((d.messages?.length ?? 0) > 0) {
-        /* chat active */
+      if ((d.messages?.length ?? 0) > 0 && sessionStorage.getItem(STARTED_KEY) === "1") {
+        setPhase("chat");
       }
       // Auto-reset after closed chat with CSAT already submitted
       if (d.status === "CLOSED" && d.csatRating) {
@@ -445,6 +521,54 @@ export function AiChatWidget() {
     });
   }
 
+  async function startChat(e: React.FormEvent) {
+    e.preventDefault();
+    if (submitting) return;
+    const name = form.name.trim();
+    const email = form.email.trim();
+    const phone = form.phone.trim();
+    const service = form.service.trim();
+    if (name.length < 2) return setFormError("Please enter your name.");
+    if (!emailOk(email)) return setFormError("Please enter a valid email address.");
+    if (phone.length < 8) return setFormError("Please enter a valid phone number.");
+    if (!service) return setFormError("Please select a service.");
+    if (!form.agree) return setFormError("Please accept the privacy policy to continue.");
+    setFormError(null);
+    setSubmitting(true);
+    try {
+      await fetch("/api/leads", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          fullName: name,
+          email,
+          phone,
+          interest: service,
+          message: `Started live chat. Service interest: ${service}`,
+          formType: "chat",
+          channel: "LIVE_CHAT",
+        }),
+      }).catch(() => undefined);
+
+      const profile: VisitorProfile = { name, email, phone, service };
+      writeVisitorProfile(profile);
+      setVisitorName(name);
+      setVisitorEmail(email);
+      setVisitorPhone(phone);
+      setVisitorInterest(service);
+      try {
+        sessionStorage.setItem(STARTED_KEY, "1");
+        sessionStorage.setItem(TEASER_KEY, "1");
+      } catch {
+        /* ignore */
+      }
+      setPhase("chat");
+      requestAnimationFrame(() => inputRef.current?.focus());
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
   async function sendText(raw: string) {
     const text = raw.trim();
     if (!text || busy || chatClosed) return;
@@ -493,6 +617,9 @@ export function AiChatWidget() {
       clientMessageId,
       pageContext: String(pathname || "").slice(0, 400) || undefined,
       visitorName: visitorName || undefined,
+      visitorEmail: visitorEmail || undefined,
+      visitorPhone: visitorPhone || undefined,
+      visitorInterest: visitorInterest || undefined,
     };
 
     async function postChat(extra: Record<string, unknown>) {
@@ -820,6 +947,115 @@ export function AiChatWidget() {
 
             {tab === "chat" && (
               <div className="flex h-full flex-col">
+                {phase === "form" ? (
+                  <>
+                    <div className={`flex h-14 items-center justify-between px-4 text-white ${GRAD}`}>
+                      <button
+                        type="button"
+                        onClick={() => setTab("home")}
+                        className="flex items-center gap-1.5 text-white transition hover:opacity-90"
+                      >
+                        <ChevronLeft className="h-5 w-5" />
+                        <span className="font-display text-base font-semibold">Chat with Aira</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setOpen(false)}
+                        aria-label="Close chat"
+                        className="text-white/80 transition hover:text-white"
+                      >
+                        <X className="h-4 w-4" />
+                      </button>
+                    </div>
+
+                    <form onSubmit={startChat} className="flex-1 space-y-4 overflow-y-auto bg-stitch-bg p-5">
+                      <p className="text-sm text-stitch-muted">
+                        Tell us a bit about yourself to start. Returning customers are recognised — we won&apos;t
+                        create duplicate CRM records.
+                      </p>
+
+                      <div>
+                        <label className="mb-1.5 block text-xs font-medium text-stitch-muted">Full Name</label>
+                        <input
+                          value={form.name}
+                          onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
+                          placeholder="e.g. John Doe"
+                          className="h-11 w-full rounded-xl border border-red-100 bg-red-50/60 px-4 text-sm text-foreground outline-none transition placeholder:text-stitch-muted focus:border-red-500 focus:ring-2 focus:ring-red-500/20"
+                        />
+                      </div>
+                      <div>
+                        <label className="mb-1.5 block text-xs font-medium text-stitch-muted">Email</label>
+                        <input
+                          type="email"
+                          value={form.email}
+                          onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))}
+                          placeholder="john@company.com"
+                          className="h-11 w-full rounded-xl border border-red-100 bg-red-50/60 px-4 text-sm text-foreground outline-none transition placeholder:text-stitch-muted focus:border-red-500 focus:ring-2 focus:ring-red-500/20"
+                        />
+                      </div>
+                      <div>
+                        <label className="mb-1.5 block text-xs font-medium text-stitch-muted">Phone / WhatsApp</label>
+                        <input
+                          value={form.phone}
+                          onChange={(e) => setForm((f) => ({ ...f, phone: e.target.value }))}
+                          placeholder="+94 77 000 0000"
+                          className="h-11 w-full rounded-xl border border-red-100 bg-red-50/60 px-4 text-sm text-foreground outline-none transition placeholder:text-stitch-muted focus:border-red-500 focus:ring-2 focus:ring-red-500/20"
+                        />
+                      </div>
+                      <div>
+                        <label className="mb-1.5 block text-xs font-medium text-stitch-muted">
+                          What service do you need?
+                        </label>
+                        <select
+                          value={form.service}
+                          onChange={(e) => setForm((f) => ({ ...f, service: e.target.value }))}
+                          className="h-11 w-full rounded-xl border border-red-100 bg-red-50/60 px-4 text-sm text-foreground outline-none transition focus:border-red-500 focus:ring-2 focus:ring-red-500/20"
+                        >
+                          {CHAT_SERVICE_OPTIONS.map((opt) => (
+                            <option key={opt} value={opt}>
+                              {opt}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+
+                      <label className="flex items-start gap-3 text-xs text-stitch-muted">
+                        <input
+                          type="checkbox"
+                          checked={form.agree}
+                          onChange={(e) => setForm((f) => ({ ...f, agree: e.target.checked }))}
+                          className="mt-0.5 h-4 w-4 rounded border-stitch-outline text-red-600 focus:ring-red-500/40"
+                        />
+                        <span>
+                          I agree to the{" "}
+                          <Link href="/privacy" className="text-red-600 hover:underline">
+                            Privacy Policy
+                          </Link>{" "}
+                          and{" "}
+                          <Link href="/terms" className="text-red-600 hover:underline">
+                            Terms of Service
+                          </Link>
+                          .
+                        </span>
+                      </label>
+
+                      {formError ? <p className="text-xs font-medium text-rose-500">{formError}</p> : null}
+
+                      <button
+                        type="submit"
+                        disabled={submitting}
+                        className={`flex h-12 w-full items-center justify-center rounded-xl text-sm font-semibold text-white shadow-[0_8px_24px_-4px_rgba(244,63,94,0.5)] transition hover:opacity-90 disabled:opacity-60 ${GRAD}`}
+                      >
+                        {submitting ? "Starting..." : "Start chat"}
+                      </button>
+
+                      <p className="flex items-center justify-center gap-1.5 text-[10px] text-stitch-muted">
+                        <ShieldCheck className="h-3 w-3" /> Saved to CRM for our team — one profile per customer.
+                      </p>
+                    </form>
+                  </>
+                ) : (
+                  <>
                     <div className={`z-20 flex items-center justify-between px-4 py-3 text-white shadow-md ${GRAD}`}>
                       <div className="flex items-center gap-3">
                         <span className="relative flex h-9 w-9 items-center justify-center rounded-full border-2 border-white/20 bg-white/15">
@@ -1141,6 +1377,8 @@ export function AiChatWidget() {
                         </>
                       )}
                     </div>
+                  </>
+                )}
               </div>
             )}
 

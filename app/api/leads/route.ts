@@ -27,7 +27,7 @@ const leadSchema = z.object({
   /** Where on the site the lead originated, e.g. "contact", "pricing-quote" */
   formType: z.string().max(60).optional(),
   channel: z
-    .enum(["WEBSITE", "FORM", "PHONE", "EMAIL"])
+    .enum(["WEBSITE", "FORM", "PHONE", "EMAIL", "LIVE_CHAT"])
     .optional()
     .default("FORM"),
 });
@@ -104,7 +104,12 @@ export async function POST(request: Request) {
       .join("\n");
 
     const lead = await ensureLeadFromChannel({
-      channel: d.channel,
+      channel:
+        d.channel === "LIVE_CHAT"
+          ? "LIVE_CHAT"
+          : d.channel === "WEBSITE"
+            ? "WEBSITE"
+            : "FORM",
       fullName: d.fullName,
       email: email || user?.email || null,
       phone: phone || null,
