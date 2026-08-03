@@ -89,6 +89,9 @@ export function ConnectDownloadPanel({
       <section className="stitch-card stitch-card-body space-y-3">
         <h2 className="font-semibold">Install steps</h2>
         <ol className="list-decimal list-inside text-sm text-[var(--sp-muted)] space-y-2">
+          <li>
+            <strong>Uninstall</strong> any old &quot;MernCrest Connect&quot; or Flutter icon app first.
+          </li>
           <li>Download the APK to your Android phone.</li>
           <li>Open the file and allow install from this source if prompted.</li>
           <li>Sign in with <strong>staff@merncrest.lk</strong> (your work email).</li>

@@ -4,8 +4,8 @@ import type { Metadata } from "next";
 export const CONNECT_APP = {
   name: "MernCrest Connect",
   tagline: "Staff mobile app for system.merncrest.lk",
-  version: "1.0.3",
-  build: 4,
+  version: "1.0.4",
+  build: 5,
   packageId: "lk.merncrest.merncrest_connect",
   minAndroid: "6.0",
   apkPath: "/downloads/merncrest-connect.apk",
@@ -13,9 +13,9 @@ export const CONNECT_APP = {
   apiHost: "https://system.merncrest.lk",
   forceUpdate: false,
   releaseNotes: [
+    "Fixed APK install (proper release signing)",
+    "Reliable download from system.merncrest.lk",
     "Update notice on login screen",
-    "Centered update popup when a new version is available",
-    "MernCrest app icon and faster mobile login",
   ],
 } as const;
 

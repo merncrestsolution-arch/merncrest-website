@@ -67,6 +67,8 @@ services:
         condition: service_healthy
     expose:
       - "3000"
+    volumes:
+      - ./public/downloads:/app/public/downloads:ro
     networks: [merncrest]
 
   nginx:
@@ -79,6 +81,7 @@ services:
     volumes:
       # active.conf is copied by deploy/ssl-init.sh; defaults to HTTP-only until certs exist.
       - ./deploy/nginx/active.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./public/downloads:/var/www/downloads:ro
       - /etc/letsencrypt:/etc/letsencrypt:ro
       - /var/www/certbot:/var/www/certbot:ro
     depends_on:
