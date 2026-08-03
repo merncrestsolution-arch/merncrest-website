@@ -47,6 +47,15 @@ DOCKER_BUILDKIT=1 COMPOSE_DOCKER_CLI_BUILD=1 $COMPOSE build --progress=plain app
 echo "==> Applying database schema + seed (one-off migrator)"
 $COMPOSE run --rm migrator
 
+echo "==> Configuring nginx"
+if [ -f /etc/letsencrypt/live/merncrest.lk/fullchain.pem ]; then
+  cp deploy/nginx/default.conf deploy/nginx/active.conf
+  echo "    Using HTTPS config (Let's Encrypt certs found)"
+else
+  cp deploy/nginx/default-http-only.conf deploy/nginx/active.conf
+  echo "    Using HTTP-only config (run deploy/ssl-init.sh for TLS)"
+fi
+
 echo "==> Starting app + nginx"
 $COMPOSE up -d app nginx
 
