@@ -12,6 +12,7 @@ import {
   Briefcase,
 } from "lucide-react";
 import { Link } from "@/i18n/routing";
+import { COMPANY_EMAILS, mailto } from "@/lib/company/emails";
 import {
   FREE_CONSULTING_DETAIL,
   FREE_CONSULTING_LABEL,
