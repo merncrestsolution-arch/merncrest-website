@@ -30,7 +30,6 @@ function normalizePhone(phone: string) {
 }
 
 export async function findCustomerByWhatsApp(phone: string) {
-  const digits = normalizePhone(phone);
   const variants = phoneMatchVariants(phone);
 
   const profile = await prisma.customerProfile.findFirst({

@@ -4,8 +4,7 @@ import { nextNumber, requireUser } from "@/lib/commerce";
 import { notifyUser } from "@/lib/support/notify";
 import { onCustomerTicketCreated } from "@/lib/crm/customer-hooks";
 import { getStaffScope, ticketScopeWhere } from "@/lib/erp/staff-scope";
-import { scopeCreateFields, defaultTenantStamp } from "@/lib/erp/scope-stamp";
-import { validateChatAttachmentUrl } from "@/lib/security/upload-policy";
+import { defaultTenantStamp } from "@/lib/erp/scope-stamp";
 import { z } from "zod";
 
 export async function GET() {
@@ -41,6 +40,9 @@ const createSchema = z.object({
   channel: z.enum(["PORTAL", "LIVE_CHAT", "WHATSAPP", "EMAIL", "PHONE", "IVR"]).optional(),
 });
 
+const ticketDepartments = ["BILLING", "TECHNICAL", "SALES", "DOMAIN", "HOSTING", "GENERAL"] as const;
+type TicketDepartment = typeof ticketDepartments[number];
+
 export async function POST(request: Request) {
   const auth = await requireUser();
   if (auth.error) return auth.error;
@@ -57,15 +59,20 @@ export async function POST(request: Request) {
     const resolveHours = priority === "URGENT" ? 8 : priority === "HIGH" ? 24 : 72;
     const now = Date.now();
 
-    let department = parsed.data.department ?? "GENERAL";
-    let category = "GENERAL";
+    let department: TicketDepartment = parsed.data.department ?? "GENERAL";
+    const category = "GENERAL";
     try {
       const { applyInboundRouting } = await import("@/lib/support/whatsapp-gateway");
       const route = await applyInboundRouting({
         source: (parsed.data.channel as "PORTAL" | "WHATSAPP" | "EMAIL" | "IVR") || "PORTAL",
         departmentHint: department,
       });
-      if (route.department) department = route.department;
+      if (
+        route.department &&
+        ticketDepartments.includes(route.department as TicketDepartment)
+      ) {
+        department = route.department as TicketDepartment;
+      }
     } catch {
       /* routing optional */
     }

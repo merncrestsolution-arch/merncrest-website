@@ -137,9 +137,6 @@ export async function getCustomerSupportSnapshot(
     /amc|support|maintenance|warranty/i.test(s.productSlug + s.productName)
   );
 
-  const sslStatuses = user.hostingAccounts.map((h) => h.sslStatus);
-  const sslActive = sslStatuses.some((s) => /active|valid|ok/i.test(s));
-  const sslExpired = sslStatuses.some((s) => /expired|invalid/i.test(s));
 
   const complaints = user.tickets.filter((t) => t.category === "COMPLAINT").length;
 

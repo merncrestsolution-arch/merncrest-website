@@ -15,7 +15,6 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { EmptyState } from "@/components/system/empty-state";
 import { LoadingState } from "@/components/system/loading-state";
-import { ErrorState } from "@/components/system/error-state";
 
 type Announcement = {
   id: string;

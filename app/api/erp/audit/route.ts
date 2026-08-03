@@ -8,14 +8,14 @@ export async function GET(request: Request) {
   if (auth.error) return auth.error;
 
   const { searchParams } = new URL(request.url);
-  const module = searchParams.get("module");
+  const moduleFilter = searchParams.get("module");
   const action = searchParams.get("action");
   const q = searchParams.get("q");
   const take = Math.min(Number(searchParams.get("limit") || 50), 200);
 
   const logs = await prisma.auditLog.findMany({
     where: {
-      ...(module ? { module } : {}),
+      ...(moduleFilter ? { module: moduleFilter } : {}),
       ...(action ? { action } : {}),
       ...(q
         ? {

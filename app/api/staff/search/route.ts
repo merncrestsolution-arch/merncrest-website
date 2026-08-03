@@ -1,7 +1,6 @@
-import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { requireStaff } from "@/lib/commerce";
-import { apiError, apiSuccess } from "@/lib/api/envelope";
+import { apiSuccess } from "@/lib/api/envelope";
 
 export type StaffSearchResult = {
   id: string;

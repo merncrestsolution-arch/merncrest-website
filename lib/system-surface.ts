@@ -1,7 +1,8 @@
 import { cookies, headers } from "next/headers";
 
 function hostName() {
-  return headers().then((h) => (h.get("host") || "").split(":")[0].toLowerCase());
+  const headerStore = headers();
+  return (headerStore.get("host") || "").split(":")[0].toLowerCase();
 }
 
 /** True when browsing System.merncrest.lk (or ?system=1 / mc_system cookie). */
@@ -18,8 +19,13 @@ export async function isSystemSurface() {
 }
 
 /** Localhost OR system surface — use Stitch StaffShell for /admin + /staff. */
-export async function useSystemShell() {
+export async function shouldUseSystemShell() {
   if (await isSystemSurface()) return true;
-  const host = await hostName();
+  const host = hostName();
   return host === "localhost" || host === "127.0.0.1";
+}
+
+/** @deprecated Use `shouldUseSystemShell` — name avoids React hooks lint false positive. */
+export async function useSystemShell() {
+  return shouldUseSystemShell();
 }

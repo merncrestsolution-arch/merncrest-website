@@ -18,7 +18,7 @@ const attachSchema = z.object({
   startDate: z.string().datetime(),
   billingCycle: z.enum(["MONTHLY", "QUARTERLY", "ANNUAL", "ONE_TIME"]).optional(),
   freePeriodDays: z.number().int().min(0).optional().nullable(),
-  metadata: z.record(z.unknown()).optional(),
+  metadata: z.record(z.string(), z.unknown()).optional(),
   notes: z.string().max(2000).optional(),
   assignedStaffId: z.string().optional(),
 });

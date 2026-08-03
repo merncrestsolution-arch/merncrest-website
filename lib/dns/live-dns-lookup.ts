@@ -46,7 +46,8 @@ async function fetchRdap(domainName: string) {
     let registrar: string | null = null;
     if (registrarEntity?.vcardArray?.[1]) {
       const fn = registrarEntity.vcardArray[1].find((row) => row[0] === "fn");
-      if (fn && typeof fn[3] === "string") registrar = fn[3];
+      const registrarName = fn ? (fn as readonly unknown[])[3] : undefined;
+      if (typeof registrarName === "string") registrar = registrarName;
     }
 
     const registration = data.events?.find((e) => e.eventAction === "registration");

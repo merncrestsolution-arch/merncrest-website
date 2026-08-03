@@ -26,8 +26,6 @@ import {
 
   LogOut,
 
-  Building2,
-
   Network,
 
   Package,

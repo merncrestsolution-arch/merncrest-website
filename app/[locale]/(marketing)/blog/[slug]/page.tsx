@@ -4,7 +4,7 @@ import { notFound } from "next/navigation";
 import { getPostBySlug, getRelatedPosts, getAllPostSlugs } from "@/lib/cms";
 import { formatBlogDate } from "@/lib/commerce-format";
 import { Link } from "@/i18n/routing";
-import { ArrowLeft, Calendar, User, Clock, ArrowRight } from "lucide-react";
+import { ArrowLeft, Calendar, Clock, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ShareButton } from "@/components/ui/share-button";
 

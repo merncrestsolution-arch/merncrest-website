@@ -1,10 +1,9 @@
 import type { LucideIcon } from "lucide-react";
-import { Check, Clock, Globe, ShieldCheck, Wallet } from "lucide-react";
+import { Check, Clock, ShieldCheck, Wallet } from "lucide-react";
 import { PageHero } from "@/components/ui/page-hero";
 import { QuoteDialog } from "@/components/forms/quote-dialog";
 import { cn } from "@/lib/utils";
 import {
-  formatLkr,
   formatPackagePrice,
   formatAddOnPrice,
   type PriceBookVolume,
@@ -19,7 +18,7 @@ type PriceBookVolumePageProps = {
   ctaIcon: LucideIcon;
 };
 
-function ServiceIncludes({ volume: _v, service }: { volume: PriceBookVolume; service: PriceBookVolume["services"][0] }) {
+function ServiceIncludes({ service }: { service: PriceBookVolume["services"][0] }) {
   if (service.tierIncludes?.length) {
     return (
       <div className="space-y-4">
@@ -165,7 +164,7 @@ export function PriceBookVolumePage({
               ))}
             </div>
 
-            <ServiceIncludes volume={volume} service={service} />
+            <ServiceIncludes service={service} />
             {service.note ? (
               <p className="mt-4 text-xs text-muted italic">{service.note}</p>
             ) : null}

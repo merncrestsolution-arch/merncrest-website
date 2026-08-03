@@ -157,7 +157,7 @@ export function AiChatWidget() {
   const [visitorInterest, setVisitorInterest] = useState("");
   const [handlerType, setHandlerType] = useState<"AI" | "AGENT" | string>("AI");
   const [agentName, setAgentName] = useState<string | null>(null);
-  const [assistantName, setAssistantName] = useState(AIRA.name);
+  const [, setAssistantName] = useState(AIRA.name);
   const [agentOnline, setAgentOnline] = useState(true);
   const [unread, setUnread] = useState(0);
   const [showJump, setShowJump] = useState(false);
@@ -167,7 +167,13 @@ export function AiChatWidget() {
   const typingTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const [teaser, setTeaser] = useState(false);
-  const [form, setForm] = useState({
+  const [form, setForm] = useState<{
+    name: string;
+    email: string;
+    phone: string;
+    service: string;
+    agree: boolean;
+  }>({
     name: "",
     email: "",
     phone: "",
@@ -588,7 +594,9 @@ export function AiChatWidget() {
       }
       bytes[6] = (bytes[6] & 0x0f) | 0x40;
       bytes[8] = (bytes[8] & 0x3f) | 0x80;
-      const hex = [...bytes].map((b) => b.toString(16).padStart(2, "0")).join("");
+      const hex = Array.from(bytes)
+        .map((b) => b.toString(16).padStart(2, "0"))
+        .join("");
       return `${hex.slice(0, 8)}-${hex.slice(8, 12)}-${hex.slice(12, 16)}-${hex.slice(16, 20)}-${hex.slice(20)}`;
     })();
 

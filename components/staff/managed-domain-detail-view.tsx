@@ -5,7 +5,7 @@ import { Link } from "@/i18n/routing";
 import { useSearchParams } from "next/navigation";
 import { ArrowLeft, Loader2, RefreshCw } from "lucide-react";
 import { formatSriLankaDate, formatSriLankaDateTime } from "@/lib/timezone";
-import { DOMAIN_REGISTRARS, registrarLabel } from "@/shared/domain-registrars";
+import { registrarLabel } from "@/shared/domain-registrars";
 import {
   Breadcrumb,
   BreadcrumbItem,

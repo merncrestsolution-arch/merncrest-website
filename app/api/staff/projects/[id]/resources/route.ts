@@ -149,7 +149,7 @@ const patchSchema = z.object({
   lastDeployedVersion: z.string().optional().nullable(),
   hostingAccountId: z.string().optional().nullable(),
   domainId: z.string().optional().nullable(),
-  envVars: z.record(z.string()).optional(),
+  envVars: z.record(z.string(), z.string()).optional(),
   credentials: z
     .array(
       z.object({

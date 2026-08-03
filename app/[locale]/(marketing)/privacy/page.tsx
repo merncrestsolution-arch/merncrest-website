@@ -1,6 +1,8 @@
 import { setRequestLocale } from "next-intl/server";
 import { COMPANY_EMAILS } from "@/lib/company/emails";
 
+/* eslint-disable react/no-unescaped-entities */
+
 export const metadata = {
   title: "Privacy Policy | MERNcrest Solutions",
   description: "Privacy Policy and Data Protection Framework for MERNcrest Solutions.",

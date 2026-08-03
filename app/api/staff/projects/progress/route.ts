@@ -1,12 +1,11 @@
 import { prisma } from "@/lib/db";
 import { requireStaff } from "@/lib/commerce";
-import { apiError, apiSuccess } from "@/lib/api/envelope";
+import { apiSuccess } from "@/lib/api/envelope";
 import { isAdminRole } from "@/lib/auth";
 import {
   currentMilestoneLabel,
   effectiveProjectProgress,
 } from "@/lib/projects/progress";
-import { requireProjectAccess } from "@/lib/projects/access";
 
 export async function GET() {
   const auth = await requireStaff();

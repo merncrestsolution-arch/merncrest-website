@@ -70,9 +70,16 @@ export function parseInvoiceDocument(
         };
       }
 
-      if (parsed && typeof parsed === "object" && Array.isArray(parsed.lines) && parsed.lines.length > 0) {
+      if (
+        parsed &&
+        typeof parsed === "object" &&
+        !Array.isArray(parsed) &&
+        "lines" in parsed &&
+        Array.isArray(parsed.lines) &&
+        parsed.lines.length > 0
+      ) {
         return {
-          lines: parsed.lines.map((l) => ({
+          lines: parsed.lines.map((l: InvoicePdfLine) => ({
             description: l.description || "Item",
             qty: l.qty || 1,
             unitCents: l.unitCents || 0,

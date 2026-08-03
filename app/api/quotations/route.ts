@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
-import { nextNumber, requireStaff, requireUser } from "@/lib/commerce";
+import { requireStaff, requireUser } from "@/lib/commerce";
 import { nextOrgNumber } from "@/lib/commerce/org-numbers";
 import { rateLimit, clientIp } from "@/lib/chat/rate-limit";
 import { getStaffScope } from "@/lib/erp/staff-scope";
@@ -10,12 +10,14 @@ import { notifyUser } from "@/lib/support/notify";
 import { z } from "zod";
 
 function calcTotals(
-  items: { quantity: number; unitPriceCents: number }[],
+  items: { description: string; quantity: number; unitPriceCents: number }[],
   discountCents = 0,
   taxCents = 0
 ) {
   const lineItems = items.map((i) => ({
-    ...i,
+    description: i.description,
+    quantity: i.quantity,
+    unitPriceCents: i.unitPriceCents,
     totalCents: i.quantity * i.unitPriceCents,
   }));
   const subtotalCents = lineItems.reduce((s, i) => s + i.totalCents, 0);

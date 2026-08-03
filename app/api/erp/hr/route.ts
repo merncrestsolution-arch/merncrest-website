@@ -132,7 +132,9 @@ export async function POST(request: Request) {
       .filter(Boolean);
     const created = [];
     for (const line of lines.slice(1)) {
-      const [fullName, email, jobTitle, departmentCode, orgRole] = line.split(",").map((s) => s.trim());
+      const [fullName, email, jobTitle, departmentCode, orgRole] = line
+        .split(",")
+        .map((s: string) => s.trim());
       if (!fullName || !email || !jobTitle) continue;
       let departmentId: string | undefined;
       if (departmentCode) {

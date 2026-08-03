@@ -2,7 +2,8 @@
 
 **Master prompt reference** for `system.merncrest.lk`.  
 **Implementation rule:** `.cursor/rules/merncrest-part-06-staff-portal.mdc`  
-**Design workflow:** `.cursor/skills/staff-portal-design/SKILL.md` (Google Stitch + Figma strictly)
+**Design workflow:** `.cursor/skills/staff-portal-design/SKILL.md` (Google Stitch + Figma strictly)  
+**Major updates (Cloud Agent):** `docs/system-major-update-cloud-agent-prompt.md` — paste when a change spans modules, shell, schema, or full UI rewrites
 
 ---
 

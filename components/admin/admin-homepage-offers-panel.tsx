@@ -53,7 +53,7 @@ const EMPTY_FORM = {
   priority: 0,
   sortOrder: 0,
   isEnabled: true,
-  status: "DRAFT" as const,
+  status: "DRAFT" as "DRAFT" | "PUBLISHED" | "EXPIRED",
   startDate: "",
   endDate: "",
   seoTitle: "",

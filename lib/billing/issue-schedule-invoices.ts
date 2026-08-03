@@ -3,7 +3,6 @@
  * without an invoice — e.g. final balance on completion.
  */
 import type { PrismaClient } from "@prisma/client";
-import { formatMoney } from "@/lib/commerce";
 import { nextOrgNumber } from "@/lib/commerce/org-numbers";
 import { calcBillingTotals } from "@/lib/billing/calc-totals";
 import { linkInvoiceToSchedule } from "@/lib/billing/sync-payment-schedule";

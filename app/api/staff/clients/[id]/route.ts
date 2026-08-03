@@ -1,4 +1,3 @@
-import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { requireStaff } from "@/lib/commerce";
 import { isAdminRole } from "@/lib/auth";
@@ -46,7 +45,16 @@ export async function GET(
         include: {
           payments: {
             where: { deletedAt: null },
-            select: { amountCents: true, status: true, isAdvance: true },
+            select: {
+              id: true,
+              amountCents: true,
+              method: true,
+              status: true,
+              isAdvance: true,
+              referenceNumber: true,
+              receiptNumber: true,
+              createdAt: true,
+            },
           },
         },
       },

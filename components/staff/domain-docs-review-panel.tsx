@@ -30,7 +30,7 @@ type Submission = {
   projectService?: {
     id: string;
     serviceType: string;
-    project?: { id: string; name: string; clientId: string };
+    project?: { id: string; name: string; clientId: string; erpProjectId?: string | null };
   };
   submitter?: { id: string; fullName: string; email: string };
 };

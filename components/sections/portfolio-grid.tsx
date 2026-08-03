@@ -85,8 +85,9 @@ export function PortfolioGrid({ projects }: { projects: PortfolioCard[] }) {
                 </div>
 
                 <div className="absolute inset-0 z-20 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                  {/* Dynamic portfolio slug — next-intl route typing */}
                   <Link
-                    href={`/portfolio/${project.slug}` as any}
+                    href={`/portfolio/${project.slug}`}
                     className="flex items-center gap-2 bg-accent text-foreground px-6 py-3 rounded-full font-bold translate-y-4 group-hover:translate-y-0 transition-all duration-300 shadow-xl"
                   >
                     {t("viewCaseStudy")} <ArrowRight className="h-4 w-4" />

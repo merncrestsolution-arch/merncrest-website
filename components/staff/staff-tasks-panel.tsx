@@ -77,7 +77,6 @@ export function StaffTasksPanel() {
   }, [pomodoroId]);
 
   const kpi = useMemo(() => {
-    const all = Object.values(byStatus).flat();
     return {
       open: stats.open,
       inProgress: (byStatus.IN_PROGRESS ?? []).length,

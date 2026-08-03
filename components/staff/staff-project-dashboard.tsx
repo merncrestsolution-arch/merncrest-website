@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useMemo } from "react";
 import { Link, useRouter } from "@/i18n/routing";
 import { useSearchParams } from "next/navigation";
 import { formatMoney } from "@/lib/commerce-format";
@@ -21,7 +21,6 @@ import {
   CreditCard,
   FileText,
   Globe2,
-  Loader2,
   Mail,
   MessageSquare,
   Server,
@@ -35,7 +34,7 @@ type ProjectSummary = {
   projectCode: string;
   name: string;
   status: string;
-  progressPct: number;
+  progressPct?: number;
   startDate?: string | null;
   endDate?: string | null;
   clientBrief?: string | null;
@@ -49,6 +48,7 @@ type ProjectSummary = {
     priority: string;
     progressPct: number;
     dueDate?: string | null;
+    parentId?: string | null;
     assignee?: { fullName: string } | null;
   }>;
 };

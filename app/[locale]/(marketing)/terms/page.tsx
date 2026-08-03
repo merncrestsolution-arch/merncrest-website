@@ -1,6 +1,8 @@
 import { setRequestLocale } from "next-intl/server";
 import { COMPANY_EMAILS } from "@/lib/company/emails";
 
+/* eslint-disable react/no-unescaped-entities */
+
 export const metadata = {
   title: "Terms of Service | MERNcrest Solutions",
   description: "Terms of Service and Legal Agreements for MERNcrest Solutions.",

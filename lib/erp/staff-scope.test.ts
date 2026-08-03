@@ -111,6 +111,8 @@ describe.skipIf(!runIntegration)("cross-branch CRM isolation (integration)", () 
       email: staffUser.email,
       fullName: staffUser.fullName,
       role: "STAFF",
+      company: null,
+      emailVerifiedAt: null,
     });
 
     const visible = await prisma.crmLead.findMany({

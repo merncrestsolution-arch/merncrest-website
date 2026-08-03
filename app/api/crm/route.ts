@@ -287,7 +287,7 @@ const patchSchema = z.object({
   followUpAt: z.string().optional(),
   ownerId: z.string().optional().nullable(),
   tags: z.array(z.string()).optional(),
-  customFields: z.record(z.string()).optional(),
+  customFields: z.record(z.string(), z.string()).optional(),
   wonReason: z.string().optional(),
   lostReason: z.string().optional(),
   activity: z

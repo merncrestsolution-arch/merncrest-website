@@ -148,7 +148,7 @@ export async function GET(request: Request) {
         },
         milestones: { orderBy: { sortOrder: "asc" } },
         clientUpdates: { orderBy: { createdAt: "desc" }, take: 5 },
-        tasks: { select: { status: true, parentId: true, progressPct: true } },
+        tasks: { select: { id: true, status: true, parentId: true, progressPct: true } },
       },
     });
     if (!project) return NextResponse.json({ error: "Not found" }, { status: 404 });

@@ -127,7 +127,7 @@ export async function PATCH(request: Request) {
 
   const updateData: Record<string, unknown> = { ...rest, updatedById: auth.user.id };
 
-  if (rest.featuresJson !== undefined) {
+  if (rest.featuresJson !== undefined && rest.featuresJson != null) {
     try {
       const arr = JSON.parse(rest.featuresJson);
       updateData.featuresJson = Array.isArray(arr) ? featuresToJson(arr.map(String)) : rest.featuresJson;

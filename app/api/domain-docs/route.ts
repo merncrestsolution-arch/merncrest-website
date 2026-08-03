@@ -192,7 +192,7 @@ export async function POST(request: Request) {
         select: {
           id: true,
           serviceType: true,
-          project: { select: { id: true, name: true, clientId: true } },
+          project: { select: { id: true, name: true, clientId: true, erpProjectId: true } },
         },
       },
       submitter: { select: { id: true, fullName: true, email: true } },

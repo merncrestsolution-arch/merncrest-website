@@ -1,4 +1,4 @@
-import { getTranslations, setRequestLocale } from "next-intl/server";
+import { setRequestLocale } from "next-intl/server";
 import { notFound } from "next/navigation";
 import { QuoteDialog } from "@/components/forms/quote-dialog";
 import { 
@@ -13,7 +13,13 @@ const validSolutions = [
   "booking", "saas", "iot", "aiml", "blockchain",
 ];
 
-const solutionContent: Record<string, any> = {
+const solutionContent: Record<string, {
+  title: string;
+  icon: typeof ShoppingCart;
+  description: string;
+  features?: Array<{ title: string; desc: string }>;
+  benefits?: string[];
+}> = {
   "ecommerce": {
     title: "E-Commerce Solutions",
     icon: ShoppingCart,
@@ -213,7 +219,7 @@ export default async function SolutionSubPage({
           <div className="lg:col-span-2">
             <h2 className="font-display text-2xl font-bold text-foreground mb-6">What We Deliver</h2>
             <div className="grid sm:grid-cols-2 gap-5">
-              {data.features.map((feature: { title: string; desc: string }, i: number) => (
+              {(data.features ?? []).map((feature: { title: string; desc: string }, i: number) => (
                 <div key={i} className="stitch-card stitch-card-hover">
                   <h3 className="font-display text-lg font-semibold text-foreground mb-2">{feature.title}</h3>
                   <p className="text-sm text-muted leading-relaxed">{feature.desc}</p>
@@ -226,7 +232,7 @@ export default async function SolutionSubPage({
             <div className="stitch-card">
               <h3 className="font-display text-lg font-semibold text-foreground mb-5">Key Benefits</h3>
               <ul className="space-y-4">
-                {data.benefits.map((benefit: string, i: number) => (
+                {(data.benefits ?? []).map((benefit: string, i: number) => (
                   <li key={i} className="flex items-start gap-3 text-sm text-muted">
                     <CheckCircle2 className="h-5 w-5 text-stitch-glow shrink-0" />
                     <span>{benefit}</span>

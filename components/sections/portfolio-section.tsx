@@ -47,7 +47,7 @@ export function PortfolioSection({ projects = [] }: { projects?: FeaturedProject
       <StitchGrid cols={3}>
         {projects.map((project, index) => (
           <StitchReveal key={project.id} delay={index * 0.06}>
-            <Link href={`/portfolio/${project.slug}` as any}>
+            <Link href={`/portfolio/${project.slug}`}>
               <StitchCard className="h-full overflow-hidden !p-0 flex flex-col group">
                 <div className="relative h-48 w-full overflow-hidden bg-white/5">
                   {project.image && (

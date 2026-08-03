@@ -49,10 +49,12 @@ export function SystemRolesPanel() {
           const label = role.orgRoles[0] || role.userRoles?.[0] || role.tier;
           return (
             <div key={role.tier} className="stitch-stat-card">
-              <Icon
-                className="h-5 w-5 mb-2"
+              <div
+                className="mb-2"
                 style={{ color: meta.statAccent || "var(--sp-primary)" }}
-              />
+              >
+                <Icon className="h-5 w-5" />
+              </div>
               <div className="stitch-stat-num text-lg">{label}</div>
               <div className="stitch-stat-label">{role.title.split("/")[0].trim()}</div>
             </div>

@@ -93,8 +93,9 @@ function normalizeChatBody(raw: unknown) {
   if (typeof body.visitorPhone === "string") body.visitorPhone = body.visitorPhone.slice(0, 40);
   if (typeof body.visitorInterest === "string") body.visitorInterest = body.visitorInterest.slice(0, 200);
   if (typeof body.clientMessageId === "string") {
-    body.clientMessageId = body.clientMessageId.slice(0, 120);
-    if (body.clientMessageId.length < 1) delete body.clientMessageId;
+    const trimmedId = body.clientMessageId.slice(0, 120);
+    if (trimmedId.length < 1) delete body.clientMessageId;
+    else body.clientMessageId = trimmedId;
   } else {
     delete body.clientMessageId;
   }
@@ -154,7 +155,7 @@ export async function POST(request: Request) {
     });
 
     let handoff = false;
-    let ticketNumber: string | null = null;
+    const ticketNumber: string | null = null;
     let assignedToLiveAgent = false;
 
     // If assigned agent went offline, reclaim for Aira before answering

@@ -1,5 +1,4 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/db";
 import { requireAdmin } from "@/lib/admin/require-admin";
 import { getSettingsByGroup, setSetting, ensureDefaultSettings } from "@/lib/admin/settings";
 import { writeAuditLog } from "@/lib/erp/audit";

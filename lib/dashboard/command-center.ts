@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/db";
-import { getSettingBool, getMaintenanceMessage } from "@/lib/admin/settings";
+import { getSettingBool } from "@/lib/admin/settings";
 
 export type CommandCenterKpis = {
   todayRevenueCents: number;

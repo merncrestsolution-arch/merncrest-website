@@ -3,7 +3,6 @@ import { prisma } from "@/lib/db";
 import { requireAdmin, requireStaffOrAdmin } from "@/lib/admin/require-admin";
 import {
   ensureDefaultSettings,
-  getSetting,
   getSettingBool,
 } from "@/lib/admin/settings";
 import { writeAuditLog } from "@/lib/erp/audit";

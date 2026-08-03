@@ -1,6 +1,6 @@
 import { prisma } from "@/lib/db";
 import { requireUser } from "@/lib/commerce";
-import { apiError, apiSuccess } from "@/lib/api/envelope";
+import { apiSuccess } from "@/lib/api/envelope";
 import { getServiceTypeLabel } from "@/shared/service-types";
 
 /** Customer portal — domain registration services + doc submission status */

@@ -3,10 +3,8 @@ import { ChevronRight } from "lucide-react";
 import { Link } from "@/i18n/routing";
 import { cn } from "@/lib/utils";
 
-const Breadcrumb = React.forwardRef<
-  HTMLElement,
-  React.ComponentPropsWithoutRef<"nav"> & { separator?: React.ReactNode }
->(({ className, separator, ...props }, ref) => (
+const Breadcrumb = React.forwardRef<HTMLElement, React.ComponentPropsWithoutRef<"nav">>(
+  ({ className, ...props }, ref) => (
   <nav ref={ref} aria-label="Breadcrumb" className={cn("flex", className)} {...props} />
 ));
 Breadcrumb.displayName = "Breadcrumb";

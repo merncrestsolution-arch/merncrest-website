@@ -4,10 +4,9 @@ import { NextResponse } from "next/server";
 import { requireStaff, requireUser } from "@/lib/commerce";
 import {
   ERP_PERMISSIONS,
-  ORG_ROLE_PRESETS,
-  ROLE_DEFAULTS,
   type ErpPermission,
 } from "@/lib/erp/permission-matrix";
+import { getStaffScope, type StaffScope } from "@/lib/erp/staff-scope";
 import { resolveEffectivePermissions } from "@/lib/erp/permission-resolve";
 
 export {

@@ -3,7 +3,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { Link } from "@/i18n/routing";
 import { Globe2, Loader2, Search } from "lucide-react";
-import { formatSriLankaDate } from "@/lib/timezone";
 import { registrarLabel } from "@/shared/domain-registrars";
 
 type DnsRow = {

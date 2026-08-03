@@ -22,6 +22,12 @@ Marketing site (`merncrest.lk`) uses the same **Luminous Enterprise** family but
 | **Code tokens** | Implemented CSS | `app/styles/stitch-portal.css` |
 | **Shell** | Chrome for every authenticated page | `components/staff/staff-shell.tsx` |
 
+## Major updates → Cursor Cloud Agent
+
+For **major** system changes (new module, shell/nav rewrite, multi-route UI, schema + API + UI together), use the copy-paste prompt in `docs/system-major-update-cloud-agent-prompt.md` in a **Cursor Cloud Agent** session — not a quick local edit.
+
+Small single-file fixes stay on local Agent.
+
 ## Workflow (required order)
 
 1. **Stitch** — Generate or update the screen in Stitch (Staff Portal / System surface).

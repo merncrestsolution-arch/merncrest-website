@@ -7,7 +7,7 @@ import {
 
 function fillTemplate(body: string, vars: Record<string, string>) {
   const merged = { businessNumber: MERNcrest_WA_DISPLAY, ...vars };
-  return body.replace(/\{\{(\w+)\}\}/g, (_, key: string) => merged[key] ?? "");
+  return body.replace(/\{\{(\w+)\}\}/g, (_, key: string) => (merged as Record<string, string>)[key] ?? "");
 }
 
 async function resolvePhoneForUser(userId: string) {

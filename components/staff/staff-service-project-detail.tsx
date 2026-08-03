@@ -214,7 +214,9 @@ export function StaffServiceProjectDetail({ projectId }: { projectId: string }) 
 
       {error ? <p className="stitch-auth-error mb-4">{error}</p> : null}
 
-      <ProjectServicesPanel projectId={projectId} />
+      {project.erpProjectId ? (
+        <ProjectServicesPanel erpProjectId={project.erpProjectId} onChanged={load} />
+      ) : null}
 
       {setup === "domain" && serviceId ? (
         <div className="stitch-modal-backdrop">

@@ -2,7 +2,6 @@ import { z } from "zod";
 import { prisma } from "@/lib/db";
 import { requireStaff, formatMoney } from "@/lib/commerce";
 import { nextOrgNumber } from "@/lib/commerce/org-numbers";
-import { recordInvoicePayment } from "@/lib/commerce/invoice-payments";
 import { notifyClient } from "@/lib/notify/client-email";
 import { calcBillingTotals } from "@/lib/billing/calc-totals";
 import { apiError, apiSuccess } from "@/lib/api/envelope";

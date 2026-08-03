@@ -3,7 +3,7 @@ import { getSessionUser, isAdminRole, isStaffRole } from "@/lib/auth";
 import { AdminShell } from "@/components/admin/admin-shell";
 import { StaffShell } from "@/components/staff/staff-shell";
 import { IdleLogout } from "@/components/staff/idle-logout";
-import { isSystemSurface, useSystemShell } from "@/lib/system-surface";
+import { isSystemSurface, shouldUseSystemShell } from "@/lib/system-surface";
 
 export default async function AdminLayout({
   children,
@@ -14,7 +14,7 @@ export default async function AdminLayout({
 }) {
   const { locale } = await params;
   const user = await getSessionUser();
-  const system = await useSystemShell();
+  const system = await shouldUseSystemShell();
   const systemHost = await isSystemSurface();
 
   if (!user) {

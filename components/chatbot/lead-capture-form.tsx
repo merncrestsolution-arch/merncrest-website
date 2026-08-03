@@ -64,7 +64,7 @@ export function LeadCaptureForm({
   if (step === "done") {
     return (
       <div className="mx-4 mb-3 rounded-xl bg-[#EEF5FB] px-3 py-2 text-[13px] text-[#105691]">
-        Thanks {data.name} — you're all set. Ask us anything below.
+        Thanks {data.name} — you&apos;re all set. Ask us anything below.
       </div>
     );
   }

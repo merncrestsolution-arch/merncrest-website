@@ -10,6 +10,8 @@
     "moduleResolution": "bundler",
     "resolveJsonModule": true,
     "isolatedModules": true,
+    "target": "ES2017",
+    "downlevelIteration": true,
     "jsx": "preserve",
     "incremental": true,
     "plugins": [
@@ -22,5 +24,5 @@
     }
   },
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
-  "exclude": ["node_modules"]
+  "exclude": ["node_modules", "mail-platform"]
 }

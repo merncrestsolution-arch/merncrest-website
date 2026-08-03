@@ -21,7 +21,14 @@ export function effectiveProjectProgress(
     return overridePct;
   }
 
-  const fromTasks = projectProgressFromTasks(tasks);
+  const fromTasks = projectProgressFromTasks(
+    tasks.map((t, index) => ({
+      id: `task-${index}`,
+      status: t.status,
+      parentId: t.parentId,
+      progressPct: t.progressPct ?? 0,
+    }))
+  );
   if (fromTasks > 0) return fromTasks;
 
   if (milestones.length === 0) return 0;

@@ -229,7 +229,7 @@ function buildResult(
   };
 }
 
-function buildFallbackResults(sld: string, tlds: string[], _preferred: string) {
+function buildFallbackResults(sld: string, tlds: string[]) {
   const results = tlds.map((t) => buildResult(sld, t, false));
   return {
     results,
@@ -322,11 +322,7 @@ export class NamecheapAdapter implements ResellerProviderAdapter {
       return { fqdn, sld, results, suggestions };
     } catch (error) {
       console.error("[namecheap:search]", error);
-      const { results, suggestions, error: fallbackError } = buildFallbackResults(
-        sld,
-        tlds,
-        preferred
-      );
+      const { results, suggestions, error: fallbackError } = buildFallbackResults(sld, tlds);
       return { fqdn, sld, results, suggestions, error: fallbackError };
     }
   }

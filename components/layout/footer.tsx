@@ -77,7 +77,7 @@ export function Footer() {
       } else {
         setMessage({ text: data.error || "Failed to subscribe.", type: "error" });
       }
-    } catch (error) {
+    } catch {
       setMessage({ text: "An error occurred. Please try again.", type: "error" });
     } finally {
       setLoading(false);

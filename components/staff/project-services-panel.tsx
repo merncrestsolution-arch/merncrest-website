@@ -56,7 +56,7 @@ export function ProjectServicesPanel({
   onChanged?: () => void;
 }) {
   const [services, setServices] = useState<ProjectService[]>([]);
-  const [serviceProjectId, setServiceProjectId] = useState<string | null>(null);
+  const [, setServiceProjectId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [showForm, setShowForm] = useState(false);

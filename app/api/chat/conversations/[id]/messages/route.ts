@@ -11,6 +11,7 @@ import {
 import { clientIp, rateLimit } from "@/lib/chat/rate-limit";
 import { prisma } from "@/lib/db";
 import { wantsHumanHandoff } from "@/lib/support/ai-replies";
+import { validateChatAttachmentUrl } from "@/lib/security/upload-policy";
 
 const postSchema = z.object({
   message: z.string().min(1).max(4000),
