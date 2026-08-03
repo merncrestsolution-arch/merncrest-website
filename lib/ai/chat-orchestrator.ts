@@ -11,7 +11,11 @@ import { requestHandoff } from "@/lib/chat/conversations";
 import { publishChatEvent } from "@/lib/chat/events";
 import { ensureLeadFromChannel } from "@/lib/crm/channels";
 import { aiReply } from "@/lib/support/ai-replies";
-import { defaultChatFallback, buildAiraSystemPrompt, airaSalesGuardrails } from "@/lib/support/chat-knowledge";
+import {
+  defaultChatFallback,
+  airaGuardrails,
+  resolveAiraSystemPrompt,
+} from "@/lib/support/chat-knowledge";
 import { sanitizeChatReply } from "@/lib/support/sanitize-chat-reply";
 import { rateLimit } from "@/lib/chat/rate-limit";
 import type { ChatMessage } from "@/lib/ai/provider.interface";
@@ -54,10 +58,10 @@ export async function handleAiTurn(opts: {
 
   const catalog = await retrieveCatalogContext(opts.userMessage);
   const systemPrompt = [
-    airaSalesGuardrails(),
-    buildAiraSystemPrompt({ pageContext: opts.pageContext }),
-    "Never invent pricing or services not present in the catalog context below. If uncertain, offer a human handoff or capture contact details.",
-    "Use tools to capture lead info and request handoff when appropriate.",
+    airaGuardrails(),
+    resolveAiraSystemPrompt(assistant?.systemPrompt, { pageContext: opts.pageContext }),
+    "Never invent pricing or services not present in the catalog context below. If uncertain, offer a human handoff or the relevant help page.",
+    "Only use capture_lead_info when the visitor voluntarily shares contact details. Use request_human_handoff when they ask for a person.",
     `Catalog context (official LKR price book + marketplace):\n${catalog}`,
   ]
     .filter(Boolean)

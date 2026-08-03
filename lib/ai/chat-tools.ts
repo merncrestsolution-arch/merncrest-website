@@ -4,7 +4,7 @@ export const CHAT_TOOLS: ToolDefinition[] = [
   {
     name: "capture_lead_info",
     description:
-      "Save visitor contact and project details as soon as they share them (name, email, phone, company, requirement). Call on partial info — do not wait for all fields.",
+      "Save visitor contact details only when they voluntarily share them (name, email, phone, company, requirement).",
     parameters: {
       type: "object",
       properties: {

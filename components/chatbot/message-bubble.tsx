@@ -1,7 +1,7 @@
 "use client";
 
 import { Bot, Headphones } from "lucide-react";
-import { sanitizeChatMessageBody } from "@/lib/chat/message-sanitize";
+import { ChatMessageBody } from "@/components/chatbot/chat-message-body";
 
 export function MessageBubble({
   role,
@@ -14,7 +14,7 @@ export function MessageBubble({
   attachmentUrl?: string | null;
   variant?: "default" | "stitch-staff";
 }) {
-  const displayBody = sanitizeChatMessageBody(role, body);
+  const displayBody = body;
   const isUser = role === "USER";
   const isSystem = role === "SYSTEM";
   const isAi = role === "AI";
@@ -62,7 +62,13 @@ export function MessageBubble({
                   : "rounded-bl-md border border-[var(--sp-outline)] bg-white text-[var(--sp-on)]"
             }`}
           >
-            <p className="whitespace-pre-wrap break-words">{displayBody}</p>
+            <p className="whitespace-pre-wrap break-words">
+              <ChatMessageBody
+                role={role}
+                body={body}
+                linkClassName={`underline underline-offset-2 hover:opacity-80 ${isUser ? "text-white/90" : "text-[var(--stitch-primary)]"}`}
+              />
+            </p>
             {attachmentUrl ? (
               <a
                 href={attachmentUrl}
@@ -107,7 +113,13 @@ export function MessageBubble({
         {isAgent ? (
           <span className="mb-1 block text-[11px] font-medium text-[#105691]">Agent</span>
         ) : null}
-        <p className="whitespace-pre-wrap break-words">{displayBody}</p>
+        <p className="whitespace-pre-wrap break-words">
+          <ChatMessageBody
+            role={role}
+            body={body}
+            linkClassName={`underline underline-offset-2 hover:opacity-80 ${isUser ? "text-white/90" : "text-[#1873A8]"}`}
+          />
+        </p>
         {attachmentUrl ? (
           <a
             href={attachmentUrl}

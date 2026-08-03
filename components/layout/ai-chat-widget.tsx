@@ -26,7 +26,7 @@ import {
   matchChatKnowledge,
 } from "@/lib/support/chat-knowledge";
 import { sanitizeChatReply } from "@/lib/support/sanitize-chat-reply";
-import { sanitizeChatMessageBody } from "@/lib/chat/message-sanitize";
+import { ChatMessageBody } from "@/components/chatbot/chat-message-body";
 
 type Msg = {
   id: string;
@@ -42,16 +42,41 @@ const AIRA = { name: "Aira", role: "MernCrest AI Assistant" };
 const FALLBACK_AGENT = { name: "Support", role: "Product Expert" };
 const GRAD = "bg-gradient-to-br from-red-500 to-rose-600";
 
-const TEASER_KEY = "mc-chat-teaser-v1";
-const STARTED_KEY = "mc-chat-started-v1";
-const NAME_KEY = "mc-chat-name-v1";
 const SESSION_KEY = "mc-chat-session-id-v1";
 const UNREAD_KEY = "mc-chat-unread-v1";
 const LAST_READ_KEY = "mc-chat-last-read-v1";
+const PENDING_CSAT_KEY = "mc-chat-pending-csat-v1";
+
+const TEASER_KEY = "mc-chat-teaser-v1";
 
 const QUICK_REPLIES = [...CHAT_QUICK_REPLIES];
 
-const emailOk = (v: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
+function readPendingCsat(): string | null {
+  try {
+    return localStorage.getItem(PENDING_CSAT_KEY);
+  } catch {
+    return null;
+  }
+}
+
+function writePendingCsat(id: string | null) {
+  try {
+    if (id) localStorage.setItem(PENDING_CSAT_KEY, id);
+    else localStorage.removeItem(PENDING_CSAT_KEY);
+  } catch {
+    /* ignore */
+  }
+}
+
+function clearChatStorage() {
+  try {
+    sessionStorage.removeItem(SESSION_KEY);
+    sessionStorage.removeItem(UNREAD_KEY);
+    sessionStorage.removeItem(LAST_READ_KEY);
+  } catch {
+    /* ignore */
+  }
+}
 
 function readSessionId(): string | null {
   try {
@@ -85,7 +110,7 @@ export function AiChatWidget() {
 
   const [open, setOpen] = useState(false);
   const [tab, setTab] = useState<Tab>("home");
-  const [phase, setPhase] = useState<"form" | "chat">("form");
+  const [phase] = useState<"chat">("chat");
 
   const [input, setInput] = useState("");
   const [messages, setMessages] = useState<Msg[]>([]);
@@ -105,9 +130,6 @@ export function AiChatWidget() {
   const [typingVisible, setTypingVisible] = useState(false);
   const typingTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const [form, setForm] = useState({ name: "", email: "", phone: "", agree: false });
-  const [formError, setFormError] = useState<string | null>(null);
-  const [submitting, setSubmitting] = useState(false);
   const [teaser, setTeaser] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
@@ -115,6 +137,8 @@ export function AiChatWidget() {
   const [csatRequested, setCsatRequested] = useState(false);
   const [csatSubmitted, setCsatSubmitted] = useState(false);
   const [csatBusy, setCsatBusy] = useState(false);
+  const [endingChat, setEndingChat] = useState(false);
+  const [pendingCsatSession, setPendingCsatSession] = useState<string | null>(null);
   const loadSeq = useRef(0);
   const sendingRef = useRef(false);
 
@@ -124,7 +148,15 @@ export function AiChatWidget() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const openRef = useRef(false);
   const stickToBottom = useRef(true);
+  const sessionIdRef = useRef<string | null>(null);
+  const messagesRef = useRef<Msg[]>([]);
+  const chatClosedRef = useRef(false);
+  const csatSubmittedRef = useRef(false);
   openRef.current = open;
+  sessionIdRef.current = sessionId;
+  messagesRef.current = messages;
+  chatClosedRef.current = chatClosed;
+  csatSubmittedRef.current = csatSubmitted;
 
   // Keep typing UI visible at least ~700ms so the animation is noticeable
   useEffect(() => {
@@ -186,18 +218,49 @@ export function AiChatWidget() {
   }
 
   useEffect(() => {
+    const pending = readPendingCsat();
+    if (pending) {
+      setPendingCsatSession(pending);
+      setCsatRequested(true);
+      setChatClosed(true);
+    }
+  }, []);
+
+  const resetChat = useCallback(() => {
+    clearChatStorage();
+    writePendingCsat(null);
+    setSessionId(null);
+    setMessages([]);
+    setChatClosed(false);
+    setCsatRequested(false);
+    setCsatSubmitted(false);
+    setPendingCsatSession(null);
+    setHandoff(false);
+    setTicketNumber(null);
+    setHandlerType("AI");
+    setAgentName(null);
+    setVisitorName("");
+    setInput("");
+    setBusy(false);
+    setUnread(0);
+    writeUnread(0);
+  }, []);
+
+  useEffect(() => {
     const id = readSessionId();
-    if (id) setSessionId(id);
+    if (id && !readPendingCsat()) setSessionId(id);
     try {
-      if (sessionStorage.getItem(STARTED_KEY) === "1") {
-        setPhase("chat");
-        setVisitorName(sessionStorage.getItem(NAME_KEY) || "");
-      }
       setUnread(Number(sessionStorage.getItem(UNREAD_KEY) || 0) || 0);
     } catch {
       /* ignore */
     }
   }, []);
+
+  useEffect(() => {
+    if (pendingCsatSession && open) {
+      setTab("chat");
+    }
+  }, [pendingCsatSession, open]);
 
   useEffect(() => {
     let seen = false;
@@ -212,8 +275,33 @@ export function AiChatWidget() {
   }, []);
 
   useEffect(() => {
-    // Keep conversation when browsing; only reset session id cache is enough
+    // Keep conversation when browsing within the same tab
   }, [pathname, locale]);
+
+  // End session + optional review prompt when visitor closes the browser/tab
+  useEffect(() => {
+    const onPageHide = (e: PageTransitionEvent) => {
+      const sid = sessionIdRef.current;
+      const hasMessages = messagesRef.current.length > 0;
+      if (!sid || !hasMessages || chatClosedRef.current) return;
+
+      const payload = JSON.stringify({ sessionId: sid, requestCsat: true });
+      try {
+        const blob = new Blob([payload], { type: "application/json" });
+        navigator.sendBeacon("/api/chat/end-session", blob);
+      } catch {
+        /* ignore */
+      }
+
+      if (e.persisted === false) {
+        writePendingCsat(sid);
+        clearChatStorage();
+      }
+    };
+
+    window.addEventListener("pagehide", onPageHide);
+    return () => window.removeEventListener("pagehide", onPageHide);
+  }, []);
 
   const applySessionPayload = useCallback(
     (d: {
@@ -246,9 +334,15 @@ export function AiChatWidget() {
       if (d.agent?.displayName) setAgentName(d.agent.displayName);
       if (typeof d.agent?.online === "boolean") setAgentOnline(d.agent.online);
       if (d.assistantName) setAssistantName(d.assistantName);
-      if ((d.messages?.length ?? 0) > 0) setPhase("chat");
+      if ((d.messages?.length ?? 0) > 0) {
+        /* chat active */
+      }
+      // Auto-reset after closed chat with CSAT already submitted
+      if (d.status === "CLOSED" && d.csatRating) {
+        resetChat();
+      }
     },
-    []
+    [resetChat]
   );
 
   const loadConversation = useCallback(async () => {
@@ -349,44 +443,6 @@ export function AiChatWidget() {
       writeUnread(n);
       return n;
     });
-  }
-
-  async function startChat(e: React.FormEvent) {
-    e.preventDefault();
-    if (submitting) return;
-    const name = form.name.trim();
-    if (name.length < 2) return setFormError("Please enter your name.");
-    if (!emailOk(form.email.trim())) return setFormError("Please enter a valid email address.");
-    if (!form.agree) return setFormError("Please accept the privacy policy to continue.");
-    setFormError(null);
-    setSubmitting(true);
-    try {
-      await fetch("/api/leads", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          fullName: name,
-          email: form.email.trim(),
-          phone: form.phone.trim() || undefined,
-          interest: "Live chat",
-          message: "Started a live chat from the website.",
-          formType: "chat",
-          channel: "WEBSITE",
-        }),
-      }).catch(() => undefined);
-      setVisitorName(name);
-      try {
-        sessionStorage.setItem(STARTED_KEY, "1");
-        sessionStorage.setItem(NAME_KEY, name);
-        sessionStorage.setItem(TEASER_KEY, "1");
-      } catch {
-        /* ignore */
-      }
-      setPhase("chat");
-      requestAnimationFrame(() => inputRef.current?.focus());
-    } finally {
-      setSubmitting(false);
-    }
   }
 
   async function sendText(raw: string) {
@@ -520,7 +576,8 @@ export function AiChatWidget() {
   }
 
   async function submitCsat(rating: number) {
-    if (!sessionId || csatBusy || csatSubmitted) return;
+    const sid = pendingCsatSession || sessionId;
+    if (!sid || csatBusy || csatSubmitted) return;
     setCsatBusy(true);
     try {
       const res = await fetch("/api/csat", {
@@ -528,13 +585,16 @@ export function AiChatWidget() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           channel: "CHAT",
-          referenceId: sessionId,
+          referenceId: sid,
           rating,
         }),
       });
       if (!res.ok) throw new Error("Failed to submit rating");
       setCsatSubmitted(true);
       setCsatRequested(false);
+      writePendingCsat(null);
+      setPendingCsatSession(null);
+      resetChat();
     } catch {
       /* visitor can retry */
     } finally {
@@ -542,7 +602,50 @@ export function AiChatWidget() {
     }
   }
 
-async function onPickFile(e: React.ChangeEvent<HTMLInputElement>) {
+  function skipCsat() {
+    writePendingCsat(null);
+    setPendingCsatSession(null);
+    setCsatSubmitted(true);
+    setCsatRequested(false);
+    resetChat();
+  }
+
+  function startNewChat() {
+    resetChat();
+  }
+
+  async function endChat() {
+    const sid = sessionId;
+    const hasMessages = messages.length > 0;
+
+    if (!sid || !hasMessages || chatClosed) {
+      resetChat();
+      return;
+    }
+
+    setEndingChat(true);
+    try {
+      const res = await fetch("/api/chat/end-session", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ sessionId: sid, requestCsat: true }),
+      });
+      if (!res.ok) throw new Error("Failed to end chat");
+      clearChatStorage();
+      setPendingCsatSession(sid);
+      setChatClosed(true);
+      setCsatRequested(true);
+    } catch {
+      clearChatStorage();
+      setPendingCsatSession(sid);
+      setChatClosed(true);
+      setCsatRequested(true);
+    } finally {
+      setEndingChat(false);
+    }
+  }
+
+  async function onPickFile(e: React.ChangeEvent<HTMLInputElement>) {
     const f = e.target.files?.[0];
     e.target.value = "";
     if (!f) return;
@@ -631,7 +734,7 @@ async function onPickFile(e: React.ChangeEvent<HTMLInputElement>) {
               <p className="text-[13px] font-semibold text-foreground">{displayName} from MernCrest</p>
             </div>
             <p className="text-[13px] leading-snug text-stitch-muted">
-              Hi! I&apos;m Aira. Looking for the right plan for your team? I can help you compare options.
+              Hi! I&apos;m Aira. Ask me anything about our services, pricing, or support.
             </p>
           </motion.div>
         )}
@@ -665,7 +768,7 @@ async function onPickFile(e: React.ChangeEvent<HTMLInputElement>) {
                   <div className="rounded-2xl border border-stitch-outline bg-stitch-surface p-5 shadow-sm">
                     <h2 className="font-display text-base font-semibold text-foreground">Hello there!</h2>
                     <p className="mt-1 text-sm text-stitch-muted">
-                      Meet Aira — your MernCrest AI assistant, ready to help you build faster.
+                      Meet Aira — your MernCrest AI assistant. Ask questions, get help, or connect with our team.
                     </p>
                   </div>
 
@@ -717,98 +820,6 @@ async function onPickFile(e: React.ChangeEvent<HTMLInputElement>) {
 
             {tab === "chat" && (
               <div className="flex h-full flex-col">
-                {phase === "form" ? (
-                  <>
-                    <div className={`flex h-14 items-center justify-between px-4 text-white ${GRAD}`}>
-                      <button
-                        type="button"
-                        onClick={() => setTab("home")}
-                        className="flex items-center gap-1.5 text-white transition hover:opacity-90"
-                      >
-                        <ChevronLeft className="h-5 w-5" />
-                        <span className="font-display text-base font-semibold">Chat with us</span>
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setOpen(false)}
-                        aria-label="Close chat"
-                        className="text-white/80 transition hover:text-white"
-                      >
-                        <X className="h-4 w-4" />
-                      </button>
-                    </div>
-
-                    <form onSubmit={startChat} className="flex-1 space-y-4 overflow-y-auto bg-stitch-bg p-6">
-                      <p className="text-sm text-stitch-muted">
-                        Please introduce yourself to start the conversation.
-                      </p>
-
-                      <div>
-                        <label className="mb-1.5 block text-xs font-medium text-stitch-muted">Full Name</label>
-                        <input
-                          value={form.name}
-                          onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
-                          placeholder="e.g. John Doe"
-                          className="h-11 w-full rounded-xl border border-red-100 bg-red-50/60 px-4 text-sm text-foreground outline-none transition placeholder:text-stitch-muted focus:border-red-500 focus:ring-2 focus:ring-red-500/20"
-                        />
-                      </div>
-                      <div>
-                        <label className="mb-1.5 block text-xs font-medium text-stitch-muted">Work Email</label>
-                        <input
-                          type="email"
-                          value={form.email}
-                          onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))}
-                          placeholder="john@company.com"
-                          className="h-11 w-full rounded-xl border border-red-100 bg-red-50/60 px-4 text-sm text-foreground outline-none transition placeholder:text-stitch-muted focus:border-red-500 focus:ring-2 focus:ring-red-500/20"
-                        />
-                      </div>
-                      <div>
-                        <label className="mb-1.5 block text-xs font-medium text-stitch-muted">Phone Number</label>
-                        <input
-                          value={form.phone}
-                          onChange={(e) => setForm((f) => ({ ...f, phone: e.target.value }))}
-                          placeholder="+94 (77) 000-0000"
-                          className="h-11 w-full rounded-xl border border-red-100 bg-red-50/60 px-4 text-sm text-foreground outline-none transition placeholder:text-stitch-muted focus:border-red-500 focus:ring-2 focus:ring-red-500/20"
-                        />
-                      </div>
-
-                      <label className="flex items-start gap-3 text-xs text-stitch-muted">
-                        <input
-                          type="checkbox"
-                          checked={form.agree}
-                          onChange={(e) => setForm((f) => ({ ...f, agree: e.target.checked }))}
-                          className="mt-0.5 h-4 w-4 rounded border-stitch-outline text-red-600 focus:ring-red-500/40"
-                        />
-                        <span>
-                          I agree to the{" "}
-                          <Link href="/privacy" className="text-red-600 hover:underline">
-                            Privacy Policy
-                          </Link>{" "}
-                          and{" "}
-                          <Link href="/terms" className="text-red-600 hover:underline">
-                            Terms of Service
-                          </Link>{" "}
-                          for data processing.
-                        </span>
-                      </label>
-
-                      {formError && <p className="text-xs font-medium text-rose-500">{formError}</p>}
-
-                      <button
-                        type="submit"
-                        disabled={submitting}
-                        className={`mt-2 flex h-12 w-full items-center justify-center rounded-xl text-sm font-semibold text-white shadow-[0_8px_24px_-4px_rgba(244,63,94,0.5)] transition hover:opacity-90 disabled:opacity-60 ${GRAD}`}
-                      >
-                        {submitting ? "Starting..." : "Start the chat"}
-                      </button>
-
-                      <p className="flex items-center justify-center gap-1.5 text-[10px] text-stitch-muted">
-                        <ShieldCheck className="h-3 w-3" /> Your details are kept private &amp; secure.
-                      </p>
-                    </form>
-                  </>
-                ) : (
-                  <>
                     <div className={`z-20 flex items-center justify-between px-4 py-3 text-white shadow-md ${GRAD}`}>
                       <div className="flex items-center gap-3">
                         <span className="relative flex h-9 w-9 items-center justify-center rounded-full border-2 border-white/20 bg-white/15">
@@ -839,14 +850,26 @@ async function onPickFile(e: React.ChangeEvent<HTMLInputElement>) {
                           </p>
                         </div>
                       </div>
-                      <button
-                        type="button"
-                        onClick={() => setOpen(false)}
-                        aria-label="Close chat"
-                        className="text-white/80 transition hover:text-white"
-                      >
-                        <X className="h-4 w-4" />
-                      </button>
+                      <div className="flex items-center gap-1">
+                        {!chatClosed && messages.length > 0 ? (
+                          <button
+                            type="button"
+                            onClick={() => void endChat()}
+                            disabled={endingChat || busy}
+                            className="rounded-lg px-2 py-1 text-[11px] font-medium text-white/90 transition hover:bg-white/15 hover:text-white disabled:opacity-50"
+                          >
+                            {endingChat ? "Ending…" : "End chat"}
+                          </button>
+                        ) : null}
+                        <button
+                          type="button"
+                          onClick={() => setOpen(false)}
+                          aria-label="Close chat"
+                          className="text-white/80 transition hover:text-white"
+                        >
+                          <X className="h-4 w-4" />
+                        </button>
+                      </div>
                     </div>
 
                     <div className="relative min-h-0 flex-1">
@@ -865,7 +888,7 @@ async function onPickFile(e: React.ChangeEvent<HTMLInputElement>) {
                             <Bot className="h-3 w-3" />
                           </span>
                           <div className="rounded-2xl rounded-bl-none border border-stitch-outline bg-stitch-surface px-3.5 py-2.5 text-sm leading-relaxed text-foreground shadow-sm">
-                            {greeting}
+                            <ChatMessageBody role="AI" body={greeting} linkClassName="text-red-600 underline underline-offset-2 hover:opacity-80" />
                           </div>
                         </div>
 
@@ -881,7 +904,11 @@ async function onPickFile(e: React.ChangeEvent<HTMLInputElement>) {
                                 transition={{ duration: 0.22, ease: "easeOut" }}
                                 className="mx-auto max-w-[92%] rounded-xl border border-amber-300/50 bg-amber-50 px-3 py-2 text-center text-xs font-medium text-amber-700"
                               >
-                                {sanitizeChatMessageBody(m.role, m.body)}
+                                <ChatMessageBody
+                                  role={m.role}
+                                  body={m.body}
+                                  linkClassName="text-amber-800 underline underline-offset-2 hover:opacity-80"
+                                />
                               </motion.div>
                             );
                           }
@@ -906,7 +933,15 @@ async function onPickFile(e: React.ChangeEvent<HTMLInputElement>) {
                                       : "rounded-2xl rounded-bl-none border border-stitch-outline bg-stitch-surface text-foreground"
                                   }`}
                                 >
-                                  {sanitizeChatMessageBody(m.role, m.body)}
+                                  <ChatMessageBody
+                                  role={m.role}
+                                  body={m.body}
+                                  linkClassName={
+                                    isUser
+                                      ? "text-white/90 underline underline-offset-2 hover:opacity-80"
+                                      : "text-red-600 underline underline-offset-2 hover:opacity-80"
+                                  }
+                                />
                                 </div>
                                 {isUser ? (
                                   <span className="flex items-center gap-0.5 pr-1 text-[10px] text-stitch-muted">
@@ -1003,7 +1038,7 @@ async function onPickFile(e: React.ChangeEvent<HTMLInputElement>) {
                       {chatClosed && csatRequested && !csatSubmitted ? (
                         <div className="px-4 py-4 text-center">
                           <p className="mb-2 text-sm font-medium text-foreground">
-                            How was your support experience?
+                            How was your chat experience? (optional)
                           </p>
                           <div className="flex justify-center gap-2">
                             {[1, 2, 3, 4, 5].map((n) => (
@@ -1019,15 +1054,28 @@ async function onPickFile(e: React.ChangeEvent<HTMLInputElement>) {
                               </button>
                             ))}
                           </div>
-                          <p className="mt-2 text-[11px] text-stitch-muted">
-                            Tap a star to rate — thank you!
-                          </p>
+                          <button
+                            type="button"
+                            onClick={skipCsat}
+                            className="mt-3 text-[11px] text-stitch-muted underline hover:text-foreground"
+                          >
+                            Skip — start a new chat
+                          </button>
                         </div>
                       ) : chatClosed ? (
-                        <div className="px-4 py-3 text-center text-xs text-stitch-muted">
-                          {csatSubmitted
-                            ? "Thank you for your feedback!"
-                            : "This chat has been closed."}
+                        <div className="px-4 py-3 text-center">
+                          <p className="text-xs text-stitch-muted">
+                            {csatSubmitted
+                              ? "Thank you for your feedback!"
+                              : "This chat has ended."}
+                          </p>
+                          <button
+                            type="button"
+                            onClick={startNewChat}
+                            className={`mt-2 rounded-xl px-4 py-2 text-xs font-semibold text-white ${GRAD}`}
+                          >
+                            Start new chat
+                          </button>
                         </div>
                       ) : (
                         <>
@@ -1093,8 +1141,6 @@ async function onPickFile(e: React.ChangeEvent<HTMLInputElement>) {
                         </>
                       )}
                     </div>
-                  </>
-                )}
               </div>
             )}
 

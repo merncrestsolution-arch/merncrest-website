@@ -37,7 +37,7 @@ export async function createConversation(opts: {
     route.handlerType === "AGENT" ? "AGENT" : "AI",
     route.handlerType === "AGENT"
       ? `Hi! You're connected with ${route.agent.displayName}. How can we help you today?`
-      : `Hello! I'm Aira, your senior technology consultant at MernCrest. What business challenge can I help you solve today — software, ERP, AI, cloud, or hosting?`
+      : `Hello! I'm Aira, your MernCrest AI assistant. How can I help you today?`
   );
 
   await prisma.chatMessage.create({
@@ -123,22 +123,31 @@ export async function appendUserMessage(opts: {
   const session = await prisma.chatSession.findUnique({ where: { id: opts.sessionId } });
   if (session) {
     const extracted = extractIdentifiersFromText(opts.body);
-    const lead = await ensureLeadFromChannel({
-      channel: "LIVE_CHAT",
-      fullName: opts.visitorName || "Live chat visitor",
-      email: extracted.emails[0] || null,
-      phone: extracted.phones[0] || null,
-      interest: "Live chat",
-      activityType: "CHAT",
-      activityBody: opts.body.slice(0, 240),
-      channelRef: opts.sessionId,
-      userId: opts.userId,
-    });
-    if (!session.leadId) {
-      await prisma.chatSession.update({
-        where: { id: session.id },
-        data: { leadId: lead.id, updatedAt: new Date() },
+    const hasContact = extracted.emails.length > 0 || extracted.phones.length > 0;
+
+    if (hasContact) {
+      const lead = await ensureLeadFromChannel({
+        channel: "LIVE_CHAT",
+        fullName: opts.visitorName || "Live chat visitor",
+        email: extracted.emails[0] || null,
+        phone: extracted.phones[0] || null,
+        interest: "Live chat",
+        activityType: "CHAT",
+        activityBody: opts.body.slice(0, 240),
+        channelRef: opts.sessionId,
+        userId: opts.userId,
       });
+      if (!session.leadId) {
+        await prisma.chatSession.update({
+          where: { id: session.id },
+          data: { leadId: lead.id, updatedAt: new Date() },
+        });
+      } else {
+        await prisma.chatSession.update({
+          where: { id: session.id },
+          data: { updatedAt: new Date() },
+        });
+      }
     } else {
       await prisma.chatSession.update({
         where: { id: session.id },
