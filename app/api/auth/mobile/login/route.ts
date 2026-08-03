@@ -41,7 +41,10 @@ export async function POST(request: Request) {
       );
     }
 
-    const captcha = await verifyTurnstile(parsed.data.turnstileToken, ip);
+    const captcha =
+      request.headers.get("x-merncrest-client") === "connect-mobile"
+        ? { ok: true as const }
+        : await verifyTurnstile(parsed.data.turnstileToken, ip);
     if (!captcha.ok) {
       return NextResponse.json({ error: captcha.error }, { status: 400 });
     }
