@@ -129,6 +129,8 @@ export function SystemLoginView() {
           </form>
 
           <p className="stitch-auth-foot">
+            <Link href="/downloads?system=1">Download MernCrest Connect (Android)</Link>
+            <span className="mx-2 opacity-40">·</span>
             Customer?{" "}
             <Link href="/login">Open Portal.merncrest.lk</Link>
           </p>

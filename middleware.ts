@@ -30,14 +30,47 @@ function markSystem(res: NextResponse, request: NextRequest) {
   return res;
 }
 
+function withMobileApiCors(request: NextRequest, response: NextResponse) {
+  const client = request.headers.get("x-merncrest-client");
+  const origin = request.headers.get("origin");
+  const isConnect =
+    client === "connect-mobile" ||
+    request.nextUrl.pathname.startsWith("/api/auth/mobile") ||
+    request.nextUrl.pathname.startsWith("/api/platform") ||
+    (request.nextUrl.pathname.startsWith("/api/staff") &&
+      request.headers.get("authorization")?.startsWith("Bearer "));
+
+  if (!isConnect) return response;
+
+  if (origin) {
+    response.headers.set("Access-Control-Allow-Origin", origin);
+    response.headers.set("Vary", "Origin");
+  } else {
+    response.headers.set("Access-Control-Allow-Origin", "*");
+  }
+  response.headers.set("Access-Control-Allow-Methods", "GET, POST, PATCH, PUT, DELETE, OPTIONS");
+  response.headers.set(
+    "Access-Control-Allow-Headers",
+    "Content-Type, Authorization, X-MernCrest-Client"
+  );
+  response.headers.set("Access-Control-Max-Age", "86400");
+  return response;
+}
+
 export function middleware(request: NextRequest) {
   try {
     const pathname = request.nextUrl.pathname;
     const host = request.headers.get("host") || "";
 
+    if (pathname.startsWith("/api")) {
+      if (request.method === "OPTIONS") {
+        return withMobileApiCors(request, new NextResponse(null, { status: 204 }));
+      }
+      return withMobileApiCors(request, NextResponse.next());
+    }
+
     if (
       pathname.startsWith("/_next") ||
-      pathname.startsWith("/api") ||
       pathname.startsWith("/_vercel") ||
       pathname.includes(".")
     ) {
@@ -87,7 +120,8 @@ export function middleware(request: NextRequest) {
         rest.startsWith("/staff") ||
         rest.startsWith("/admin") ||
         rest.startsWith("/login") ||
-        rest.startsWith("/forgot-password");
+        rest.startsWith("/forgot-password") ||
+        rest.startsWith("/downloads");
 
       if (!pathnameHasLocale) {
         const target =
@@ -109,6 +143,13 @@ export function middleware(request: NextRequest) {
         return markSystem(NextResponse.redirect(url), request);
       }
 
+      // Public Connect APK page on system host (avoids clash with marketing /downloads)
+      if (rest === "/downloads" || rest.startsWith("/downloads/")) {
+        const url = request.nextUrl.clone();
+        url.pathname = `/${locale}/system/downloads`;
+        return markSystem(NextResponse.rewrite(url), request);
+      }
+
       // Block portal/marketing on system surface → System login
       // (keep /admin + /staff on Stitch System shell)
       if (
@@ -116,7 +157,8 @@ export function middleware(request: NextRequest) {
         !rest.startsWith("/admin") &&
         !rest.startsWith("/login") &&
         !rest.startsWith("/forgot-password") &&
-        !rest.startsWith("/register")
+        !rest.startsWith("/register") &&
+        !rest.startsWith("/downloads")
       ) {
         // Cookie-only system mode on marketing paths: don't trap users — clear redirect only on real system host
         if (isSystemHost(host) || systemParam === "1") {

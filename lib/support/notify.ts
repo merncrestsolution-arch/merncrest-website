@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/db";
+import { publishPlatformSync } from "@/lib/platform/sync-events";
 
 export async function notifyUser(opts: {
   userId: string;
@@ -7,7 +8,7 @@ export async function notifyUser(opts: {
   category?: string;
   href?: string;
 }) {
-  return prisma.notification.create({
+  const row = await prisma.notification.create({
     data: {
       userId: opts.userId,
       title: opts.title,
@@ -16,4 +17,18 @@ export async function notifyUser(opts: {
       href: opts.href,
     },
   });
+
+  const unreadCount = await prisma.notification.count({
+    where: { userId: opts.userId, readAt: null },
+  });
+
+  publishPlatformSync({
+    type: "notification",
+    userId: opts.userId,
+    id: row.id,
+    title: row.title,
+    unreadCount,
+  });
+
+  return row;
 }

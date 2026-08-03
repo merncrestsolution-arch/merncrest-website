@@ -18,6 +18,7 @@ import {
   Cloud,
   ArrowRight,
 } from "lucide-react";
+import { useSyncRefresh } from "@/hooks/use-platform-sync";
 
 type StaffData = {
   employee?: {
@@ -88,6 +89,8 @@ export function StaffDashboard() {
     if (!res.ok) setError(d.error || "Failed");
     else setData(d);
   }, []);
+
+  useSyncRefresh(["all"], load);
 
   useEffect(() => {
     load();

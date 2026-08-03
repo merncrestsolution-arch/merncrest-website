@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/db";
+import { publishAnnouncementSync } from "@/lib/platform/publish";
 
 /** Publish scheduled announcements whose scheduledFor has passed. */
 export async function publishDueAnnouncements(): Promise<{ published: number }> {
@@ -49,6 +50,8 @@ export async function publishAnnouncement(announcementId: string) {
   if (announcement.surface === "PORTAL" || announcement.surface === "BOTH") {
     // Portal customers see via active announcement query — no per-user notify required
   }
+
+  publishAnnouncementSync();
 
   return announcement;
 }

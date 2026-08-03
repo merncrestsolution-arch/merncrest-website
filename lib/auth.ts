@@ -1,6 +1,6 @@
 import { createHash, randomBytes } from "crypto";
 import bcrypt from "bcryptjs";
-import { cookies } from "next/headers";
+import { cookies, headers } from "next/headers";
 import { isSecureRequest } from "@/lib/cookie-secure";
 import { prisma } from "@/lib/db";
 import { getSessionDays } from "@/lib/security/auth-policy";
@@ -85,25 +85,39 @@ export async function destroySession(token: string) {
   });
 }
 
-export async function getSessionUser(): Promise<SessionUser | null> {
+async function getSessionUserByToken(token: string): Promise<SessionUser | null> {
+  const session = await prisma.session.findUnique({
+    where: { tokenHash: hashToken(token) },
+    include: { user: true },
+  });
+
+  if (!session || session.expiresAt < new Date()) {
+    if (session) {
+      await prisma.session.delete({ where: { id: session.id } }).catch(() => undefined);
+    }
+    return null;
+  }
+
+  return toSessionUser(session.user);
+}
+
+/** Resolve staff session from cookie (`mc_session`) or `Authorization: Bearer` (mobile). */
+export async function getSessionUser(request?: Request): Promise<SessionUser | null> {
   try {
+    let bearer = request?.headers.get("authorization") ?? null;
+    if (!bearer) {
+      const hdrs = await headers();
+      bearer = hdrs.get("authorization");
+    }
+    if (bearer?.startsWith("Bearer ")) {
+      return getSessionUserByToken(bearer.slice(7).trim());
+    }
+
     const cookieStore = await cookies();
     const token = cookieStore.get(SESSION_COOKIE)?.value;
     if (!token) return null;
 
-    const session = await prisma.session.findUnique({
-      where: { tokenHash: hashToken(token) },
-      include: { user: true },
-    });
-
-    if (!session || session.expiresAt < new Date()) {
-      if (session) {
-        await prisma.session.delete({ where: { id: session.id } }).catch(() => undefined);
-      }
-      return null;
-    }
-
-    return toSessionUser(session.user);
+    return getSessionUserByToken(token);
   } catch (error) {
     console.error("[getSessionUser]", error);
     return null;

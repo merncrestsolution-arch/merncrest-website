@@ -5,6 +5,7 @@ import { requireStaff } from "@/lib/commerce";
 import { TASK_STATUSES, POMODORO_MINUTES } from "@/lib/erp/projects/constants";
 import { writeAuditLog } from "@/lib/erp/audit";
 import { canMutateProject } from "@/lib/projects/access";
+import { publishTaskUpdate } from "@/lib/platform/publish";
 
 /** Staff ESS — assigned / project-member tasks + Pomodoro */
 export async function GET() {
@@ -158,6 +159,8 @@ export async function PATCH(request: Request) {
     entityId: updated.id,
     summary: `ESS status → ${updated.status}: ${updated.title}`,
   });
+
+  publishTaskUpdate(auth.user.id, updated.id, updated.status);
 
   return NextResponse.json({ task: updated });
 }

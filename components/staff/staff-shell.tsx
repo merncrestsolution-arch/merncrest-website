@@ -45,6 +45,7 @@ import {
 import { cn } from "@/lib/utils";
 import { StaffSearchProvider, StaffSearchTrigger } from "@/components/staff/staff-global-search";
 import { AgentPresenceToggle } from "@/components/staff/agent-presence-toggle";
+import { PlatformSyncProvider, usePlatformSync } from "@/hooks/use-platform-sync";
 
 type NavItem = {
   href: string;
@@ -178,6 +179,26 @@ export function StaffShell({
   userRole?: string;
   isSuperAdmin?: boolean;
 }) {
+  return (
+    <PlatformSyncProvider>
+      <StaffShellInner userName={userName} userRole={userRole} isSuperAdmin={isSuperAdmin}>
+        {children}
+      </StaffShellInner>
+    </PlatformSyncProvider>
+  );
+}
+
+function StaffShellInner({
+  children,
+  userName,
+  userRole,
+  isSuperAdmin = false,
+}: {
+  children: React.ReactNode;
+  userName?: string;
+  userRole?: string;
+  isSuperAdmin?: boolean;
+}) {
   const pathname = usePathname();
   const router = useRouter();
   const roleLabel =
@@ -188,6 +209,7 @@ export function StaffShell({
         : userRole || "Team Member";
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [collapsed, setCollapsed] = useState<Record<string, boolean>>({});
+  const sync = usePlatformSync();
 
   const visibleGroups = navGroups.filter((g) => isSuperAdmin || !g.superAdminOnly);
 
@@ -312,6 +334,9 @@ export function StaffShell({
               <AgentPresenceToggle />
               <Link href="/staff/notifications" className="stitch-topbar-icon-btn" aria-label="Notifications">
                 <Bell className="h-4 w-4" />
+                {sync.unreadNotifications > 0 ? (
+                  <span className="stitch-topbar-badge">{sync.unreadNotifications}</span>
+                ) : null}
               </Link>
               <Link href="/staff/chat" className="stitch-topbar-icon-btn" aria-label="Messages">
                 <Mail className="h-4 w-4" />

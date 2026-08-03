@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { nextNumber, requireUser } from "@/lib/commerce";
 import { notifyUser } from "@/lib/support/notify";
+import { publishTicketUpdate } from "@/lib/platform/publish";
 import { onCustomerTicketCreated } from "@/lib/crm/customer-hooks";
 import { getStaffScope, ticketScopeWhere } from "@/lib/erp/staff-scope";
 import { defaultTenantStamp } from "@/lib/erp/scope-stamp";
@@ -186,6 +187,7 @@ export async function PATCH(request: Request) {
           internal: true,
         },
       });
+      publishTicketUpdate(ticket.id);
       return NextResponse.json({ ticket: updated });
     }
 
@@ -199,6 +201,7 @@ export async function PATCH(request: Request) {
           user: { select: { email: true, fullName: true } },
         },
       });
+      publishTicketUpdate(ticket.id);
       return NextResponse.json({ ticket: updated });
     }
 
@@ -230,6 +233,7 @@ export async function PATCH(request: Request) {
           },
         });
       });
+      publishTicketUpdate(ticket.id);
       return NextResponse.json({ ticket: updated });
     }
 
@@ -280,6 +284,7 @@ export async function PATCH(request: Request) {
           href: "/portal/tickets",
         });
       }
+      publishTicketUpdate(ticket.id);
       return NextResponse.json({ ticket: updated });
     }
 
@@ -340,6 +345,7 @@ export async function PATCH(request: Request) {
       }
     }
 
+    publishTicketUpdate(updated.id);
     return NextResponse.json({ ticket: updated });
   } catch (error) {
     console.error("[tickets:patch]", error);
@@ -429,6 +435,7 @@ export async function PUT(request: Request) {
       });
     }
 
+    publishTicketUpdate(ticket.id);
     return NextResponse.json({ ticket });
   } catch (error) {
     console.error("[tickets:put]", error);

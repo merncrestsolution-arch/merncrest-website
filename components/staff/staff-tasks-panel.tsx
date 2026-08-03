@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { KANBAN_COLUMNS, POMODORO_MINUTES, TASK_STATUS_TRANSITIONS, type TaskStatus } from "@/lib/erp/projects/constants";
+import { useSyncRefresh } from "@/hooks/use-platform-sync";
 import { Clock, Timer } from "lucide-react";
 
 type Task = {
@@ -59,6 +60,8 @@ export function StaffTasksPanel() {
   useEffect(() => {
     load();
   }, [load]);
+
+  useSyncRefresh(["task"], load);
 
   useEffect(() => {
     if (!pomodoroId || secondsLeft <= 0) return;

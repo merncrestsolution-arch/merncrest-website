@@ -3,6 +3,7 @@ import { z } from "zod";
 import { prisma } from "@/lib/db";
 import { requireStaff } from "@/lib/commerce";
 import { writeAuditLog } from "@/lib/erp/audit";
+import { publishAttendanceSync } from "@/lib/platform/publish";
 import { randomBytes } from "crypto";
 
 function startOfDay(d = new Date()) {
@@ -145,6 +146,8 @@ export async function POST(request: Request) {
       action: parsed.data.action,
     });
   }
+
+  publishAttendanceSync(auth.user.id);
 
   return NextResponse.json({ record });
 }
