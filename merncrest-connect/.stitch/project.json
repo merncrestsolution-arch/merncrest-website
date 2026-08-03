@@ -1,0 +1,23 @@
+{
+  "projectId": "16091446373131283598",
+  "projectUrl": "https://stitch.withgoogle.com/projects/16091446373131283598",
+  "productName": "MernCrest Connect",
+  "platform": "flutter",
+  "apiHost": "https://system.merncrest.lk",
+  "screens": {
+    "login": "projects/16091446373131283598/screens/5a1983fa76c74a32826dccf198c93d7a",
+    "dashboard": "projects/16091446373131283598/screens/b91ab168ec1249489ca56abb46234d65",
+    "attendance": "projects/16091446373131283598/screens/35bb7d2080694e7799266d9b48238d94",
+    "tasks": "projects/16091446373131283598/screens/45ab87d6ef9440aeae47a7964ce257ca",
+    "liveChat": "projects/16091446373131283598/screens/19cbd0341fa64163a303b383ab4de8cb",
+    "clientDetail": "projects/16091446373131283598/screens/4fb262fd98044e869285c0b6e6b66401",
+    "ticketDetail": "projects/16091446373131283598/screens/2f64ae6d16ad4668a9cf0b71302bb8f4",
+    "billing": "projects/16091446373131283598/screens/173c2cb328a34fcaa8124d3dd4647b37",
+    "leave": "projects/16091446373131283598/screens/24a2f794788d4a14a9be05803f11f528",
+    "notifications": "projects/16091446373131283598/screens/93c6608ea6c146a6becc50c8ce7c825e",
+    "projectHub": "projects/16091446373131283598/screens/9ccaf440401c4e9c82ead60939ea5554",
+    "resourcesHub": "projects/16091446373131283598/screens/913f75a6ab6b4847b03647e55919ba76",
+    "salesPipeline": "projects/16091446373131283598/screens/56ad7d965a1e4168a23d598fd9250c9b",
+    "whatsappCrm": "projects/16091446373131283598/screens/c35445deca574e3c941498f1c2e0616e"
+  }
+}

@@ -121,7 +121,8 @@ class AppUpdateOverlay extends StatelessWidget {
             constraints: const BoxConstraints(maxWidth: 380),
             child: Card(
               elevation: 12,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+              color: ConnectColors.surfaceRaised,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24), side: const BorderSide(color: ConnectColors.borderSubtle)),
               child: AppUpdateCard(info: info, onDismiss: onDismiss),
             ),
           ),
@@ -144,12 +145,7 @@ class AppUpdateLoginBanner extends StatelessWidget {
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: ConnectColors.primary.withValues(alpha: 0.35)),
-        gradient: LinearGradient(
-          colors: [
-            ConnectColors.primary.withValues(alpha: 0.12),
-            ConnectColors.accent.withValues(alpha: 0.08),
-          ],
-        ),
+        color: ConnectColors.surfaceRaised,
       ),
       child: AppUpdateCard(info: info, compact: true),
     );

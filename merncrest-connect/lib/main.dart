@@ -24,7 +24,9 @@ class MernCrestConnectApp extends StatelessWidget {
     return MaterialApp(
       title: 'MernCrest Connect',
       debugShowCheckedModeBanner: false,
-      theme: ConnectTheme.light(),
+      theme: ConnectTheme.dark(),
+      darkTheme: ConnectTheme.dark(),
+      themeMode: ThemeMode.dark,
       home: const AppUpdateGate(child: _RootGate()),
     );
   }
@@ -38,16 +40,20 @@ class _RootGate extends StatelessWidget {
     final state = context.watch<AppState>();
 
     if (state.loading) {
-      return const Scaffold(
+      return Scaffold(
+        backgroundColor: ConnectColors.background,
         body: Center(
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Image(image: AssetImage('assets/images/app_icon.png'), width: 96, height: 96),
-              SizedBox(height: 16),
-              CircularProgressIndicator(),
-              SizedBox(height: 8),
-              Text('MernCrest Connect'),
+              ClipRRect(
+                borderRadius: BorderRadius.circular(24),
+                child: Image.asset('assets/images/app_icon.png', width: 88, height: 88),
+              ),
+              const SizedBox(height: 20),
+              const CircularProgressIndicator(color: ConnectColors.primary),
+              const SizedBox(height: 12),
+              Text('MernCrest Connect', style: Theme.of(context).textTheme.titleMedium),
             ],
           ),
         ),
