@@ -6,8 +6,8 @@ import 'package:merncrest_connect/theme/connect_theme.dart';
 import 'package:merncrest_connect/theme/connect_tokens.dart';
 import 'package:merncrest_connect/utils/formatters.dart';
 import 'package:merncrest_connect/widgets/connect_card.dart';
-import 'package:merncrest_connect/widgets/connect_charts.dart';
 import 'package:merncrest_connect/widgets/connect_glass.dart';
+import 'package:merncrest_connect/widgets/connect_kpi_grid.dart';
 import 'package:merncrest_connect/widgets/connect_motion.dart';
 import 'package:merncrest_connect/widgets/connect_quick_actions.dart';
 import 'package:merncrest_connect/widgets/connect_skeleton.dart';
@@ -21,17 +21,25 @@ class DashboardScreen extends StatefulWidget {
   State<DashboardScreen> createState() => _DashboardScreenState();
 }
 
-class _DashboardScreenState extends State<DashboardScreen> {
+class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProviderStateMixin {
   Map<String, dynamic>? _data;
   Map<String, dynamic>? _command;
   List<dynamic> _announcements = [];
   bool _loading = true;
   String? _error;
+  late TabController _activityTabs;
 
   @override
   void initState() {
     super.initState();
+    _activityTabs = TabController(length: 4, vsync: this);
     _load();
+  }
+
+  @override
+  void dispose() {
+    _activityTabs.dispose();
+    super.dispose();
   }
 
   Future<void> _load() async {
@@ -76,6 +84,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
     final ops = _command?['kpis'] as Map<String, dynamic>? ?? {};
     final activities = (_command?['recentActivities'] as List<dynamic>?) ?? [];
     final employee = state.user?['employee'] as Map<String, dynamic>?;
+    final roles = (state.user?['roles'] as List<dynamic>?) ?? [];
 
     return ConnectPage(
       onRefresh: _load,
@@ -83,6 +92,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          ConnectOfflineBanner(online: sync?.connected == true),
           if (_loading)
             const ConnectDashboardSkeleton()
           else if (_error != null)
@@ -91,46 +101,41 @@ class _DashboardScreenState extends State<DashboardScreen> {
             _WelcomeHero(
               name: state.displayName,
               role: employee?['jobTitle']?.toString() ?? 'MernCrest Staff',
+              roles: roles.map((r) => r.toString()).toList(),
               branch: employee?['branch']?['name']?.toString() ?? 'MernCrest HQ',
+              location: employee?['branch']?['city']?.toString() ?? 'Sri Lanka',
+              lastLogin: state.user?['user']?['lastLoginAt']?.toString(),
               now: now,
               syncOnline: sync?.connected == true,
               serverStatus: ops['serverStatus']?.toString() ?? 'online',
+              apiStatus: 'online',
+              employeeStatus: employee?['status']?.toString() ?? 'ACTIVE',
             ).stitchEntrance(),
-            const SizedBox(height: ConnectSpacing.md),
+            const SizedBox(height: ConnectSpacing.sm),
             ConnectStatusRow(items: [
               ('Sync', sync?.connected == true ? ConnectStatusLevel.online : ConnectStatusLevel.degraded),
+              ('Internet', ConnectStatusLevel.online),
               ('API', ConnectStatusLevel.online),
               ('Server', _serverLevel(ops['serverStatus']?.toString())),
+              ('Employee', ConnectStatusLevel.online),
               ('Cloud', ConnectStatusLevel.online),
             ]),
-            const SizedBox(height: ConnectSpacing.md),
-            _KpiGrid(ops: ops, data: _data, sync: sync),
-            const ConnectSectionHeader(title: 'Performance', padding: EdgeInsets.fromLTRB(0, ConnectSpacing.md, 0, ConnectSpacing.sm)),
-            _PerformanceCharts(ops: ops),
-            const ConnectSectionHeader(title: 'Quick Actions'),
+            const SizedBox(height: ConnectSpacing.sm),
+            ...DashboardKpiBuilder(ops: ops, data: _data, sync: sync).buildSections(),
+            const ConnectSectionHeader(
+              title: 'Upcoming',
+              padding: EdgeInsets.fromLTRB(0, ConnectSpacing.xs, 0, ConnectSpacing.xs),
+            ),
+            _UpcomingSection(items: (_command?['upcomingCalendar'] as List<dynamic>?) ?? []),
+            const ConnectSectionHeader(title: 'Quick Actions', padding: EdgeInsets.fromLTRB(0, ConnectSpacing.sm, 0, ConnectSpacing.xs)),
             ConnectQuickActionGrid(actions: _buildQuickActions(context, state)),
             const ConnectSectionHeader(title: 'Recent Activity'),
-            if (activities.isEmpty)
-              ..._fallbackActivity(_data)
-            else
-              ...activities.take(6).map((a) {
-                final item = a as Map<String, dynamic>;
-                return _ActivityTile(
-                  title: item['summary']?.toString() ?? item['action']?.toString() ?? 'Activity',
-                  subtitle: '${item['module'] ?? ''} · ${item['actorName'] ?? 'System'}',
-                  time: item['createdAt']?.toString(),
-                ).stitchEntrance();
-              }),
-            const ConnectSectionHeader(title: 'Announcements'),
-            if (_announcements.isEmpty && ((_data?['notifications'] as List?)?.isEmpty ?? true))
-              const ConnectEmptyState(icon: Icons.campaign_outlined, title: 'No announcements yet', subtitle: 'Company updates will appear here.')
-            else ...[
-              ..._announcements.take(4).map((n) => _AnnouncementTile(title: (n as Map)['title']?.toString() ?? '', body: n['body']?.toString() ?? '')),
-              ...((_data?['notifications'] as List<dynamic>?) ?? []).take(4).map((n) {
-                final item = n as Map<String, dynamic>;
-                return _AnnouncementTile(title: item['title']?.toString() ?? '', body: item['body']?.toString() ?? '');
-              }),
-            ],
+            _ActivityTabs(
+              controller: _activityTabs,
+              activities: activities,
+              data: _data,
+              announcements: _announcements,
+            ),
           ],
         ],
       ),
@@ -147,35 +152,30 @@ class _DashboardScreenState extends State<DashboardScreen> {
     return [
       QuickActionItem(icon: Icons.login_rounded, label: 'Clock In', color: ConnectModuleColors.attendance, onTap: () => ModuleRouter.open(context, '/attendance')),
       QuickActionItem(icon: Icons.logout_rounded, label: 'Clock Out', color: ConnectModuleColors.attendance, onTap: () => ModuleRouter.open(context, '/attendance')),
+      QuickActionItem(icon: Icons.schedule_rounded, label: 'Attendance', color: ConnectModuleColors.attendance, onTap: () => ModuleRouter.open(context, '/attendance')),
       QuickActionItem(icon: Icons.flight_takeoff_rounded, label: 'Leave', color: ConnectModuleColors.hr, onTap: () => ModuleRouter.open(context, '/leave')),
-      QuickActionItem(icon: Icons.add_task_rounded, label: 'Create Task', color: ConnectModuleColors.projects, onTap: () => ModuleRouter.open(context, '/tasks')),
+      QuickActionItem(icon: Icons.add_task_rounded, label: 'Task', color: ConnectModuleColors.projects, onTap: () => ModuleRouter.open(context, '/tasks')),
       QuickActionItem(icon: Icons.confirmation_number_outlined, label: 'Ticket', color: ConnectModuleColors.helpdesk, onTap: () => ModuleRouter.open(context, '/tickets')),
       QuickActionItem(icon: Icons.groups_rounded, label: 'CRM', color: ConnectModuleColors.crm, onTap: () => state.goToShellTab(3)),
       QuickActionItem(icon: Icons.receipt_long_rounded, label: 'Invoices', color: ConnectModuleColors.finance, onTap: () => ModuleRouter.open(context, '/billing')),
       QuickActionItem(icon: Icons.folder_special_rounded, label: 'Projects', color: ConnectModuleColors.projects, onTap: () => ModuleRouter.open(context, '/projects')),
       QuickActionItem(icon: Icons.trending_up_rounded, label: 'Sales', color: ConnectModuleColors.crm, onTap: () => state.goToShellTab(3)),
+      QuickActionItem(icon: Icons.person_add_rounded, label: 'Clients', color: ConnectModuleColors.crm, onTap: () => state.goToShellTab(3)),
       QuickActionItem(icon: Icons.calendar_month_rounded, label: 'Calendar', color: ConnectModuleColors.calendar, onTap: () => ModuleRouter.open(context, '/calendar')),
+      QuickActionItem(icon: Icons.event_rounded, label: 'Meetings', color: ConnectModuleColors.calendar, onTap: () => ModuleRouter.open(context, '/calendar')),
       QuickActionItem(icon: Icons.forum_rounded, label: 'Chat', color: ConnectModuleColors.chat, onTap: () => state.goToShellTab(2)),
       QuickActionItem(icon: Icons.qr_code_scanner_rounded, label: 'Scan QR', color: ConnectModuleColors.security, onTap: () => ModuleRouter.open(context, '/attendance')),
+      QuickActionItem(icon: Icons.qr_code_2_rounded, label: 'Barcode', color: ConnectModuleColors.security, onTap: () => ModuleRouter.open(context, '/attendance')),
       QuickActionItem(icon: Icons.auto_awesome_rounded, label: 'AIRA', color: ConnectModuleColors.ai, onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const AiAssistantScreen()))),
       QuickActionItem(icon: Icons.payments_rounded, label: 'Payments', color: ConnectModuleColors.finance, onTap: () => ModuleRouter.open(context, '/billing')),
+      QuickActionItem(icon: Icons.money_off_rounded, label: 'Expenses', color: ConnectModuleColors.finance, onTap: () => ModuleRouter.open(context, '/billing')),
       QuickActionItem(icon: Icons.approval_rounded, label: 'Approvals', color: ConnectModuleColors.erp, onTap: () => ModuleRouter.open(context, '/tasks')),
       QuickActionItem(icon: Icons.campaign_rounded, label: 'News', color: ConnectModuleColors.hr, onTap: () => ModuleRouter.open(context, '/announcements')),
       QuickActionItem(icon: Icons.description_rounded, label: 'Documents', color: ConnectModuleColors.docs, onTap: () => ModuleRouter.open(context, '/documents')),
+      QuickActionItem(icon: Icons.folder_open_rounded, label: 'Files', color: ConnectModuleColors.docs, onTap: () => ModuleRouter.open(context, '/documents')),
       QuickActionItem(icon: Icons.emergency_rounded, label: 'Emergency', color: ConnectColors.error, onTap: () {}),
       QuickActionItem(icon: Icons.settings_rounded, label: 'Settings', color: ConnectModuleColors.settings, onTap: () => ModuleRouter.open(context, '/settings')),
     ];
-  }
-
-  List<Widget> _fallbackActivity(Map<String, dynamic>? data) {
-    final notifications = (data?['notifications'] as List<dynamic>?) ?? [];
-    if (notifications.isEmpty) {
-      return [ConnectCard(padding: const EdgeInsets.all(ConnectSpacing.md), child: Text('No recent activity yet.', style: Theme.of(context).textTheme.bodyMedium))];
-    }
-    return notifications.take(4).map((n) {
-      final item = n as Map<String, dynamic>;
-      return _ActivityTile(title: item['title']?.toString() ?? 'Update', subtitle: item['body']?.toString() ?? '', time: item['createdAt']?.toString());
-    }).toList();
   }
 }
 
@@ -183,18 +183,28 @@ class _WelcomeHero extends StatelessWidget {
   const _WelcomeHero({
     required this.name,
     required this.role,
+    required this.roles,
     required this.branch,
+    required this.location,
+    required this.lastLogin,
     required this.now,
     required this.syncOnline,
     required this.serverStatus,
+    required this.apiStatus,
+    required this.employeeStatus,
   });
 
   final String name;
   final String role;
+  final List<String> roles;
   final String branch;
+  final String location;
+  final String? lastLogin;
   final DateTime now;
   final bool syncOnline;
   final String serverStatus;
+  final String apiStatus;
+  final String employeeStatus;
 
   @override
   Widget build(BuildContext context) {
@@ -207,49 +217,53 @@ class _WelcomeHero extends StatelessWidget {
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              ClipRRect(borderRadius: BorderRadius.circular(ConnectRadius.md), child: Image.asset('assets/images/app_icon.png', width: 36, height: 36)),
+              ClipRRect(
+                borderRadius: BorderRadius.circular(ConnectRadius.sm),
+                child: Image.asset('assets/images/app_icon.png', width: 32, height: 32),
+              ),
               const SizedBox(width: ConnectSpacing.sm),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('${greetingForHour(now.hour)}, $name', style: Theme.of(context).textTheme.titleLarge),
-                    Text(role, style: const TextStyle(color: ConnectColors.primaryGlow, fontSize: 12)),
-                    Text(branch, style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontSize: 11)),
+                    Text('${greetingForHour(now.hour)}, $name', style: Theme.of(context).textTheme.titleLarge?.copyWith(fontSize: 16)),
+                    const SizedBox(height: 2),
+                    Text(role, style: const TextStyle(color: ConnectColors.primaryGlow, fontSize: 12, fontWeight: FontWeight.w600)),
+                    if (roles.isNotEmpty)
+                      Text(roles.first, style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontSize: 10)),
+                    Text('$branch · $location', style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontSize: 10)),
                   ],
                 ),
               ),
-              ConnectAvatar(label: name, size: 48),
+              ConnectAvatar(label: name, size: 44),
             ],
           ),
           const SizedBox(height: ConnectSpacing.sm),
           Row(
             children: [
-              Icon(Icons.access_time_rounded, size: 14, color: ConnectPalette.of(context).textMuted),
-              const SizedBox(width: 4),
-              Text(formatTime(now), style: Theme.of(context).textTheme.labelSmall),
-              const SizedBox(width: ConnectSpacing.md),
-              Icon(Icons.calendar_today_rounded, size: 14, color: ConnectPalette.of(context).textMuted),
-              const SizedBox(width: 4),
-              Text(formatDate(now), style: Theme.of(context).textTheme.labelSmall),
-              const Spacer(),
-              const Icon(Icons.wb_sunny_outlined, size: 14, color: ConnectColors.warning),
-              const SizedBox(width: 4),
-              Text('28°C', style: Theme.of(context).textTheme.labelSmall),
+              _MetaChip(icon: Icons.access_time_rounded, label: formatTime(now)),
+              const SizedBox(width: 6),
+              _MetaChip(icon: Icons.calendar_today_rounded, label: formatDate(now)),
             ],
           ),
+          if (lastLogin != null) ...[
+            const SizedBox(height: 6),
+            Text('Last login: $lastLogin', style: Theme.of(context).textTheme.labelSmall?.copyWith(fontSize: 9)),
+          ],
           const SizedBox(height: ConnectSpacing.sm),
           Wrap(
-            spacing: 6,
-            runSpacing: 6,
+            spacing: 5,
+            runSpacing: 5,
             children: [
               ConnectStatusPill(label: syncOnline ? 'LIVE SYNC' : 'SYNCING', status: syncOnline ? ConnectStatusLevel.online : ConnectStatusLevel.degraded, compact: true),
               const ConnectStatusPill(label: 'INTERNET', status: ConnectStatusLevel.online, compact: true),
+              ConnectStatusPill(label: apiStatus.toUpperCase(), status: ConnectStatusLevel.online, compact: true),
               ConnectStatusPill(
                 label: serverStatus.toUpperCase(),
                 status: serverStatus == 'online' ? ConnectStatusLevel.online : ConnectStatusLevel.degraded,
                 compact: true,
               ),
+              ConnectStatusPill(label: employeeStatus.toUpperCase(), status: ConnectStatusLevel.online, compact: true),
             ],
           ),
         ],
@@ -258,96 +272,180 @@ class _WelcomeHero extends StatelessWidget {
   }
 }
 
-class _KpiGrid extends StatelessWidget {
-  const _KpiGrid({required this.ops, required this.data, required this.sync});
-  final Map<String, dynamic> ops;
-  final Map<String, dynamic>? data;
-  final dynamic sync;
+class _MetaChip extends StatelessWidget {
+  const _MetaChip({required this.icon, required this.label, this.color});
+  final IconData icon;
+  final String label;
+  final Color? color;
 
   @override
   Widget build(BuildContext context) {
-    final kpis = [
-      ('Present', '${ops['staffAttendanceToday'] ?? 0}', Icons.people_alt_rounded, ConnectModuleColors.attendance),
-      ('Open Tickets', '${ops['openTickets'] ?? data?['ops']?['openTickets'] ?? 0}', Icons.headset_mic_outlined, ConnectModuleColors.helpdesk),
-      ('Live Chats', '${ops['liveChats'] ?? sync?.liveChats ?? 0}', Icons.forum_outlined, ConnectModuleColors.chat),
-      ('New Leads', '${ops['newLeads'] ?? 0}', Icons.trending_up_rounded, ConnectModuleColors.crm),
-      ('Today Revenue', formatCurrencyCents(ops['todayRevenueCents'] ?? 0), Icons.payments_rounded, ConnectModuleColors.finance),
-      ('Month Revenue', formatCurrencyCents(ops['monthRevenueCents'] ?? 0), Icons.account_balance_wallet_rounded, ConnectModuleColors.finance),
-      ('Projects', '${ops['activeProjects'] ?? 0}', Icons.folder_special_rounded, ConnectModuleColors.projects),
-      ('My Tasks', '${data?['pendingTaskCount'] ?? sync?.openTasks ?? 0}', Icons.task_alt_rounded, ConnectModuleColors.projects),
-      ('Pending Pay', '${ops['pendingPayments'] ?? 0}', Icons.receipt_long_rounded, ConnectColors.warning),
-      ('New Clients', '${ops['newClients'] ?? 0}', Icons.person_add_rounded, ConnectModuleColors.crm),
-      ('Daily Tasks', '${ops['dailyTasks'] ?? 0}', Icons.checklist_rounded, ConnectModuleColors.erp),
-      ('Notifications', '${sync?.unreadNotifications ?? 0}', Icons.notifications_active_outlined, ConnectColors.accent),
-    ];
-
-    return GridView.builder(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2,
-        mainAxisSpacing: ConnectSpacing.sm,
-        crossAxisSpacing: ConnectSpacing.sm,
-        childAspectRatio: 1.55,
+    final palette = ConnectPalette.of(context);
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: palette.surfaceOverlay.withValues(alpha: 0.5),
+        borderRadius: BorderRadius.circular(ConnectRadius.pill),
+        border: Border.all(color: palette.borderSubtle),
       ),
-      itemCount: kpis.length,
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 12, color: color ?? palette.textMuted),
+          const SizedBox(width: 4),
+          Text(label, style: Theme.of(context).textTheme.labelSmall?.copyWith(fontSize: 9)),
+        ],
+      ),
+    );
+  }
+}
+
+class _ActivityTabs extends StatelessWidget {
+  const _ActivityTabs({
+    required this.controller,
+    required this.activities,
+    required this.data,
+    required this.announcements,
+  });
+
+  final TabController controller;
+  final List<dynamic> activities;
+  final Map<String, dynamic>? data;
+  final List<dynamic> announcements;
+
+  @override
+  Widget build(BuildContext context) {
+    final palette = ConnectPalette.of(context);
+    return Column(
+      children: [
+        TabBar(
+          controller: controller,
+          isScrollable: true,
+          tabAlignment: TabAlignment.start,
+          labelStyle: const TextStyle(fontSize: 11, fontWeight: FontWeight.w700),
+          unselectedLabelStyle: const TextStyle(fontSize: 11),
+          indicatorColor: ConnectColors.primary,
+          dividerColor: palette.borderSubtle,
+          tabs: const [
+            Tab(text: 'Activity'),
+            Tab(text: 'Notifications'),
+            Tab(text: 'Announcements'),
+            Tab(text: 'Tickets'),
+          ],
+        ),
+        SizedBox(
+          height: 220,
+          child: TabBarView(
+            controller: controller,
+            children: [
+              _ActivityList(items: activities.isNotEmpty ? activities : (data?['notifications'] as List<dynamic>?) ?? []),
+              _ActivityList(items: (data?['notifications'] as List<dynamic>?) ?? [], emptyIcon: Icons.notifications_none_rounded, emptyTitle: 'No notifications'),
+              _AnnouncementList(items: announcements),
+              _ActivityList(items: _ticketItems(data), emptyIcon: Icons.headset_mic_outlined, emptyTitle: 'No tickets'),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  List<dynamic> _ticketItems(Map<String, dynamic>? data) {
+    final ops = data?['ops'] as Map<String, dynamic>?;
+    if (ops?['recentTickets'] is List) return ops!['recentTickets'] as List;
+    return [];
+  }
+}
+
+class _ActivityList extends StatelessWidget {
+  const _ActivityList({required this.items, this.emptyIcon = Icons.history_rounded, this.emptyTitle = 'No activity yet'});
+
+  final List<dynamic> items;
+  final IconData emptyIcon;
+  final String emptyTitle;
+
+  @override
+  Widget build(BuildContext context) {
+    if (items.isEmpty) {
+      return ConnectEmptyState(icon: emptyIcon, title: emptyTitle, subtitle: 'Updates will appear here.');
+    }
+    return ListView.builder(
+      padding: const EdgeInsets.only(top: ConnectSpacing.sm),
+      itemCount: items.length.clamp(0, 8),
       itemBuilder: (context, i) {
-        final (label, value, icon, color) = kpis[i];
-        return ConnectStatTile(label: label, value: value, icon: icon, color: color, compact: true)
-            .stitchEntrance(delay: Duration(milliseconds: 25 * i));
+        final item = items[i] as Map<String, dynamic>;
+        return _ActivityTile(
+          title: item['summary']?.toString() ?? item['title']?.toString() ?? item['action']?.toString() ?? 'Activity',
+          subtitle: '${item['module'] ?? item['body'] ?? ''} · ${item['actorName'] ?? 'System'}',
+          time: item['createdAt']?.toString(),
+        ).stitchEntrance(delay: Duration(milliseconds: 30 * i));
       },
     );
   }
 }
 
-class _PerformanceCharts extends StatelessWidget {
-  const _PerformanceCharts({required this.ops});
-  final Map<String, dynamic> ops;
+class _AnnouncementList extends StatelessWidget {
+  const _AnnouncementList({required this.items});
+  final List<dynamic> items;
 
   @override
   Widget build(BuildContext context) {
-    final revenue = [
-      (ops['todayRevenueCents'] as num? ?? 0).toDouble() / 100,
-      (ops['monthRevenueCents'] as num? ?? 0).toDouble() / 100 * 0.3,
-      (ops['monthRevenueCents'] as num? ?? 0).toDouble() / 100 * 0.5,
-      (ops['monthRevenueCents'] as num? ?? 0).toDouble() / 100 * 0.7,
-      (ops['monthRevenueCents'] as num? ?? 0).toDouble() / 100,
-    ];
-    final leads = [
-      (ops['newLeads'] as num? ?? 2).toDouble(),
-      (ops['newClients'] as num? ?? 1).toDouble() * 1.5,
-      (ops['newLeads'] as num? ?? 3).toDouble() * 0.8,
-      (ops['newOrders'] as num? ?? 2).toDouble(),
-      (ops['newLeads'] as num? ?? 4).toDouble(),
-    ];
+    if (items.isEmpty) {
+      return const ConnectEmptyState(icon: Icons.campaign_outlined, title: 'No announcements', subtitle: 'Company updates will appear here.');
+    }
+    return ListView.builder(
+      padding: const EdgeInsets.only(top: ConnectSpacing.sm),
+      itemCount: items.length.clamp(0, 8),
+      itemBuilder: (context, i) {
+        final n = items[i] as Map<String, dynamic>;
+        return _AnnouncementTile(title: n['title']?.toString() ?? '', body: n['body']?.toString() ?? '');
+      },
+    );
+  }
+}
 
+class _UpcomingSection extends StatelessWidget {
+  const _UpcomingSection({required this.items});
+  final List<dynamic> items;
+
+  @override
+  Widget build(BuildContext context) {
+    if (items.isEmpty) {
+      return ConnectCard(
+        padding: const EdgeInsets.all(ConnectSpacing.md),
+        child: Text('No upcoming events on your calendar.', style: Theme.of(context).textTheme.bodyMedium),
+      );
+    }
     return Column(
-      children: [
-        ConnectChartCard(title: 'Revenue Trend', subtitle: 'Weekly performance', child: ConnectSparkline(values: revenue, color: ConnectColors.success)),
-        const SizedBox(height: ConnectSpacing.sm),
-        Row(
-          children: [
-            Expanded(
-              child: ConnectChartCard(
-                title: 'Leads & Sales',
-                child: ConnectMiniBarChart(values: leads, labels: const ['M', 'T', 'W', 'T', 'F'], color: ConnectModuleColors.crm, height: 64),
-              ),
-            ),
-            const SizedBox(width: ConnectSpacing.sm),
-            Expanded(
-              child: ConnectChartCard(
-                title: 'Attendance',
-                child: ConnectMiniBarChart(
-                  values: [(ops['staffAttendanceToday'] as num? ?? 5).toDouble(), 8, 12, 10, (ops['staffAttendanceToday'] as num? ?? 6).toDouble()],
-                  labels: const ['M', 'T', 'W', 'T', 'F'],
-                  color: ConnectModuleColors.attendance,
-                  height: 64,
+      children: items.take(6).map((raw) {
+        final item = raw as Map<String, dynamic>;
+        final title = item['title']?.toString() ?? 'Event';
+        final when = item['startsAt']?.toString();
+        final dt = when != null ? DateTime.tryParse(when) : null;
+        return Padding(
+          padding: const EdgeInsets.only(bottom: ConnectSpacing.xs),
+          child: ConnectCard(
+            padding: const EdgeInsets.all(ConnectSpacing.sm),
+            child: Row(
+              children: [
+                const Icon(Icons.event_rounded, color: ConnectColors.primaryGlow, size: 18),
+                const SizedBox(width: ConnectSpacing.sm),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(title, style: Theme.of(context).textTheme.titleMedium?.copyWith(fontSize: 12)),
+                      Text(
+                        dt != null ? formatDateTime(dt) : (item['kind']?.toString() ?? ''),
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontSize: 10),
+                      ),
+                    ],
+                  ),
                 ),
-              ),
+              ],
             ),
-          ],
-        ),
-      ],
+          ),
+        );
+      }).toList(),
     );
   }
 }
@@ -361,26 +459,26 @@ class _ActivityTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: ConnectSpacing.sm),
+      padding: const EdgeInsets.only(bottom: ConnectSpacing.xs),
       child: ConnectCard(
         padding: const EdgeInsets.all(ConnectSpacing.sm),
         child: Row(
           children: [
-            Container(width: 4, height: 36, decoration: BoxDecoration(color: ConnectColors.primary, borderRadius: BorderRadius.circular(2))),
+            Container(width: 3, height: 32, decoration: BoxDecoration(color: ConnectColors.primary, borderRadius: BorderRadius.circular(2))),
             const SizedBox(width: ConnectSpacing.sm),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(title, style: Theme.of(context).textTheme.titleMedium?.copyWith(fontSize: 13), maxLines: 1, overflow: TextOverflow.ellipsis),
-                  Text(subtitle, style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontSize: 11), maxLines: 1, overflow: TextOverflow.ellipsis),
+                  Text(title, style: Theme.of(context).textTheme.titleMedium?.copyWith(fontSize: 12), maxLines: 1, overflow: TextOverflow.ellipsis),
+                  Text(subtitle, style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontSize: 10), maxLines: 1, overflow: TextOverflow.ellipsis),
                 ],
               ),
             ),
             if (time != null)
               Text(
                 DateTime.tryParse(time!) != null ? formatDateTime(DateTime.parse(time!)) : '',
-                style: TextStyle(fontSize: 10, color: ConnectPalette.of(context).textMuted),
+                style: TextStyle(fontSize: 9, color: ConnectPalette.of(context).textMuted),
               ),
           ],
         ),
@@ -397,24 +495,24 @@ class _AnnouncementTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: ConnectSpacing.sm),
+      padding: const EdgeInsets.only(bottom: ConnectSpacing.xs),
       child: ConnectCard(
         padding: const EdgeInsets.all(ConnectSpacing.sm),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(color: ConnectColors.primary.withValues(alpha: 0.15), borderRadius: BorderRadius.circular(ConnectRadius.md)),
-              child: const Icon(Icons.campaign_outlined, color: ConnectColors.primaryGlow, size: 16),
+              padding: const EdgeInsets.all(7),
+              decoration: BoxDecoration(color: ConnectColors.primary.withValues(alpha: 0.15), borderRadius: BorderRadius.circular(ConnectRadius.sm)),
+              child: const Icon(Icons.campaign_outlined, color: ConnectColors.primaryGlow, size: 14),
             ),
             const SizedBox(width: ConnectSpacing.sm),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(title, style: Theme.of(context).textTheme.titleMedium?.copyWith(fontSize: 13)),
-                  if (body.isNotEmpty) Text(body, maxLines: 2, overflow: TextOverflow.ellipsis, style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontSize: 12)),
+                  Text(title, style: Theme.of(context).textTheme.titleMedium?.copyWith(fontSize: 12)),
+                  if (body.isNotEmpty) Text(body, maxLines: 2, overflow: TextOverflow.ellipsis, style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontSize: 11)),
                 ],
               ),
             ),

@@ -1,6 +1,7 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:merncrest_connect/theme/connect_theme.dart';
 import 'package:merncrest_connect/theme/connect_tokens.dart';
 
@@ -134,7 +135,7 @@ class ConnectTopBar extends StatelessWidget {
       child: BackdropFilter(
         filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
         child: Container(
-          padding: const EdgeInsets.fromLTRB(16, 6, 8, 6),
+          padding: const EdgeInsets.fromLTRB(14, 4, 6, 4),
           decoration: BoxDecoration(
             color: palette.surfaceRaised.withValues(alpha: 0.85),
             border: Border(bottom: BorderSide(color: palette.borderSubtle)),
@@ -145,7 +146,7 @@ class ConnectTopBar extends StatelessWidget {
               children: [
                 ClipRRect(
                   borderRadius: BorderRadius.circular(10),
-                  child: Image.asset('assets/images/app_icon.png', width: 28, height: 28),
+                  child: Image.asset('assets/images/app_icon.png', width: 24, height: 24),
                 ),
                 const SizedBox(width: 10),
                 Expanded(
@@ -153,9 +154,9 @@ class ConnectTopBar extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Text(name, style: Theme.of(context).textTheme.titleMedium?.copyWith(fontSize: 13), maxLines: 1, overflow: TextOverflow.ellipsis),
+                      Text(name, style: Theme.of(context).textTheme.titleMedium?.copyWith(fontSize: 12), maxLines: 1, overflow: TextOverflow.ellipsis),
                       if (role != null)
-                        Text(role!, style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontSize: 11), maxLines: 1, overflow: TextOverflow.ellipsis),
+                        Text(role!, style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontSize: 10), maxLines: 1, overflow: TextOverflow.ellipsis),
                     ],
                   ),
                 ),
@@ -378,6 +379,117 @@ class ConnectAvatar extends StatelessWidget {
         borderRadius: BorderRadius.circular(size * 0.28),
       ),
       child: Text(initial, style: TextStyle(color: Colors.white, fontWeight: FontWeight.w700, fontSize: size * 0.38)),
+    );
+  }
+}
+
+/// Enterprise search field with glass styling.
+class ConnectSearchBar extends StatelessWidget {
+  const ConnectSearchBar({
+    super.key,
+    required this.hint,
+    this.onChanged,
+    this.controller,
+  });
+
+  final String hint;
+  final ValueChanged<String>? onChanged;
+  final TextEditingController? controller;
+
+  @override
+  Widget build(BuildContext context) {
+    final palette = ConnectPalette.of(context);
+    return TextField(
+      controller: controller,
+      onChanged: onChanged,
+      style: TextStyle(color: palette.textPrimary, fontSize: 13),
+      decoration: InputDecoration(
+        hintText: hint,
+        isDense: true,
+        prefixIcon: Icon(Icons.search_rounded, size: 20, color: palette.textMuted),
+        filled: true,
+        fillColor: palette.surfaceRaised.withValues(alpha: 0.85),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(ConnectRadius.md),
+          borderSide: BorderSide(color: palette.borderSubtle),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(ConnectRadius.md),
+          borderSide: BorderSide(color: palette.borderSubtle),
+        ),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      ),
+    );
+  }
+}
+
+/// Gradient FAB with haptic feedback.
+class ConnectFab extends StatelessWidget {
+  const ConnectFab({
+    super.key,
+    required this.icon,
+    required this.onPressed,
+    this.label,
+  });
+
+  final IconData icon;
+  final VoidCallback onPressed;
+  final String? label;
+
+  @override
+  Widget build(BuildContext context) {
+    if (label != null) {
+      return FloatingActionButton.extended(
+        onPressed: () {
+          HapticFeedback.mediumImpact();
+          onPressed();
+        },
+        elevation: 4,
+        backgroundColor: ConnectColors.primary,
+        foregroundColor: Colors.white,
+        icon: Icon(icon, size: 20),
+        label: Text(label!, style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13)),
+      );
+    }
+    return FloatingActionButton(
+      onPressed: () {
+        HapticFeedback.mediumImpact();
+        onPressed();
+      },
+      elevation: 4,
+      backgroundColor: ConnectColors.primary,
+      foregroundColor: Colors.white,
+      child: Icon(icon, size: 22),
+    );
+  }
+}
+
+/// Offline / degraded connectivity banner.
+class ConnectOfflineBanner extends StatelessWidget {
+  const ConnectOfflineBanner({super.key, required this.online, this.message});
+
+  final bool online;
+  final String? message;
+
+  @override
+  Widget build(BuildContext context) {
+    if (online) return const SizedBox.shrink();
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(horizontal: ConnectSpacing.md, vertical: ConnectSpacing.xs),
+      color: ConnectColors.warning.withValues(alpha: 0.15),
+      child: Row(
+        children: [
+          const Icon(Icons.wifi_off_rounded, size: 14, color: ConnectColors.warning),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              message ?? 'Offline mode — some data may be cached',
+              style: const TextStyle(fontSize: 11, color: ConnectColors.warning),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

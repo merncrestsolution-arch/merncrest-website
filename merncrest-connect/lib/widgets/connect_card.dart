@@ -62,34 +62,40 @@ class ConnectStatTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ConnectCard(
-      padding: EdgeInsets.all(compact ? 12 : 16),
+      padding: EdgeInsets.all(compact ? 10 : 14),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
         children: [
           Row(
             children: [
               Container(
-                padding: EdgeInsets.all(compact ? 6 : 8),
+                padding: EdgeInsets.all(compact ? 5 : 7),
                 decoration: BoxDecoration(
                   color: color.withValues(alpha: 0.15),
-                  borderRadius: BorderRadius.circular(compact ? 10 : 12),
+                  borderRadius: BorderRadius.circular(compact ? 8 : 10),
                 ),
-                child: Icon(icon, color: color, size: compact ? 16 : 20),
+                child: Icon(icon, color: color, size: compact ? 14 : 18),
               ),
               const Spacer(),
               if (trend != null)
-                Text(trend!, style: Theme.of(context).textTheme.labelSmall?.copyWith(color: ConnectColors.success)),
+                Text(trend!, style: Theme.of(context).textTheme.labelSmall?.copyWith(color: ConnectColors.success, fontSize: 9)),
             ],
           ),
-          SizedBox(height: compact ? 8 : 14),
+          SizedBox(height: compact ? 6 : 10),
           Text(
             value,
-            style: Theme.of(context).textTheme.headlineMedium?.copyWith(fontSize: compact ? 18 : null),
+            style: Theme.of(context).textTheme.headlineMedium?.copyWith(fontSize: compact ? 16 : 20, height: 1.1),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
           ),
           const SizedBox(height: 2),
-          Text(label, style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontSize: compact ? 11 : null)),
+          Text(
+            label,
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontSize: compact ? 10 : 12),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
         ],
       ),
     );

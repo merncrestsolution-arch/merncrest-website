@@ -3,6 +3,7 @@ import 'package:merncrest_connect/providers/app_state.dart';
 import 'package:merncrest_connect/providers/theme_provider.dart';
 import 'package:merncrest_connect/screens/notifications_screen.dart';
 import 'package:merncrest_connect/screens/profile_screen.dart';
+import 'package:merncrest_connect/screens/security_settings_screen.dart';
 import 'package:merncrest_connect/theme/connect_theme.dart';
 import 'package:merncrest_connect/theme/connect_tokens.dart';
 import 'package:merncrest_connect/widgets/connect_card.dart';
@@ -92,7 +93,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               title: 'Privacy & Security',
               subtitle: 'Biometric · PIN · sessions',
               icon: Icons.shield_outlined,
-              onTap: () {},
+              onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const SecuritySettingsScreen())),
             ),
             ConnectSectionHeader(title: 'System'),
             ConnectCard(

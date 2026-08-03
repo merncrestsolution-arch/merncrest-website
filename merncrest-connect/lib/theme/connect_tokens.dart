@@ -42,6 +42,9 @@ abstract final class ConnectModuleColors {
   static const inventory = Color(0xFF84CC16);
   static const security = Color(0xFF6366F1);
   static const settings = Color(0xFF94A3B8);
+  static const sales = Color(0xFF0EA5E9);
+  static const manufacturing = Color(0xFF78716C);
+  static const fleet = Color(0xFFEA580C);
 }
 
 List<BoxShadow> connectSoftShadow(Color glow, {double blur = 20, double y = 6}) => [

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:merncrest_connect/widgets/connect_ui.dart';
 
@@ -48,6 +49,7 @@ class _ConnectPressableState extends State<ConnectPressable> {
       onTapUp: widget.enabled
           ? (_) {
               setState(() => _pressed = false);
+              HapticFeedback.lightImpact();
               widget.onPressed?.call();
             }
           : null,

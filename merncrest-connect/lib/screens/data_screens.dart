@@ -1,6 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:merncrest_connect/providers/app_state.dart';
 import 'package:merncrest_connect/screens/ai_assistant_screen.dart';
+import 'package:merncrest_connect/screens/attendance_screen.dart';
+import 'package:merncrest_connect/screens/calendar_screen.dart';
+import 'package:merncrest_connect/screens/chat_conversation_screen.dart';
+import 'package:merncrest_connect/screens/client_detail_screen.dart';
+import 'package:merncrest_connect/screens/internal_chat_screen.dart';
+import 'package:merncrest_connect/screens/projects_screen.dart';
+import 'package:merncrest_connect/screens/task_detail_screen.dart';
 import 'package:merncrest_connect/services/platform_sync_service.dart';
 import 'package:merncrest_connect/theme/connect_theme.dart';
 import 'package:merncrest_connect/theme/connect_tokens.dart';
@@ -61,11 +68,25 @@ class WorkHubScreen extends StatelessWidget {
             onTap: () => _open(context, const LeaveScreen()),
           ),
           ConnectModuleRow(
+            title: 'Projects',
+            subtitle: 'Progress · milestones · services',
+            icon: Icons.folder_special_rounded,
+            iconColor: ConnectModuleColors.projects,
+            onTap: () => _open(context, const ProjectsScreen()),
+          ),
+          ConnectModuleRow(
             title: 'Calendar',
             subtitle: 'Meetings · events · deadlines',
             icon: Icons.calendar_month_rounded,
             iconColor: ConnectModuleColors.calendar,
-            onTap: () => _open(context, const ModuleListScreen(title: 'Calendar', endpoint: '/api/staff/calendar')),
+            onTap: () => _open(context, const CalendarScreen()),
+          ),
+          ConnectModuleRow(
+            title: 'Team Chat',
+            subtitle: 'Internal messaging · general & DM',
+            icon: Icons.chat_bubble_outline_rounded,
+            iconColor: ConnectModuleColors.chat,
+            onTap: () => _open(context, const InternalChatScreen()),
           ),
           ConnectModuleRow(
             title: 'AIRA Assistant',
@@ -84,214 +105,6 @@ class WorkHubScreen extends StatelessWidget {
   }
 }
 
-class AttendanceScreen extends StatefulWidget {
-  const AttendanceScreen({super.key});
-  @override
-  State<AttendanceScreen> createState() => _AttendanceScreenState();
-}
-
-class _AttendanceScreenState extends State<AttendanceScreen> with SingleTickerProviderStateMixin {
-  Map<String, dynamic>? _data;
-  late final TabController _tabs;
-
-  @override
-  void initState() {
-    super.initState();
-    _tabs = TabController(length: 4, vsync: this);
-    _load();
-  }
-
-  @override
-  void dispose() {
-    _tabs.dispose();
-    super.dispose();
-  }
-
-  Future<void> _load() async {
-    final data = await context.read<AppState>().auth.api.get('/api/staff/attendance');
-    if (mounted) setState(() => _data = data);
-  }
-
-  Future<void> _clock(String action) async {
-    await context.read<AppState>().auth.api.post('/api/staff/attendance', {'action': action});
-    await _load();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final today = _data?['today'] as Map<String, dynamic>?;
-    final clockedIn = today?['clockIn'] != null && today?['clockOut'] == null;
-    final onBreak = today?['breakStart'] != null && today?['breakEnd'] == null;
-    final palette = ConnectPalette.of(context);
-
-    return Scaffold(
-      backgroundColor: palette.background,
-      appBar: AppBar(
-        title: const Text('Attendance'),
-        bottom: TabBar(
-          controller: _tabs,
-          isScrollable: true,
-          tabAlignment: TabAlignment.start,
-          tabs: const [
-            Tab(text: 'Clock'),
-            Tab(text: 'GPS'),
-            Tab(text: 'QR'),
-            Tab(text: 'History'),
-          ],
-        ),
-      ),
-      body: ConnectAmbientBackground(
-        child: TabBarView(
-          controller: _tabs,
-          children: [
-            _ClockTab(
-              clockedIn: clockedIn,
-              onBreak: onBreak,
-              today: today,
-              onClock: _clock,
-            ),
-            _MethodTab(icon: Icons.location_on_rounded, title: 'GPS Attendance', subtitle: 'Location-based clock in with geo-fence validation.', color: ConnectModuleColors.attendance),
-            _MethodTab(icon: Icons.qr_code_scanner_rounded, title: 'QR Attendance', subtitle: 'Scan office QR code to mark attendance.', color: ConnectModuleColors.security),
-            _HistoryTab(records: (_data?['recent'] as List<dynamic>?) ?? []),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _ClockTab extends StatelessWidget {
-  const _ClockTab({
-    required this.clockedIn,
-    required this.onBreak,
-    required this.today,
-    required this.onClock,
-  });
-
-  final bool clockedIn;
-  final bool onBreak;
-  final Map<String, dynamic>? today;
-  final Future<void> Function(String) onClock;
-
-  @override
-  Widget build(BuildContext context) {
-    return ListView(
-      padding: const EdgeInsets.all(ConnectSpacing.lg),
-      children: [
-        ConnectGlassCard(
-          featured: true,
-          child: Column(
-            children: [
-              Icon(
-                clockedIn ? Icons.check_circle_rounded : Icons.access_time_rounded,
-                size: 44,
-                color: clockedIn ? ConnectColors.success : ConnectColors.primaryGlow,
-              ),
-              const SizedBox(height: ConnectSpacing.sm),
-              Text(
-                clockedIn ? (onBreak ? 'On break' : 'You are clocked in') : 'Ready to start your day',
-                style: Theme.of(context).textTheme.headlineMedium,
-                textAlign: TextAlign.center,
-              ),
-              if (today?['clockIn'] != null) ...[
-                const SizedBox(height: 8),
-                Text('Clock in: ${today!['clockIn']}', style: Theme.of(context).textTheme.bodyMedium),
-              ],
-              const SizedBox(height: ConnectSpacing.md),
-              ConnectPrimaryButton(
-                label: clockedIn ? 'Clock out' : 'Clock in',
-                icon: clockedIn ? Icons.logout_rounded : Icons.login_rounded,
-                onPressed: () => onClock(clockedIn ? 'clock_out' : 'clock_in'),
-              ),
-              if (clockedIn) ...[
-                const SizedBox(height: ConnectSpacing.sm),
-                ConnectPrimaryButton(
-                  label: onBreak ? 'End break' : 'Start break',
-                  icon: Icons.coffee_rounded,
-                  onPressed: () => onClock(onBreak ? 'break_end' : 'break_start'),
-                ),
-              ],
-            ],
-          ),
-        ).stitchEntrance(),
-        const SizedBox(height: ConnectSpacing.md),
-        GridView.count(
-          crossAxisCount: 2,
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          mainAxisSpacing: ConnectSpacing.sm,
-          crossAxisSpacing: ConnectSpacing.sm,
-          childAspectRatio: 1.6,
-          children: const [
-            ConnectStatTile(label: 'Working Hours', value: '—', icon: Icons.timer_outlined, compact: true),
-            ConnectStatTile(label: 'Overtime', value: '—', icon: Icons.more_time_rounded, color: ConnectColors.warning, compact: true),
-          ],
-        ),
-      ],
-    );
-  }
-}
-
-class _MethodTab extends StatelessWidget {
-  const _MethodTab({required this.icon, required this.title, required this.subtitle, required this.color});
-  final IconData icon;
-  final String title;
-  final String subtitle;
-  final Color color;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(ConnectSpacing.lg),
-      child: ConnectGlassCard(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(icon, size: 56, color: color),
-            const SizedBox(height: ConnectSpacing.md),
-            Text(title, style: Theme.of(context).textTheme.titleLarge),
-            const SizedBox(height: ConnectSpacing.sm),
-            Text(subtitle, textAlign: TextAlign.center, style: Theme.of(context).textTheme.bodyMedium),
-            const SizedBox(height: ConnectSpacing.lg),
-            ConnectPrimaryButton(label: 'Coming soon', onPressed: null),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _HistoryTab extends StatelessWidget {
-  const _HistoryTab({required this.records});
-  final List<dynamic> records;
-
-  @override
-  Widget build(BuildContext context) {
-    if (records.isEmpty) {
-      return const ConnectEmptyState(icon: Icons.history_rounded, title: 'No history yet', subtitle: 'Your attendance records will appear here.');
-    }
-    return ListView.builder(
-      padding: const EdgeInsets.all(ConnectSpacing.lg),
-      itemCount: records.length,
-      itemBuilder: (context, i) {
-        final r = records[i] as Map<String, dynamic>;
-        return Padding(
-          padding: const EdgeInsets.only(bottom: ConnectSpacing.sm),
-          child: ConnectCard(
-            child: Row(
-              children: [
-                const Icon(Icons.event_available_rounded, color: ConnectColors.success, size: 20),
-                const SizedBox(width: ConnectSpacing.sm),
-                Expanded(child: Text(r['workDate']?.toString() ?? r.toString(), style: Theme.of(context).textTheme.titleMedium?.copyWith(fontSize: 13))),
-              ],
-            ),
-          ),
-        );
-      },
-    );
-  }
-}
-
 class TasksScreen extends StatefulWidget {
   const TasksScreen({super.key});
   @override
@@ -300,8 +113,9 @@ class TasksScreen extends StatefulWidget {
 
 class _TasksScreenState extends State<TasksScreen> {
   Map<String, dynamic>? _data;
+  String _priorityFilter = 'all';
 
-  static const _columns = ['BACKLOG', 'TODO', 'IN_PROGRESS', 'REVIEW', 'TESTING', 'COMPLETED'];
+  static const _columns = ['TODO', 'IN_PROGRESS', 'IN_REVIEW', 'DONE', 'BLOCKED'];
 
   @override
   void initState() {
@@ -335,15 +149,32 @@ class _TasksScreenState extends State<TasksScreen> {
                 children: [
                   Padding(
                     padding: const EdgeInsets.fromLTRB(ConnectSpacing.lg, ConnectSpacing.sm, ConnectSpacing.lg, 0),
-                    child: SingleChildScrollView(
-                      scrollDirection: Axis.horizontal,
-                      child: Row(
-                        children: [
-                          ConnectChip(label: '${_data?['total'] ?? 0} total', color: ConnectColors.info),
-                          const SizedBox(width: 6),
-                          ConnectChip(label: 'Kanban view', color: ConnectColors.primary),
-                        ],
-                      ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        SingleChildScrollView(
+                          scrollDirection: Axis.horizontal,
+                          child: Row(
+                            children: [
+                              ConnectChip(label: '${_data?['stats']?['open'] ?? _data?['total'] ?? 0} open', color: ConnectColors.info),
+                              const SizedBox(width: 6),
+                              ConnectChip(label: '${_data?['stats']?['trackedMinutesToday'] ?? 0}m tracked', color: ConnectModuleColors.projects),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: ConnectSpacing.sm),
+                        SingleChildScrollView(
+                          scrollDirection: Axis.horizontal,
+                          child: Row(
+                            children: [
+                              _PriorityChip(label: 'All', value: 'all', selected: _priorityFilter == 'all', onTap: () => setState(() => _priorityFilter = 'all')),
+                              _PriorityChip(label: 'High', value: 'HIGH', selected: _priorityFilter == 'HIGH', onTap: () => setState(() => _priorityFilter = 'HIGH')),
+                              _PriorityChip(label: 'Medium', value: 'MEDIUM', selected: _priorityFilter == 'MEDIUM', onTap: () => setState(() => _priorityFilter = 'MEDIUM')),
+                              _PriorityChip(label: 'Low', value: 'LOW', selected: _priorityFilter == 'LOW', onTap: () => setState(() => _priorityFilter = 'LOW')),
+                            ],
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                   Expanded(
@@ -354,7 +185,12 @@ class _TasksScreenState extends State<TasksScreen> {
                         for (final col in _columns)
                           _KanbanColumn(
                             title: col.replaceAll('_', ' '),
-                            tasks: _tasksForColumn(byStatus, col),
+                            tasks: _filteredTasks(_tasksForColumn(byStatus, col)),
+                            onTaskTap: (task) => Navigator.of(context).push(
+                              MaterialPageRoute(
+                                builder: (_) => TaskDetailScreen(task: task, onUpdated: _load),
+                              ),
+                            ),
                           ),
                       ],
                     ),
@@ -363,6 +199,11 @@ class _TasksScreenState extends State<TasksScreen> {
               ),
       ),
     );
+  }
+
+  List<dynamic> _filteredTasks(List<dynamic> tasks) {
+    if (_priorityFilter == 'all') return tasks;
+    return tasks.where((t) => (t as Map)['priority']?.toString().toUpperCase() == _priorityFilter).toList();
   }
 
   List<dynamic> _tasksForColumn(Map<String, dynamic> byStatus, String col) {
@@ -377,9 +218,10 @@ class _TasksScreenState extends State<TasksScreen> {
 }
 
 class _KanbanColumn extends StatelessWidget {
-  const _KanbanColumn({required this.title, required this.tasks});
+  const _KanbanColumn({required this.title, required this.tasks, this.onTaskTap});
   final String title;
   final List<dynamic> tasks;
+  final void Function(Map<String, dynamic> task)? onTaskTap;
 
   @override
   Widget build(BuildContext context) {
@@ -417,6 +259,7 @@ class _KanbanColumn extends StatelessWidget {
                         padding: const EdgeInsets.only(bottom: ConnectSpacing.sm),
                         child: ConnectCard(
                           padding: const EdgeInsets.all(ConnectSpacing.sm),
+                          onTap: onTaskTap != null ? () => onTaskTap!(t) : null,
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
@@ -433,6 +276,27 @@ class _KanbanColumn extends StatelessWidget {
                   ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _PriorityChip extends StatelessWidget {
+  const _PriorityChip({required this.label, required this.value, required this.selected, required this.onTap});
+  final String label;
+  final String value;
+  final bool selected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(right: 6),
+      child: FilterChip(
+        label: Text(label, style: const TextStyle(fontSize: 10)),
+        selected: selected,
+        onSelected: (_) => onTap(),
+        selectedColor: ConnectColors.primary.withValues(alpha: 0.25),
       ),
     );
   }
@@ -460,6 +324,22 @@ class _LeaveScreenState extends State<LeaveScreen> {
     } catch (_) {}
   }
 
+  void _openApplySheet() {
+    showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: ConnectPalette.of(context).surfaceRaised,
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(ConnectRadius.xl))),
+      builder: (ctx) => _ApplyLeaveSheet(
+        leaveTypes: (_data?['leaveTypes'] as List<dynamic>?)?.map((e) => e.toString()).toList() ?? ['ANNUAL', 'CASUAL', 'SICK'],
+        onSubmitted: () {
+          Navigator.pop(ctx);
+          _load();
+        },
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final balances = (_data?['balances'] as List<dynamic>?) ?? [];
@@ -471,7 +351,7 @@ class _LeaveScreenState extends State<LeaveScreen> {
       appBar: AppBar(
         title: const Text('Leave Management'),
         actions: [
-          IconButton(onPressed: () {}, icon: const Icon(Icons.add_rounded)),
+          IconButton(onPressed: _openApplySheet, icon: const Icon(Icons.add_rounded)),
         ],
       ),
       body: ConnectAmbientBackground(
@@ -497,9 +377,10 @@ class _LeaveScreenState extends State<LeaveScreen> {
                         itemCount: balances.length,
                         itemBuilder: (context, i) {
                           final b = balances[i] as Map<String, dynamic>;
+                          final remaining = (b['entitled'] as num? ?? 0) - (b['used'] as num? ?? 0) - (b['pending'] as num? ?? 0);
                           return ConnectStatTile(
-                            label: b['type']?.toString() ?? b['leaveType']?.toString() ?? 'Leave',
-                            value: '${b['remaining'] ?? b['balance'] ?? '—'}',
+                            label: b['leaveType']?.toString() ?? 'Leave',
+                            value: '$remaining',
                             icon: Icons.beach_access_rounded,
                             color: ConnectModuleColors.hr,
                             compact: true,
@@ -546,10 +427,119 @@ class _LeaveScreenState extends State<LeaveScreen> {
                         );
                       }),
                     const SizedBox(height: ConnectSpacing.md),
-                    ConnectPrimaryButton(label: 'Apply for Leave', icon: Icons.add_rounded, onPressed: () {}),
+                    ConnectPrimaryButton(label: 'Apply for Leave', icon: Icons.add_rounded, onPressed: _openApplySheet),
                   ],
                 ),
               ),
+      ),
+    );
+  }
+}
+
+class _ApplyLeaveSheet extends StatefulWidget {
+  const _ApplyLeaveSheet({required this.leaveTypes, required this.onSubmitted});
+  final List<String> leaveTypes;
+  final VoidCallback onSubmitted;
+
+  @override
+  State<_ApplyLeaveSheet> createState() => _ApplyLeaveSheetState();
+}
+
+class _ApplyLeaveSheetState extends State<_ApplyLeaveSheet> {
+  late String _leaveType = widget.leaveTypes.isNotEmpty ? widget.leaveTypes.first : 'ANNUAL';
+  DateTime _start = DateTime.now();
+  DateTime _end = DateTime.now();
+  final _reason = TextEditingController();
+  bool _busy = false;
+  String? _error;
+
+  @override
+  void dispose() {
+    _reason.dispose();
+    super.dispose();
+  }
+
+  String _fmt(DateTime d) => '${d.year}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}';
+
+  Future<void> _pickDate(bool isStart) async {
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: isStart ? _start : _end,
+      firstDate: DateTime.now().subtract(const Duration(days: 1)),
+      lastDate: DateTime.now().add(const Duration(days: 365)),
+    );
+    if (picked != null) {
+      setState(() {
+        if (isStart) {
+          _start = picked;
+          if (_end.isBefore(_start)) _end = _start;
+        } else {
+          _end = picked;
+        }
+      });
+    }
+  }
+
+  Future<void> _submit() async {
+    setState(() {
+      _busy = true;
+      _error = null;
+    });
+    try {
+      await context.read<AppState>().auth.api.post('/api/staff/leave', {
+        'leaveType': _leaveType,
+        'startDate': _fmt(_start),
+        'endDate': _fmt(_end),
+        'reason': _reason.text.trim().isEmpty ? null : _reason.text.trim(),
+      });
+      widget.onSubmitted();
+    } catch (e) {
+      setState(() => _error = e.toString().replaceFirst('Exception: ', ''));
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final bottom = MediaQuery.of(context).viewInsets.bottom;
+    return Padding(
+      padding: EdgeInsets.fromLTRB(ConnectSpacing.lg, ConnectSpacing.md, ConnectSpacing.lg, bottom + ConnectSpacing.lg),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Text('Apply for Leave', style: Theme.of(context).textTheme.titleLarge),
+          const SizedBox(height: ConnectSpacing.md),
+          DropdownButtonFormField<String>(
+            value: _leaveType,
+            decoration: const InputDecoration(labelText: 'Leave type'),
+            items: widget.leaveTypes.map((t) => DropdownMenuItem(value: t, child: Text(t))).toList(),
+            onChanged: (v) => setState(() => _leaveType = v ?? _leaveType),
+          ),
+          const SizedBox(height: ConnectSpacing.sm),
+          ListTile(
+            contentPadding: EdgeInsets.zero,
+            title: const Text('Start date'),
+            subtitle: Text(_fmt(_start)),
+            trailing: const Icon(Icons.calendar_today_rounded, size: 18),
+            onTap: () => _pickDate(true),
+          ),
+          ListTile(
+            contentPadding: EdgeInsets.zero,
+            title: const Text('End date'),
+            subtitle: Text(_fmt(_end)),
+            trailing: const Icon(Icons.calendar_today_rounded, size: 18),
+            onTap: () => _pickDate(false),
+          ),
+          TextField(controller: _reason, maxLines: 3, decoration: const InputDecoration(labelText: 'Reason (optional)')),
+          if (_error != null) ...[
+            const SizedBox(height: ConnectSpacing.sm),
+            Text(_error!, style: const TextStyle(color: ConnectColors.error, fontSize: 12)),
+          ],
+          const SizedBox(height: ConnectSpacing.md),
+          ConnectPrimaryButton(label: 'Submit Request', icon: Icons.send_rounded, loading: _busy, onPressed: _submit),
+        ],
       ),
     );
   }
@@ -564,6 +554,8 @@ class LiveChatScreen extends StatefulWidget {
 class _LiveChatScreenState extends State<LiveChatScreen> {
   List<dynamic> _inbox = [];
   PlatformSyncService? _sync;
+  String _query = '';
+  String _filter = 'all';
 
   @override
   void initState() {
@@ -599,6 +591,18 @@ class _LiveChatScreenState extends State<LiveChatScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final filtered = _inbox.where((c) {
+      final item = c as Map<String, dynamic>;
+      final name = item['lead']?['fullName']?.toString() ?? 'Visitor';
+      final unread = item['unreadCount'] as int? ?? 0;
+      final status = item['status']?.toString() ?? 'OPEN';
+
+      if (_filter == 'unread' && unread == 0) return false;
+      if (_filter == 'open' && status.toUpperCase() != 'OPEN') return false;
+      if (_query.isNotEmpty && !name.toLowerCase().contains(_query.toLowerCase())) return false;
+      return true;
+    }).toList();
+
     if (_inbox.isEmpty) {
       return ConnectPage(
         title: 'Live Chat',
@@ -610,42 +614,111 @@ class _LiveChatScreenState extends State<LiveChatScreen> {
 
     return ConnectPage(
       title: 'Live Chat',
-      subtitle: '${_inbox.length} active conversations',
+      subtitle: '${filtered.length} conversations',
       onRefresh: _load,
       child: Column(
-        children: _inbox.map((c) {
-          final item = c as Map<String, dynamic>;
-          final name = item['lead']?['fullName']?.toString() ?? 'Visitor';
-          final unread = item['unreadCount'] as int? ?? 0;
-          return Padding(
-            padding: const EdgeInsets.only(bottom: ConnectSpacing.sm),
-            child: ConnectCard(
-              onTap: () {},
-              child: Row(
-                children: [
-                  ConnectAvatar(label: name, size: 44),
-                  const SizedBox(width: ConnectSpacing.sm),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
+        children: [
+          ConnectSearchBar(hint: 'Search chats…', onChanged: (v) => setState(() => _query = v)),
+          const SizedBox(height: ConnectSpacing.sm),
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Row(
+              children: [
+                _FilterChip(label: 'All', value: 'all', selected: _filter == 'all', onTap: () => setState(() => _filter = 'all')),
+                _FilterChip(label: 'Unread', value: 'unread', selected: _filter == 'unread', onTap: () => setState(() => _filter = 'unread')),
+                _FilterChip(label: 'Open', value: 'open', selected: _filter == 'open', onTap: () => setState(() => _filter = 'open')),
+                _FilterChip(label: 'Pinned', value: 'pinned', selected: _filter == 'pinned', onTap: () => setState(() => _filter = 'pinned')),
+              ],
+            ),
+          ),
+          const SizedBox(height: ConnectSpacing.sm),
+          if (filtered.isEmpty)
+            const ConnectEmptyState(icon: Icons.search_off_rounded, title: 'No matches', subtitle: 'Try a different search or filter.')
+          else
+            ...filtered.map((c) {
+              final item = c as Map<String, dynamic>;
+              final name = item['lead']?['fullName']?.toString() ?? 'Visitor';
+              final unread = item['unreadCount'] as int? ?? 0;
+              return Padding(
+                padding: const EdgeInsets.only(bottom: ConnectSpacing.sm),
+                child: ConnectCard(
+                  onTap: () {
+                    final sessionId = item['id']?.toString();
+                    if (sessionId == null) return;
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (_) => ChatConversationScreen(sessionId: sessionId, preview: item),
+                      ),
+                    );
+                  },
+                  child: Row(
+                    children: [
+                      Stack(
+                        children: [
+                          ConnectAvatar(label: name, size: 44),
+                          if (unread > 0)
+                            Positioned(
+                              right: 0,
+                              top: 0,
+                              child: Container(
+                                width: 10,
+                                height: 10,
+                                decoration: const BoxDecoration(color: ConnectColors.accent, shape: BoxShape.circle),
+                              ),
+                            ),
+                        ],
+                      ),
+                      const SizedBox(width: ConnectSpacing.sm),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Expanded(child: Text(name, style: Theme.of(context).textTheme.titleMedium?.copyWith(fontSize: 13))),
-                            if (unread > 0) ConnectChip(label: '$unread', color: ConnectColors.accent),
+                            Row(
+                              children: [
+                                Expanded(child: Text(name, style: Theme.of(context).textTheme.titleMedium?.copyWith(fontSize: 13))),
+                                if (unread > 0) ConnectChip(label: '$unread', color: ConnectColors.accent),
+                              ],
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              item['lastMessage']?['body']?.toString() ?? '',
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontSize: 12),
+                            ),
                           ],
                         ),
-                        const SizedBox(height: 4),
-                        Text(item['lastMessage']?['body']?.toString() ?? '', maxLines: 1, overflow: TextOverflow.ellipsis, style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontSize: 12)),
-                      ],
-                    ),
+                      ),
+                      ConnectChip(label: item['status']?.toString() ?? 'OPEN'),
+                    ],
                   ),
-                  ConnectChip(label: item['status']?.toString() ?? 'OPEN'),
-                ],
-              ),
-            ),
-          );
-        }).toList(),
+                ),
+              );
+            }),
+        ],
+      ),
+    );
+  }
+}
+
+class _FilterChip extends StatelessWidget {
+  const _FilterChip({required this.label, required this.value, required this.selected, required this.onTap});
+  final String label;
+  final String value;
+  final bool selected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(right: 6),
+      child: FilterChip(
+        label: Text(label, style: const TextStyle(fontSize: 11)),
+        selected: selected,
+        onSelected: (_) => onTap(),
+        selectedColor: ConnectColors.primary.withValues(alpha: 0.25),
+        checkmarkColor: ConnectColors.primaryGlow,
+        side: BorderSide(color: selected ? ConnectColors.primary : ConnectPalette.of(context).borderSubtle),
       ),
     );
   }
@@ -668,17 +741,24 @@ class _ClientsScreenState extends State<ClientsScreen> {
   }
 
   Future<void> _load() async {
+    final api = context.read<AppState>().auth.api;
     try {
-      final data = await context.read<AppState>().auth.api.get('/api/crm');
-      if (mounted) {
-        setState(() {
-          _clients = (data['leads'] as List<dynamic>?) ??
-              (data['clients'] as List<dynamic>?) ??
-              (data['data'] as List<dynamic>?) ??
-              [];
-        });
-      }
-    } catch (_) {}
+      final data = await api.get('/api/admin/customers');
+      if (!mounted) return;
+      setState(() {
+        _clients = (data['customers'] as List<dynamic>?) ??
+            (data['leads'] as List<dynamic>?) ??
+            (data['clients'] as List<dynamic>?) ??
+            (data['data'] as List<dynamic>?) ??
+            [];
+      });
+    } catch (_) {
+      try {
+        final data = await api.get('/api/crm');
+        if (!mounted) return;
+        setState(() => _clients = (data['leads'] as List<dynamic>?) ?? []);
+      } catch (_) {}
+    }
   }
 
   @override
@@ -696,14 +776,34 @@ class _ClientsScreenState extends State<ClientsScreen> {
       onRefresh: _load,
       child: Column(
         children: [
-          TextField(
-            decoration: const InputDecoration(
-              hintText: 'Search clients…',
-              prefixIcon: Icon(Icons.search_rounded, size: 20),
-              isDense: true,
+          ConnectGlassCard(
+            featured: true,
+            padding: const EdgeInsets.all(ConnectSpacing.md),
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: ConnectModuleColors.crm.withValues(alpha: 0.2),
+                    borderRadius: BorderRadius.circular(ConnectRadius.md),
+                  ),
+                  child: const Icon(Icons.groups_rounded, color: ConnectModuleColors.crm, size: 24),
+                ),
+                const SizedBox(width: ConnectSpacing.sm),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('Client Dashboard', style: Theme.of(context).textTheme.titleMedium),
+                      Text('Search · filter · customer 360', style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontSize: 11)),
+                    ],
+                  ),
+                ),
+              ],
             ),
-            onChanged: (v) => setState(() => _query = v),
-          ),
+          ).stitchEntrance(),
+          const SizedBox(height: ConnectSpacing.sm),
+          ConnectSearchBar(hint: 'Search clients…', onChanged: (v) => setState(() => _query = v)),
           const SizedBox(height: ConnectSpacing.md),
           if (filtered.isEmpty)
             const ConnectEmptyState(icon: Icons.groups_outlined, title: 'No clients yet', subtitle: 'CRM records will sync from the server.')
@@ -714,7 +814,15 @@ class _ClientsScreenState extends State<ClientsScreen> {
               return Padding(
                 padding: const EdgeInsets.only(bottom: ConnectSpacing.sm),
                 child: ConnectCard(
-                  onTap: () {},
+                  onTap: () {
+                    final clientId = item['id']?.toString() ?? item['customerCode']?.toString();
+                    if (clientId == null) return;
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (_) => ClientDetailScreen(clientId: clientId, preview: item),
+                      ),
+                    );
+                  },
                   child: Row(
                     children: [
                       ConnectAvatar(label: name),
@@ -737,73 +845,5 @@ class _ClientsScreenState extends State<ClientsScreen> {
         ],
       ),
     );
-  }
-}
-
-class ModuleListScreen extends StatefulWidget {
-  const ModuleListScreen({super.key, required this.title, required this.endpoint});
-  final String title;
-  final String endpoint;
-  @override
-  State<ModuleListScreen> createState() => _ModuleListScreenState();
-}
-
-class _ModuleListScreenState extends State<ModuleListScreen> {
-  dynamic _payload;
-  String? _error;
-
-  @override
-  void initState() {
-    super.initState();
-    _load();
-  }
-
-  Future<void> _load() async {
-    try {
-      final data = await context.read<AppState>().auth.api.get(widget.endpoint);
-      if (mounted) setState(() => _payload = data);
-    } catch (e) {
-      if (mounted) setState(() => _error = e.toString());
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final palette = ConnectPalette.of(context);
-    return Scaffold(
-      backgroundColor: palette.background,
-      appBar: AppBar(title: Text(widget.title)),
-      body: ConnectAmbientBackground(
-        child: _error != null
-            ? ConnectEmptyState(icon: Icons.error_outline, title: 'Could not load', subtitle: _error)
-            : _payload == null
-                ? const Center(child: CircularProgressIndicator(color: ConnectColors.primary))
-                : RefreshIndicator(
-                    onRefresh: _load,
-                    color: ConnectColors.primary,
-                    child: ListView(
-                      padding: const EdgeInsets.all(ConnectSpacing.lg),
-                      children: [
-                        ConnectCard(
-                          child: Text(
-                            _formatPayload(_payload),
-                            style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontSize: 12),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-      ),
-    );
-  }
-
-  String _formatPayload(dynamic payload) {
-    if (payload is Map) {
-      final items = payload['items'] ?? payload['data'] ?? payload['records'];
-      if (items is List && items.isNotEmpty) {
-        return items.map((e) => e.toString()).join('\n\n');
-      }
-    }
-    return payload.toString();
   }
 }

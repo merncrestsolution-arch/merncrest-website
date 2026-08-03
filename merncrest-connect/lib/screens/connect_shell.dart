@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:merncrest_connect/navigation/module_router.dart';
 import 'package:merncrest_connect/providers/app_state.dart';
+import 'package:merncrest_connect/screens/ai_assistant_screen.dart';
 import 'package:merncrest_connect/screens/dashboard_screen.dart';
 import 'package:merncrest_connect/screens/data_screens.dart';
 import 'package:merncrest_connect/screens/more_screen.dart';
@@ -29,6 +30,13 @@ class ConnectShell extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: palette.background,
+      floatingActionButton: state.shellTab == 0
+          ? ConnectFab(
+              icon: Icons.auto_awesome_rounded,
+              label: 'AIRA',
+              onPressed: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const AiAssistantScreen())),
+            )
+          : null,
       body: Column(
         children: [
           ConnectTopBar(

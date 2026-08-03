@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:merncrest_connect/navigation/module_router.dart';
 import 'package:merncrest_connect/providers/app_state.dart';
 import 'package:merncrest_connect/screens/ai_assistant_screen.dart';
+import 'package:merncrest_connect/screens/attendance_screen.dart';
 import 'package:merncrest_connect/screens/data_screens.dart';
 import 'package:merncrest_connect/screens/profile_screen.dart';
 import 'package:merncrest_connect/screens/settings_screen.dart';
@@ -33,14 +34,28 @@ class MoreScreen extends StatelessWidget {
         ('Tasks', '/tasks', Icons.task_alt_rounded),
         ('CRM', '/clients', Icons.groups_rounded),
         ('Helpdesk', '/tickets', Icons.headset_mic_rounded),
+        ('Team Chat', '/internal-chat', Icons.chat_bubble_outline_rounded),
       ],
     ),
     (
-      'Enterprise',
+      'Enterprise ERP',
       [
-        ('ERP', '/erp', Icons.hub_rounded),
+        ('ERP Hub', '/erp', Icons.hub_rounded),
         ('Finance', '/billing', Icons.account_balance_wallet_rounded),
         ('Inventory', '/inventory', Icons.inventory_2_rounded),
+        ('Sales', '/sales', Icons.point_of_sale_rounded),
+        ('Purchasing', '/purchasing', Icons.shopping_cart_outlined),
+        ('Warehouse', '/warehouse', Icons.warehouse_rounded),
+        ('Manufacturing', '/manufacturing', Icons.precision_manufacturing_rounded),
+        ('Assets', '/assets', Icons.devices_rounded),
+        ('Fleet', '/fleet', Icons.local_shipping_rounded),
+      ],
+    ),
+    (
+      'HR & People',
+      [
+        ('HR', '/hr', Icons.people_alt_rounded),
+        ('Announcements', '/announcements', Icons.campaign_rounded),
         ('Documents', '/documents', Icons.description_rounded),
         ('Reports', '/reports', Icons.analytics_rounded),
       ],
@@ -51,8 +66,11 @@ class MoreScreen extends StatelessWidget {
         ('AI Assistant', '/ai', Icons.auto_awesome_rounded),
         ('Integrations', '/integrations', Icons.extension_rounded),
         ('Security', '/security', Icons.shield_outlined),
+        ('Administration', '/admin', Icons.admin_panel_settings_outlined),
+        ('Analytics', '/analytics', Icons.bar_chart_rounded),
         ('Settings', '/settings', Icons.settings_rounded),
         ('Help', '/help', Icons.help_outline_rounded),
+        ('About', '/about', Icons.info_outline_rounded),
       ],
     ),
   ];
@@ -67,6 +85,33 @@ class MoreScreen extends StatelessWidget {
       subtitle: 'All modules & enterprise tools',
       child: Column(
         children: [
+          ConnectCard(
+            featured: true,
+            padding: const EdgeInsets.all(ConnectSpacing.md),
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    gradient: ConnectColors.brandGradient,
+                    borderRadius: BorderRadius.circular(ConnectRadius.md),
+                  ),
+                  child: const Icon(Icons.apps_rounded, color: Colors.white, size: 22),
+                ),
+                const SizedBox(width: ConnectSpacing.sm),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('Enterprise Super App', style: Theme.of(context).textTheme.titleMedium),
+                      Text('HR · CRM · ERP · Finance · AI', style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontSize: 11)),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: ConnectSpacing.sm),
           if (serverGroups.isNotEmpty)
             ..._buildServerGroups(context, serverGroups)
           else
@@ -98,14 +143,23 @@ class MoreScreen extends StatelessWidget {
     return [
       for (final g in groups) ...[
         ConnectSectionHeader(title: g['label']?.toString() ?? 'Modules'),
-        for (final item in (g['items'] as List<dynamic>? ?? []))
-          _ModuleTile(
-            title: item['label']?.toString() ?? '',
-            route: item['route']?.toString() ?? '',
-            icon: ModuleRouter.iconForRoute(item['route']?.toString() ?? ''),
-            color: ModuleRouter.colorForRoute(item['route']?.toString() ?? ''),
-            onTap: () => _handleRoute(context, item['route']?.toString() ?? '', item['label']?.toString()),
+        ConnectCard(
+          padding: const EdgeInsets.symmetric(vertical: ConnectSpacing.xs),
+          child: Column(
+            children: [
+              for (var i = 0; i < (g['items'] as List<dynamic>? ?? []).length; i++) ...[
+                _CompactModuleTile(
+                  title: (g['items'][i] as Map)['label']?.toString() ?? '',
+                  route: (g['items'][i] as Map)['route']?.toString() ?? '',
+                  icon: ModuleRouter.iconForRoute((g['items'][i] as Map)['route']?.toString() ?? ''),
+                  color: ModuleRouter.colorForRoute((g['items'][i] as Map)['route']?.toString() ?? ''),
+                  onTap: () => _handleRoute(context, (g['items'][i] as Map)['route']?.toString() ?? '', (g['items'][i] as Map)['label']?.toString()),
+                ),
+                if (i < (g['items'] as List).length - 1) Divider(height: 1, color: ConnectPalette.of(context).borderSubtle),
+              ],
+            ],
           ),
+        ),
       ],
     ];
   }
@@ -161,33 +215,6 @@ class MoreScreen extends StatelessWidget {
       return;
     }
     ModuleRouter.open(context, route, label: label);
-  }
-}
-
-class _ModuleTile extends StatelessWidget {
-  const _ModuleTile({
-    required this.title,
-    required this.route,
-    required this.icon,
-    required this.color,
-    required this.onTap,
-  });
-
-  final String title;
-  final String route;
-  final IconData icon;
-  final Color color;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return ConnectModuleRow(
-      title: title,
-      subtitle: route,
-      icon: icon,
-      iconColor: color,
-      onTap: onTap,
-    );
   }
 }
 

@@ -1,8 +1,28 @@
 import 'package:flutter/material.dart';
 import 'package:merncrest_connect/screens/ai_assistant_screen.dart';
+import 'package:merncrest_connect/screens/analytics_screen.dart';
+import 'package:merncrest_connect/screens/announcements_screen.dart';
+import 'package:merncrest_connect/screens/attendance_screen.dart';
+import 'package:merncrest_connect/screens/calendar_screen.dart';
 import 'package:merncrest_connect/screens/data_screens.dart';
+import 'package:merncrest_connect/screens/documents_screen.dart';
+import 'package:merncrest_connect/screens/erp_hub_screen.dart';
+import 'package:merncrest_connect/screens/erp_assets_screen.dart';
+import 'package:merncrest_connect/screens/erp_fleet_screen.dart';
+import 'package:merncrest_connect/screens/erp_inventory_screen.dart';
+import 'package:merncrest_connect/screens/erp_manufacturing_screen.dart';
+import 'package:merncrest_connect/screens/erp_procurement_screen.dart';
+import 'package:merncrest_connect/screens/finance_screen.dart';
+import 'package:merncrest_connect/screens/internal_chat_screen.dart';
+import 'package:merncrest_connect/screens/module_list_screen.dart';
+import 'package:merncrest_connect/screens/performance_screen.dart';
+import 'package:merncrest_connect/screens/projects_screen.dart';
+import 'package:merncrest_connect/screens/quotations_screen.dart';
+import 'package:merncrest_connect/screens/helpdesk_screen.dart';
 import 'package:merncrest_connect/screens/notifications_screen.dart';
+import 'package:merncrest_connect/screens/payroll_screen.dart';
 import 'package:merncrest_connect/screens/profile_screen.dart';
+import 'package:merncrest_connect/screens/security_settings_screen.dart';
 import 'package:merncrest_connect/screens/settings_screen.dart';
 import 'package:merncrest_connect/theme/connect_tokens.dart';
 
@@ -26,7 +46,7 @@ class ModuleRouter {
         screen = const LeaveScreen();
       case 'calendar':
       case 'ess/calendar':
-        screen = const ModuleListScreen(title: 'Calendar', endpoint: '/api/staff/calendar');
+        screen = const CalendarScreen();
       case 'profile':
       case 'ess/profile':
         screen = const ProfileScreen();
@@ -43,31 +63,70 @@ class ModuleRouter {
       case 'chat':
         // Switch to chat tab handled by shell callback
         break;
+      case 'internal-chat':
+      case 'team-chat':
+      case 'internal-messaging':
+        screen = const InternalChatScreen();
       case 'clients':
       case 'crm':
         break;
       case 'command-center':
       case 'dashboard':
-        break;
+      case 'analytics':
+      case 'reports':
+        screen = const AnalyticsScreen();
+      case 'performance':
+        screen = const PerformanceScreen();
       case 'billing':
       case 'invoices':
-        screen = const ModuleListScreen(title: 'Invoices', endpoint: '/api/staff/invoices');
+      case 'finance':
+        screen = const FinanceScreen();
       case 'receipts':
-        screen = const ModuleListScreen(title: 'Receipts', endpoint: '/api/staff/invoices');
+        screen = const FinanceScreen();
       case 'quotations':
-        screen = const ModuleListScreen(title: 'Quotations', endpoint: '/api/quotations');
+        screen = const QuotationsScreen();
       case 'projects':
-        screen = const ModuleListScreen(title: 'Projects', endpoint: '/api/staff/service-projects');
+        screen = const ProjectsScreen();
       case 'tickets':
       case 'helpdesk':
-        screen = const ModuleListScreen(title: 'Helpdesk', endpoint: '/api/staff/tickets');
+        screen = const HelpdeskScreen();
       case 'payroll':
       case 'payslips':
-        screen = const ModuleListScreen(title: 'Payroll', endpoint: '/api/staff/payroll');
+      case 'payslip':
+        screen = const PayrollScreen();
       case 'documents':
-        screen = const ModuleListScreen(title: 'Documents', endpoint: '/api/staff/documents');
+        screen = const DocumentsScreen();
       case 'announcements':
-        screen = const ModuleListScreen(title: 'Announcements', endpoint: '/api/staff/announcements');
+        screen = const AnnouncementsScreen();
+      case 'erp':
+      case 'admin/erp':
+        screen = const ErpHubScreen();
+      case 'inventory':
+      case 'warehouse':
+        screen = const ErpInventoryScreen();
+      case 'manufacturing':
+        screen = const ErpManufacturingScreen();
+      case 'purchasing':
+      case 'procurement':
+        screen = const ErpProcurementScreen();
+      case 'assets':
+        screen = const ErpAssetsScreen();
+      case 'fleet':
+      case 'fsm':
+        screen = const ErpFleetScreen();
+      case 'sales':
+        screen = const QuotationsScreen();
+      case 'hr':
+        screen = const ModuleListScreen(title: 'HR', endpoint: '/api/erp/hr');
+      case 'security':
+        screen = const SecuritySettingsScreen();
+      case 'help':
+        screen = const ModuleListScreen(title: 'Help', endpoint: '/api/staff/navigation');
+      case 'about':
+        screen = const SettingsScreen();
+      case 'admin':
+      case 'integrations':
+        screen = const SettingsScreen();
       default:
         if (route.startsWith('/api/')) {
           screen = ModuleListScreen(title: label ?? 'Module', endpoint: route);
@@ -97,6 +156,9 @@ class ModuleRouter {
     if (r.contains('setting')) return Icons.settings_rounded;
     if (r.contains('profile')) return Icons.person_rounded;
     if (r.contains('announce')) return Icons.campaign_rounded;
+    if (r.contains('performance')) return Icons.insights_rounded;
+    if (r.contains('analytics') || r.contains('report')) return Icons.analytics_rounded;
+    if (r.contains('quotation')) return Icons.request_quote_rounded;
     if (r.contains('inventory')) return Icons.inventory_2_rounded;
     if (r.contains('erp')) return Icons.hub_rounded;
     return Icons.widgets_outlined;
