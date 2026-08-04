@@ -4,12 +4,11 @@ import { prisma } from "@/lib/db";
 import { requireStaff } from "@/lib/commerce";
 import { writeAuditLog } from "@/lib/erp/audit";
 import { publishAttendanceSync } from "@/lib/platform/publish";
+import { isLateInSriLanka, startOfDaySriLanka } from "@/lib/timezone";
 import { randomBytes } from "crypto";
 
 function startOfDay(d = new Date()) {
-  const x = new Date(d);
-  x.setHours(0, 0, 0, 0);
-  return x;
+  return startOfDaySriLanka(d);
 }
 
 /** ESS attendance: punch in/out + history + QR token */
@@ -146,7 +145,7 @@ export async function POST(request: Request) {
     if (record?.checkIn) {
       return NextResponse.json({ error: "Already punched in today" }, { status: 400 });
     }
-    const late = now.getHours() > 9 || (now.getHours() === 9 && now.getMinutes() > 15);
+    const late = isLateInSriLanka(now);
     record = record
       ? await prisma.attendanceRecord.update({
           where: { id: record.id },

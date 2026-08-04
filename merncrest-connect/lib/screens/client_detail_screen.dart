@@ -348,7 +348,7 @@ class _ClientDetailScreenState extends State<ClientDetailScreen> {
       context,
       title: 'Payment receipt',
       apiPath: '/api/payments/$id/receipt',
-      filename: 'receipt-$id.html',
+      filename: 'receipt-$id.pdf',
     );
   }
 

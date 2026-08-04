@@ -697,6 +697,13 @@ async function main() {
       update: {},
       create: { userId: staffUser.id, permission: "erp.finance.view" },
     });
+    for (const perm of ["billing.manage", "projects.manage", "clients.manage"] as const) {
+      await prisma.staffPermission.upsert({
+        where: { userId_permission: { userId: staffUser.id, permission: perm } },
+        update: {},
+        create: { userId: staffUser.id, permission: perm },
+      });
+    }
     for (const p of ["erp.iot.view", "erp.esm.view", "erp.dms.view", "erp.ai.view"] as const) {
       await prisma.staffPermission.upsert({
         where: { userId_permission: { userId: staffUser.id, permission: p } },

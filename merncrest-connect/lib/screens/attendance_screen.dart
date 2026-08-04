@@ -3,7 +3,6 @@ import 'package:merncrest_connect/providers/app_state.dart';
 import 'package:merncrest_connect/theme/connect_theme.dart';
 import 'package:merncrest_connect/theme/connect_tokens.dart';
 import 'package:merncrest_connect/utils/formatters.dart';
-import 'package:merncrest_connect/utils/formatters.dart';
 import 'package:merncrest_connect/widgets/connect_card.dart';
 import 'package:merncrest_connect/widgets/connect_charts.dart';
 import 'package:merncrest_connect/widgets/connect_glass.dart';
@@ -170,8 +169,7 @@ class _ClockTab extends StatelessWidget {
 
   String _fmt(dynamic dt) {
     if (dt == null) return '—';
-    final parsed = DateTime.tryParse(dt.toString());
-    return parsed != null ? formatDateTime(parsed) : dt.toString();
+    return formatApiDateTime(dt.toString());
   }
 
   @override
@@ -556,7 +554,10 @@ class _AnalyticsTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final present = records.where((r) => (r as Map)['status'] == 'PRESENT' || (r as Map)['status'] == 'LATE').length;
+    final present = records.where((r) {
+      final status = (r as Map)['status'];
+      return status == 'PRESENT' || status == 'LATE';
+    }).length;
     final late = records.where((r) => (r as Map)['status'] == 'LATE').length;
     final absent = records.where((r) => (r as Map)['status'] == 'ABSENT').length;
     final weekly = List<double>.generate(5, (i) {
@@ -627,8 +628,8 @@ class _HistoryTab extends StatelessWidget {
         final verify = r['verifyMethod']?.toString();
         final checkIn = r['checkIn'];
         final checkOut = r['checkOut'];
-        final inLabel = checkIn != null && DateTime.tryParse(checkIn.toString()) != null ? formatDateTime(DateTime.parse(checkIn.toString())) : (checkIn?.toString() ?? '—');
-        final outLabel = checkOut != null && DateTime.tryParse(checkOut.toString()) != null ? formatDateTime(DateTime.parse(checkOut.toString())) : (checkOut?.toString() ?? '—');
+        final inLabel = formatApiDateTime(checkIn?.toString());
+        final outLabel = formatApiDateTime(checkOut?.toString());
         return Padding(
           padding: const EdgeInsets.only(bottom: ConnectSpacing.sm),
           child: ConnectCard(

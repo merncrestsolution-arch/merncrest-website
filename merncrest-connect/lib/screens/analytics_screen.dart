@@ -99,7 +99,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                     ConnectChartCard(title: 'Performance', child: ConnectSparkline(values: revenueSeries, color: ConnectColors.primary)),
                     const ConnectSectionHeader(title: 'Reports'),
                     ConnectCard(
-                      onTap: () => openInAppDocument(context, title: 'Finance summary', apiPath: '/api/staff/reports/finance', filename: 'finance-report.html'),
+                      onTap: () => openInAppDocument(context, title: 'Finance summary', apiPath: '/api/staff/reports/finance', filename: 'finance-report.pdf'),
                       padding: const EdgeInsets.all(ConnectSpacing.sm),
                       child: const Row(
                         children: [

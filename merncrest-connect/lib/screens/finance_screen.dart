@@ -72,7 +72,7 @@ class _FinanceScreenState extends State<FinanceScreen> with SingleTickerProvider
       context,
       title: pay['receiptNumber']?.toString() ?? 'Receipt',
       apiPath: pay['receiptPath']?.toString() ?? '/api/payments/$id/receipt',
-      filename: 'receipt-${pay['receiptNumber'] ?? id}.html',
+      filename: 'receipt-${pay['receiptNumber'] ?? id}.pdf',
     );
   }
 
@@ -83,7 +83,7 @@ class _FinanceScreenState extends State<FinanceScreen> with SingleTickerProvider
       context,
       title: inv['invoiceNumber']?.toString() ?? 'Invoice',
       apiPath: '/api/invoices/$id/pdf',
-      filename: 'invoice-${inv['invoiceNumber'] ?? id}.html',
+      filename: 'invoice-${inv['invoiceNumber'] ?? id}.pdf',
     );
   }
 
@@ -98,7 +98,10 @@ class _FinanceScreenState extends State<FinanceScreen> with SingleTickerProvider
   }
 
   num _sumPaid() => _invoices.fold<num>(0, (s, i) => s + ((i as Map)['paidCents'] as num? ?? 0));
-  num _sumOutstanding() => _invoices.fold<num>(0, (s, i) => s + ((i as Map)['remainingBalanceCents'] as num? ?? (i as Map)['balanceCents'] as num? ?? 0));
+  num _sumOutstanding() => _invoices.fold<num>(0, (s, i) {
+        final m = i as Map<String, dynamic>;
+        return s + ((m['remainingBalanceCents'] as num?) ?? m['balanceCents'] as num? ?? 0);
+      });
   num _sumTotal() => _invoices.fold<num>(0, (s, i) => s + ((i as Map)['totalCents'] as num? ?? 0));
 
   List<double> _cashFlowSeries() {
@@ -116,11 +119,17 @@ class _FinanceScreenState extends State<FinanceScreen> with SingleTickerProvider
     return buckets;
   }
 
+  int _outstandingCount() => _invoices.where((i) {
+        final m = i as Map<String, dynamic>;
+        return ((m['remainingBalanceCents'] as num?) ?? m['balanceCents'] as num? ?? 0) > 0;
+      }).length;
+
   List<dynamic> _filteredInvoices() {
     return _invoices.where((inv) {
       final m = inv as Map<String, dynamic>;
       final status = m['status']?.toString().toUpperCase() ?? '';
-      if (_statusFilter == 'outstanding' && (m['remainingBalanceCents'] as num? ?? 0) <= 0) return false;
+      final balance = (m['remainingBalanceCents'] as num?) ?? m['balanceCents'] as num? ?? 0;
+      if (_statusFilter == 'outstanding' && balance <= 0) return false;
       if (_statusFilter == 'paid' && status != 'PAID') return false;
       if (_statusFilter == 'pending' && status != 'PENDING' && status != 'SENT') return false;
       final q = _query.toLowerCase();
@@ -224,8 +233,31 @@ class _FinanceScreenState extends State<FinanceScreen> with SingleTickerProvider
                           ),
                         ),
                         const ConnectSectionHeader(title: 'Quick view', padding: EdgeInsets.fromLTRB(0, ConnectSpacing.sm, 0, ConnectSpacing.xs)),
+                        if (_sumOutstanding() > 0) ...[
+                          ConnectCard(
+                            onTap: () {
+                              setState(() => _statusFilter = 'outstanding');
+                              _tabs.animateTo(1);
+                            },
+                            padding: const EdgeInsets.all(ConnectSpacing.sm),
+                            child: Row(
+                              children: [
+                                const Icon(Icons.warning_amber_rounded, color: ConnectColors.warning, size: 20),
+                                const SizedBox(width: 8),
+                                Expanded(
+                                  child: Text(
+                                    '${_outstandingCount()} invoices with outstanding balance',
+                                    style: const TextStyle(fontSize: 13),
+                                  ),
+                                ),
+                                Text(formatCurrencyCents(_sumOutstanding()), style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600)),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(height: ConnectSpacing.xs),
+                        ],
                         ConnectCard(
-                          onTap: () => openInAppDocument(context, title: 'Finance summary report', apiPath: '/api/staff/reports/finance', filename: 'finance-report.html'),
+                          onTap: () => openInAppDocument(context, title: 'Finance summary report', apiPath: '/api/staff/reports/finance', filename: 'finance-report.pdf'),
                           padding: const EdgeInsets.all(ConnectSpacing.sm),
                           child: const Row(
                             children: [
@@ -301,6 +333,11 @@ class _FinanceScreenState extends State<FinanceScreen> with SingleTickerProvider
                                               crossAxisAlignment: CrossAxisAlignment.end,
                                               children: [
                                                 Text(formatCurrencyCents(inv['totalCents'] ?? 0), style: Theme.of(context).textTheme.titleMedium?.copyWith(fontSize: 12)),
+                                                if (((inv['remainingBalanceCents'] as num?) ?? inv['balanceCents'] as num? ?? 0) > 0)
+                                                  Text(
+                                                    'Due ${formatCurrencyCents(inv['remainingBalanceCents'] ?? inv['balanceCents'] ?? 0)}',
+                                                    style: TextStyle(fontSize: 10, color: ConnectColors.warning),
+                                                  ),
                                                 ConnectChip(label: inv['status']?.toString() ?? '', color: _invoiceStatusColor(inv['status']?.toString())),
                                               ],
                                             ),
@@ -373,7 +410,7 @@ class _FinanceScreenState extends State<FinanceScreen> with SingleTickerProvider
                     padding: const EdgeInsets.all(ConnectSpacing.lg),
                     children: [
                       ConnectCard(
-                        onTap: () => openInAppDocument(context, title: 'Finance summary', apiPath: '/api/staff/reports/finance', filename: 'finance-report.html'),
+                        onTap: () => openInAppDocument(context, title: 'Finance summary', apiPath: '/api/staff/reports/finance', filename: 'finance-report.pdf'),
                         padding: const EdgeInsets.all(ConnectSpacing.md),
                         child: Row(
                           children: [

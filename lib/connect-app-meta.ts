@@ -4,8 +4,8 @@ import type { Metadata } from "next";
 export const CONNECT_APP = {
   name: "MernCrest Connect",
   tagline: "Staff mobile app for system.merncrest.lk",
-  version: "1.0.8",
-  build: 9,
+  version: "1.0.9",
+  build: 10,
   packageId: "lk.merncrest.merncrest_connect",
   minAndroid: "6.0",
   apkPath: "/downloads/merncrest-connect.apk",
@@ -13,12 +13,12 @@ export const CONNECT_APP = {
   apiHost: "https://system.merncrest.lk",
   forceUpdate: false,
   releaseNotes: [
-    "Finance: view invoices, payments & receipts in-app (no download required)",
-    "Record client payments and create invoices from Client 360",
-    "Add services & projects for clients from mobile",
-    "Finance summary reports and payslip viewer in-app",
-    "Light theme fixed — readable cards, text, and navigation",
-    "Billing PDF/receipt share optional from document viewer",
+    "Sri Lanka time (UTC+5:30) for attendance, calendar, and dashboard",
+    "Project hub shows client card and editable service billing cycles",
+    "Live sync indicator fixed — online when API works (not SSE-only)",
+    "Share invoices/receipts as PDF instead of HTML",
+    "Staff can record payments and manage outstanding balances",
+    "Finance tab shows due amounts and outstanding summary",
   ],
 } as const;
 

@@ -33,6 +33,14 @@ class AppState extends ChangeNotifier {
   String get displayName =>
       _user?['user']?['fullName']?.toString() ?? _user?['fullName']?.toString() ?? 'Staff';
 
+  bool hasPermission(String code) {
+    final perms = _user?['permissions'];
+    if (perms is List) return perms.map((e) => e.toString()).contains(code);
+    return false;
+  }
+
+  bool get canManageBilling => hasPermission('billing.manage');
+
   Future<void> bootstrap() async {
     _loading = true;
     notifyListeners();

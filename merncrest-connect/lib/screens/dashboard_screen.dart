@@ -241,7 +241,7 @@ class _WelcomeHero extends StatelessWidget {
           const SizedBox(height: ConnectSpacing.sm),
           Row(
             children: [
-              _MetaChip(icon: Icons.access_time_rounded, label: formatTime(now)),
+              _MetaChip(icon: Icons.access_time_rounded, label: formatTime(nowInSriLanka())),
               const SizedBox(width: 6),
               _MetaChip(icon: Icons.calendar_today_rounded, label: formatDate(now)),
             ],

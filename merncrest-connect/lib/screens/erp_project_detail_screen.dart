@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:merncrest_connect/providers/app_state.dart';
 import 'package:merncrest_connect/utils/document_viewer.dart';
+import 'package:merncrest_connect/screens/client_detail_screen.dart';
 import 'package:merncrest_connect/screens/invoice_detail_screen.dart';
 import 'package:merncrest_connect/theme/connect_theme.dart';
 import 'package:merncrest_connect/theme/connect_tokens.dart';
@@ -52,6 +53,96 @@ class _ErpProjectDetailScreenState extends State<ErpProjectDetailScreen> {
         _loading = false;
       });
     }
+  }
+
+  String? _serviceProjectId(Map<String, dynamic> hub) {
+    final sp = hub['serviceProject'] as Map<String, dynamic>?;
+    return sp?['id']?.toString() ?? hub['serviceProjectId']?.toString();
+  }
+
+  Future<void> _editServiceBilling(Map<String, dynamic> svc) async {
+    final hub = _hub ?? {};
+    final serviceProjectId = _serviceProjectId(hub);
+    final serviceId = svc['id']?.toString();
+    if (serviceProjectId == null || serviceId == null) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Service project not linked')));
+      return;
+    }
+
+    String billingCycle = svc['billingCycle']?.toString() ?? 'ANNUAL';
+    bool submitting = false;
+
+    await showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: ConnectPalette.of(context).surface,
+      builder: (ctx) {
+        return Padding(
+          padding: EdgeInsets.fromLTRB(
+            ConnectSpacing.lg,
+            ConnectSpacing.md,
+            ConnectSpacing.lg,
+            MediaQuery.of(ctx).viewInsets.bottom + ConnectSpacing.lg,
+          ),
+          child: StatefulBuilder(
+            builder: (context, setSheetState) {
+              return Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Text('Billing cycle', style: Theme.of(context).textTheme.titleMedium),
+                  Text(svc['serviceType']?.toString() ?? 'Service', style: Theme.of(context).textTheme.bodySmall),
+                  const SizedBox(height: ConnectSpacing.sm),
+                  DropdownButtonFormField<String>(
+                    initialValue: billingCycle,
+                    decoration: const InputDecoration(labelText: 'Billing cycle'),
+                    items: const [
+                      DropdownMenuItem(value: 'MONTHLY', child: Text('Monthly')),
+                      DropdownMenuItem(value: 'QUARTERLY', child: Text('Quarterly')),
+                      DropdownMenuItem(value: 'ANNUAL', child: Text('Annual')),
+                      DropdownMenuItem(value: 'ONE_TIME', child: Text('One time')),
+                    ],
+                    onChanged: (v) => setSheetState(() => billingCycle = v ?? billingCycle),
+                  ),
+                  const SizedBox(height: ConnectSpacing.md),
+                  ConnectPrimaryButton(
+                    label: submitting ? 'Saving…' : 'Save billing cycle',
+                    icon: Icons.save_rounded,
+                    onPressed: submitting
+                        ? null
+                        : () async {
+                            setSheetState(() => submitting = true);
+                            try {
+                              await context.read<AppState>().auth.api.patch(
+                                '/api/projects/$serviceProjectId/services/$serviceId',
+                                {'billingCycle': billingCycle},
+                              );
+                              if (Navigator.of(ctx).canPop()) Navigator.of(ctx).pop();
+                              await _load();
+                              if (mounted) {
+                                ScaffoldMessenger.of(this.context).showSnackBar(const SnackBar(content: Text('Billing cycle updated')));
+                              }
+                            } catch (e) {
+                              setSheetState(() => submitting = false);
+                              ScaffoldMessenger.of(ctx).showSnackBar(SnackBar(content: Text(e.toString())));
+                            }
+                          },
+                  ),
+                ],
+              );
+            },
+          ),
+        );
+      },
+    );
+  }
+
+  void _openClient(Map<String, dynamic>? client) {
+    final id = client?['id']?.toString();
+    if (id == null) return;
+    Navigator.of(context).push(
+      MaterialPageRoute(builder: (_) => ClientDetailScreen(clientId: id)),
+    );
   }
 
   Future<void> _addService() async {
@@ -156,12 +247,13 @@ class _ErpProjectDetailScreenState extends State<ErpProjectDetailScreen> {
       context,
       title: 'Payment receipt',
       apiPath: '/api/payments/$paymentId/receipt',
-      filename: 'receipt-$paymentId.html',
+      filename: 'receipt-$paymentId.pdf',
     );
   }
 
   @override
   Widget build(BuildContext context) {
+    final palette = ConnectPalette.of(context);
     final hub = _hub ?? widget.preview ?? {};
     final project = hub['erpProject'] as Map<String, dynamic>? ?? hub['project'] as Map<String, dynamic>? ?? hub;
     final services = (hub['services'] as List<dynamic>?) ?? [];
@@ -169,7 +261,9 @@ class _ErpProjectDetailScreenState extends State<ErpProjectDetailScreen> {
     final invoices = (billingBlock['invoices'] as List<dynamic>?) ?? (hub['invoices'] as List<dynamic>?) ?? [];
     final receipts = (billingBlock['receipts'] as List<dynamic>?) ?? (hub['receipts'] as List<dynamic>?) ?? [];
     final billing = billingBlock['summary'] as Map<String, dynamic>? ?? hub['billingSummary'] as Map<String, dynamic>? ?? {};
-    final client = hub['client'] as Map<String, dynamic>? ?? project['customer'] as Map<String, dynamic>?;
+    final client = hub['client'] as Map<String, dynamic>? ??
+        project['customer'] as Map<String, dynamic>? ??
+        widget.preview?['client'] as Map<String, dynamic>?;
     final progressPct = (hub['progress'] as Map<String, dynamic>?)?['percent'];
 
     return Scaffold(
@@ -211,12 +305,55 @@ class _ErpProjectDetailScreenState extends State<ErpProjectDetailScreen> {
                           ],
                         ),
                         if (client != null) ...[
-                          const SizedBox(height: 8),
-                          Text(
-                            client['company']?.toString() ?? client['fullName']?.toString() ?? '',
-                            style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontSize: 12),
+                          const SizedBox(height: ConnectSpacing.sm),
+                          ConnectCard(
+                            onTap: () => _openClient(client),
+                            padding: const EdgeInsets.all(ConnectSpacing.sm),
+                            child: Row(
+                              children: [
+                                CircleAvatar(
+                                  radius: 18,
+                                  backgroundColor: ConnectModuleColors.crm.withValues(alpha: 0.2),
+                                  child: Text(
+                                    initialsFromName(clientDisplayName(client)),
+                                    style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+                                  ),
+                                ),
+                                const SizedBox(width: ConnectSpacing.sm),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text('Client', style: Theme.of(context).textTheme.labelSmall),
+                                      Text(
+                                        clientDisplayName(client),
+                                        style: Theme.of(context).textTheme.titleMedium?.copyWith(fontSize: 13),
+                                      ),
+                                      if (client['email'] != null)
+                                        Text(client['email'].toString(), style: Theme.of(context).textTheme.bodySmall),
+                                    ],
+                                  ),
+                                ),
+                                const Icon(Icons.chevron_right_rounded, color: ConnectColors.textMuted),
+                              ],
+                            ),
                           ),
-                        ],
+                        ] else
+                          ConnectCard(
+                            padding: const EdgeInsets.all(ConnectSpacing.sm),
+                            child: Row(
+                              children: [
+                                Icon(Icons.person_off_outlined, size: 18, color: palette.textMuted),
+                                const SizedBox(width: 8),
+                                Expanded(
+                                  child: Text(
+                                    'No client linked to this ERP project',
+                                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontSize: 12),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
                       ],
                     ),
                   ),
@@ -239,9 +376,11 @@ class _ErpProjectDetailScreenState extends State<ErpProjectDetailScreen> {
                   else
                     ...services.map((s) {
                       final svc = s as Map<String, dynamic>;
+                      final renewal = svc['renewalDate']?.toString();
                       return Padding(
                         padding: const EdgeInsets.only(bottom: ConnectSpacing.xs),
                         child: ConnectCard(
+                          onTap: () => _editServiceBilling(svc),
                           padding: const EdgeInsets.all(ConnectSpacing.sm),
                           child: Row(
                             children: [
@@ -252,11 +391,15 @@ class _ErpProjectDetailScreenState extends State<ErpProjectDetailScreen> {
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Text(svc['label']?.toString() ?? svc['serviceType']?.toString() ?? 'Service', style: const TextStyle(fontSize: 13)),
-                                    if (svc['renewalDate'] != null) Text('Renews ${svc['renewalDate'].toString().split('T').first}', style: Theme.of(context).textTheme.labelSmall),
+                                    Text(
+                                      '${billingCycleLabel(svc['billingCycle']?.toString())}${renewal != null ? ' · Renews ${formatApiDate(renewal)}' : ''}',
+                                      style: Theme.of(context).textTheme.labelSmall,
+                                    ),
                                   ],
                                 ),
                               ),
                               ConnectChip(label: svc['status']?.toString() ?? ''),
+                              const Icon(Icons.edit_outlined, size: 16, color: ConnectColors.textMuted),
                             ],
                           ),
                         ),

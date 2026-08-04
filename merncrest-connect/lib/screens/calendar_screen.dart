@@ -65,17 +65,17 @@ class _CalendarScreenState extends State<CalendarScreen> with SingleTickerProvid
   }
 
   List<dynamic> _filteredEvents() {
-    final now = DateTime.now();
+    final now = nowInSriLanka();
     if (_mode == 'day') {
       return _events.where((e) {
-        final start = DateTime.tryParse((e as Map)['startsAt']?.toString() ?? '');
-        return start != null && start.year == now.year && start.month == now.month && start.day == now.day;
+        final start = parseApiDateTime((e as Map)['startsAt']?.toString());
+        return start != null && isSameCalendarDay(start, now);
       }).toList();
     }
     if (_mode == 'week') {
       final weekEnd = now.add(const Duration(days: 7));
       return _events.where((e) {
-        final start = DateTime.tryParse((e as Map)['startsAt']?.toString() ?? '');
+        final start = parseApiDateTime((e as Map)['startsAt']?.toString());
         return start != null && start.isBefore(weekEnd) && start.isAfter(now.subtract(const Duration(days: 1)));
       }).toList();
     }
@@ -119,7 +119,7 @@ class _CalendarScreenState extends State<CalendarScreen> with SingleTickerProvid
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text(formatDate(DateTime.now()), style: Theme.of(context).textTheme.titleMedium),
+                                Text(formatDate(nowInSriLanka()), style: Theme.of(context).textTheme.titleMedium),
                                 Text('${filtered.length} events · ${_holidays.length} holidays · ${_leaves.length} leave', style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontSize: 11)),
                               ],
                             ),
@@ -162,7 +162,7 @@ class _CalendarScreenState extends State<CalendarScreen> with SingleTickerProvid
                           else
                             ...filtered.map((e) {
                               final item = e as Map<String, dynamic>;
-                              final start = DateTime.tryParse(item['startsAt']?.toString() ?? '');
+                              final start = parseApiDateTime(item['startsAt']?.toString());
                               return _CalendarTile(
                                 icon: _iconForKind(item['kind']?.toString()),
                                 color: ConnectModuleColors.calendar,
@@ -183,8 +183,8 @@ class _CalendarScreenState extends State<CalendarScreen> with SingleTickerProvid
   }
 
   void _showEventDetail(BuildContext context, Map<String, dynamic> item) {
-    final start = DateTime.tryParse(item['startsAt']?.toString() ?? '');
-    final end = DateTime.tryParse(item['endsAt']?.toString() ?? '');
+    final start = parseApiDateTime(item['startsAt']?.toString());
+    final end = parseApiDateTime(item['endsAt']?.toString());
     showModalBottomSheet(
       context: context,
       backgroundColor: ConnectPalette.of(context).surfaceRaised,

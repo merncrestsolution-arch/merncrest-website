@@ -198,7 +198,7 @@ class PayslipDetailScreen extends StatelessWidget {
                   context,
                   title: slip['slipNumber']?.toString() ?? 'Payslip',
                   apiPath: '/api/staff/payslips/$id/html',
-                  filename: 'payslip-${slip['slipNumber'] ?? id}.html',
+                  filename: 'payslip-${slip['slipNumber'] ?? id}.pdf',
                 );
               },
             ),

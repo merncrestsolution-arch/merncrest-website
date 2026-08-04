@@ -488,8 +488,8 @@ class ConnectOfflineBanner extends StatelessWidget {
     final offline = !online;
     final label = offline
         ? (pendingMutations > 0
-            ? 'Offline — $pendingMutations queued action${pendingMutations == 1 ? '' : 's'} will sync when online'
-            : message ?? 'Offline mode — some data may be cached')
+            ? 'No connection — $pendingMutations queued action${pendingMutations == 1 ? '' : 's'} will sync when back online'
+            : message ?? 'No connection — pull to refresh or check network')
         : '$pendingMutations queued action${pendingMutations == 1 ? '' : 's'} syncing…';
 
     return Container(

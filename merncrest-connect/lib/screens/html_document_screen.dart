@@ -71,8 +71,8 @@ class _HtmlDocumentScreenState extends State<HtmlDocumentScreen> {
     if (html == null) return;
     setState(() => _sharing = true);
     try {
-      final name = widget.filename ?? '${widget.title.replaceAll(' ', '_')}.html';
-      await _docs.shareHtmlFile(html: html, filename: name, shareText: widget.title);
+      final name = widget.filename ?? '${widget.title.replaceAll(' ', '_')}.pdf';
+      await _docs.shareAsPdf(html: html, filename: name, shareText: widget.title);
     } finally {
       if (mounted) setState(() => _sharing = false);
     }

@@ -39,8 +39,11 @@ export const ROLE_DEFAULT_PERMISSIONS: Record<SystemRole, StaffPermission[] | "*
   ADMIN: "*",
   STAFF: [
     "clients.view",
+    "clients.manage",
     "projects.view",
+    "projects.manage",
     "billing.view",
+    "billing.manage",
     "domains.view",
     "hosting.view",
     "announcements.view",

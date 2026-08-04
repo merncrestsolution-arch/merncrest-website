@@ -16,7 +16,8 @@ class PlatformSyncService extends ChangeNotifier {
   StreamSubscription<List<int>>? _sseSub;
   http.Client? _sseClient;
   String? _since;
-  bool _connected = false;
+  bool _apiReachable = false;
+  bool _streamLive = false;
   String? lastEventType;
   String? lastChatSessionId;
   String? lastChatMessageId;
@@ -28,7 +29,9 @@ class PlatformSyncService extends ChangeNotifier {
   String? lastSyncAt;
   int pendingMutations = 0;
 
-  bool get connected => _connected;
+  /// HTTP/API reachable (used for offline banner — not SSE-only).
+  bool get connected => _apiReachable;
+  bool get streamLive => _streamLive;
 
   Future<void> refreshPendingMutations() async {
     pendingMutations = await OfflineMutationQueue.pendingCount();
@@ -52,7 +55,8 @@ class PlatformSyncService extends ChangeNotifier {
     _sseSub = null;
     _sseClient?.close();
     _sseClient = null;
-    _connected = false;
+    _apiReachable = false;
+    _streamLive = false;
   }
 
   Future<void> _restoreCachedSnapshot() async {
@@ -67,9 +71,11 @@ class PlatformSyncService extends ChangeNotifier {
           : '/api/platform/sync';
       final data = await _api.get(path);
       _applyPayload(data);
+      _apiReachable = true;
       await _flushOfflineQueue();
+      notifyListeners();
     } catch (_) {
-      _connected = false;
+      _apiReachable = false;
       notifyListeners();
     }
   }
@@ -145,7 +151,7 @@ class PlatformSyncService extends ChangeNotifier {
     _sseClient!
         .send(http.Request('GET', url)..headers['X-MernCrest-Client'] = 'connect-mobile')
         .then((streamed) {
-      _connected = true;
+      _streamLive = true;
       notifyListeners();
       _flushOfflineQueue();
 
@@ -164,7 +170,7 @@ class PlatformSyncService extends ChangeNotifier {
             try {
               final data = jsonDecode(line.substring(6)) as Map<String, dynamic>;
               if (data['type'] == 'connected') {
-                _connected = true;
+                _streamLive = true;
                 notifyListeners();
                 continue;
               }
@@ -173,19 +179,19 @@ class PlatformSyncService extends ChangeNotifier {
           }
         },
         onError: (_) {
-          _connected = false;
+          _streamLive = false;
           notifyListeners();
           Future.delayed(const Duration(seconds: 2), _connectStream);
         },
         onDone: () {
-          _connected = false;
+          _streamLive = false;
           notifyListeners();
           Future.delayed(const Duration(seconds: 2), _connectStream);
         },
         cancelOnError: true,
       );
     }).catchError((_) {
-      _connected = false;
+      _streamLive = false;
       notifyListeners();
       Future.delayed(const Duration(seconds: 2), _connectStream);
     });

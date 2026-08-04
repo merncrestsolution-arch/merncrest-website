@@ -3,6 +3,8 @@ import 'dart:io';
 import 'package:http/http.dart' as http;
 import 'package:merncrest_connect/config/api_config.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:pdf/pdf.dart';
+import 'package:printing/printing.dart';
 import 'package:share_plus/share_plus.dart';
 
 /// Fetches invoice/receipt HTML from billing APIs using Bearer auth (mobile).
@@ -25,21 +27,31 @@ class BillingDocumentService {
     return res.body;
   }
 
-  Future<File> saveHtmlFile(String html, String filename) async {
+  String _pdfFilename(String filename) {
+    final base = filename.replaceAll(RegExp(r'\.(html?|pdf)$', caseSensitive: false), '');
+    return '$base.pdf';
+  }
+
+  Future<File> savePdfBytes(List<int> bytes, String filename) async {
     final dir = await getTemporaryDirectory();
-    final file = File('${dir.path}/$filename');
-    await file.writeAsString(html, flush: true);
+    final file = File('${dir.path}/${_pdfFilename(filename)}');
+    await file.writeAsBytes(bytes, flush: true);
     return file;
   }
 
-  Future<void> shareHtmlFile({
+  Future<void> shareAsPdf({
     required String html,
     required String filename,
     String? shareText,
   }) async {
-    final file = await saveHtmlFile(html, filename);
+    final bytes = await Printing.convertHtml(
+      html: html,
+      format: PdfPageFormat.a4,
+      baseUrl: ApiConfig.baseUrl,
+    );
+    final file = await savePdfBytes(bytes, filename);
     await Share.shareXFiles(
-      [XFile(file.path, mimeType: 'text/html', name: filename)],
+      [XFile(file.path, mimeType: 'application/pdf', name: file.path.split('/').last)],
       text: shareText,
     );
   }

@@ -88,7 +88,7 @@ class _InvoiceDetailScreenState extends State<InvoiceDetailScreen> {
       context,
       title: 'Invoice $number',
       apiPath: '/api/invoices/$_id/pdf',
-      filename: 'invoice-$number.html',
+      filename: 'invoice-$number.pdf',
     );
   }
 
@@ -97,7 +97,7 @@ class _InvoiceDetailScreenState extends State<InvoiceDetailScreen> {
       context,
       title: receiptNumber != null ? 'Receipt $receiptNumber' : 'Payment receipt',
       apiPath: '/api/payments/$paymentId/receipt',
-      filename: 'receipt-${receiptNumber ?? paymentId}.html',
+      filename: 'receipt-${receiptNumber ?? paymentId}.pdf',
     );
   }
 
@@ -206,6 +206,7 @@ class _InvoiceDetailScreenState extends State<InvoiceDetailScreen> {
   @override
   Widget build(BuildContext context) {
     final palette = ConnectPalette.of(context);
+    final canBill = context.watch<AppState>().canManageBilling;
     final inv = _invoice;
     final payments = (inv?['payments'] as List<dynamic>?) ?? [];
     final lines = _lineItems();
@@ -221,11 +222,11 @@ class _InvoiceDetailScreenState extends State<InvoiceDetailScreen> {
           IconButton(onPressed: _load, icon: const Icon(Icons.refresh_rounded, size: 20)),
         ],
       ),
-      floatingActionButton: inv != null && ((inv['remainingBalanceCents'] as num?) ?? 0) > 0
+      floatingActionButton: inv != null && canBill && ((inv['remainingBalanceCents'] as num?) ?? inv['balanceCents'] as num? ?? 0) > 0
           ? FloatingActionButton.extended(
               onPressed: _recordPayment,
               icon: const Icon(Icons.add_card_rounded),
-              label: const Text('Payment'),
+              label: const Text('Record payment'),
               backgroundColor: ConnectColors.primary,
             )
           : null,
@@ -275,7 +276,7 @@ class _InvoiceDetailScreenState extends State<InvoiceDetailScreen> {
                                 color: ConnectColors.warning,
                               ),
                               if (inv['dueAt'] != null)
-                                _InvoiceRow(label: 'Due date', value: inv['dueAt'].toString().split('T').first),
+                                _InvoiceRow(label: 'Due date', value: formatApiDate(inv['dueAt']?.toString())),
                             ],
                           ),
                         ),
