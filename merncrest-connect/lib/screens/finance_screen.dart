@@ -44,24 +44,23 @@ class _FinanceScreenState extends State<FinanceScreen> with SingleTickerProvider
 
   Future<void> _load() async {
     setState(() => _loading = true);
+    final api = context.read<AppState>().auth.api;
+    List<dynamic> invoices = [];
+    List<dynamic> payments = [];
     try {
-      final api = context.read<AppState>().auth.api;
-      final results = await Future.wait([
-        api.get('/api/staff/invoices'),
-        api.get('/api/staff/payments'),
-      ]);
-      if (mounted) {
-        setState(() {
-          _invoices = envelopeList(results[0]);
-          _payments = envelopeList(results[1]);
-          _loading = false;
-        });
-      }
-    } catch (e) {
-      if (mounted) {
-        setState(() => _loading = false);
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString())));
-      }
+      final invRes = await api.get('/api/staff/invoices');
+      invoices = envelopeList(invRes);
+    } catch (_) {}
+    try {
+      final payRes = await api.get('/api/staff/payments');
+      payments = envelopeList(payRes);
+    } catch (_) {}
+    if (mounted) {
+      setState(() {
+        _invoices = invoices;
+        _payments = payments;
+        _loading = false;
+      });
     }
   }
 

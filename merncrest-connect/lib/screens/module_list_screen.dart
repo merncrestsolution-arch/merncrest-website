@@ -111,6 +111,26 @@ class _ModuleListScreenState extends State<ModuleListScreen> {
           .toList();
     }
 
+    if (endpoint.contains('/domains') || endpoint.contains('/hosting') || endpoint.contains('/dns')) {
+      return ApiPayload.list(data, keys: const ['data', 'domains', 'hostingAccounts', 'records', 'items'])
+          .map((e) {
+            final m = e as Map<String, dynamic>;
+            return _RowData(
+              title: m['fqdn']?.toString() ?? m['domain']?.toString() ?? m['name']?.toString() ?? 'Record',
+              subtitle: [
+                m['status']?.toString(),
+                if (m['user'] is Map) (m['user'] as Map)['fullName']?.toString(),
+                if (m['expiresAt'] != null) m['expiresAt']?.toString(),
+              ].whereType<String>().where((s) => s.isNotEmpty).join(' · '),
+              chip: m['status']?.toString(),
+            );
+          })
+          .toList();
+    }
+    if (endpoint.contains('/monitoring') || endpoint.contains('/renewals') || endpoint.contains('/cloud') || endpoint.contains('/resources')) {
+      return ApiPayload.list(data).map((e) => _fromMap(e as Map<String, dynamic>)).toList();
+    }
+
     return ApiPayload.list(data).map((e) => _fromMap(e as Map<String, dynamic>)).toList();
   }
 

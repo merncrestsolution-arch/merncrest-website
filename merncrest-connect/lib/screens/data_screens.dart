@@ -11,6 +11,8 @@ import 'package:merncrest_connect/screens/task_detail_screen.dart';
 import 'package:merncrest_connect/services/platform_sync_service.dart';
 import 'package:merncrest_connect/theme/connect_theme.dart';
 import 'package:merncrest_connect/theme/connect_tokens.dart';
+import 'package:merncrest_connect/utils/api_envelope.dart';
+import 'package:merncrest_connect/utils/formatters.dart';
 import 'package:merncrest_connect/widgets/connect_card.dart';
 import 'package:merncrest_connect/widgets/connect_glass.dart';
 import 'package:merncrest_connect/widgets/connect_motion.dart';
@@ -746,21 +748,23 @@ class _ClientsScreenState extends State<ClientsScreen> {
   Future<void> _load() async {
     final api = context.read<AppState>().auth.api;
     try {
-      final data = await api.get('/api/admin/customers');
+      final data = await api.get('/api/staff/clients');
       if (!mounted) return;
       setState(() {
-        _clients = (data['customers'] as List<dynamic>?) ??
-            (data['leads'] as List<dynamic>?) ??
-            (data['clients'] as List<dynamic>?) ??
-            (data['data'] as List<dynamic>?) ??
-            [];
+        _clients = envelopeList(data).isNotEmpty
+            ? envelopeList(data)
+            : (data['customers'] as List<dynamic>?) ?? [];
       });
     } catch (_) {
       try {
-        final data = await api.get('/api/crm');
+        final data = await api.get('/api/admin/customers');
         if (!mounted) return;
-        setState(() => _clients = (data['leads'] as List<dynamic>?) ?? []);
-      } catch (_) {}
+        setState(() {
+          _clients = (data['customers'] as List<dynamic>?) ?? envelopeList(data);
+        });
+      } catch (_) {
+        if (mounted) setState(() => _clients = []);
+      }
     }
   }
 
@@ -814,11 +818,13 @@ class _ClientsScreenState extends State<ClientsScreen> {
             ...filtered.map((c) {
               final item = c as Map<String, dynamic>;
               final name = item['fullName']?.toString() ?? item['company']?.toString() ?? 'Client';
+              final billing = item['billing'] as Map<String, dynamic>?;
+              final balance = billing?['balanceCents'] as num? ?? 0;
               return Padding(
                 padding: const EdgeInsets.only(bottom: ConnectSpacing.sm),
                 child: ConnectCard(
                   onTap: () {
-                    final clientId = item['id']?.toString() ?? item['customerCode']?.toString();
+                    final clientId = item['id']?.toString();
                     if (clientId == null) return;
                     Navigator.of(context).push(
                       MaterialPageRoute(
@@ -835,10 +841,21 @@ class _ClientsScreenState extends State<ClientsScreen> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(name, style: Theme.of(context).textTheme.titleMedium?.copyWith(fontSize: 13)),
-                            Text(item['customerCode']?.toString() ?? item['leadNumber']?.toString() ?? item['email']?.toString() ?? '', style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontSize: 11)),
+                            Text(
+                              item['customerCode']?.toString() ?? item['email']?.toString() ?? '',
+                              style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontSize: 11),
+                            ),
                           ],
                         ),
                       ),
+                      if (balance > 0)
+                        Padding(
+                          padding: const EdgeInsets.only(right: 4),
+                          child: Text(
+                            formatCurrencyCents(balance),
+                            style: Theme.of(context).textTheme.labelSmall?.copyWith(color: ConnectColors.warning),
+                          ),
+                        ),
                       const Icon(Icons.chevron_right_rounded, size: 18, color: ConnectColors.textMuted),
                     ],
                   ),

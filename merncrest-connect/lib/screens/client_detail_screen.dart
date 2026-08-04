@@ -514,6 +514,8 @@ class _ClientDetailScreenState extends State<ClientDetailScreen> {
                   else
                     ...invoices.take(8).map((inv) {
                       final i = inv as Map<String, dynamic>;
+                      final balance = (i['remainingBalanceCents'] as num?) ?? i['balanceCents'] as num? ?? 0;
+                      final total = i['totalCents'] as num? ?? 0;
                       return Padding(
                         padding: const EdgeInsets.only(bottom: ConnectSpacing.xs),
                         child: ConnectCard(
@@ -534,7 +536,17 @@ class _ClientDetailScreenState extends State<ClientDetailScreen> {
                                   ],
                                 ),
                               ),
-                              Text(formatCurrencyCents(i['totalCents'] ?? 0), style: const TextStyle(fontSize: 12)),
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.end,
+                                children: [
+                                  Text(formatCurrencyCents(total), style: const TextStyle(fontSize: 12)),
+                                  if (balance > 0)
+                                    Text(
+                                      'Due ${formatCurrencyCents(balance)}',
+                                      style: Theme.of(context).textTheme.labelSmall?.copyWith(color: ConnectColors.warning, fontSize: 10),
+                                    ),
+                                ],
+                              ),
                               const Icon(Icons.chevron_right_rounded, size: 18, color: ConnectColors.textMuted),
                             ],
                           ),

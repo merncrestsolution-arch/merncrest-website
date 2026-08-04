@@ -41,20 +41,20 @@ class _ProjectsScreenState extends State<ProjectsScreen> with SingleTickerProvid
   Future<void> _load() async {
     setState(() => _loading = true);
     final api = context.read<AppState>().auth.api;
+    List<dynamic> erp = [];
+    List<dynamic> service = [];
     try {
-      final results = await Future.wait([
-        api.get('/api/staff/projects/progress'),
-        api.get('/api/staff/service-projects'),
-      ]);
-      if (mounted) {
-        setState(() {
-          _erpProjects = envelopeList(results[0]);
-          _serviceProjects = envelopeList(results[1]);
-          _loading = false;
-        });
-      }
-    } catch (_) {
-      if (mounted) setState(() => _loading = false);
+      erp = envelopeList(await api.get('/api/staff/projects/progress'));
+    } catch (_) {}
+    try {
+      service = envelopeList(await api.get('/api/staff/service-projects'));
+    } catch (_) {}
+    if (mounted) {
+      setState(() {
+        _erpProjects = erp;
+        _serviceProjects = service;
+        _loading = false;
+      });
     }
   }
 

@@ -4,11 +4,11 @@ List<dynamic> envelopeList(Map<String, dynamic> res, {String? listKey}) {
   final data = res['data'];
   if (data is List) return data;
   if (data is Map) {
-    for (final key in ['items', 'records', 'projects', 'invoices', 'tickets']) {
+    for (final key in ['items', 'records', 'projects', 'invoices', 'tickets', 'clients', 'customers', 'domains', 'payments']) {
       if (data[key] is List) return data[key] as List;
     }
   }
-  for (final key in ['projects', 'invoices', 'items', 'records', 'tickets', 'slips']) {
+  for (final key in ['projects', 'invoices', 'items', 'records', 'tickets', 'slips', 'clients', 'customers', 'domains', 'payments']) {
     if (res[key] is List) return res[key] as List;
   }
   return [];

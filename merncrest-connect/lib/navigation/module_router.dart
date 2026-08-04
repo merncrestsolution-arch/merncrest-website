@@ -74,7 +74,7 @@ class ModuleRouter {
         screen = const InternalChatScreen();
       case 'clients':
       case 'crm':
-        break;
+        screen = const ClientsScreen();
       case 'command-center':
       case 'dashboard':
       case 'analytics':
@@ -135,6 +135,21 @@ class ModuleRouter {
         screen = const AdminScreen();
       case 'integrations':
         screen = const IntegrationsScreen();
+      case 'domains':
+        screen = const ModuleListScreen(title: 'Domains', endpoint: '/api/staff/domains');
+      case 'dns':
+        screen = const ModuleListScreen(title: 'DNS', endpoint: '/api/staff/dns');
+      case 'hosting':
+        screen = const ModuleListScreen(title: 'Hosting', endpoint: '/api/staff/hosting');
+      case 'resources':
+      case 'resources-hub':
+        screen = const ModuleListScreen(title: 'Resources Hub', endpoint: '/api/staff/resources-hub');
+      case 'monitoring':
+        screen = const ModuleListScreen(title: 'Monitoring', endpoint: '/api/staff/monitoring');
+      case 'renewals':
+        screen = const ModuleListScreen(title: 'Renewals', endpoint: '/api/staff/renewals');
+      case 'cloud':
+        screen = const ModuleListScreen(title: 'Cloud', endpoint: '/api/staff/cloud');
       default:
         if (route.startsWith('/api/')) {
           screen = ModuleListScreen(title: label ?? 'Module', endpoint: route);

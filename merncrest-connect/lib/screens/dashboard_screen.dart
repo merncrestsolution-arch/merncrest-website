@@ -48,31 +48,32 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
       _error = null;
     });
     final api = context.read<AppState>().auth.api;
+    Map<String, dynamic>? staffData;
+    Map<String, dynamic>? commandData;
+    List<dynamic> announcements = [];
+    String? loadError;
     try {
-      final results = await Future.wait([
-        api.get('/api/staff'),
-        api.get('/api/staff/command-center'),
-        api.get('/api/staff/announcements').catchError((_) => <String, dynamic>{}),
-      ]);
-      if (mounted) {
-        final announcementsRaw = results[2];
-        final announcements = (announcementsRaw['data'] as List<dynamic>?) ??
-            (announcementsRaw['announcements'] as List<dynamic>?) ??
-            [];
-        setState(() {
-          _data = results[0];
-          _command = results[1];
-          _announcements = announcements;
-          _loading = false;
-        });
-      }
+      staffData = await api.get('/api/staff');
     } catch (e) {
-      if (mounted) {
-        setState(() {
-          _loading = false;
-          _error = e.toString().replaceFirst('Exception: ', '');
-        });
-      }
+      loadError = e.toString().replaceFirst('Exception: ', '');
+    }
+    try {
+      commandData = await api.get('/api/staff/command-center');
+    } catch (_) {}
+    try {
+      final announcementsRaw = await api.get('/api/staff/announcements');
+      announcements = (announcementsRaw['data'] as List<dynamic>?) ??
+          (announcementsRaw['announcements'] as List<dynamic>?) ??
+          [];
+    } catch (_) {}
+    if (mounted) {
+      setState(() {
+        _data = staffData;
+        _command = commandData;
+        _announcements = announcements;
+        _loading = false;
+        _error = staffData == null ? loadError : null;
+      });
     }
   }
 
