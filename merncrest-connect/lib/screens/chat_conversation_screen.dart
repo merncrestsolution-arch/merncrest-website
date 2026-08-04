@@ -72,20 +72,22 @@ class _ChatConversationScreenState extends State<ChatConversationScreen> {
   Future<void> _load() async {
     setState(() => _loading = true);
     final api = context.read<AppState>().auth.api;
+    List<dynamic> messages = [];
+    Map<String, dynamic>? contextData;
     try {
-      final results = await Future.wait([
-        api.get('/api/chat/conversations/${widget.sessionId}/messages'),
-        api.get('/api/staff/chat/inbox/${widget.sessionId}/context'),
-      ]);
-      if (mounted) {
-        setState(() {
-          _messages = (results[0]['messages'] as List<dynamic>?) ?? [];
-          _context = (results[1]['context'] as Map<String, dynamic>?) ?? results[1];
-          _loading = false;
-        });
-      }
-    } catch (_) {
-      if (mounted) setState(() => _loading = false);
+      final msgRes = await api.get('/api/chat/conversations/${widget.sessionId}/messages');
+      messages = (msgRes['messages'] as List<dynamic>?) ?? [];
+    } catch (_) {}
+    try {
+      final ctxRes = await api.get('/api/staff/chat/inbox/${widget.sessionId}/context');
+      contextData = (ctxRes['context'] as Map<String, dynamic>?) ?? ctxRes;
+    } catch (_) {}
+    if (mounted) {
+      setState(() {
+        _messages = messages;
+        _context = contextData;
+        _loading = false;
+      });
     }
   }
 

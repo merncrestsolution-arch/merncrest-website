@@ -69,11 +69,12 @@ export function StaffClientsPanel() {
     setError("");
     const params = new URLSearchParams();
     if (search) params.set("q", search);
-    fetch(`/api/admin/customers?${params}`)
+    fetch(`/api/staff/clients?${params}`)
       .then(async (r) => {
         const d = await r.json();
-        if (!r.ok) throw new Error(d.error || "Failed to load clients");
-        setClients(d.customers ?? []);
+        if (!r.ok) throw new Error(d.error?.message || d.error || "Failed to load clients");
+        const rows = Array.isArray(d.data) ? d.data : d.customers ?? [];
+        setClients(rows);
       })
       .catch((e) => setError(e instanceof Error ? e.message : "Failed"))
       .finally(() => setLoading(false));

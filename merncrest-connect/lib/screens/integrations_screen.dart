@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:merncrest_connect/config/api_config.dart';
 import 'package:merncrest_connect/navigation/module_router.dart';
 import 'package:merncrest_connect/providers/app_state.dart';
+import 'package:merncrest_connect/utils/navigation_items.dart';
 import 'package:merncrest_connect/services/ssl_pinning_service.dart';
 import 'package:merncrest_connect/theme/connect_theme.dart';
 import 'package:merncrest_connect/theme/connect_tokens.dart';
@@ -20,7 +21,7 @@ class IntegrationsScreen extends StatelessWidget {
     final state = context.watch<AppState>();
     final sync = state.sync;
     final nav = state.navigation;
-    final modules = (nav?['modules'] as List<dynamic>?) ?? (nav?['items'] as List<dynamic>?) ?? [];
+    final modules = flattenNavigationGroups(nav);
 
     return Scaffold(
       backgroundColor: ConnectPalette.of(context).background,

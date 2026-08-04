@@ -4,8 +4,8 @@ import type { Metadata } from "next";
 export const CONNECT_APP = {
   name: "MernCrest Connect",
   tagline: "Staff mobile app for system.merncrest.lk",
-  version: "1.0.10",
-  build: 11,
+  version: "1.0.11",
+  build: 12,
   packageId: "lk.merncrest.merncrest_connect",
   minAndroid: "6.0",
   apkPath: "/downloads/merncrest-connect.apk",
@@ -13,11 +13,12 @@ export const CONNECT_APP = {
   apiHost: "https://system.merncrest.lk",
   forceUpdate: false,
   releaseNotes: [
-    "Finance loads invoices even when payments list is restricted",
-    "Clients list uses staff API with outstanding balances on each row",
-    "Dashboard and projects load independently — partial data instead of blank screens",
-    "CRM/Clients navigation opens client list; domains, hosting, DNS, monitoring routes work",
-    "Client detail shows due amounts on invoice rows",
+    "Dead nav routes fixed: training, WhatsApp, live chat, clients tab, projects progress",
+    "Hosting uses managed accounts (same as web) plus legacy hosting list",
+    "Domains merge managed + customer domains; DNS/access request lists added",
+    "WhatsApp CRM inbox and mail platform launcher on mobile",
+    "Web clients list aligned to /api/staff/clients with billing summaries",
+    "Chat conversation loads messages even if context API fails",
   ],
 } as const;
 

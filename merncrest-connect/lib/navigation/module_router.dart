@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:merncrest_connect/providers/app_state.dart';
 import 'package:merncrest_connect/screens/ai_assistant_screen.dart';
 import 'package:merncrest_connect/screens/analytics_screen.dart';
 import 'package:merncrest_connect/screens/announcements_screen.dart';
@@ -15,6 +16,7 @@ import 'package:merncrest_connect/screens/erp_manufacturing_screen.dart';
 import 'package:merncrest_connect/screens/erp_procurement_screen.dart';
 import 'package:merncrest_connect/screens/finance_screen.dart';
 import 'package:merncrest_connect/screens/internal_chat_screen.dart';
+import 'package:merncrest_connect/screens/mailbox_screen.dart';
 import 'package:merncrest_connect/screens/module_list_screen.dart';
 import 'package:merncrest_connect/screens/performance_screen.dart';
 import 'package:merncrest_connect/screens/projects_screen.dart';
@@ -29,7 +31,9 @@ import 'package:merncrest_connect/screens/admin_screen.dart';
 import 'package:merncrest_connect/screens/help_screen.dart';
 import 'package:merncrest_connect/screens/integrations_screen.dart';
 import 'package:merncrest_connect/screens/settings_screen.dart';
+import 'package:merncrest_connect/screens/whatsapp_screen.dart';
 import 'package:merncrest_connect/theme/connect_tokens.dart';
+import 'package:provider/provider.dart';
 
 /// Maps server navigation routes and quick actions to in-app screens.
 class ModuleRouter {
@@ -37,6 +41,8 @@ class ModuleRouter {
 
   static void open(BuildContext context, String route, {String? label}) {
     final normalized = route.toLowerCase().replaceAll(RegExp(r'^/staff'), '').replaceAll(RegExp(r'^/'), '');
+
+    if (_tryShellTab(context, normalized)) return;
 
     Widget? screen;
     switch (normalized) {
@@ -64,19 +70,11 @@ class ModuleRouter {
       case 'ai-assistant':
       case 'aira':
         screen = const AiAssistantScreen();
-      case 'live-chat':
-      case 'chat':
-        // Switch to chat tab handled by shell callback
-        break;
       case 'internal-chat':
       case 'team-chat':
       case 'internal-messaging':
         screen = const InternalChatScreen();
-      case 'clients':
-      case 'crm':
-        screen = const ClientsScreen();
       case 'command-center':
-      case 'dashboard':
       case 'analytics':
       case 'reports':
         screen = const AnalyticsScreen();
@@ -93,6 +91,7 @@ class ModuleRouter {
       case 'quotations':
         screen = const QuotationsScreen();
       case 'projects':
+      case 'projects/progress':
         screen = const ProjectsScreen();
       case 'tickets':
       case 'helpdesk':
@@ -122,7 +121,13 @@ class ModuleRouter {
       case 'fsm':
         screen = const ErpFleetScreen();
       case 'sales':
-        screen = const QuotationsScreen();
+        screen = const ClientsScreen();
+      case 'training':
+        screen = const ModuleListScreen(title: 'Training', endpoint: '/api/erp/training');
+      case 'whatsapp':
+        screen = const WhatsAppScreen();
+      case 'mailbox':
+        screen = const MailboxScreen();
       case 'hr':
         screen = const ModuleListScreen(title: 'HR', endpoint: '/api/erp/hr');
       case 'security':
@@ -136,11 +141,23 @@ class ModuleRouter {
       case 'integrations':
         screen = const IntegrationsScreen();
       case 'domains':
-        screen = const ModuleListScreen(title: 'Domains', endpoint: '/api/staff/domains');
+        screen = const ModuleListScreen(
+          title: 'Domains',
+          endpoint: '/api/staff/domains',
+          mergeEndpoints: ['/api/staff/domains/managed'],
+        );
       case 'dns':
         screen = const ModuleListScreen(title: 'DNS', endpoint: '/api/staff/dns');
+      case 'dns-change-requests':
+        screen = const ModuleListScreen(title: 'DNS Change Requests', endpoint: '/api/staff/dns-change-requests');
+      case 'access-requests':
+        screen = const ModuleListScreen(title: 'Access Requests', endpoint: '/api/staff/access-requests');
       case 'hosting':
-        screen = const ModuleListScreen(title: 'Hosting', endpoint: '/api/staff/hosting');
+        screen = const ModuleListScreen(
+          title: 'Hosting',
+          endpoint: '/api/staff/hosting/managed',
+          mergeEndpoints: ['/api/staff/hosting'],
+        );
       case 'resources':
       case 'resources-hub':
         screen = const ModuleListScreen(title: 'Resources Hub', endpoint: '/api/staff/resources-hub');
@@ -161,13 +178,38 @@ class ModuleRouter {
     }
   }
 
+  static bool _tryShellTab(BuildContext context, String normalized) {
+    final state = context.read<AppState>();
+    switch (normalized) {
+      case 'home':
+      case 'dashboard':
+        state.goToShellTab(0);
+        return true;
+      case 'work':
+        state.goToShellTab(1);
+        return true;
+      case 'live-chat':
+      case 'chat':
+        state.goToShellTab(2);
+        return true;
+      case 'clients':
+      case 'crm':
+        state.goToShellTab(3);
+        return true;
+      case 'more':
+        state.goToShellTab(4);
+        return true;
+    }
+    return false;
+  }
+
   static IconData iconForRoute(String route) {
     final r = route.toLowerCase();
     if (r.contains('attendance')) return Icons.schedule_rounded;
     if (r.contains('leave')) return Icons.flight_takeoff_rounded;
     if (r.contains('task')) return Icons.task_alt_rounded;
     if (r.contains('calendar')) return Icons.calendar_month_rounded;
-    if (r.contains('chat')) return Icons.forum_rounded;
+    if (r.contains('chat') || r.contains('whatsapp')) return Icons.forum_rounded;
     if (r.contains('client') || r.contains('crm')) return Icons.groups_rounded;
     if (r.contains('project')) return Icons.folder_special_rounded;
     if (r.contains('ticket') || r.contains('help')) return Icons.headset_mic_rounded;
@@ -184,17 +226,19 @@ class ModuleRouter {
     if (r.contains('quotation')) return Icons.request_quote_rounded;
     if (r.contains('inventory')) return Icons.inventory_2_rounded;
     if (r.contains('erp')) return Icons.hub_rounded;
+    if (r.contains('mail')) return Icons.mail_rounded;
+    if (r.contains('training')) return Icons.school_rounded;
     return Icons.widgets_outlined;
   }
 
   static Color colorForRoute(String route) {
     final r = route.toLowerCase();
     if (r.contains('attendance')) return ConnectModuleColors.attendance;
-    if (r.contains('leave') || r.contains('hr')) return ConnectModuleColors.hr;
+    if (r.contains('leave') || r.contains('hr') || r.contains('training')) return ConnectModuleColors.hr;
     if (r.contains('client') || r.contains('crm') || r.contains('sales')) return ConnectModuleColors.crm;
     if (r.contains('erp') || r.contains('inventory')) return ConnectModuleColors.erp;
     if (r.contains('finance') || r.contains('billing') || r.contains('invoice')) return ConnectModuleColors.finance;
-    if (r.contains('chat')) return ConnectModuleColors.chat;
+    if (r.contains('chat') || r.contains('whatsapp')) return ConnectModuleColors.chat;
     if (r.contains('project')) return ConnectModuleColors.projects;
     if (r.contains('ticket') || r.contains('help')) return ConnectModuleColors.helpdesk;
     if (r.contains('ai')) return ConnectModuleColors.ai;

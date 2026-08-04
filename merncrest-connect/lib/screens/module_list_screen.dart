@@ -10,10 +10,16 @@ import 'package:provider/provider.dart';
 
 /// Loads a staff API endpoint and renders human-readable rows (never raw JSON).
 class ModuleListScreen extends StatefulWidget {
-  const ModuleListScreen({super.key, required this.title, required this.endpoint});
+  const ModuleListScreen({
+    super.key,
+    required this.title,
+    required this.endpoint,
+    this.mergeEndpoints = const [],
+  });
 
   final String title;
   final String endpoint;
+  final List<String> mergeEndpoints;
 
   @override
   State<ModuleListScreen> createState() => _ModuleListScreenState();
@@ -36,10 +42,21 @@ class _ModuleListScreenState extends State<ModuleListScreen> {
       _error = null;
     });
     try {
-      final data = await context.read<AppState>().auth.api.get(widget.endpoint);
+      final api = context.read<AppState>().auth.api;
+      final rows = <_RowData>[];
+      try {
+        final data = await api.get(widget.endpoint);
+        rows.addAll(_parse(widget.endpoint, data));
+      } catch (_) {}
+      for (final ep in widget.mergeEndpoints) {
+        try {
+          final data = await api.get(ep);
+          rows.addAll(_parse(ep, data));
+        } catch (_) {}
+      }
       if (!mounted) return;
       setState(() {
-        _rows = _parse(widget.endpoint, data);
+        _rows = rows;
         _loading = false;
       });
     } catch (e) {
@@ -111,16 +128,57 @@ class _ModuleListScreenState extends State<ModuleListScreen> {
           .toList();
     }
 
+    if (endpoint.contains('/training')) {
+      return ApiPayload.list(data, keys: const ['data', 'records', 'content'])
+          .map((e) {
+            final m = e as Map<String, dynamic>;
+            return _RowData(
+              title: m['title']?.toString() ?? m['courseName']?.toString() ?? m['name']?.toString() ?? 'Training',
+              subtitle: [
+                m['status']?.toString(),
+                if (m['employee'] is Map) (m['employee'] as Map)['fullName']?.toString(),
+                if (m['completedAt'] != null) m['completedAt']?.toString(),
+              ].whereType<String>().where((s) => s.isNotEmpty).join(' · '),
+              chip: m['status']?.toString(),
+            );
+          })
+          .toList();
+    }
+    if (endpoint.contains('access-requests') || endpoint.contains('dns-change')) {
+      return ApiPayload.list(data, keys: const ['data', 'items', 'records'])
+          .map((e) {
+            final m = e as Map<String, dynamic>;
+            return _RowData(
+              title: m['reason']?.toString() ?? m['domainName']?.toString() ?? m['id']?.toString() ?? 'Request',
+              subtitle: [
+                m['status']?.toString(),
+                if (m['client'] is Map) (m['client'] as Map)['fullName']?.toString(),
+                if (m['requester'] is Map) (m['requester'] as Map)['fullName']?.toString(),
+              ].whereType<String>().where((s) => s.isNotEmpty).join(' · '),
+              chip: m['status']?.toString(),
+            );
+          })
+          .toList();
+    }
     if (endpoint.contains('/domains') || endpoint.contains('/hosting') || endpoint.contains('/dns')) {
       return ApiPayload.list(data, keys: const ['data', 'domains', 'hostingAccounts', 'records', 'items'])
           .map((e) {
             final m = e as Map<String, dynamic>;
             return _RowData(
-              title: m['fqdn']?.toString() ?? m['domain']?.toString() ?? m['name']?.toString() ?? 'Record',
+              title: m['fqdn']?.toString() ??
+                  m['domainName']?.toString() ??
+                  m['label']?.toString() ??
+                  m['packageName']?.toString() ??
+                  m['domain']?.toString() ??
+                  m['name']?.toString() ??
+                  'Record',
               subtitle: [
                 m['status']?.toString(),
+                if (m['client'] is Map) (m['client'] as Map)['fullName']?.toString(),
                 if (m['user'] is Map) (m['user'] as Map)['fullName']?.toString(),
+                if (m['project'] is Map) (m['project'] as Map)['name']?.toString(),
                 if (m['expiresAt'] != null) m['expiresAt']?.toString(),
+                if (m['renewsAt'] != null) m['renewsAt']?.toString(),
               ].whereType<String>().where((s) => s.isNotEmpty).join(' · '),
               chip: m['status']?.toString(),
             );
